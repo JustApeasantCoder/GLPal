@@ -17,8 +17,6 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Your Metabolic Profile</h3>
-      
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
           <p className="text-sm text-gray-600 dark:text-gray-400">BMR (Basal Metabolic Rate)</p>
@@ -34,6 +32,17 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
       <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
         <h4 className="font-medium text-gray-900 dark:text-white mb-3">Weight Loss Calorie Targets</h4>
         <div className="space-y-2">
+          <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-gray-300">Maintain weight</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Current maintenance</p>
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-gray-900 dark:text-gray-300">{tdee.toLocaleString()} cal/day</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">No deficit</p>
+            </div>
+          </div>
+
           <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <div>
               <p className="font-medium text-green-900 dark:text-green-300">Loss 0.5 kg/week</p>
@@ -60,7 +69,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
 
       <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
         <h4 className="font-medium text-gray-900 dark:text-white mb-2">Based on Current Weight: {currentWeight} kg</h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-xs text-gray-500 dark:text-gray-500">
           These calculations use the Mifflin-St Jeor equation, considered the most accurate BMR formula.
           Individual results may vary based on body composition and genetics.
         </p>

@@ -17,10 +17,10 @@ test('renders GLPal Dashboard', () => {
   expect(headerElement).toBeInTheDocument();
 });
 
-test('renders weight tracking form', () => {
+test('renders weight trends chart', () => {
   renderWithTheme(<App />);
-  const weightInput = screen.getByLabelText(/weight/i);
-  expect(weightInput).toBeInTheDocument();
+  const weightTrends = screen.getByText(/Weight Trends/i);
+  expect(weightTrends).toBeInTheDocument();
 });
 
 test('renders settings dropdown', () => {

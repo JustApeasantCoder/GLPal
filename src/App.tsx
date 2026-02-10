@@ -42,6 +42,21 @@ function App() {
 
   const currentWeight = weights[weights.length - 1]?.weight || 0;
   const goalWeight = 80;
+  const startWeight = weights[0]?.weight || currentWeight;
+  
+  // Calculate BMI (height in cm, weight in kg)
+  const heightInMeters = profile.height / 100;
+  const bmi = currentWeight / (heightInMeters * heightInMeters);
+  
+  // Calculate total loss and percentage
+  const totalLoss = startWeight - currentWeight;
+  const totalLossPercentage = startWeight > 0 ? (totalLoss / startWeight) * 100 : 0;
+  
+  // Calculate averages
+  const weeklyAverageLoss = weights.length >= 2 ? 
+    ((weights[0].weight - currentWeight) / ((weights.length - 1) / 7)) : 0;
+  const monthlyAverageLoss = weights.length >= 2 ? 
+    ((weights[0].weight - currentWeight) / ((weights.length - 1) / 30)) : 0;
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -92,44 +107,72 @@ function App() {
                {/* Header - Mobile Optimized */}
                <header className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Dashboard</h1>
-                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                   <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                     <p className="text-xs text-blue-600 dark:text-blue-400">Current</p>
-                     <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
+                 <div className="space-y-3">
+                   {/* Row 1: Current, BMI, Total Loss */}
+                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-blue-600 dark:text-blue-400">Current</p>
+                       <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
+                     </div>
+                     <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-green-600 dark:text-green-400">BMI</p>
+                       <p className="text-lg font-bold text-green-900 dark:text-green-300">{bmi.toFixed(1)}</p>
+                     </div>
+                     <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-purple-600 dark:text-purple-400">Total Loss</p>
+                       <p className="text-lg font-bold text-purple-900 dark:text-purple-300">
+                         {totalLoss.toFixed(1)} kg
+                       </p>
+                       <p className="text-xs text-purple-600 dark:text-purple-400">
+                         {totalLossPercentage.toFixed(1)}%
+                       </p>
+                     </div>
                    </div>
-                   <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                     <p className="text-xs text-green-600 dark:text-green-400">Goal</p>
-                     <p className="text-lg font-bold text-green-900 dark:text-green-300">{goalWeight} kg</p>
-                   </div>
-                   <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                     <p className="text-xs text-purple-600 dark:text-purple-400">To Lose</p>
-                     <p className="text-lg font-bold text-purple-900 dark:text-purple-300">
-                       {(currentWeight - goalWeight).toFixed(1)} kg
-                     </p>
+                   
+                   {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
+                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                     <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-orange-600 dark:text-orange-400">Weekly Avg</p>
+                       <p className="text-lg font-bold text-orange-900 dark:text-orange-300">
+                         {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
+                       </p>
+                     </div>
+                     <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-pink-600 dark:text-pink-400">Monthly Avg</p>
+                       <p className="text-lg font-bold text-pink-900 dark:text-pink-300">
+                         {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
+                       </p>
+                     </div>
+                     <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
+                       <p className="text-xs text-indigo-600 dark:text-indigo-400">To Lose</p>
+                       <p className="text-lg font-bold text-indigo-900 dark:text-indigo-300">
+                         {(currentWeight - goalWeight).toFixed(1)} kg
+                       </p>
+                     </div>
                    </div>
                  </div>
                </header>
 
-               {/* Quick Stats Cards */}
-               <div className="grid grid-cols-2 gap-3">
-                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Quick Add</h3>
-                   <WeightInput onAddWeight={handleAddWeight} />
-                 </div>
-                 
-                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">GLP-1 Status</h3>
-                   <div className="h-24">
-                     <GLP1Chart data={glp1Entries} />
-                   </div>
-                 </div>
-               </div>
+                {/* Weight Trends */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Weight Trends</h2>
+                  <div className="h-64 sm:h-80">
+                    <WeightChart data={weights} goalWeight={goalWeight} />
+                  </div>
+                </div>
 
-               {/* Metabolic Profile */}
-               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Metabolic Profile</h2>
-                 <TDEEDisplay profile={profile} currentWeight={currentWeight} />
-               </div>
+                {/* Quick Stats Cards */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">GLP-1 Status</h3>
+                  <div className="h-24">
+                    <GLP1Chart data={glp1Entries} />
+                  </div>
+                </div>
+
+                {/* Metabolic Profile */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                  <TDEEDisplay profile={profile} currentWeight={currentWeight} />
+                </div>
             </>
           )}
 
