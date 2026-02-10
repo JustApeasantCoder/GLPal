@@ -20,7 +20,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
 
   return (
     <div className="w-full h-80">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <LineChart
           data={chartData}
           margin={{

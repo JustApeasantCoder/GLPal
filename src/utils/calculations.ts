@@ -26,6 +26,17 @@ export const calculateWeeklyWeightLoss = (dailyCalorieDeficit: number): number =
   return (dailyCalorieDeficit * 7) / 7700;
 };
 
+export const calculateMonthlyWeightLoss = (dailyCalorieDeficit: number): number => {
+  // 30 days = ~4.29 weeks
+  return ((dailyCalorieDeficit * 30) / 7700);
+};
+
+export const calculateBMI = (weight: number, height: number): number => {
+  // Convert height from cm to meters
+  const heightInMeters = height / 100;
+  return weight / (heightInMeters * heightInMeters);
+};
+
 export const calculateGLP1Concentration = (
   doses: Array<{ date: Date; dose: number }>,
   halfLifeHours: number,

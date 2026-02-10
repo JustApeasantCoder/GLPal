@@ -38,7 +38,7 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
 
   return (
     <div className="w-full h-80">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <AreaChart
           data={chartData}
           margin={{
