@@ -7,7 +7,7 @@ import SettingsDropdown from './components/SettingsDropdown';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
 
-type TabType = 'dashboard' | 'glp1';
+type TabType = 'dashboard' | 'weight' | 'glp1';
 
 function App() {
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -45,11 +45,12 @@ function App() {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'weight', label: 'Weight', icon: '⚖️' },
     { id: 'glp1', label: 'GLP-1', icon: '💉' }
   ] as const;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Fixed top navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 z-50">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
@@ -83,77 +84,100 @@ function App() {
         </div>
       </nav>
 
-      {/* Main scrollable content area with padding for nav */}
-      <main className="flex-1 bg-gray-100 dark:bg-gray-900 p-4 pt-20 pb-20 overflow-y-auto">
-        <div className="max-w-7xl mx-auto space-y-6">
+      {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
+      <main className="flex-1 pt-16 pb-16 overflow-y-auto">
+        <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl">
           {activeTab === 'dashboard' && (
             <>
-               {/* Header */}
-               <header className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-                 <div className="mt-4 grid grid-cols-3 gap-4">
-                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                     <p className="text-sm text-blue-600 dark:text-blue-400">Current Weight</p>
-                     <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
+               {/* Header - Mobile Optimized */}
+               <header className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Dashboard</h1>
+                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                   <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                     <p className="text-xs text-blue-600 dark:text-blue-400">Current</p>
+                     <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
                    </div>
-                   <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                     <p className="text-sm text-green-600 dark:text-green-400">Goal Weight</p>
-                     <p className="text-2xl font-bold text-green-900 dark:text-green-300">{goalWeight} kg</p>
+                   <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                     <p className="text-xs text-green-600 dark:text-green-400">Goal</p>
+                     <p className="text-lg font-bold text-green-900 dark:text-green-300">{goalWeight} kg</p>
                    </div>
-                   <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                     <p className="text-sm text-purple-600 dark:text-purple-400">To Lose</p>
-                     <p className="text-2xl font-bold text-purple-900 dark:text-purple-300">
+                   <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                     <p className="text-xs text-purple-600 dark:text-purple-400">To Lose</p>
+                     <p className="text-lg font-bold text-purple-900 dark:text-purple-300">
                        {(currentWeight - goalWeight).toFixed(1)} kg
                      </p>
                    </div>
                  </div>
                </header>
 
-               {/* Forms and Charts */}
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+               {/* Quick Stats Cards */}
+               <div className="grid grid-cols-2 gap-3">
+                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Quick Add</h3>
                    <WeightInput onAddWeight={handleAddWeight} />
                  </div>
-               </div>
-
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Weight Trends</h2>
-                   <div className="w-full h-80">
-                     <WeightChart data={weights} goalWeight={goalWeight} />
-                   </div>
-                 </div>
                  
-                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">GLP-1 Concentration</h2>
-                   <div className="w-full h-80">
+                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">GLP-1 Status</h3>
+                   <div className="h-24">
                      <GLP1Chart data={glp1Entries} />
                    </div>
                  </div>
                </div>
 
-               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Metabolic Profile</h2>
+               {/* Metabolic Profile */}
+               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Metabolic Profile</h2>
                  <TDEEDisplay profile={profile} currentWeight={currentWeight} />
                </div>
             </>
           )}
 
-           {activeTab === 'glp1' && (
-             <div className="space-y-6">
-               <header className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">GLP-1 Tracking</h1>
-                 <p className="mt-2 text-gray-600 dark:text-gray-400">Track your GLP-1 medication doses and monitor concentration levels.</p>
-               </header>
+          {activeTab === 'weight' && (
+            <>
+              <header className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Weight Tracking</h1>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Current</p>
+                    <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                    <p className="text-xs text-green-600 dark:text-green-400">Goal</p>
+                    <p className="text-lg font-bold text-green-900 dark:text-green-300">{goalWeight} kg</p>
+                  </div>
+                </div>
+              </header>
 
-               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">GLP-1 Progress</h2>
-                 <div className="w-full h-80">
-                   <GLP1Chart data={glp1Entries} />
-                 </div>
-               </div>
-             </div>
-           )}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Add Today's Weight</h3>
+                <WeightInput onAddWeight={handleAddWeight} />
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Weight Trends</h2>
+                <div className="h-64 sm:h-80">
+                  <WeightChart data={weights} goalWeight={goalWeight} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'glp1' && (
+              <div className="space-y-3">
+                <header className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">GLP-1 Tracking</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Track your GLP-1 medication doses and monitor concentration levels.</p>
+                </header>
+
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">GLP-1 Progress</h2>
+                  <div className="h-64 sm:h-80">
+                    <GLP1Chart data={glp1Entries} />
+                  </div>
+                </div>
+              </div>
+            )}
 
 
         </div>
