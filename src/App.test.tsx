@@ -1,39 +1,46 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
+import { ThemeProvider } from './contexts/ThemeContext';
 
-test('renders GLPal Health Tracker', () => {
-  render(<App />);
-  const headerElement = screen.getByText(/GLPal - Health Tracker/i);
+const renderWithTheme = (component: React.ReactElement) => {
+  return render(
+    <ThemeProvider>
+      {component}
+    </ThemeProvider>
+  );
+};
+
+test('renders GLPal Dashboard', () => {
+  renderWithTheme(<App />);
+  const headerElement = screen.getByRole('heading', { name: /Dashboard/i });
   expect(headerElement).toBeInTheDocument();
 });
 
 test('renders weight tracking form', () => {
-  render(<App />);
+  renderWithTheme(<App />);
   const weightInput = screen.getByLabelText(/weight/i);
   expect(weightInput).toBeInTheDocument();
 });
 
-test('renders TDEE calculator', () => {
-  render(<App />);
-  const tdeeButton = screen.getByText(/calculate tdee/i);
-  expect(tdeeButton).toBeInTheDocument();
+test('renders settings dropdown', () => {
+  renderWithTheme(<App />);
+  const settingsButton = screen.getByLabelText('Settings');
+  expect(settingsButton).toBeInTheDocument();
 });
 
 test('renders bottom navigation tabs', () => {
-  render(<App />);
-  const weightTab = screen.getByText('Weight');
-  const glp1Tab = screen.getByText('GLP-1');
-  const tdeeTab = screen.getByText('TDEE');
+  renderWithTheme(<App />);
+  const dashboardTab = screen.getByRole('button', { name: /Dashboard/i });
+  const glp1Tab = screen.getByRole('button', { name: /GLP-1/i });
   
-  expect(weightTab).toBeInTheDocument();
+  expect(dashboardTab).toBeInTheDocument();
   expect(glp1Tab).toBeInTheDocument();
-  expect(tdeeTab).toBeInTheDocument();
 });
 
-test('default active tab is weight', () => {
-  render(<App />);
-  const weightTab = screen.getByText('Weight');
+test('default active tab is dashboard', () => {
+  renderWithTheme(<App />);
+  const dashboardTab = screen.getByRole('button', { name: /Dashboard/i });
   
-  expect(weightTab.parentElement).toHaveClass('bg-blue-500', 'text-white');
+  expect(dashboardTab).toHaveClass('bg-blue-500', 'text-white');
 });
