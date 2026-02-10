@@ -1,5 +1,5 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeightEntry } from '../types';
 
 interface WeightChartProps {
@@ -19,7 +19,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
   }));
 
   return (
-    <div className="w-full h-80">
+    <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <LineChart
           data={chartData}
@@ -38,10 +38,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
           <YAxis 
             domain={['dataMin - 2', 'dataMax + 2']}
             tick={{ fontSize: 12 }}
-            label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip />
-          <Legend />
           <ReferenceLine 
             y={goalWeight} 
             stroke="#10b981" 
@@ -53,7 +51,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
             dataKey="weight" 
             stroke="#3b82f6" 
             strokeWidth={2}
-            name="Weight"
             dot={{ fill: '#3b82f6', r: 4 }}
           />
         </LineChart>

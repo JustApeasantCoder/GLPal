@@ -104,10 +104,12 @@ function App() {
         <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl">
           {activeTab === 'dashboard' && (
             <>
-               {/* Header - Mobile Optimized */}
-               <header className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Dashboard</h1>
-                 <div className="space-y-3">
+               {/* Unified Dashboard Card */}
+               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Dashboard</h1>
+                 
+                 {/* Metrics Section */}
+                 <div className="space-y-3 mb-6">
                    {/* Row 1: Current, BMI, Total Loss */}
                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
@@ -151,23 +153,26 @@ function App() {
                      </div>
                    </div>
                  </div>
-               </header>
 
-                {/* Weight Trends */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Weight Trends</h2>
-                  <div className="h-64 sm:h-80">
-                    <WeightChart data={weights} goalWeight={goalWeight} />
-                  </div>
-                </div>
+                 {/* Charts Section */}
+                 <div className="space-y-6">
+                   {/* Weight Trends */}
+                   <div>
+                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Weight Trends</h3>
+                     <div className="h-48 sm:h-56">
+                       <WeightChart data={weights} goalWeight={goalWeight} />
+                     </div>
+                   </div>
 
-                {/* Quick Stats Cards */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">GLP-1 Status</h3>
-                  <div className="h-24">
-                    <GLP1Chart data={glp1Entries} />
-                  </div>
-                </div>
+                   {/* GLP-1 Status */}
+                   <div>
+                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">GLP-1 Status</h3>
+                     <div className="h-32 sm:h-40">
+                       <GLP1Chart data={glp1Entries} />
+                     </div>
+                   </div>
+                 </div>
+               </div>
 
                 {/* Metabolic Profile */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">

@@ -37,7 +37,7 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
   const chartData = generateConcentrationData();
 
   return (
-    <div className="w-full h-80">
+    <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <AreaChart
           data={chartData}
@@ -55,7 +55,6 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
           />
           <YAxis 
             tick={{ fontSize: 12 }}
-            label={{ value: 'Concentration (mg)', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip 
             formatter={(value?: number) => value ? [`${value.toFixed(3)} mg`, 'Concentration'] : ['', '']}
