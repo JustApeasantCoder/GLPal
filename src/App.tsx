@@ -184,48 +184,45 @@ const handleAddWeight = (newWeight: number) => {
                  
                  {/* Metrics Section */}
                  <div className="space-y-3 mb-6">
-                   {/* Row 1: Current, BMI, Total Loss */}
-                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                     <div className="bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)]">
-                       <p className="text-xs text-[#4ADEA8] font-medium">Current</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">{currentWeight.toFixed(1)} kg</p>
-                     </div>
-                     <div className="bg-gradient-to-br from-[#5B4B8A]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#5B4B8A]/30 shadow-[0_0_20px_rgba(91,75,138,0.3)]">
-                       <p className="text-xs text-[#9C7BD3] font-medium">BMI</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(156,123,211,0.5)]">{bmi.toFixed(1)}</p>
-                     </div>
-                     <div className="bg-gradient-to-br from-[#9C7BD3]/20 to-[#5B4B8A]/20 backdrop-blur-sm p-3 rounded-xl border border-[#9C7BD3]/30 shadow-[0_0_20px_rgba(156,123,211,0.3)]">
-                       <p className="text-xs text-[#9C7BD3] font-medium">Total Loss</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(156,123,211,0.5)]">
-                         {totalLoss.toFixed(1)} kg
-                       </p>
-                       <p className="text-xs text-[#9C7BD3]">
-                         {totalLossPercentage.toFixed(1)}%
-                       </p>
-                     </div>
-                   </div>
-                   
-                   {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
-                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                     <div className="bg-gradient-to-br from-[#5B4B8A]/20 to-[#2F2A4A]/20 backdrop-blur-sm p-3 rounded-xl border border-[#5B4B8A]/30 shadow-[0_0_20px_rgba(91,75,138,0.3)]">
-                       <p className="text-xs text-[#5B4B8A] font-medium">Weekly Avg</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(91,75,138,0.5)]">
-                         {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
-                       </p>
-                     </div>
-                     <div className="bg-gradient-to-br from-[#9C7BD3]/20 to-[#5B4B8A]/20 backdrop-blur-sm p-3 rounded-xl border border-[#9C7BD3]/30 shadow-[0_0_20px_rgba(156,123,211,0.3)]">
-                       <p className="text-xs text-[#9C7BD3] font-medium">Monthly Avg</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(156,123,211,0.5)]">
-                         {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
-                       </p>
-                     </div>
-                     <div className="bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)]">
-                       <p className="text-xs text-[#4ADEA8] font-medium">To Lose</p>
-                       <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">
-                         {(currentWeight - goalWeight).toFixed(1)} kg
-                       </p>
-                     </div>
-                   </div>
+                    {/* Row 1: Current, BMI, Total Loss */}
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">Current</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">{currentWeight.toFixed(1)} kg</p>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">BMI</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">{bmi.toFixed(1)}</p>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm px-2 py-1 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">Total Loss</p>
+                        <p className="text-base font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)] leading-tight">
+                          {totalLoss.toFixed(1)} kg <span className="text-xs text-[#4ADEA8]/80 -mt-1 inline-block">({totalLossPercentage.toFixed(1)}%)</span>
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">Weekly Avg</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">
+                          {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
+                        </p>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">Monthly Avg</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">
+                          {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
+                        </p>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm p-3 rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#4ADEA8] font-medium">To Lose</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(74,222,168,0.5)]">
+                          {(currentWeight - goalWeight).toFixed(1)} kg
+                        </p>
+                      </div>
+                    </div>
                  </div>
 
                  {/* Charts Section */}
