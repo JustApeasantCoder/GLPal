@@ -39,14 +39,14 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
 
   if (showTDEESettings) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,255,255,0.3)] max-w-md w-full max-h-[90vh] overflow-y-auto border border-cyan-500/20">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">TDEE Settings</h2>
+              <h2 className="text-xl font-semibold text-cyan-300 [text-shadow:0_0_20px_rgba(0,255,255,0.6)]">TDEE Settings</h2>
               <button
                 onClick={() => setShowTDEESettings(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="text-cyan-400 hover:text-cyan-300 text-2xl leading-none p-1 rounded-lg hover:bg-cyan-500/10 transition-all duration-300 [text-shadow:0_0_10px_rgba(0,255,255,0.5)]"
               >
                 ×
               </button>
@@ -62,11 +62,11 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        className="p-2 rounded-xl hover:bg-cyan-500/10 transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]"
         aria-label="Settings"
       >
         <svg
-          className="w-6 h-6 text-gray-600 dark:text-gray-400"
+          className="w-6 h-6 text-cyan-300 [text-shadow:0_0_10px_rgba(0,255,255,0.5)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -87,35 +87,35 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+        <div className="absolute right-0 mt-3 w-56 bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_40px_rgba(0,255,255,0.3)] border border-cyan-500/20 py-2 z-50">
           <button
             onClick={handleTDEESettingsClick}
-            className="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors first:rounded-t-2xl"
+            className="w-full text-left px-4 py-3 text-cyan-200 hover:bg-cyan-500/10 transition-all duration-300 first:rounded-t-2xl hover:text-cyan-100"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 text-cyan-400 [text-shadow:0_0_5px_rgba(0,255,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               TDEE Settings
             </div>
           </button>
           
-          <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+          <div className="border-t border-cyan-500/20 mt-2 pt-2">
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center">
-                <svg className="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-3 text-cyan-400 [text-shadow:0_0_5px_rgba(0,255,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
-                <span className="text-gray-700 dark:text-gray-300">Dark Mode</span>
+                <span className="text-cyan-200">Dark Mode</span>
               </div>
               <button
                 onClick={onThemeToggle}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isDarkMode ? 'bg-blue-600' : 'bg-gray-200'
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
+                  isDarkMode ? 'bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'bg-gray-600/50'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all shadow-sm ${
                     isDarkMode ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />

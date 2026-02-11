@@ -48,25 +48,50 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke="rgba(0, 255, 255, 0.1)" 
+          />
           <XAxis 
             dataKey="date" 
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            axisLine={{ stroke: 'rgba(0, 255, 255, 0.2)' }}
           />
           <YAxis 
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            axisLine={{ stroke: 'rgba(0, 255, 255, 0.2)' }}
           />
           <Tooltip 
             formatter={(value?: number) => value ? [`${value.toFixed(3)} mg`, 'Concentration'] : ['', '']}
+            contentStyle={{ 
+              backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+              border: '1px solid rgba(0, 255, 255, 0.3)',
+              borderRadius: '8px',
+              boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)'
+            }}
+            labelStyle={{ color: '#67e8f9' }}
+            itemStyle={{ color: '#a5f3fc' }}
           />
           <Area 
             type="monotone" 
             dataKey="concentration" 
-            stroke="#8b5cf6" 
-            fill="#8b5cf6" 
-            fillOpacity={0.3}
+            stroke="url(#purpleCyanGradient)" 
+            fill="url(#purpleCyanGradientFill)" 
             strokeWidth={2}
+            filter="drop-shadow(0 0 15px rgba(139, 92, 246, 0.4))"
           />
+          <defs>
+            <linearGradient id="purpleCyanGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#8b5cf6" />
+              <stop offset="50%" stopColor="#06b6d4" />
+              <stop offset="100%" stopColor="#0ea5e9" />
+            </linearGradient>
+            <linearGradient id="purpleCyanGradientFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
+              <stop offset="50%" stopColor="#06b6d4" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.1} />
+            </linearGradient>
+          </defs>
         </AreaChart>
       </ResponsiveContainer>
     </div>
