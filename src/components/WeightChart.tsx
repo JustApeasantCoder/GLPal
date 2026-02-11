@@ -13,6 +13,19 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const CustomYAxisTick = ({ x, y, payload, index, visibleTicksCount }: any) => {
+    // Hide first and last tick
+    if (index === 0 || index === visibleTicksCount - 1) {
+      return null;
+    }
+
+    return (
+      <text x={x+22} y={y} textAnchor="start" fill="#94a3b8" fontSize={12}>
+        {payload.value}kg
+      </text>
+    );
+  };
+
   const processChartData = (data: WeightEntry[]): WeightEntry[] => {
   if (data.length <= 12) return data;
   
@@ -62,8 +75,8 @@ const chartData = processChartData(data).map(entry => ({
               (dataMax: number) => dataMax + 2
             ]}
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
-            tick={{ dx:45,fontSize: 12, fill: '#94a3b8' }}
-            tickFormatter={(value) => `${Math.round(value)}kg`}
+            tick={<CustomYAxisTick />}
+            tickCount={6}
             tickMargin={10}
           />
 
