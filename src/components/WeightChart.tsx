@@ -49,19 +49,22 @@ const chartData = processChartData(data).map(entry => ({
           <XAxis
             dataKey="displayDate"
             padding={{ left: 10, right: 10 }}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ dy:-6, fontSize: 12, fill: '#94a3b8' }}
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
             tickMargin={10}
           />
 
           <YAxis
-            width={0}
+            orientation="left"
+            width={1}
             domain={[
               (dataMin: number) => dataMin - 2,
               (dataMax: number) => dataMax + 2
             ]}
-            axisLine={true}
-            tick={true}
+            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
+            tick={{ dx:45,fontSize: 12, fill: '#94a3b8' }}
+            tickFormatter={(value) => `${Math.round(value)}kg`}
+            tickMargin={10}
           />
 
           <Tooltip 
