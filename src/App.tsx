@@ -5,6 +5,7 @@ import WeightTab from './components/WeightTab';
 import GLP1Tab from './components/GLP1Tab';
 import Navigation from './components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
+import { useWeightMetrics } from './hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
 import { 
   initializeDatabase, 
@@ -103,25 +104,9 @@ const handleAddWeight = (newWeight: number) => {
     setWeights(prev => [...prev, newEntry]);
   };
 
-  const currentWeight = weights[weights.length - 1]?.weight || 0;
+// Calculate all weight metrics using custom hook
+  const weightMetrics = useWeightMetrics(weights, profile);
   const goalWeight = 80;
-  const startWeight = weights[0]?.weight || currentWeight;
-  
-
-  
-  // Calculate BMI (height in cm, weight in kg)
-  const heightInMeters = profile.height / 100;
-  const bmi = currentWeight / (heightInMeters * heightInMeters);
-  
-  // Calculate total loss and percentage
-  const totalLoss = startWeight - currentWeight;
-  const totalLossPercentage = startWeight > 0 ? (totalLoss / startWeight) * 100 : 0;
-  
-  // Calculate averages
-  const weeklyAverageLoss = weights.length >= 2 ? 
-    ((weights[0].weight - currentWeight) / ((weights.length - 1) / 7)) : 0;
-  const monthlyAverageLoss = weights.length >= 2 ? 
-    ((weights[0].weight - currentWeight) / ((weights.length - 1) / 30)) : 0;
 
 
 
@@ -157,14 +142,7 @@ return (
               weights={weights}
               glp1Entries={glp1Entries}
               profile={profile}
-              currentWeight={currentWeight}
-              startWeight={startWeight}
-              totalLoss={totalLoss}
-              totalLossPercentage={totalLossPercentage}
-              weeklyAverageLoss={weeklyAverageLoss}
-              monthlyAverageLoss={monthlyAverageLoss}
               goalWeight={goalWeight}
-              bmi={bmi}
               onAddWeight={handleAddWeight}
             />
           </TabContent>
@@ -172,7 +150,7 @@ return (
           <TabContent isActive={activeTab === 'weight'}>
             <WeightTab
               weights={weights}
-              currentWeight={currentWeight}
+              profile={profile}
               goalWeight={goalWeight}
               onAddWeight={handleAddWeight}
             />

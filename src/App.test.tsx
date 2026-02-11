@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -19,8 +19,25 @@ test('renders GLPal Dashboard', () => {
 
 test('renders weight trends chart', () => {
   renderWithTheme(<App />);
-  const weightTrends = screen.getByText(/Weight Trends/i);
-  expect(weightTrends).toBeInTheDocument();
+  
+  // Switch to weight tab
+  const weightTab = screen.getByRole('button', { name: /Weight/i });
+  fireEvent.click(weightTab);
+  
+  // Check if weight chart renders
+  expect(screen.getByText('Weight Trends')).toBeInTheDocument();
+});
+
+test('renders Performance Overview in Dashboard', () => {
+  renderWithTheme(<App />);
+  
+  // Should see Performance Overview header in dashboard
+  expect(screen.getByText('Performance Overview')).toBeInTheDocument();
+  
+  // Should see performance metrics
+  expect(screen.getByText('Progress Rate')).toBeInTheDocument();
+  expect(screen.getByText('Best Week')).toBeInTheDocument();
+  expect(screen.getByText('Time Active')).toBeInTheDocument();
 });
 
 test('renders settings dropdown', () => {

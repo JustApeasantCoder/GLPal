@@ -1,49 +1,27 @@
 import React, { useState } from 'react';
 import WeightChart from './WeightChart';
 import WeightInput from './WeightInput';
-import { WeightEntry } from '../types';
+import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
+import { WeightEntry, UserProfile } from '../types';
 
 interface WeightTabProps {
   weights: WeightEntry[];
-  currentWeight: number;
-  goalWeight: number;
+  profile: UserProfile;
+  goalWeight?: number;
   onAddWeight: (weight: number) => void;
 }
 
 const WeightTab: React.FC<WeightTabProps> = ({
   weights,
-  currentWeight,
-  goalWeight,
+  profile,
+  goalWeight = 80,
   onAddWeight,
 }) => {
-  const [chartPeriod, setChartPeriod] = useState<'week' | 'month' | '90days' | 'all'>('90days');
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
 
-  // Filter weights based on selected period
-  const getFilteredWeights = () => {
-    const now = new Date();
-    const filterDate = new Date();
-    
-    switch (chartPeriod) {
-      case 'week':
-        filterDate.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        filterDate.setDate(now.getDate() - 30);
-        break;
-      case '90days':
-        filterDate.setDate(now.getDate() - 90);
-        break;
-      case 'all':
-        return weights;
-      default:
-        return weights;
-    }
-    
-    const filterDateStr = filterDate.toISOString().split('T')[0];
-    return weights.filter(entry => entry.date >= filterDateStr);
-  };
-  
-  const filteredWeights = getFilteredWeights();
+  // Use custom hooks for data processing
+  const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
+  const filteredWeights = useFilteredWeights(weights, chartPeriod);
 
   return (
     <>
@@ -52,7 +30,7 @@ const WeightTab: React.FC<WeightTabProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)]">
             <p className="text-xs text-[#B19CD9] font-medium">Current</p>
-            <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">{currentWeight.toFixed(1)} kg</p>
+            <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">{weightMetrics.currentWeight.toFixed(1)} kg</p>
           </div>
           <div className="bg-gradient-to-br from-[#5B4B8A]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#5B4B8A]/30 shadow-[0_0_20px_rgba(91,75,138,0.3)]">
             <p className="text-xs text-[#9C7BD3] font-medium">Goal</p>

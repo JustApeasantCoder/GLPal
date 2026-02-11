@@ -1,4 +1,5 @@
 import React from 'react';
+import { WeightAnalytics } from '../services';
 import { WeightEntry } from '../types';
 
 interface PerformanceOverviewProps {
@@ -31,34 +32,11 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
           </div>
           <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
             <p className="text-xs text-[#B19CD9] font-medium">Best Week</p>
-            <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
-                -{Math.max(...weights.map((entry, i) => {
-                  if (i === 0) return 0;
-                  const weekStart = Math.floor(i / 7);
-                  
-                  // Find the start of this week
-                  let weekStartIndex = 0;
-                  for (let j = 0; j < i; j++) {
-                    if (Math.floor(j / 7) === weekStart) {
-                      weekStartIndex = j;
-                      break;
-                    }
-                  }
-                  
-                  if (weekStartIndex === 0) return 0;
-                  
-                  const weekEndIndex = Math.min(weekStartIndex + 6, weights.length - 1);
-                  const weekWeights = weights.slice(weekStartIndex, weekEndIndex + 1);
-                  
-                  if (weekWeights.length < 2) return 0;
-                  
-                  const weekStartWeight = weekWeights[0].weight;
-                  const weekEndWeight = weekWeights[weekWeights.length - 1].weight;
-                  return weekStartWeight - weekEndWeight;
-                })).toFixed(1)} kg
-              </p>
-            </div>
+<div className="text-left">
+            <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+              -{WeightAnalytics.calculateBestWeek(weights).toFixed(1)} kg
+            </p>
+          </div>
           </div>
           <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
             <p className="text-xs text-[#B19CD9] font-medium">Time Active</p>
@@ -82,12 +60,7 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
             <p className="text-xs text-[#B19CD9] font-medium">Best Month</p>
             <div className="text-left">
               <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
-                -{Math.max(...weights.map((entry, i) => {
-                  if (i === 0) return 0;
-                  const currentMonth = new Date(entry.date).getMonth();
-                  const prevMonth = new Date(weights[i - 1].date).getMonth();
-                  return prevMonth === currentMonth ? weights[i - 1].weight - entry.weight : 0;
-                })).toFixed(1)} kg
+                -{WeightAnalytics.calculateBestMonth(weights).toFixed(1)} kg
               </p>
             </div>
           </div>
