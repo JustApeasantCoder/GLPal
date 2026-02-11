@@ -18,6 +18,25 @@ import { generateSimulatedData } from './utils/generateData';
 
 type TabType = 'dashboard' | 'weight' | 'glp1';
 
+interface TabContentProps {
+  children: React.ReactNode;
+  isActive: boolean;
+}
+
+const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
+  return (
+    <div
+      className={`transition-all duration-500 ease-in-out transform ${
+        isActive
+          ? 'opacity-100 translate-x-0'
+          : 'opacity-0 translate-x-full absolute inset-0 pointer-events-none'
+      }`}
+    >
+      {children}
+    </div>
+  );
+};
+
 function App() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -160,10 +179,10 @@ const handleAddWeight = (newWeight: number) => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-500 ease-out transform ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_20px_rgba(74,222,168,0.4)] scale-105'
-                  : 'text-gray-400 hover:text-[#4ADEA8] hover:bg-[#4ADEA8]/10 hover:shadow-[0_0_15px_rgba(74,222,168,0.2)]'
+                  ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_20px_rgba(74,222,168,0.4)] scale-110 translate-y-[-2px]'
+                  : 'text-gray-400 hover:text-[#4ADEA8] hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_20px_rgba(74,222,168,0.3)] hover:scale-105 hover:translate-y-[-1px]'
               }`}
             >
               <span className="text-xs font-medium">{tab.label}</span>
@@ -173,9 +192,9 @@ const handleAddWeight = (newWeight: number) => {
       </nav>
 
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
-      <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar">
-        <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl">
-          {activeTab === 'dashboard' && (
+      <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
+        <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl relative">
+          <TabContent isActive={activeTab === 'dashboard'}>
             <>
                {/* Unified Dashboard Card */}
                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
@@ -292,9 +311,9 @@ const handleAddWeight = (newWeight: number) => {
                   <TDEEDisplay profile={profile} currentWeight={currentWeight} />
                 </div>
             </>
-          )}
+          </TabContent>
 
-          {activeTab === 'weight' && (
+          <TabContent isActive={activeTab === 'weight'}>
             <>
               <header className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
                 <h1 className="text-2xl font-bold text-[#4ADEA8] [text-shadow:0_0_20px_rgba(74,222,168,0.6)] mb-3">Weight Tracking</h1>
@@ -365,9 +384,10 @@ const handleAddWeight = (newWeight: number) => {
                 </div>
               </div>
             </>
-          )}
+          </TabContent>
 
-          {activeTab === 'glp1' && (
+          <TabContent isActive={activeTab === 'glp1'}>
+            <>
               <div className="space-y-3">
                 <header className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
                   <h1 className="text-2xl font-bold text-[#4ADEA8] [text-shadow:0_0_20px_rgba(74,222,168,0.6)] mb-2">GLP-1 Tracking</h1>
@@ -381,9 +401,8 @@ const handleAddWeight = (newWeight: number) => {
                   </div>
                 </div>
               </div>
-            )}
-
-
+            </>
+          </TabContent>
         </div>
       </main>
     </div>
