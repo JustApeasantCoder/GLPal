@@ -5,10 +5,9 @@ import { WeightEntry } from '../types';
 interface WeightChartProps {
   data: WeightEntry[];
   goalWeight: number;
-  currentWeight?: number;
 }
 
-const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, currentWeight }) => {
+const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -20,13 +19,13 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, currentWeig
   }));
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <LineChart
           data={chartData}
           margin={{
             top: 5,
-            right: currentWeight ? 80 : 30, // Make room for weight display
+            right: 30,
             left: 20,
             bottom: 5,
           }}
@@ -56,11 +55,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, currentWeig
           />
         </LineChart>
       </ResponsiveContainer>
-      {currentWeight && (
-        <div className="absolute top-2 right-2 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg shadow-md border border-gray-200 dark:border-gray-600">
-          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{currentWeight.toFixed(1)} kg</p>
-        </div>
-      )}
     </div>
   );
 };
