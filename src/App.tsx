@@ -306,9 +306,64 @@ const handleAddWeight = (newWeight: number) => {
                  </div>
                </div>
 
-                {/* Metabolic Profile */}
-                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_5px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
+{/* Metabolic Profile */}
+                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
                   <TDEEDisplay profile={profile} currentWeight={currentWeight} />
+                </div>
+
+                {/* Additional Metric Cards */}
+                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
+                  <h4 className="font-medium text-[#B19CD9] mb-3 [text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Performance Metrics</h4>
+                  <div className="space-y-3">
+                    {/* Performance Overview Row */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#B19CD9] font-medium">Progress Rate</p>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+                            {((totalLoss / (startWeight - goalWeight)) * 100).toFixed(1)}%
+                          </p>
+                          <p className="text-xs text-[#B19CD9]/80">to goal</p>
+                        </div>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#B19CD9] font-medium">Time Active</p>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+                            {filteredWeights.length} days
+                          </p>
+                          <p className="text-xs text-[#B19CD9]/80">tracking</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Detailed Stats Row */}
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#B19CD9] font-medium">Start Weight</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">{startWeight.toFixed(1)} kg</p>
+                        <p className="text-xs text-[#B19CD9]/80">{new Date(weights[0]?.date).toLocaleDateString()}</p>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#B19CD9] font-medium">Best Week</p>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+                            -{Math.max(...weights.map((w, i) => i > 0 ? weights[i - 1].weight - w.weight : 0)).toFixed(1)} kg
+                          </p>
+                          <p className="text-xs text-[#B19CD9]/80">loss</p>
+                        </div>
+                      </div>
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                        <p className="text-xs text-[#B19CD9] font-medium">Worst Week</p>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+                            +{Math.max(...weights.map((w, i) => i > 0 ? w.weight - weights[i - 1].weight : 0)).toFixed(1)} kg
+                          </p>
+                          <p className="text-xs text-[#B19CD9]/80">gain</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
             </>
           </TabContent>
