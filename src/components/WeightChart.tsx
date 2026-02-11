@@ -27,6 +27,10 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
   };
 
   const processChartData = (data: WeightEntry[]): WeightEntry[] => {
+  // Temporarily disabled - return all data points
+  return data;
+  
+  // Always limit to 12 points maximum for better readability
   if (data.length <= 12) return data;
   
   const chunkSize = Math.ceil(data.length / 12);
@@ -71,9 +75,15 @@ const chartData = processChartData(data).map(entry => ({
             orientation="left"
             width={1}
             domain={[
-              (dataMin: number) => dataMin - 2,
-              (dataMax: number) => dataMax + 2
-            ]}
+                (dataMin: number) => {
+                  const min = Math.floor(dataMin);
+                  return Math.max(min - 1, 0);
+                },
+                (dataMax: number) => {
+                  const max = Math.ceil(dataMax);
+                  return max + 1;
+                }
+              ]}
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
             tick={<CustomYAxisTick />}
             tickCount={6}
