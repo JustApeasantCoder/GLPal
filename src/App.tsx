@@ -130,9 +130,9 @@ const handleAddWeight = (newWeight: number) => {
     ((weights[0].weight - currentWeight) / ((weights.length - 1) / 30)) : 0;
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'weight', label: 'Weight', icon: '⚖️' },
-    { id: 'glp1', label: 'GLP-1', icon: '💉' }
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'weight', label: 'Weight' },
+    { id: 'glp1', label: 'GLP-1' }
   ] as const;
 
   return (
@@ -166,7 +166,6 @@ const handleAddWeight = (newWeight: number) => {
                   : 'text-gray-400 hover:text-[#4ADEA8] hover:bg-[#4ADEA8]/10 hover:shadow-[0_0_15px_rgba(74,222,168,0.2)]'
               }`}
             >
-              <span className="text-lg mb-1">{tab.icon}</span>
               <span className="text-xs font-medium">{tab.label}</span>
             </button>
           ))}
