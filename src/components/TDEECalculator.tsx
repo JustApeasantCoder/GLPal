@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 import { UserProfile } from '../types';
 
 interface TDEECalculatorProps {
+  profile: UserProfile;
   onProfileUpdate: (profile: UserProfile) => void;
+  onClose?: () => void;
 }
 
-const TDEECalculator: React.FC<TDEECalculatorProps> = ({ onProfileUpdate }) => {
-  const [profile, setProfile] = useState<UserProfile>({
-    age: 35,
-    gender: 'male',
-    height: 180,
-    activityLevel: 1.5,
-  });
+const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate, onClose }) => {
+  const [profile, setProfile] = useState<UserProfile>(initialProfile);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onProfileUpdate(profile);
+    if (onClose) {
+      onClose();
+    }
   };
 
   const activityLevels = [

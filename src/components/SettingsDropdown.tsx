@@ -52,7 +52,11 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
                 ×
               </button>
             </div>
-            <TDEECalculator onProfileUpdate={onProfileUpdate} />
+            <TDEECalculator 
+              profile={profile} 
+              onProfileUpdate={onProfileUpdate} 
+              onClose={() => setShowTDEESettings(false)} 
+            />
           </div>
         </div>
       </div>,
