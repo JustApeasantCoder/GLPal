@@ -322,7 +322,6 @@ const handleAddWeight = (newWeight: number) => {
 
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
                 <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Weight Trends</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setChartPeriod('week')}
