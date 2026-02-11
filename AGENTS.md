@@ -1,46 +1,64 @@
 # GLPal - AI Agent Development Guide
 
+Welcome to the GLPal health tracking application! This guide provides comprehensive instructions for AI agents working in this React/TypeScript codebase.
+
 ## 🚀 Quick Start Commands
 
 ### Development
-- `npm start` - Start React dev server (http://localhost:3000)
-- `npm run electron-dev` - Start Electron app with hot reload
-- `npm test` - Run all tests in watch mode
+```bash
+npm start                    # React dev server (http://localhost:3000)
+npm run electron-dev          # Electron app with hot reload
+```
 
-### Single Test Commands
-- `npm test -- --testNamePattern="specific test"` - Run single test by name
-- `npm test -- --testPathPattern="filename"` - Run tests in specific file
-- `npm test -- --watchAll=false` - Run tests once (CI mode)
-- `npm test -- --coverage` - Run tests with coverage report
+### Testing
+```bash
+npm test                     # Run tests in watch mode
+npm test -- --testNamePattern="specific test"    # Run single test by name
+npm test -- --testPathPattern="filename"           # Run tests in specific file
+npm test -- --watchAll=false          # Run tests once (CI mode)
+npm test -- --coverage              # Run tests with coverage report
+```
 
 ### Build & Production
-- `npm run build` - Build for production (outputs to `build/`)
-- `npm run electron-pack` - Build and run production Electron app
-- `npm run electron` - Run Electron from built files
-
-### Code Quality
-- ESLint is configured via `react-scripts` with `react-app` rules
-- TypeScript compiler enforces strict typing (`strict: true`)
-- No separate lint command - use `npm start` which runs ESLint automatically
+```bash
+npm run build               # Build for production (outputs to `build/`)
+npm run electron-pack        # Build and run production Electron app
+npm run electron              # Run Electron from built files
+```
 
 ## 📁 Project Structure & Conventions
 
 ```
 src/
 ├── components/          # React components (PascalCase files)
+│   ├── Dashboard.tsx
+│   ├── WeightTab.tsx
+│   ├── GLP1Tab.tsx
+│   ├── Navigation.tsx
 │   ├── WeightChart.tsx
 │   ├── GLP1Chart.tsx
 │   ├── WeightInput.tsx
-│   ├── TDEECalculator.tsx
-│   └── TDEEDisplay.tsx
+│   ├── TDEEDisplay.tsx
+│   ├── PerformanceOverview.tsx
+│   ├── SettingsDropdown.tsx
+│   └── TDEECalculator.tsx
+├── hooks/              # Custom React hooks
+│   ├── useWeightMetrics.ts
+│   ├── useFilteredWeights.ts
+│   └── index.ts
+├── services/           # Business logic services
+│   ├── WeightAnalytics.ts
+│   └── index.ts
 ├── utils/              # Utility functions (camelCase files)
-│   └── calculations.ts
+│   ├── calculations.ts
+│   ├── database.ts
+│   └── generateData.ts
 ├── contexts/           # React contexts
 │   └── ThemeContext.tsx
 ├── types.ts            # TypeScript type definitions
 ├── App.tsx             # Main application component
 ├── App.test.tsx        # Main test file
-└── index.tsx           # Entry point
+└── index.tsx           # Application entry point
 ```
 
 ## 💻 Code Style Guidelines
@@ -48,14 +66,16 @@ src/
 ### Import Organization
 ```typescript
 // 1. React imports first
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // 2. External libraries (alphabetical)
-import { LineChart, Line } from 'recharts';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { render, screen, fireEvent } from '@testing-library/react';
 
-// 3. Internal imports (absolute paths)
-import { UserProfile } from '../types';
-import { calculateBMR } from '../utils/calculations';
+// 3. Internal imports (use relative paths)
+import { UserProfile, WeightEntry } from '../types';
+import { WeightAnalytics } from '../services';
+import { useWeightMetrics } from '../hooks';
 import WeightChart from './WeightChart';
 ```
 
@@ -99,6 +119,7 @@ export default Component;
 - Use strict typing (no `any` unless absolutely necessary)
 - Union types for limited string sets: `'male' | 'female'`
 - Array types: `WeightEntry[]` instead of `Array<WeightEntry>`
+- Service classes with static methods for business logic
 
 ### Naming Conventions
 - **Components**: PascalCase (`WeightChart`, `TDEECalculator`)
@@ -110,10 +131,16 @@ export default Component;
 ## 🎨 Tailwind CSS Guidelines
 
 ### Design System
-- Custom color palette: purple/teal gradient theme (`#4ADEA8`, `#9C7BD3`, `#5B4B8A`)
-- Consistent spacing: Use Tailwind's spacing scale (2, 4, 6, 8)
-- Responsive design: Mobile-first with `sm:`, `md:`, `lg:`, `xl:` prefixes
-- Glass morphism effects: `bg-black/30 backdrop-blur-lg`
+- **Color Palette**: Purple-based gradient theme
+  - Primary: `#B19CD9` (light purple)
+  - Secondary: `#9C7BD3` (medium purple) 
+  - Dark: `#2D1B4E` (deep purple)
+  - Accent: `#4ADEA8` (mint green)
+  - Background: `#0D0A15` to `#2D1B4E` (gradient)
+
+- **Consistent spacing**: Use Tailwind's spacing scale (2, 3, 4, 6, 8)
+- **Responsive design**: Mobile-first with `sm:`, `md:`, `lg:`, `xl:` prefixes
+- **Glass morphism effects**: `bg-black/30 backdrop-blur-lg`
 
 ### Common Patterns
 ```tsx
@@ -139,11 +166,13 @@ export default Component;
 - Optimize expensive calculations with `useMemo`
 - Prevent recreating functions with `useCallback`
 - Keep component state as local as possible
+- Use `React.FC` for better TypeScript inference
 
 ### Chart Performance
 - Use `ResponsiveContainer` from Recharts for all charts
 - Limit chart data points for better performance
 - Use `minWidth={0}` to prevent chart overflow issues
+- Memoize chart data processing
 
 ### State Management
 - Use local state for component-specific data
@@ -157,18 +186,16 @@ export default Component;
 ```typescript
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Component from './Component';
+import App from './App';
 
-test('descriptive test name', () => {
-  // Arrange
-  render(<Component prop="value" />);
-  
-  // Act
-  fireEvent.click(screen.getByRole('button'));
-  
-  // Assert
-  expect(screen.getByText('expected text')).toBeInTheDocument();
-});
+// Theme wrapper for consistent testing
+const renderWithTheme = (component: React.ReactElement) => {
+  return render(
+    <ThemeProvider>
+      {component}
+    </ThemeProvider>
+  );
+};
 ```
 
 ### Testing Guidelines
@@ -199,6 +226,61 @@ test('displays user profile information', () => {
   expect(screen.getByText('John')).toBeInTheDocument();
   expect(screen.getByText('30 years old')).toBeInTheDocument();
 });
+```
+
+## 🔧 Development Workflow
+
+### Adding New Features
+1. **Define TypeScript types first** in `types.ts`
+2. **Create utility functions** in `utils/` if needed
+3. **Build components** using established patterns
+4. **Add comprehensive tests** for new functionality
+5. **Test responsiveness** and accessibility
+6. **Verify performance** doesn't degrade
+
+### Code Review Checklist
+- [ ] TypeScript compilation passes
+- [ ] Tests pass and provide good coverage
+- [ ] Components are properly typed
+- [ ] Responsive design works on all breakpoints
+- [ ] Accessibility features are implemented
+- [ ] Performance considerations addressed
+
+### Git Integration
+- **Feature branches**: `git checkout -b feature/amazing-feature`
+- **Commit with descriptive messages**: `git commit -m "feat: add weight tracking chart"`
+- **Run tests before pushing**: `npm test -- --watchAll=false`
+- **Build passes**: `npm run build`
+
+## 📊 Data Architecture
+
+### Storage Strategy
+- **localStorage-based persistence** for user data
+- **Separate utilities** for database operations in `utils/database.ts`
+- **Data generation utilities** in `utils/generateData.ts`
+- **Error handling** for localStorage availability
+
+### Data Models
+```typescript
+// Core data types
+interface WeightEntry {
+  date: string;
+  weight: number;
+}
+
+interface GLP1Entry {
+  date: string;
+  dose: number;
+  concentration: number;
+}
+
+interface UserProfile {
+  age: number;
+  gender: 'male' | 'female';
+  height: number; // cm
+  activityLevel: number;
+  goalWeight?: number;
+}
 ```
 
 ## 🔄 Error Handling & User Feedback
@@ -236,7 +318,7 @@ test('displays user profile information', () => {
 </div>
 
 // Navigation
-<div className="fixed bottom-0 left-0 right-0 bg-white border-t">
+<div className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t">
   {/* mobile bottom navigation */}
 </div>
 <div className="hidden md:block">
@@ -264,29 +346,64 @@ test('displays user profile information', () => {
 - Don't use !important unless absolutely necessary
 - Ensure color contrast meets accessibility standards
 
-## 🔧 Development Workflow
+## 🔍 Component Library Patterns
 
-### Adding New Features
-1. Define TypeScript types first in `types.ts`
-2. Create utility functions in `utils/` if needed
-3. Build components using established patterns
-4. Add comprehensive tests
-5. Test responsiveness and accessibility
+### Reusable Components
+```typescript
+// Metric cards (used throughout the app)
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  trend?: 'up' | 'down' | 'neutral';
+}
 
-### Code Review Checklist
-- [ ] TypeScript compilation passes
-- [ ] Tests pass and provide good coverage
-- [ ] Components are properly typed
-- [ ] Responsive design works on all breakpoints
-- [ ] Accessibility features are implemented
-- [ ] Performance considerations addressed
+// Chart period selector (reused across components)
+interface ChartPeriodSelectorProps {
+  period: ChartPeriod;
+  onPeriodChange: (period: ChartPeriod) => void;
+}
+```
 
-### Git Integration
-- Feature branches: `git checkout -b feature/new-feature`
-- Commit with descriptive messages: `git commit -m "feat: add weight tracking chart"`
-- Run tests before pushing: `npm test -- --watchAll=false`
-- Build passes: `npm run build`
+### Custom Hooks Patterns
+```typescript
+// Data filtering logic
+const useFilteredWeights = (weights: WeightEntry[], period: ChartPeriod) => {
+  return useMemo(() => {
+    // filtering logic
+  }, [weights, period]);
+};
+
+// Metrics calculation
+const useWeightMetrics = (weights: WeightEntry[], profile: UserProfile) => {
+  return useMemo(() => {
+    // calculation logic
+  }, [weights, profile]);
+};
+```
+
+## 🛠️ Architecture Patterns
+
+### Service Layer
+```typescript
+// Business logic separation
+export class WeightAnalytics {
+  static calculateMetrics(weights: WeightEntry[]): WeightMetrics {
+    // complex calculations
+  }
+  
+  static calculateBestWeek(weights: WeightEntry[]): number {
+    // specialized calculations
+  }
+}
+```
+
+### State Management
+- Local component state for component-specific data
+- React Context for global state (theme, user settings)
+- Custom hooks for complex stateful logic
+- Service classes for business calculations
 
 ---
 
-**Remember**: This is a health tracking application - prioritize data accuracy, user privacy, and accessibility in all development decisions.
+**Important**: This health tracking application prioritizes data accuracy, user privacy, and accessibility in all development decisions.
