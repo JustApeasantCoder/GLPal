@@ -32,56 +32,56 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
         >
           <CartesianGrid 
             strokeDasharray="3 3" 
-            stroke="rgba(0, 255, 255, 0.1)" 
+            stroke="rgba(156, 123, 211, 0.1)" 
           />
           <XAxis 
             dataKey="displayDate" 
             tick={{ fontSize: 12, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(0, 255, 255, 0.2)' }}
+            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
           />
           <YAxis 
             domain={['dataMin - 2', 'dataMax + 2']}
             tick={{ fontSize: 12, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(0, 255, 255, 0.2)' }}
+            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: 'rgba(0, 0, 0, 0.8)', 
-              border: '1px solid rgba(0, 255, 255, 0.3)',
+              backgroundColor: 'rgba(47, 42, 74, 0.8)', 
+              border: '1px solid rgba(74, 222, 168, 0.3)',
               borderRadius: '8px',
-              boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)'
+              boxShadow: '0 0 20px rgba(74, 222, 168, 0.3)'
             }}
-            labelStyle={{ color: '#67e8f9' }}
-            itemStyle={{ color: '#a5f3fc' }}
+            labelStyle={{ color: '#4ADEA8' }}
+            itemStyle={{ color: '#9C7BD3' }}
           />
           <ReferenceLine 
             y={goalWeight} 
-            stroke="rgba(16, 185, 129, 0.8)" 
+            stroke="rgba(74, 222, 168, 0.8)" 
             strokeDasharray="5 5" 
-            label={{ value: "Goal", fill: '#10b981', fontSize: 12 }}
+            label={{ value: "Goal", fill: '#4ADEA8', fontSize: 12 }}
           />
           <Line 
             type="monotone" 
             dataKey="weight" 
-            stroke="url(#cyanGradient)" 
+            stroke="url(#purpleGradient)" 
             strokeWidth={3}
             dot={{ 
-              fill: '#06b6d4', 
+              fill: '#9C7BD3', 
               r: 5,
-              stroke: '#0284c7',
+              stroke: '#5B4B8A',
               strokeWidth: 2,
-              filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.6))'
+              filter: 'drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))'
             }}
             activeDot={{ 
               r: 7,
-              filter: 'drop-shadow(0 0 12px rgba(0, 255, 255, 0.8))'
+              filter: 'drop-shadow(0 0 12px rgba(156, 123, 211, 0.8))'
             }}
           />
           <defs>
-            <linearGradient id="cyanGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#06b6d4" />
-              <stop offset="50%" stopColor="#00ffff" />
-              <stop offset="100%" stopColor="#0ea5e9" />
+            <linearGradient id="purpleGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#5B4B8A" />
+              <stop offset="50%" stopColor="#9C7BD3" />
+              <stop offset="100%" stopColor="#4ADEA8" />
             </linearGradient>
           </defs>
         </LineChart>
