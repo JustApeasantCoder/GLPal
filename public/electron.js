@@ -14,7 +14,8 @@ function createWindow() {
       enableRemoteModule: false,
     },
     title: 'GLPal - Health Tracker',
-    icon: path.join(__dirname, '../public/favicon.ico')
+    icon: path.join(__dirname, '../public/favicon.ico'),
+    show: false // Don't show until ready to prevent flicker
   });
 
   mainWindow.loadURL(
@@ -22,6 +23,24 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`
   );
+
+  // Hide scrollbars completely when window is ready
+  mainWindow.webContents.once('did-finish-load', () => {
+    mainWindow.webContents.insertCSS(`
+      *::-webkit-scrollbar {
+        display: none !important;
+      }
+      * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html, body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+    `);
+    mainWindow.show();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

@@ -136,7 +136,7 @@ const handleAddWeight = (newWeight: number) => {
   ] as const;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1625] via-[#2F2A4A] to-[#5B4B8A] animate-gradient-shift">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1625] via-[#2F2A4A] to-[#5B4B8A] animate-gradient-shift hide-scrollbar">
       {/* Fixed top navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-b border-[#4ADEA8]/20 px-4 py-3 z-50 shadow-[0_4px_20px_rgba(74,222,168,0.15)]">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
@@ -173,7 +173,7 @@ const handleAddWeight = (newWeight: number) => {
       </nav>
 
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
-      <main className="flex-1 pt-16 pb-16 overflow-y-auto">
+      <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar">
         <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl">
           {activeTab === 'dashboard' && (
             <>
@@ -232,7 +232,7 @@ const handleAddWeight = (newWeight: number) => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => setChartPeriod('week')}
-                            className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                            className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                               chartPeriod === 'week'
                                 ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                                 : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -242,7 +242,7 @@ const handleAddWeight = (newWeight: number) => {
                           </button>
                           <button
                             onClick={() => setChartPeriod('month')}
-                            className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                            className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                               chartPeriod === 'month'
                                 ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                                 : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -252,7 +252,7 @@ const handleAddWeight = (newWeight: number) => {
                           </button>
                           <button
                             onClick={() => setChartPeriod('90days')}
-                            className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                            className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                               chartPeriod === '90days'
                                 ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                                 : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -262,7 +262,7 @@ const handleAddWeight = (newWeight: number) => {
                           </button>
                           <button
                             onClick={() => setChartPeriod('all')}
-                            className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                            className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                               chartPeriod === 'all'
                                 ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                                 : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -320,7 +320,7 @@ const handleAddWeight = (newWeight: number) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setChartPeriod('week')}
-                      className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                      className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                         chartPeriod === 'week'
                           ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                           : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -330,7 +330,7 @@ const handleAddWeight = (newWeight: number) => {
                     </button>
                     <button
                       onClick={() => setChartPeriod('month')}
-                      className={`px-3 py-1 text-s rounded-lg transition-all duration-300 ${
+                      className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                         chartPeriod === 'month'
                           ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                           : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -340,7 +340,7 @@ const handleAddWeight = (newWeight: number) => {
                     </button>
                     <button
                       onClick={() => setChartPeriod('90days')}
-                      className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                      className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                         chartPeriod === '90days'
                           ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                           : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
@@ -350,7 +350,7 @@ const handleAddWeight = (newWeight: number) => {
                     </button>
                     <button
                       onClick={() => setChartPeriod('all')}
-                      className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                      className={`w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                         chartPeriod === 'all'
                           ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                           : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
