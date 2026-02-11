@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { UserProfile } from '../types';
 import TDEECalculator from './TDEECalculator';
 
@@ -38,9 +39,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
   };
 
   if (showTDEESettings) {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full max-h-[90vh] overflow-y-auto border border-[#9C7BD3]/20">
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-[#4ADEA8] [text-shadow:0_0_20px_rgba(74,222,168,0.6)]">TDEE Settings</h2>
@@ -54,7 +55,8 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
             <TDEECalculator onProfileUpdate={onProfileUpdate} />
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
