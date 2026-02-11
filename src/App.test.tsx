@@ -42,5 +42,5 @@ test('default active tab is dashboard', () => {
   renderWithTheme(<App />);
   const dashboardTab = screen.getByRole('button', { name: /Dashboard/i });
   
-  expect(dashboardTab).toHaveClass('bg-blue-500', 'text-white');
+  expect(dashboardTab).toHaveClass('from-[#B19CD9]', 'text-white');
 });
