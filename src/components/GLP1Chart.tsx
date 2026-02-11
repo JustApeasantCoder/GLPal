@@ -43,9 +43,9 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
           data={chartData}
           margin={{
             top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
+            right: 5,
+            left: 5,
+            bottom: 25,
           }}
         >
           <CartesianGrid 
@@ -58,8 +58,9 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
           />
           <YAxis 
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
+            width={0}
+            axisLine={true}
+            tick={true}
           />
           <Tooltip 
             formatter={(value?: number) => value ? [`${value.toFixed(3)} mg`, 'Concentration'] : ['', '']}

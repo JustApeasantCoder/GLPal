@@ -19,31 +19,32 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
   }));
 
   return (
-    <div className="w-full h-full">
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
+    <div className="w-full h-[230px]">
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
+          margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
         >
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke="rgba(156, 123, 211, 0.1)" 
-          />
-          <XAxis 
-            dataKey="displayDate" 
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(156, 123, 211, 0.1)" />
+
+          <XAxis
+            dataKey="displayDate"
+            padding={{ left: 10, right: 10 }}
             tick={{ fontSize: 12, fill: '#94a3b8' }}
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
+            tickMargin={10}
           />
-          <YAxis 
-            domain={['dataMin - 2', 'dataMax + 2']}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
+
+          <YAxis
+            width={0}
+            domain={[
+              (dataMin: number) => dataMin - 2,
+              (dataMax: number) => dataMax + 2
+            ]}
+            axisLine={true}
+            tick={true}
           />
+
           <Tooltip 
             contentStyle={{ 
               backgroundColor: 'rgba(47, 42, 74, 0.8)', 

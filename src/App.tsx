@@ -279,7 +279,7 @@ const handleAddWeight = (newWeight: number) => {
 
                    {/* GLP-1 Status */}
                    <div>
-                     <h3 className="text-sm font-medium text-[#4ADEA8] mb-3 [text-shadow:0_0_10px_rgba(74,222,168,0.4)]">GLP-1 Status</h3>
+                     {/*<h3 className="text-sm font-medium text-[#4ADEA8] mb-3 [text-shadow:0_0_10px_rgba(74,222,168,0.4)]">GLP-1 Status</h3>*/}
                      <div className="h-32 sm:h-40">
                        <GLP1Chart data={glp1Entries} />
                      </div>
@@ -330,7 +330,7 @@ const handleAddWeight = (newWeight: number) => {
                     </button>
                     <button
                       onClick={() => setChartPeriod('month')}
-                      className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                      className={`px-3 py-1 text-s rounded-lg transition-all duration-300 ${
                         chartPeriod === 'month'
                           ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]'
                           : 'bg-[#4ADEA8]/10 text-[#4ADEA8] border border-[#4ADEA8]/30 hover:bg-[#4ADEA8]/20 hover:shadow-[0_0_10px_rgba(74,222,168,0.3)]'
