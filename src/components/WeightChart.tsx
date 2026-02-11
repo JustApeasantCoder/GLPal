@@ -26,33 +26,33 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
     );
   };
 
-  const processChartData = (data: WeightEntry[]): WeightEntry[] => {
-  // Temporarily disabled - return all data points
-  return data;
-  
-  // Always limit to 12 points maximum for better readability
-  if (data.length <= 12) return data;
-  
-  const chunkSize = Math.ceil(data.length / 12);
-  const processedData: WeightEntry[] = [];
-  
-  for (let i = 0; i < data.length; i += chunkSize) {
-    const chunk = data.slice(i, i + chunkSize);
-    const avgWeight = chunk.reduce((sum, entry) => sum + entry.weight, 0) / chunk.length;
-    const middleIndex = Math.floor(chunk.length / 2);
-    processedData.push({
-      date: chunk[middleIndex].date,
-      weight: avgWeight
-    });
+  // Generate indices for dots to show (up to 12 points evenly distributed)
+const getDotIndices = (dataLength: number): number[] => {
+  if (dataLength <= 12) {
+    // Show all points if 12 or fewer
+    return Array.from({ length: dataLength }, (_, i) => i);
   }
   
-  return processedData;
+  // Show first, last, and 10 evenly distributed points in between
+  const indices = new Set<number>();
+  indices.add(0); // Always show first point
+  indices.add(dataLength - 1); // Always show last point
+  
+  // Add 10 evenly distributed points between first and last
+  const step = (dataLength - 1) / 11;
+  for (let i = 1; i <= 10; i++) {
+    indices.add(Math.round(i * step));
+  }
+  
+  return Array.from(indices).sort((a, b) => a - b);
 };
 
-const chartData = processChartData(data).map(entry => ({
+const chartData = data.map(entry => ({
     ...entry,
     displayDate: formatDate(entry.date),
   }));
+
+const dotIndices = new Set(getDotIndices(data.length));
 
   return (
     <div className="w-full h-[230px]">
@@ -111,16 +111,31 @@ const chartData = processChartData(data).map(entry => ({
             dataKey="weight" 
             stroke="url(#purpleGradient)" 
             strokeWidth={3}
-            dot={{ 
-              fill: '#9C7BD3', 
-              r: 5,
-              stroke: '#2D1B4E',
-              strokeWidth: 2,
-              filter: 'drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))'
+            dot={(props: any) => {
+              const { cx, cy, index } = props;
+              // Only show dots for selected indices
+              if (dotIndices.has(index)) {
+                return (
+                  <circle 
+                    cx={cx} 
+                    cy={cy} 
+                    r={5}
+                    fill="#9C7BD3" 
+                    stroke="#2D1B4E"
+                    strokeWidth={2}
+                    filter="drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))"
+                  />
+                );
+              }
+              // Hide other dots
+              return null;
             }}
             activeDot={{ 
               r: 7,
-              filter: 'drop-shadow(0 0 12px rgba(156, 123, 211, 0.8))'
+              fill: '#B19CD9',
+              stroke: '#2D1B4E',
+              strokeWidth: 2,
+              filter: 'drop-shadow(0 0 12px rgba(177, 156, 217, 0.8))'
             }}
           />
           <defs>

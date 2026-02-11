@@ -47,8 +47,8 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
 
   if (showTDEESettings) {
     return ReactDOM.createPortal(
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-        <div className="bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div className="bg-black/50 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-[#B19CD9] [text-shadow:0_0_20px_rgba(177,156,217,0.6)]">TDEE Settings</h2>
@@ -69,7 +69,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
 
   if (showDosageCalculator) {
     return ReactDOM.createPortal(
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
         <div className="bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
@@ -118,7 +118,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_40px_rgba(156,123,211,0.3)] border border-[#9C7BD3]/20 py-2 z-50">
+        <div className="absolute right-0 mt-3 w-56 bg-black/100 backdrop-blur-3xl rounded-2xl shadow-[0_20px_40px_rgba(156,123,211,0.3)] border border-[#9C7BD3]/20 py-2 z-50">
           <button
             onClick={handleTDEESettingsClick}
             className="w-full text-left px-4 py-3 text-[#B19CD9]/80 hover:bg-[#B19CD9]/10 transition-all duration-300 first:rounded-t-2xl hover:text-[#B19CD9]"

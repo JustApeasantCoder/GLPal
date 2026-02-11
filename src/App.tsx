@@ -204,17 +204,17 @@ const handleAddWeight = (newWeight: number) => {
                  <div className="space-y-3 mb-6">
                     {/* Row 1: Current, BMI, Total Loss */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">Current</p>
-                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">{currentWeight.toFixed(1)} kg</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">{currentWeight.toFixed(1)} kg</p>
                       </div>
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">BMI</p>
-                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">{bmi.toFixed(1)}</p>
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">{bmi.toFixed(1)}</p>
                       </div>
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm px-2 py-1 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm px-2 py-1 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">Total Loss</p>
-                        <p className="text-base font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)] leading-tight">
+                        <p className="text-base font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)] leading-tight">
                           {totalLoss.toFixed(1)} kg <span className="text-xs text-[#B19CD9]/80 -mt-1 inline-block">({totalLossPercentage.toFixed(1)}%)</span>
                         </p>
                       </div>
@@ -222,21 +222,21 @@ const handleAddWeight = (newWeight: number) => {
                     
                     {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">Weekly Avg</p>
-                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
                           {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
                         </p>
                       </div>
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">Monthly Avg</p>
-                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
                           {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
                         </p>
                       </div>
-                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] flex flex-col justify-between">
+                      <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
                         <p className="text-xs text-[#B19CD9] font-medium">To Lose</p>
-                        <p className="text-lg font-bold text-white [text-shadow:0_0_10px_rgba(177,156,217,0.5)]">
+                        <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
                           {(currentWeight - goalWeight).toFixed(1)} kg
                         </p>
                       </div>
@@ -307,7 +307,7 @@ const handleAddWeight = (newWeight: number) => {
                </div>
 
                 {/* Metabolic Profile */}
-                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
+                <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_5px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
                   <TDEEDisplay profile={profile} currentWeight={currentWeight} />
                 </div>
             </>

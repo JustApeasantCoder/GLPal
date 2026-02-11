@@ -1,6 +1,6 @@
 import { addWeightEntry, addGLP1Entry, initializeDatabase, getUserProfile, saveUserProfile } from './database';
 
-// Generate 90 days of weight data from 103kg to 85kg
+// Generate 120 days of weight data with drastic changes: 105kg → 90kg → 100kg → 80kg
 export const generateSimulatedData = (): void => {
   initializeDatabase();
   
@@ -17,33 +17,56 @@ export const generateSimulatedData = (): void => {
   }
 
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 89); // 90 days ago
+  startDate.setDate(startDate.getDate() - 119); // 120 days ago
 
-  const startWeight = 103; // kg
-  const endWeight = 85; // kg
-  const totalWeightLoss = startWeight - endWeight;
-  const days = 90;
+  const totalDays = 120;
+  
+  // Define phases for dramatic weight changes
+  const phases = [
+    { start: 0, end: 35, startWeight: 105, endWeight: 90, description: "Initial rapid loss" },  // Days 1-35: 105→90
+    { start: 35, end: 65, startWeight: 90, endWeight: 100, description: "Weight regain" },      // Days 36-65: 90→100  
+    { start: 65, end: 120, startWeight: 100, endWeight: 80, description: "Final aggressive loss" } // Days 66-120: 100→80
+  ];
 
-  // Generate weight entries with realistic fluctuations
-  for (let i = 0; i < days; i++) {
+  // Generate weight entries with dramatic fluctuations
+  for (let i = 0; i < totalDays; i++) {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + i);
     
-    // Base weight with linear progression
-    const baseWeight = startWeight - (totalWeightLoss * (i / days));
+    // Determine which phase we're in
+    let baseWeight = 105; // default start
+    for (const phase of phases) {
+      if (i >= phase.start && i <= phase.end) {
+        const phaseProgress = (i - phase.start) / (phase.end - phase.start);
+        baseWeight = phase.startWeight - ((phase.startWeight - phase.endWeight) * phaseProgress);
+        break;
+      }
+    }
     
-    // Add realistic fluctuations (±0.3kg)
-    const fluctuation = (Math.random() - 0.5) * 0.6;
+    // Add drastic fluctuations (±1.2kg) - much more dramatic
+    const fluctuation = (Math.random() - 0.5) * 2.4;
     
-    // Add weekly pattern (slightly higher on weekends)
+    // Add strong weekly pattern (significantly higher on weekends, lower after weekend)
     const dayOfWeek = currentDate.getDay();
-    const weekendAdjustment = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.2 : 0;
+    let weekendAdjustment = 0;
+    if (dayOfWeek === 0) weekendAdjustment = 1.5; // Sunday: weight gain
+    else if (dayOfWeek === 1) weekendAdjustment = 0.8; // Monday: still elevated
+    else if (dayOfWeek === 5) weekendAdjustment = -0.8; // Friday: pre-weekend loss
     
-    // Add occasional plateaus (every 3-4 weeks)
-    const isPlateauDay = i > 0 && i % 25 === 0 && i < days - 5;
-    const plateauAdjustment = isPlateauDay ? 0.3 : 0;
+    // Add dramatic plateaus and spikes (every 2-3 weeks)
+    let dramaticAdjustment = 0;
+    if (i > 10 && i % 18 === 0) {
+      dramaticAdjustment = 2.0; // Sudden weight spike
+    } else if (i > 20 && i % 15 === 0) {
+      dramaticAdjustment = -1.5; // Sudden weight drop
+    }
     
-    const finalWeight = Math.round((baseWeight + fluctuation + weekendAdjustment - plateauAdjustment) * 100) / 100;
+    // Add holiday season effects (around days 30-40 and 80-90)
+    if ((i >= 30 && i <= 40) || (i >= 80 && i <= 90)) {
+      dramaticAdjustment += 1.2; // Holiday weight gain
+    }
+    
+    const finalWeight = Math.round((baseWeight + fluctuation + weekendAdjustment + dramaticAdjustment) * 100) / 100;
     
     const dateString = currentDate.toISOString().split('T')[0];
     addWeightEntry({
@@ -59,10 +82,12 @@ export const generateSimulatedData = (): void => {
     { name: 'Tirzepatide', dose: 15.0, halfLife: 117 } // 5 days
   ];
 
-  // Add a few sample medication entries
+  // Add a few sample medication entries spread across 120 days
   const medicationDates = [
-    startDate.getTime() + (30 * 24 * 60 * 60 * 1000), // Day 30
-    startDate.getTime() + (60 * 24 * 60 * 60 * 1000), // Day 60
+    startDate.getTime() + (30 * 24 * 60 * 60 * 1000),  // Day 30
+    startDate.getTime() + (60 * 24 * 60 * 60 * 1000),  // Day 60
+    startDate.getTime() + (90 * 24 * 60 * 60 * 1000),  // Day 90
+    startDate.getTime() + (110 * 24 * 60 * 60 * 1000), // Day 110
   ];
 
   medicationDates.forEach((timestamp, index) => {
@@ -78,7 +103,7 @@ export const generateSimulatedData = (): void => {
     });
   });
 
-  console.log('Generated 90 days of simulated weight data (103kg to 85kg)');
+  console.log('Generated 120 days of simulated weight data (105kg → 90kg → 100kg → 80kg)');
   console.log(`Date range: ${startDate.toISOString().split('T')[0]} to ${new Date().toISOString().split('T')[0]}`);
   console.log(`Sample GLP-1 entries added: ${medicationDates.length}`);
 };
