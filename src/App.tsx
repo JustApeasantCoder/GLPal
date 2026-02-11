@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import WeightChart from './components/WeightChart';
 import GLP1Chart from './components/GLP1Chart';
 import TDEEDisplay from './components/TDEEDisplay';
@@ -6,28 +6,23 @@ import WeightInput from './components/WeightInput';
 import SettingsDropdown from './components/SettingsDropdown';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
+import { 
+  initializeDatabase, 
+  getWeightEntries, 
+  getGLP1Entries, 
+  getUserProfile, 
+  addWeightEntry, 
+  saveUserProfile 
+} from './utils/database';
+import { generateSimulatedData } from './utils/generateData';
 
 type TabType = 'dashboard' | 'weight' | 'glp1';
 
 function App() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  const [weights, setWeights] = useState<WeightEntry[]>([
-    { date: '2024-01-01', weight: 85 },
-    { date: '2024-01-02', weight: 84.8 },
-    { date: '2024-01-03', weight: 84.9 },
-    { date: '2024-01-04', weight: 84.5 },
-    { date: '2024-01-05', weight: 84.6 },
-    { date: '2024-01-06', weight: 84.3 },
-    { date: '2024-01-07', weight: 84.1 },
-  ]);
-
-  const [glp1Entries] = useState<GLP1Entry[]>([
-    { date: '2024-01-01', medication: 'Semaglutide', dose: 0.25, halfLifeHours: 168 },
-    { date: '2024-01-08', medication: 'Semaglutide', dose: 0.5, halfLifeHours: 168 },
-    { date: '2024-01-15', medication: 'Semaglutide', dose: 1.0, halfLifeHours: 168 },
-  ]);
-
+  const [weights, setWeights] = useState<WeightEntry[]>([]);
+  const [glp1Entries, setGLP1Entries] = useState<GLP1Entry[]>([]);
   const [profile, setProfile] = useState<UserProfile>({
     age: 35,
     gender: 'male',
@@ -35,9 +30,57 @@ function App() {
     activityLevel: 1.5,
   });
 
-  const handleAddWeight = (newWeight: number) => {
+  // Initialize database and load data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const initializeApp = () => {
+      try {
+        initializeDatabase();
+        
+        // Load existing data
+        const existingWeights = getWeightEntries();
+        const existingGLP1 = getGLP1Entries();
+        const existingProfile = getUserProfile();
+        
+        // If no data exists, generate simulated data
+        if (existingWeights.length === 0) {
+          console.log('No existing data found, generating simulated data...');
+          generateSimulatedData();
+          
+          // Reload after generation
+          const generatedWeights = getWeightEntries();
+          const generatedGLP1 = getGLP1Entries();
+          setWeights(generatedWeights);
+          setGLP1Entries(generatedGLP1);
+        } else {
+          setWeights(existingWeights);
+          setGLP1Entries(existingGLP1);
+        }
+        
+        // Load profile or use default
+        if (existingProfile) {
+          setProfile(existingProfile);
+        } else {
+          saveUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Error initializing database:', error);
+      }
+    };
+    
+    initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - run only once
+
+const handleAddWeight = (newWeight: number) => {
     const today = new Date().toISOString().split('T')[0];
-    setWeights(prev => [...prev, { date: today, weight: newWeight }]);
+    const newEntry = { date: today, weight: newWeight };
+    
+    // Save to database
+    addWeightEntry(newEntry);
+    
+    // Update state
+    setWeights(prev => [...prev, newEntry]);
   };
 
   const currentWeight = weights[weights.length - 1]?.weight || 0;
@@ -72,7 +115,10 @@ function App() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">GLPal</h1>
           <SettingsDropdown 
             profile={profile} 
-            onProfileUpdate={setProfile}
+            onProfileUpdate={useCallback((newProfile: UserProfile) => {
+              setProfile(newProfile);
+              saveUserProfile(newProfile);
+            }, [])}
             isDarkMode={isDarkMode}
             onThemeToggle={toggleDarkMode}
           />

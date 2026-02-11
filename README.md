@@ -1,22 +1,26 @@
 # GLPal - Health Tracker
 
-A comprehensive desktop health tracking application built with React, TypeScript, and Electron.
+A comprehensive health tracking application built with React, TypeScript, and Electron featuring persistent data storage and intelligent calculations.
 
 ## Features
 
 ### 🏃 Weight Tracking
 - Daily weight input with validation
+- **90-day simulated weight progression** (103kg to 85kg)
 - Weight trend visualization with Recharts
 - Goal weight tracking with progress display
 - Historical weight data analysis
+- **Persistent data storage** using localStorage
 
 ### 🔥 TDEE Calculator
 - **Mifflin-St Jeor BMR calculation** (most accurate formula)
 - Activity level multipliers (sedentary to extremely active)
 - Real-time TDEE calculation based on current weight
 - Personalized calorie targets for different weight loss rates:
-  - 0.5 kg/week (slow and sustainable)
-  - 1.0 kg/week (moderate pace)
+  - 0.5 kg/week (slow and sustainable) - ~550 cal deficit
+  - 1.0 kg/week (moderate pace) - ~1100 cal deficit
+- **Profile persistence** across app sessions
+- Accurate calorie deficit calculations
 
 ### 💊 GLP-1 Dose Tracking
 - Medication dose input and storage
@@ -26,13 +30,16 @@ A comprehensive desktop health tracking application built with React, TypeScript
   - Tirzepatide (5 days half-life)
 - Real-time blood concentration visualization
 - Accumulation and decay curves over time
+- Sample medication entries in simulated data
 
 ### 🎨 Professional Dashboard
 - Clean, branded design with Tailwind CSS
-- Responsive grid layout
+- Responsive grid layout with mobile-first design
 - Color-coded statistics cards
-- Intuitive user interface
+- Intuitive user interface with tabbed navigation
 - Real-time data updates
+- **Error boundary** for graceful error handling
+- **Dark mode** support with smooth transitions
 
 ## Technology Stack
 
@@ -41,6 +48,9 @@ A comprehensive desktop health tracking application built with React, TypeScript
 - **Styling**: Tailwind CSS for custom branded design
 - **Desktop**: Electron for cross-platform deployment
 - **State Management**: React Hooks
+- **Data Storage**: localStorage-based database simulation
+- **Error Handling**: React Error Boundaries
+- **Build Tools**: Create React App with TypeScript
 
 ## Getting Started
 
@@ -75,7 +85,23 @@ npm start
 
 # Electron desktop app with hot reload
 npm run electron-dev
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
 ```
+
+### First Run
+
+The application automatically initializes with **90 days of simulated weight data** showing a progression from 103kg to 85kg with realistic:
+- Daily fluctuations (±0.3kg)
+- Weekend weight variations  
+- Occasional plateau periods
+- Sample GLP-1 medication entries
+
+Data persists automatically using localStorage in your browser.
 
 ## Project Structure
 
@@ -89,12 +115,35 @@ npm run electron-dev
 │   │   ├── GLP1Chart.tsx
 │   │   ├── WeightInput.tsx
 │   │   ├── TDEECalculator.tsx
-│   │   └── TDEEDisplay.tsx
+│   │   ├── TDEEDisplay.tsx
+│   │   ├── SettingsDropdown.tsx
+│   │   └── ErrorBoundary.tsx
+│   ├── contexts/          # React contexts
+│   │   └── ThemeContext.tsx
 │   ├── utils/            # Utility functions
-│   │   └── calculations.ts
-│   └── types.ts          # TypeScript type definitions
+│   │   ├── calculations.ts
+│   │   ├── database.ts     # localStorage-based database
+│   │   └── generateData.ts # Simulated data generator
+│   ├── types.ts          # TypeScript type definitions
+│   ├── App.tsx           # Main application component
+│   ├── App.test.tsx      # Main test file
+│   ├── index.tsx         # Application entry point
+│   └── index.css         # Global styles
+├── scripts/              # Build and utility scripts
+│   └── initDatabase.ts   # Database initialization
 └── package.json          # Dependencies and scripts
 ```
+
+## Recent Updates
+
+### v1.1.0 - Database Integration & Bug Fixes
+- ✅ **Database Implementation**: localStorage-based persistent storage
+- ✅ **Simulated Data Generation**: 90-day weight progression (103kg → 85kg)
+- ✅ **Profile Persistence**: User settings saved across sessions
+- ✅ **Error Boundaries**: Graceful error handling with user-friendly messages
+- ✅ **TDEE Calculation Fix**: Accurate calorie deficit displays
+- ✅ **Infinite Loop Fix**: Resolved white screen crash issue
+- ✅ **Safety Checks**: localStorage availability and error handling
 
 ## Future Mobile Development
 
@@ -104,6 +153,7 @@ When ready for mobile deployment:
 - Business logic (calculations, data structures) transfers directly
 - Recharts → React Native Chart Kit for mobile charts
 - Same TypeScript types and calculation utilities
+- Database layer can be adapted to SQLite or AsyncStorage
 
 ## Data Calculations
 

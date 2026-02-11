@@ -12,8 +12,10 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   const tdee = calculateTDEE(bmr, profile.activityLevel);
   
   // Calculate weekly weight loss scenarios
-  const loss05KgPerWeek = Math.round(tdee - 550); // ~0.5kg/week deficit
-  const loss1KgPerWeek = Math.round(tdee - 1100); // ~1kg/week deficit
+  const deficit05Kg = Math.round(7700 * 0.5 / 7); // ~550 cal deficit for 0.5kg/week
+  const deficit1Kg = Math.round(7700 * 1.0 / 7); // ~1100 cal deficit for 1kg/week
+  const loss05KgPerWeek = Math.round(tdee - deficit05Kg);
+  const loss1KgPerWeek = Math.round(tdee - deficit1Kg);
   
   return (
     <div className="space-y-4">
@@ -50,7 +52,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
             </div>
             <div className="text-right">
               <p className="font-bold text-green-900 dark:text-green-300">{loss05KgPerWeek.toLocaleString()} cal/day</p>
-              <p className="text-sm text-green-600 dark:text-green-400">{(tdee - loss05KgPerWeek).toLocaleString()} cal deficit</p>
+              <p className="text-sm text-green-600 dark:text-green-400">{deficit05Kg.toLocaleString()} cal deficit</p>
             </div>
           </div>
 
@@ -61,7 +63,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
             </div>
             <div className="text-right">
               <p className="font-bold text-yellow-900 dark:text-yellow-300">{loss1KgPerWeek.toLocaleString()} cal/day</p>
-              <p className="text-sm text-yellow-600 dark:text-yellow-400">{(tdee - loss1KgPerWeek).toLocaleString()} cal deficit</p>
+              <p className="text-sm text-yellow-600 dark:text-yellow-400">{deficit1Kg.toLocaleString()} cal deficit</p>
             </div>
           </div>
         </div>
