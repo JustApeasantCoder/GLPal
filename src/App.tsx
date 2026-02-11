@@ -156,12 +156,8 @@ const handleAddWeight = (newWeight: number) => {
                  
                  {/* Metrics Section */}
                  <div className="space-y-3 mb-6">
-                   {/* Row 1: Current, BMI, Total Loss */}
+                   {/* Row 1: BMI, Total Loss, To Lose */}
                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                       <p className="text-xs text-blue-600 dark:text-blue-400">Current</p>
-                       <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{currentWeight.toFixed(1)} kg</p>
-                     </div>
                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
                        <p className="text-xs text-green-600 dark:text-green-400">BMI</p>
                        <p className="text-lg font-bold text-green-900 dark:text-green-300">{bmi.toFixed(1)}</p>
@@ -175,22 +171,6 @@ const handleAddWeight = (newWeight: number) => {
                          {totalLossPercentage.toFixed(1)}%
                        </p>
                      </div>
-                   </div>
-                   
-                   {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
-                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                     <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
-                       <p className="text-xs text-orange-600 dark:text-orange-400">Weekly Avg</p>
-                       <p className="text-lg font-bold text-orange-900 dark:text-orange-300">
-                         {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
-                       </p>
-                     </div>
-                     <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg">
-                       <p className="text-xs text-pink-600 dark:text-pink-400">Monthly Avg</p>
-                       <p className="text-lg font-bold text-pink-900 dark:text-pink-300">
-                         {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
-                       </p>
-                     </div>
                      <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
                        <p className="text-xs text-indigo-600 dark:text-indigo-400">To Lose</p>
                        <p className="text-lg font-bold text-indigo-900 dark:text-indigo-300">
@@ -198,17 +178,32 @@ const handleAddWeight = (newWeight: number) => {
                        </p>
                      </div>
                    </div>
+                   
+                    {/* Row 2: Weekly Avg, Monthly Avg */}
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 dark:text-orange-400">Weekly Avg</p>
+                        <p className="text-lg font-bold text-orange-900 dark:text-orange-300">
+                          {weeklyAverageLoss > 0 ? '-' : ''}{weeklyAverageLoss.toFixed(1)} kg
+                        </p>
+                      </div>
+                      <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg">
+                        <p className="text-xs text-pink-600 dark:text-pink-400">Monthly Avg</p>
+                        <p className="text-lg font-bold text-pink-900 dark:text-pink-300">
+                          {monthlyAverageLoss > 0 ? '-' : ''}{monthlyAverageLoss.toFixed(1)} kg
+                        </p>
+                      </div>
+                    </div>
                  </div>
 
                  {/* Charts Section */}
                  <div className="space-y-6">
-                   {/* Weight Trends */}
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Weight Trends</h3>
-                     <div className="h-48 sm:h-56">
-                       <WeightChart data={weights} goalWeight={goalWeight} />
-                     </div>
-                   </div>
+                    {/* Weight Trends */}
+                    <div>
+                      <div className="h-48 sm:h-56">
+                        <WeightChart data={weights} goalWeight={goalWeight} currentWeight={currentWeight} />
+                      </div>
+                    </div>
 
                    {/* GLP-1 Status */}
                    <div>
@@ -250,9 +245,9 @@ const handleAddWeight = (newWeight: number) => {
 
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Weight Trends</h2>
-                <div className="h-64 sm:h-80">
-                  <WeightChart data={weights} goalWeight={goalWeight} />
-                </div>
+                  <div className="h-64 sm:h-80">
+                    <WeightChart data={weights} goalWeight={goalWeight} currentWeight={currentWeight} />
+                  </div>
               </div>
             </>
           )}
