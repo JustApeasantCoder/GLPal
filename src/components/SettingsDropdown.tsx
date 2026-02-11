@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { UserProfile } from '../types';
 import TDEECalculator from './TDEECalculator';
+import DosageCalculator from './DosageCalculator';
 
 interface SettingsDropdownProps {
   profile: UserProfile;
@@ -18,6 +19,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTDEESettings, setShowTDEESettings] = useState(false);
+  const [showDosageCalculator, setShowDosageCalculator] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,10 +40,15 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
     setIsOpen(false);
   };
 
+  const handleDosageCalculatorClick = () => {
+    setShowDosageCalculator(true);
+    setIsOpen(false);
+  };
+
   if (showTDEESettings) {
     return ReactDOM.createPortal(
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-        <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto" style={{ maxHeight: '80vh' }}>
+        <div className="bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-[#4ADEA8] [text-shadow:0_0_20px_rgba(74,222,168,0.6)]">TDEE Settings</h2>
@@ -52,11 +59,29 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
                 ×
               </button>
             </div>
-            <TDEECalculator 
-              profile={profile} 
-              onProfileUpdate={onProfileUpdate} 
-              onClose={() => setShowTDEESettings(false)} 
-            />
+            <TDEECalculator profile={profile} onProfileUpdate={onProfileUpdate} onClose={() => setShowTDEESettings(false)} />
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  if (showDosageCalculator) {
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div className="bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto" style={{ maxHeight: '80vh' }}>
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-[#4ADEA8] [text-shadow:0_0_20px_rgba(74,222,168,0.6)]">Dosage Calculator</h2>
+              <button
+                onClick={() => setShowDosageCalculator(false)}
+                className="text-[#9C7BD3] hover:text-[#4ADEA8] text-2xl leading-none p-1 rounded-lg hover:bg-[#4ADEA8]/10 transition-all duration-300 [text-shadow:0_0_10px_rgba(74,222,168,0.5)]"
+              >
+                ×
+              </button>
+            </div>
+            <DosageCalculator onClose={() => setShowDosageCalculator(false)} />
           </div>
         </div>
       </div>,
@@ -93,7 +118,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-black/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_40px_rgba(156,123,211,0.3)] border border-[#9C7BD3]/20 py-2 z-50">
+        <div className="absolute right-0 mt-3 w-56 bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_40px_rgba(156,123,211,0.3)] border border-[#9C7BD3]/20 py-2 z-50">
           <button
             onClick={handleTDEESettingsClick}
             className="w-full text-left px-4 py-3 text-[#4ADEA8]/80 hover:bg-[#4ADEA8]/10 transition-all duration-300 first:rounded-t-2xl hover:text-[#4ADEA8]"
@@ -103,6 +128,18 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               TDEE Settings
+            </div>
+          </button>
+          
+          <button
+            onClick={handleDosageCalculatorClick}
+            className="w-full text-left px-4 py-3 text-[#4ADEA8]/80 hover:bg-[#4ADEA8]/10 transition-all duration-300 hover:text-[#4ADEA8]"
+          >
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-3 text-[#9C7BD3] [text-shadow:0_0_5px_rgba(74,222,168,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M12 14v4m0-4h.01M9 7h6m0-4h.01M12 3v4m0-4h.01" />
+              </svg>
+              Dosage Calculator
             </div>
           </button>
           

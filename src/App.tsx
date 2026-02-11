@@ -136,7 +136,7 @@ const handleAddWeight = (newWeight: number) => {
   ] as const;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#2F2A4A] via-[#5B4B8A] to-[#9C7BD3]">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1625] via-[#2F2A4A] to-[#5B4B8A] animate-gradient-shift">
       {/* Fixed top navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-b border-[#4ADEA8]/20 px-4 py-3 z-50 shadow-[0_4px_20px_rgba(74,222,168,0.15)]">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
