@@ -13,7 +13,26 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const chartData = data.map(entry => ({
+  const processChartData = (data: WeightEntry[]): WeightEntry[] => {
+  if (data.length <= 12) return data;
+  
+  const chunkSize = Math.ceil(data.length / 12);
+  const processedData: WeightEntry[] = [];
+  
+  for (let i = 0; i < data.length; i += chunkSize) {
+    const chunk = data.slice(i, i + chunkSize);
+    const avgWeight = chunk.reduce((sum, entry) => sum + entry.weight, 0) / chunk.length;
+    const middleIndex = Math.floor(chunk.length / 2);
+    processedData.push({
+      date: chunk[middleIndex].date,
+      weight: avgWeight
+    });
+  }
+  
+  return processedData;
+};
+
+const chartData = processChartData(data).map(entry => ({
     ...entry,
     displayDate: formatDate(entry.date),
   }));

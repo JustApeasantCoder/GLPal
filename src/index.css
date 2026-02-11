@@ -50,6 +50,13 @@ code {
   display: none;  /* Safari and Chrome */
 }
 
+/* Hardware-accelerated animations */
+@media (prefers-reduced-motion: no-reduced-motion) {
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+}
+
 /* Tab transition animations */
 @keyframes slideInRight {
   from {
