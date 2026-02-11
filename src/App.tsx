@@ -23,6 +23,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [glp1Entries, setGLP1Entries] = useState<GLP1Entry[]>([]);
+  const [chartPeriod, setChartPeriod] = useState<'week' | 'month' | '90days' | 'all'>('90days');
   const [profile, setProfile] = useState<UserProfile>({
     age: 35,
     gender: 'male',
@@ -86,6 +87,33 @@ const handleAddWeight = (newWeight: number) => {
   const currentWeight = weights[weights.length - 1]?.weight || 0;
   const goalWeight = 80;
   const startWeight = weights[0]?.weight || currentWeight;
+  
+  // Filter weights based on selected period
+  const getFilteredWeights = () => {
+    const now = new Date();
+    const filterDate = new Date();
+    
+    switch (chartPeriod) {
+      case 'week':
+        filterDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        filterDate.setDate(now.getDate() - 30);
+        break;
+      case '90days':
+        filterDate.setDate(now.getDate() - 90);
+        break;
+      case 'all':
+        return weights;
+      default:
+        return weights;
+    }
+    
+    const filterDateStr = filterDate.toISOString().split('T')[0];
+    return weights.filter(entry => entry.date >= filterDateStr);
+  };
+  
+  const filteredWeights = getFilteredWeights();
   
   // Calculate BMI (height in cm, weight in kg)
   const heightInMeters = profile.height / 100;
@@ -202,13 +230,57 @@ const handleAddWeight = (newWeight: number) => {
 
                  {/* Charts Section */}
                  <div className="space-y-6">
-                   {/* Weight Trends */}
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Weight Trends</h3>
-                     <div className="h-48 sm:h-56">
-                       <WeightChart data={weights} goalWeight={goalWeight} />
-                     </div>
-                   </div>
+                    {/* Weight Trends */}
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Weight Trends</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setChartPeriod('week')}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                              chartPeriod === 'week'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            Week
+                          </button>
+                          <button
+                            onClick={() => setChartPeriod('month')}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                              chartPeriod === 'month'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            Month
+                          </button>
+                          <button
+                            onClick={() => setChartPeriod('90days')}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                              chartPeriod === '90days'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            90 days
+                          </button>
+                          <button
+                            onClick={() => setChartPeriod('all')}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                              chartPeriod === 'all'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            All Time
+                          </button>
+                        </div>
+                      </div>
+                      <div className="h-48 sm:h-56">
+                        <WeightChart data={filteredWeights} goalWeight={goalWeight} />
+                      </div>
+                    </div>
 
                    {/* GLP-1 Status */}
                    <div>
@@ -249,9 +321,53 @@ const handleAddWeight = (newWeight: number) => {
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Weight Trends</h2>
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Weight Trends</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setChartPeriod('week')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        chartPeriod === 'week'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      Week
+                    </button>
+                    <button
+                      onClick={() => setChartPeriod('month')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        chartPeriod === 'month'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      Month
+                    </button>
+                    <button
+                      onClick={() => setChartPeriod('90days')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        chartPeriod === '90days'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      90 days
+                    </button>
+                    <button
+                      onClick={() => setChartPeriod('all')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        chartPeriod === 'all'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      All Time
+                    </button>
+                  </div>
+                </div>
                 <div className="h-64 sm:h-80">
-                  <WeightChart data={weights} goalWeight={goalWeight} />
+                  <WeightChart data={filteredWeights} goalWeight={goalWeight} />
                 </div>
               </div>
             </>
