@@ -65,12 +65,12 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
           <Tooltip 
             formatter={(value?: number) => value ? [`${value.toFixed(3)} mg`, 'Concentration'] : ['', '']}
             contentStyle={{ 
-              backgroundColor: 'rgba(47, 42, 74, 0.8)', 
-              border: '1px solid rgba(74, 222, 168, 0.3)',
+              backgroundColor: 'rgba(45, 27, 78, 0.8)', 
+              border: '1px solid rgba(177, 156, 217, 0.3)',
               borderRadius: '8px',
-              boxShadow: '0 0 20px rgba(74, 222, 168, 0.3)'
+              boxShadow: '0 0 20px rgba(177, 156, 217, 0.3)'
             }}
-            labelStyle={{ color: '#4ADEA8' }}
+            labelStyle={{ color: '#B19CD9' }}
             itemStyle={{ color: '#9C7BD3' }}
           />
           <Area 
@@ -83,14 +83,14 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
           />
           <defs>
             <linearGradient id="mintPurpleGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#4ADEA8" />
+              <stop offset="0%" stopColor="#B19CD9" />
               <stop offset="50%" stopColor="#9C7BD3" />
-              <stop offset="100%" stopColor="#5B4B8A" />
+              <stop offset="100%" stopColor="#2D1B4E" />
             </linearGradient>
             <linearGradient id="mintPurpleGradientFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4ADEA8" stopOpacity={0.4} />
+              <stop offset="0%" stopColor="#B19CD9" stopOpacity={0.4} />
               <stop offset="50%" stopColor="#9C7BD3" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#5B4B8A" stopOpacity={0.1} />
+              <stop offset="100%" stopColor="#2D1B4E" stopOpacity={0.1} />
             </linearGradient>
           </defs>
         </AreaChart>

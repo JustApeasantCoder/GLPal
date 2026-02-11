@@ -42,7 +42,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
               max="120"
               value={profile.age}
               onChange={(e) => setProfile(prev => ({ ...prev, age: parseInt(e.target.value) || 0 }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ADEA8] focus:border-[#4ADEA8] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
               required
             />
           </div>
@@ -73,7 +73,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
               max="250"
               value={profile.height}
               onChange={(e) => setProfile(prev => ({ ...prev, height: parseInt(e.target.value) || 0 }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ADEA8] focus:border-[#4ADEA8] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
               required
             />
           </div>
@@ -99,7 +99,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white py-2 px-4 rounded-lg hover:from-[#5B4B8A] hover:to-[#9C7BD3] transition-all duration-300 shadow-[0_0_20px_rgba(74,222,168,0.3)] hover:shadow-[0_0_30px_rgba(156,123,211,0.5)] transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white py-2 px-4 rounded-lg hover:from-[#2D1B4E] hover:to-[#5B4B8A] transition-all duration-300 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:shadow-[0_0_30px_rgba(45,27,78,0.5)] transform hover:scale-[1.02]"
         >
           Save Profile
         </button>

@@ -92,19 +92,19 @@ const chartData = processChartData(data).map(entry => ({
 
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: 'rgba(47, 42, 74, 0.8)', 
-              border: '1px solid rgba(74, 222, 168, 0.3)',
+              backgroundColor: 'rgba(45, 27, 78, 0.8)', 
+              border: '1px solid rgba(177, 156, 217, 0.3)',
               borderRadius: '8px',
-              boxShadow: '0 0 20px rgba(74, 222, 168, 0.3)'
+              boxShadow: '0 0 20px rgba(177, 156, 217, 0.3)'
             }}
-            labelStyle={{ color: '#4ADEA8' }}
+            labelStyle={{ color: '#B19CD9' }}
             itemStyle={{ color: '#9C7BD3' }}
           />
           <ReferenceLine 
             y={goalWeight} 
-            stroke="rgba(74, 222, 168, 0.8)" 
+            stroke="rgba(177, 156, 217, 0.8)" 
             strokeDasharray="5 5" 
-            label={{ value: "Goal", fill: '#4ADEA8', fontSize: 12 }}
+            label={{ value: "Goal", fill: '#B19CD9', fontSize: 12 }}
           />
           <Line 
             type="monotone" 
@@ -114,7 +114,7 @@ const chartData = processChartData(data).map(entry => ({
             dot={{ 
               fill: '#9C7BD3', 
               r: 5,
-              stroke: '#5B4B8A',
+              stroke: '#2D1B4E',
               strokeWidth: 2,
               filter: 'drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))'
             }}
@@ -125,9 +125,9 @@ const chartData = processChartData(data).map(entry => ({
           />
           <defs>
             <linearGradient id="purpleGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#5B4B8A" />
+              <stop offset="0%" stopColor="#2D1B4E" />
               <stop offset="50%" stopColor="#9C7BD3" />
-              <stop offset="100%" stopColor="#4ADEA8" />
+              <stop offset="100%" stopColor="#B19CD9" />
             </linearGradient>
           </defs>
         </LineChart>

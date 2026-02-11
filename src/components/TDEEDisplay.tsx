@@ -20,46 +20,46 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   return (
     <div className="space-y-4">
       <div className="border-t border-[#9C7BD3]/20 pt-4">
-        <h4 className="font-medium text-[#4ADEA8] mb-3 [text-shadow:0_0_10px_rgba(74,222,168,0.4)]">Weight Loss Calorie Targets</h4>
+        <h4 className="font-medium text-[#B19CD9] mb-3 [text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Weight Loss Calorie Targets</h4>
         <div className="space-y-2">
-          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm rounded-xl border border-[#4ADEA8]/30 hover:border-[#4ADEA8]/50 transition-all duration-300">
+          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm rounded-xl border border-[#B19CD9]/30 hover:border-[#B19CD9]/50 transition-all duration-300">
             <div>
-              <p className="font-medium text-[#4ADEA8]">Maintain weight</p>
-              <p className="text-sm text-[#4ADEA8]/80">Current maintenance</p>
+              <p className="font-medium text-[#B19CD9]">Maintain weight</p>
+              <p className="text-sm text-[#B19CD9]/80">Current maintenance</p>
             </div>
             <div className="text-right">
-              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(74,222,168,0.5)]">{tdee.toLocaleString()} cal/day</p>
-              <p className="text-sm text-[#4ADEA8]/80">No deficit</p>
+              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">{tdee.toLocaleString()} cal/day</p>
+              <p className="text-sm text-[#B19CD9]/80">No deficit</p>
             </div>
           </div>
 
-          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] hover:border-[#4ADEA8]/50 transition-all duration-300">
+          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:border-[#B19CD9]/50 transition-all duration-300">
             <div>
-              <p className="font-medium text-[#4ADEA8]">Loss 0.5 kg/week</p>
-              <p className="text-sm text-[#4ADEA8]/80">Slow and sustainable</p>
+              <p className="font-medium text-[#B19CD9]">Loss 0.5 kg/week</p>
+              <p className="text-sm text-[#B19CD9]/80">Slow and sustainable</p>
             </div>
             <div className="text-right">
-              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(74,222,168,0.5)]">{loss05KgPerWeek.toLocaleString()} cal/day</p>
-              <p className="text-sm text-[#4ADEA8]/80">{deficit05Kg.toLocaleString()} cal deficit</p>
+              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">{loss05KgPerWeek.toLocaleString()} cal/day</p>
+              <p className="text-sm text-[#B19CD9]/80">{deficit05Kg.toLocaleString()} cal deficit</p>
             </div>
           </div>
 
-          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#4ADEA8]/20 to-[#4FD99C]/20 backdrop-blur-sm rounded-xl border border-[#4ADEA8]/30 shadow-[0_0_20px_rgba(74,222,168,0.3)] hover:border-[#4ADEA8]/50 transition-all duration-300">
+          <div className="flex justify-between items-center p-3 bg-gradient-to-r from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:border-[#B19CD9]/50 transition-all duration-300">
             <div>
-              <p className="font-medium text-[#4ADEA8]">Loss 1 kg/week</p>
-              <p className="text-sm text-[#4ADEA8]/80">Moderate pace</p>
+              <p className="font-medium text-[#B19CD9]">Loss 1 kg/week</p>
+              <p className="text-sm text-[#B19CD9]/80">Moderate pace</p>
             </div>
             <div className="text-right">
-              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(74,222,168,0.5)]">{loss1KgPerWeek.toLocaleString()} cal/day</p>
-              <p className="text-sm text-[#4ADEA8]/80">{deficit1Kg.toLocaleString()} cal deficit</p>
+              <p className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">{loss1KgPerWeek.toLocaleString()} cal/day</p>
+              <p className="text-sm text-[#B19CD9]/80">{deficit1Kg.toLocaleString()} cal deficit</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="border-t border-[#9C7BD3]/20 pt-4">
-        <h4 className="font-medium text-[#4ADEA8] mb-2 [text-shadow:0_0_10px_rgba(74,222,168,0.4)]">Based on Current Weight: {currentWeight} kg</h4>
-        <p className="text-xs text-[#4ADEA8]/80">
+        <h4 className="font-medium text-[#B19CD9] mb-2 [text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Based on Current Weight: {currentWeight} kg</h4>
+        <p className="text-xs text-[#B19CD9]/80">
           These calculations use the Mifflin-St Jeor equation, considered the most accurate BMR formula.
           Individual results may vary based on body composition and genetics.
         </p>
