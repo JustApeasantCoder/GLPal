@@ -48,13 +48,14 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
   if (showTDEESettings) {
     return ReactDOM.createPortal(
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-        <div className="bg-black/50 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
+        <div className="bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg max-w-md w-full mx-auto border border-card-border overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-[#B19CD9] [text-shadow:0_0_20px_rgba(177,156,217,0.6)]">TDEE Settings</h2>
+              <h2 className="text-xl font-semibold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.6)' : '0 0 20px rgba(45,27,78,0.3)' }}>TDEE Settings</h2>
               <button
                 onClick={() => setShowTDEESettings(false)}
-                className="text-[#9C7BD3] hover:text-[#B19CD9] text-2xl leading-none p-1 rounded-lg hover:bg-[#B19CD9]/10 transition-all duration-300 [text-shadow:0_0_10px_rgba(177,156,217,0.5)]"
+                className="text-accent-purple-medium hover:text-accent-purple-light text-2xl leading-none p-1 rounded-lg hover:bg-accent-purple-light/10 transition-all duration-300"
+                style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}
               >
                 ×
               </button>
@@ -70,13 +71,14 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
   if (showDosageCalculator) {
     return ReactDOM.createPortal(
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-        <div className="bg-black/70 backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_rgba(156,123,211,0.3)] max-w-md w-full mx-auto border border-[#9C7BD3]/20 overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
+        <div className="bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg max-w-md w-full mx-auto border border-card-border overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-[#B19CD9] [text-shadow:0_0_20px_rgba(177,156,217,0.6)]">Dosage Calculator</h2>
+              <h2 className="text-xl font-semibold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.6)' : '0 0 20px rgba(45,27,78,0.3)' }}>Dosage Calculator</h2>
               <button
                 onClick={() => setShowDosageCalculator(false)}
-                className="text-[#9C7BD3] hover:text-[#B19CD9] text-2xl leading-none p-1 rounded-lg hover:bg-[#B19CD9]/10 transition-all duration-300 [text-shadow:0_0_10px_rgba(177,156,217,0.5)]"
+                className="text-accent-purple-medium hover:text-accent-purple-light text-2xl leading-none p-1 rounded-lg hover:bg-accent-purple-light/10 transition-all duration-300"
+                style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}
               >
                 ×
               </button>
@@ -93,14 +95,15 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
     <div className="relative" ref={dropdownRef}>
 <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-xl hover:bg-[#B19CD9]/10 transition-all duration-300 hover:shadow-[0_0_15px_rgba(177,156,217,0.3)]"
+        className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300 hover:shadow-theme"
         aria-label="Settings"
       >
         <svg
-          className="w-6 h-6 text-[#B19CD9] [text-shadow:0_0_10px_rgba(177,156,217,0.5)]"
+          className="w-6 h-6 text-text-primary"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.3)' }}
         >
           <path
             strokeLinecap="round"
@@ -118,13 +121,13 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-black/100 backdrop-blur-3xl rounded-2xl shadow-[0_20px_40px_rgba(156,123,211,0.3)] border border-[#9C7BD3]/20 py-2 z-50">
+        <div className="absolute right-0 mt-3 w-56 bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg border border-card-border py-2 z-50">
           <button
             onClick={handleTDEESettingsClick}
-            className="w-full text-left px-4 py-3 text-[#B19CD9]/80 hover:bg-[#B19CD9]/10 transition-all duration-300 first:rounded-t-2xl hover:text-[#B19CD9]"
+            className="w-full text-left px-4 py-3 text-text-muted hover:bg-accent-purple-light/10 transition-all duration-300 first:rounded-t-2xl hover:text-text-primary"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-3 text-[#9C7BD3] [text-shadow:0_0_5px_rgba(177,156,217,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               TDEE Settings
@@ -133,28 +136,28 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
           
           <button
             onClick={handleDosageCalculatorClick}
-            className="w-full text-left px-4 py-3 text-[#B19CD9]/80 hover:bg-[#B19CD9]/10 transition-all duration-300 hover:text-[#B19CD9]"
+            className="w-full text-left px-4 py-3 text-text-muted hover:bg-accent-purple-light/10 transition-all duration-300 hover:text-text-primary"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-3 text-[#9C7BD3] [text-shadow:0_0_5px_rgba(177,156,217,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M12 14v4m0-4h.01M9 7h6m0-4h.01M12 3v4m0-4h.01" />
               </svg>
               Dosage Calculator
             </div>
           </button>
           
-          <div className="border-t border-[#9C7BD3]/20 mt-2 pt-2">
+          <div className="border-t border-card-border mt-2 pt-2">
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center">
-<svg className="w-5 h-5 mr-3 text-[#9C7BD3] [text-shadow:0_0_5px_rgba(177,156,217,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
-                <span className="text-[#B19CD9]/80">Dark Mode</span>
+                <span className="text-text-muted">Dark Mode</span>
               </div>
               <button
                 onClick={onThemeToggle}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
-                  isDarkMode ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] shadow-[0_0_15px_rgba(177,156,217,0.4)]' : 'bg-gray-600/50'
+                  isDarkMode ? 'bg-gradient-to-r from-accent-purple-light to-accent-purple-medium shadow-theme' : 'bg-gray-400/50'
                 }`}
               >
                 <span

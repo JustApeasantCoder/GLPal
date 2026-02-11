@@ -39,7 +39,7 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 };
 
 function App() {
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [glp1Entries, setGLP1Entries] = useState<GLP1Entry[]>([]);
@@ -111,11 +111,11 @@ const handleAddWeight = (newWeight: number) => {
 
 
 return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#0d0a15] via-[#161220] to-[#2D1B4E] animate-gradient-shift hide-scrollbar">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end animate-gradient-shift hide-scrollbar">
       {/* Fixed top navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-b border-[#B19CD9]/20 px-4 py-3 z-50 shadow-[0_4px_20px_rgba(177,156,217,0.15)]">
+      <nav className="fixed top-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-b border-card-border px-4 py-3 z-50 shadow-theme">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold text-[#B19CD9] [text-shadow:0_0_20px_rgba(177,156,217,0.5)]">GLPal</h1>
+          <h1 className="text-xl font-bold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>GLPal</h1>
           <SettingsDropdown 
             profile={profile} 
             onProfileUpdate={useCallback((newProfile: UserProfile) => {
@@ -123,7 +123,7 @@ return (
               saveUserProfile(newProfile);
             }, [])}
             isDarkMode={isDarkMode}
-            onThemeToggle={toggleDarkMode}
+            onThemeToggle={toggleTheme}
           />
         </div>
       </nav>

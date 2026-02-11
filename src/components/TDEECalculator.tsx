@@ -32,7 +32,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="age" className="block text-sm font-medium text-[#9C7BD3] mb-1">
+            <label htmlFor="age" className="block text-sm font-medium text-accent-purple-light mb-1">
               Age
             </label>
             <input
@@ -42,20 +42,20 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
               max="120"
               value={profile.age}
               onChange={(e) => setProfile(prev => ({ ...prev, age: parseInt(e.target.value) || 0 }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="gender" className="block text-sm font-medium text-[#9C7BD3] mb-1">
+            <label htmlFor="gender" className="block text-sm font-medium text-accent-purple-light mb-1">
               Gender
             </label>
             <select
               id="gender"
               value={profile.gender}
               onChange={(e) => setProfile(prev => ({ ...prev, gender: e.target.value as 'male' | 'female' }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ADEA8] focus:border-[#4ADEA8] transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-mint focus:border-accent-mint transition-all duration-300"
             >
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -63,7 +63,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
           </div>
 
           <div>
-            <label htmlFor="height" className="block text-sm font-medium text-[#9C7BD3] mb-1">
+            <label htmlFor="height" className="block text-sm font-medium text-accent-purple-light mb-1">
               Height (cm)
             </label>
             <input
@@ -73,20 +73,20 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
               max="250"
               value={profile.height}
               onChange={(e) => setProfile(prev => ({ ...prev, height: parseInt(e.target.value) || 0 }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="activity" className="block text-sm font-medium text-[#9C7BD3] mb-1">
+            <label htmlFor="activity" className="block text-sm font-medium text-accent-purple-light mb-1">
               Activity Level
             </label>
             <select
               id="activity"
               value={profile.activityLevel}
               onChange={(e) => setProfile(prev => ({ ...prev, activityLevel: parseFloat(e.target.value) }))}
-              className="w-full px-3 py-2 border border-[#9C7BD3]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ADEA8] focus:border-[#4ADEA8] transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-mint focus:border-accent-mint transition-all duration-300"
             >
               {activityLevels.map(level => (
                 <option key={level.value} value={level.value}>
@@ -99,7 +99,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white py-2 px-4 rounded-lg hover:from-[#2D1B4E] hover:to-[#5B4B8A] transition-all duration-300 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:shadow-[0_0_30px_rgba(45,27,78,0.5)] transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
         >
           Save Profile
         </button>

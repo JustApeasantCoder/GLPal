@@ -53,7 +53,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="vial-capacity" className="block text-sm font-medium text-[#B19CD9] mb-1">
+            <label htmlFor="vial-capacity" className="block text-sm font-medium text-accent-purple-light mb-1">
               Vial Capacity (mg)
             </label>
             <input
@@ -63,14 +63,14 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               step="0.1"
               value={vialCapacity}
               onChange={(e) => setVialCapacity(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               placeholder="e.g., 10"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="bacteriostatic-water" className="block text-sm font-medium text-[#B19CD9] mb-1">
+            <label htmlFor="bacteriostatic-water" className="block text-sm font-medium text-accent-purple-light mb-1">
               Bacteriostatic Water (ml)
             </label>
             <input
@@ -81,14 +81,14 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               step="0.1"
               value={bacteriostaticWater}
               onChange={(e) => setBacteriostaticWater(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               placeholder="e.g., 2"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="desired-dose" className="block text-sm font-medium text-[#B19CD9] mb-1">
+            <label htmlFor="desired-dose" className="block text-sm font-medium text-accent-purple-light mb-1">
               Desired Dose (mg)
             </label>
             <input
@@ -99,7 +99,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               step="0.1"
               value={desiredDose}
               onChange={(e) => setDesiredDose(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-[#B19CD9] placeholder-gray-400 transition-all duration-300"
+              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               placeholder="e.g., 2.5"
               required
             />
@@ -110,31 +110,31 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white py-2 px-4 rounded-lg hover:from-[#2D1B4E] hover:to-[#5B4B8A] transition-all duration-300 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:shadow-[0_0_30px_rgba(45,27,78,0.5)] transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
         >
           Calculate Dosage
         </button>
       </form>
 
       {result && (
-        <div className="bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-4 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_20px_rgba(177,156,217,0.3)]">
-          <h4 className="font-medium text-[#B19CD9] mb-3 [text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Calculation Results</h4>
+        <div className="bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-4 rounded-xl border border-accent-purple-light/30 shadow-theme">
+          <h4 className="font-medium text-accent-purple-light mb-3" style={{ textShadow: '0 0 10px var(--accent-purple-light)' }}>Calculation Results</h4>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-[#B19CD9]/80">Draw solution:</span>
-              <span className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">
+              <span className="text-sm text-text-muted">Draw solution:</span>
+              <span className="font-bold text-text-secondary" style={{ textShadow: '0 0 5px var(--accent-purple-light)' }}>
                 {result.doseAmount.toFixed(2)} ml
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-[#B19CD9]/80">Concentration:</span>
-              <span className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">
+              <span className="font-bold text-text-secondary" style={{ textShadow: '0 0 5px var(--accent-purple-light)' }}>
                 {result.waterAmount.toFixed(1)} mg/ml
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-[#B19CD9]/80">Fill syringe to:</span>
-              <span className="font-bold text-white [text-shadow:0_0_5px_rgba(177,156,217,0.5)]">
+              <span className="text-sm text-text-muted">Fill syringe to:</span>
+              <span className="font-bold text-text-secondary" style={{ textShadow: '0 0 5px var(--accent-purple-light)' }}>
                 {result.syringeAmount.toFixed(0)} IU
               </span>
             </div>

@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 interface ThemeContextType {
   isDarkMode: boolean;
-  toggleDarkMode: () => void;
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -31,6 +32,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return false;
   });
 
+  const theme = isDarkMode ? 'dark' : 'light';
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -41,13 +44,58 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   }, [isDarkMode]);
 
-  const toggleDarkMode = () => {
+  const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+    <ThemeContext.Provider value={{ isDarkMode, theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
+};
+
+// Theme Style Constants
+export const useThemeStyles = () => {
+  const { isDarkMode } = useTheme();
+  
+  return {
+    // Small Card (Light & Dark Mode)
+    smallCard: isDarkMode 
+      ? "h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between"
+      : "h-16 sm:h-18 bg-white/80 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-3 rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between",
+    
+    // Text styles for small cards
+    text: {
+      label: isDarkMode 
+        ? "text-xs text-[#B19CD9] font-medium"
+        : "text-xs text-gray-600 dark:text-[#B19CD9] font-medium",
+      value: isDarkMode
+        ? "text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
+        : "text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
+      // Special styling for Total Loss card (uses text-base and has nested span)
+      totalLossValue: isDarkMode
+        ? "text-base font-bold text-white leading-tight [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
+        : "text-base font-bold text-gray-900 leading-tight dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
+      percentage: isDarkMode
+        ? "text-xs text-[#B19CD9]/80 -mt-1 inline-block"
+        : "text-xs text-gray-500 dark:text-[#B19CD9]/80 -mt-1 inline-block"
+    },
+    
+    // Button styles with active state
+    button: (isActive: boolean = false) => {
+      if (isActive) {
+        // Active button style (same for both themes as per your preference)
+        return "w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]";
+      }
+      
+      // Normal button style - differs by theme
+      return isDarkMode
+        ? "w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]"
+        : "w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 bg-white/80 dark:bg-accent-purple-light/10 text-gray-700 dark:text-accent-purple-light border border-gray-200 dark:border-accent-purple-light/30 hover:bg-gray-100 dark:hover:bg-accent-purple-light/20 hover:shadow-card-md";
+    },
+    
+    // Include isDarkMode for future use
+    isDarkMode
+  };
 };

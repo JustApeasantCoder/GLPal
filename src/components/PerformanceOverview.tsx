@@ -16,32 +16,32 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
   goalWeight,
 }) => {
   return (
-    <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-[#9C7BD3]/20">
-      <h4 className="font-medium text-[#B19CD9] mb-3 [text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Performance Overview</h4>
+    <div className="bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border">
+      <h4 className="font-medium text-text-primary mb-3" style={{ textShadow: '0 0 10px var(--accent-purple-light)' }}>Performance Overview</h4>
       
       {/* Performance Overview Row */}
       <div className="space-y-3 mb-3">
         <div className="grid grid-cols-3 gap-3">
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Progress Rate</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Progress Rate</p>
             <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+              <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>
                 {((totalLoss / (startWeight - goalWeight)) * 100).toFixed(1)}%
               </p>
             </div>
           </div>
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Best Week</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Best Week</p>
 <div className="text-left">
-            <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+            <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>
               -{WeightAnalytics.calculateBestWeek(weights).toFixed(1)} kg
             </p>
           </div>
           </div>
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Time Active</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Time Active</p>
             <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+              <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>
                 {weights.length} Days
               </p>
             </div>
@@ -50,24 +50,24 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
 
         {/* Additional Metrics */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Start Weight</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Start Weight</p>
             <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">{startWeight.toFixed(1)} kg</p>
+              <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>{startWeight.toFixed(1)} kg</p>
             </div>
           </div>
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Best Month</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Best Month</p>
             <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
+              <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>
                 -{WeightAnalytics.calculateBestMonth(weights).toFixed(1)} kg
               </p>
             </div>
           </div>
-          <div className="h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between">
-            <p className="text-xs text-[#B19CD9] font-medium">Total Loss</p>
+          <div className="h-16 sm:h-18 bg-gradient-to-br from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm p-3 rounded-xl border border-accent-purple-light/30 shadow-theme flex flex-col justify-between">
+            <p className="text-xs text-accent-purple-light font-medium">Total Loss</p>
             <div className="text-left">
-              <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">{totalLoss.toFixed(1)} kg</p>
+              <p className="text-lg font-bold text-text-secondary" style={{ textShadow: '0 0 3px var(--accent-purple-light)' }}>{totalLoss.toFixed(1)} kg</p>
             </div>
           </div>
         </div>

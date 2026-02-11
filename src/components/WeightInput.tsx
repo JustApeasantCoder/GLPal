@@ -20,7 +20,7 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight }) => {
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-[#B19CD9] mb-1 [text-shadow:0_0_5px_rgba(177,156,217,0.3)]">
+          <label htmlFor="weight" className="block text-sm font-medium text-accent-purple-light mb-1" style={{ textShadow: '0 0 5px var(--accent-purple-light)' }}>
             Weight (kg)
           </label>
           <input
@@ -31,14 +31,14 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight }) => {
             max="500"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/30 backdrop-blur-sm text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9C7BD3] focus:border-[#9C7BD3] placeholder-gray-400 transition-all duration-300"
+            className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
             placeholder="Enter your weight"
             required
           />
         </div>
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white py-2 px-4 rounded-lg hover:from-[#2D1B4E] hover:to-[#5B4B8A] transition-all duration-300 shadow-[0_0_20px_rgba(177,156,217,0.3)] hover:shadow-[0_0_30px_rgba(45,27,78,0.5)] transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
         >
           Add Weight
         </button>
