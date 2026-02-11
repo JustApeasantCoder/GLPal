@@ -3,6 +3,7 @@ import WeightChart from './WeightChart';
 import WeightInput from './WeightInput';
 import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
 import { WeightEntry, UserProfile } from '../types';
+import { useThemeStyles } from '../contexts/ThemeContext';
 
 interface WeightTabProps {
   weights: WeightEntry[];
@@ -22,20 +23,21 @@ const WeightTab: React.FC<WeightTabProps> = ({
   // Use custom hooks for data processing
   const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
+  const { smallCard, text } = useThemeStyles();
 
   return (
     <>
       <header className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-[#B19CD9] mb-3 dark:[text-shadow:0_0_20px_rgba(177,156,217,0.6)]">Weight Tracking</h1>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/70 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-3 rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_20px_rgba(177,156,217,0.3)]">
-            <p className="text-xs text-gray-600 dark:text-[#B19CD9] font-medium">Current</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_10px_rgba(177,156,217,0.5)]">{weightMetrics.currentWeight.toFixed(1)} kg</p>
-          </div>
-          <div className="bg-white/70 dark:from-[#5B4B8A]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-3 rounded-xl border border-gray-200 dark:border-[#5B4B8A]/30 shadow-sm dark:shadow-[0_0_20px_rgba(91,75,138,0.3)]">
-            <p className="text-xs text-gray-600 dark:text-[#9C7BD3] font-medium">Goal</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_10px_rgba(156,123,211,0.5)]">{goalWeight} kg</p>
-          </div>
+<div className={smallCard}>
+              <p className={text.label}>Current</p>
+              <p className={text.value}>{weightMetrics.currentWeight.toFixed(1)} kg</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Goal</p>
+              <p className={text.value}>{goalWeight} kg</p>
+            </div>
         </div>
       </header>
 
