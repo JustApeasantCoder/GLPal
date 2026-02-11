@@ -331,9 +331,27 @@ const handleAddWeight = (newWeight: number) => {
                           <p className="text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]">
                             -{Math.max(...weights.map((entry, i) => {
                               if (i === 0) return 0;
-                              const currentWeight = entry.weight;
-                              const prevWeight = i > 0 ? weights[i - 1].weight : entry.weight;
-                              return prevWeight - currentWeight;
+                              const weekStart = Math.floor(i / 7);
+                              
+                              // Find the start of this week
+                              let weekStartIndex = 0;
+                              for (let j = 0; j < i; j++) {
+                                if (Math.floor(j / 7) === weekStart) {
+                                  weekStartIndex = j;
+                                  break;
+                                }
+                              }
+                              
+                              if (weekStartIndex === 0) return 0;
+                              
+                              const weekEndIndex = Math.min(weekStartIndex + 6, weights.length - 1);
+                              const weekWeights = weights.slice(weekStartIndex, weekEndIndex + 1);
+                              
+                              if (weekWeights.length < 2) return 0;
+                              
+                              const weekStartWeight = weekWeights[0].weight;
+                              const weekEndWeight = weekWeights[weekWeights.length - 1].weight;
+                              return weekStartWeight - weekEndWeight;
                             })).toFixed(1)} kg
                           </p>
                         </div>
