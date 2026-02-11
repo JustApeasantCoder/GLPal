@@ -232,8 +232,8 @@ const handleAddWeight = (newWeight: number) => {
                  <div className="space-y-6">
                     {/* Weight Trends */}
                     <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex gap-2 items-center">
+                      <div className="flex justify-center mb-3">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => setChartPeriod('week')}
                             className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
@@ -320,8 +320,8 @@ const handleAddWeight = (newWeight: number) => {
               </div>
 
               <div className="bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(0,255,255,0.2)] p-4 border border-cyan-500/20">
-                  <div className="flex justify-between items-center mb-3">
-                  <div className="flex gap-2 items-center">
+                  <div className="flex justify-center mb-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setChartPeriod('week')}
                       className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
