@@ -24,21 +24,20 @@ function createWindow() {
       : `file://${path.join(__dirname, '../build/index.html')}`
   );
 
-  // Hide scrollbars completely when window is ready
+  // Hide scrollbars completely
+  mainWindow.webContents.insertCSS(`
+    html, body, * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  `);
+
   mainWindow.webContents.once('did-finish-load', () => {
-    mainWindow.webContents.insertCSS(`
-      *::-webkit-scrollbar {
-        display: none !important;
-      }
-      * {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-      html, body {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-    `);
     mainWindow.show();
   });
 
