@@ -45,7 +45,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div className={smallCard}>
               <p className={text.label}>BMI</p>
-              <p className={text.value}>{weightMetrics.bmi.toFixed(1)}</p>
+              <p className={text.totalLossValue}>
+                {weightMetrics.bmi.toFixed(1)} <span className={`${text.bmiCategory} ${weightMetrics.bmiCategory.color}`}>({weightMetrics.bmiCategory.category})</span>
+              </p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Total Loss</p>

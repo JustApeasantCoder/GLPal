@@ -8,6 +8,7 @@ export interface WeightMetrics {
   weeklyAverageLoss: number;
   monthlyAverageLoss: number;
   bmi: number;
+  bmiCategory: { category: string; color: string };
   goalWeight: number;
 }
 
@@ -15,6 +16,22 @@ export class WeightAnalytics {
   static calculateBMI(currentWeight: number, heightCm: number): number {
     const heightInMeters = heightCm / 100;
     return currentWeight / (heightInMeters * heightInMeters);
+  }
+
+  static getBMICategory(bmi: number): { category: string; color: string } {
+    if (bmi < 18.5) {
+      return { category: 'UW', color: 'text-blue-400' };
+    } else if (bmi < 25) {
+      return { category: 'NW', color: 'text-green-400' };
+    } else if (bmi < 30) {
+      return { category: 'OW', color: 'text-yellow-400' };
+    } else if (bmi < 35) {
+      return { category: 'OB I', color: 'text-red-400' };
+    } else if (bmi < 40) {
+      return { category: 'OB II', color: 'text-red-500' };
+    } else {
+      return { category: 'OB III', color: 'text-red-600' };
+    }
   }
 
   static calculateAverages(weights: WeightEntry[]) {
@@ -42,8 +59,9 @@ export class WeightAnalytics {
     // Calculate averages
     const { weeklyAverageLoss, monthlyAverageLoss } = this.calculateAverages(weights);
     
-    // Calculate BMI
+    // Calculate BMI and category
     const bmi = this.calculateBMI(currentWeight, profile.height);
+    const bmiCategory = this.getBMICategory(bmi);
 
     return {
       currentWeight,
@@ -53,6 +71,7 @@ export class WeightAnalytics {
       weeklyAverageLoss,
       monthlyAverageLoss,
       bmi,
+      bmiCategory,
       goalWeight
     };
   }

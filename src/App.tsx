@@ -151,7 +151,6 @@ return (
             <WeightTab
               weights={weights}
               profile={profile}
-              goalWeight={goalWeight}
               onAddWeight={handleAddWeight}
             />
           </TabContent>

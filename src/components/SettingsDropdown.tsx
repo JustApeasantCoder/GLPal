@@ -9,6 +9,7 @@ interface SettingsDropdownProps {
   onProfileUpdate: (profile: UserProfile) => void;
   isDarkMode: boolean;
   onThemeToggle: () => void;
+  onGoalUpdate?: (goalWeight: number) => void;
 }
 
 const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
@@ -16,6 +17,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
   onProfileUpdate,
   isDarkMode,
   onThemeToggle,
+  onGoalUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTDEESettings, setShowTDEESettings] = useState(false);
@@ -51,7 +53,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
         <div className="bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg max-w-md w-full mx-auto border border-card-border overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.6)' : '0 0 20px rgba(45,27,78,0.3)' }}>TDEE Settings</h2>
+              <h2 className="text-xl font-semibold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.6)' : '0 0 20px rgba(45,27,78,0.3)' }}>User Settings</h2>
               <button
                 onClick={() => setShowTDEESettings(false)}
                 className="text-accent-purple-medium hover:text-accent-purple-light text-2xl leading-none p-1 rounded-lg hover:bg-accent-purple-light/10 transition-all duration-300"
@@ -61,6 +63,70 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
               </button>
             </div>
             <TDEECalculator profile={profile} onProfileUpdate={onProfileUpdate} onClose={() => setShowTDEESettings(false)} />
+            
+            {/* Goal Weight Setting */}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="goalWeight" className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
+                  Goal Weight (kg)
+                </label>
+                <input
+                  type="number"
+                  id="goalWeight"
+                  step="0.1"
+                  min="30"
+                  max="300"
+                  defaultValue={profile.goalWeight || 80}
+                  className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+                  placeholder="Enter your goal weight"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    const input = document.getElementById('goalWeight') as HTMLInputElement;
+                    const newGoalWeight = parseFloat(input?.value || '80');
+                    if (newGoalWeight && newGoalWeight > 0 && newGoalWeight < 500) {
+                      // Update profile with new goal weight
+                      const updatedProfile = { ...profile, goalWeight: newGoalWeight };
+                      onProfileUpdate(updatedProfile);
+                    }
+                    setShowTDEESettings(false);
+                  }}
+                  className="bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white px-4 py-2 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
+                >
+                  Save Goal
+                </button>
+              </div>
+            </div>
+
+            {/* Save Profile Button */}
+            {/* <button
+                onClick={() => {
+                  const input = document.getElementById('goalWeight') as HTMLInputElement;
+                  const newGoalWeight = parseFloat(input?.value || profile.goalWeight?.toString() || '80');
+                  if (newGoalWeight && newGoalWeight > 0 && newGoalWeight < 500) {
+                    const updatedProfile = { ...profile, goalWeight: newGoalWeight };
+                    onProfileUpdate(updatedProfile);
+                  }
+                  setShowTDEESettings(false);
+                }}
+                className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
+              >
+                Save Profile
+              </button> */}
+            </div>
+              
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => setShowTDEESettings(false)}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>,
@@ -121,7 +187,14 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-card-bg rounded-2xl shadow-theme-lg border border-card-border py-2 z-50">
+          <div 
+            className="absolute right-0 mt-3 w-56 rounded-2xl shadow-theme-lg border border-card-border py-2 z-40"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)'
+            } as React.CSSProperties}
+          >
           <button
             onClick={handleTDEESettingsClick}
             className="w-full text-left px-4 py-3 text-text-muted hover:bg-accent-purple-light/10 transition-all duration-300 first:rounded-t-2xl hover:text-text-primary"
@@ -130,7 +203,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
               <svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              TDEE Settings
+              User Settings
             </div>
           </button>
           
@@ -145,6 +218,8 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
               Dosage Calculator
             </div>
           </button>
+          
+          
           
           <div className="border-t border-card-border mt-2 pt-2">
             <div className="px-4 py-3 flex items-center justify-between">
@@ -167,9 +242,11 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
                 />
               </button>
             </div>
+            </div>
           </div>
-        </div>
       )}
+      
+
     </div>
   );
 };

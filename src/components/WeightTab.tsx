@@ -8,45 +8,47 @@ import { useThemeStyles } from '../contexts/ThemeContext';
 interface WeightTabProps {
   weights: WeightEntry[];
   profile: UserProfile;
-  goalWeight?: number;
   onAddWeight: (weight: number) => void;
+  onGoalUpdate?: (goalWeight: number) => void;
 }
 
 const WeightTab: React.FC<WeightTabProps> = ({
   weights,
   profile,
-  goalWeight = 80,
   onAddWeight,
+  onGoalUpdate,
 }) => {
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
 
   // Use custom hooks for data processing
-  const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
+  const weightMetrics = useWeightMetrics(weights, profile, profile.goalWeight || 80);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   return (
-    <>
-      <header className={bigCard}>
-        <h1 className={bigCardText.h1}>Weight Tracking</h1>
-        <div className="grid grid-cols-2 gap-3">
-<div className={smallCard}>
-              <p className={text.label}>Current</p>
-              <p className={text.value}>{weightMetrics.currentWeight.toFixed(1)} kg</p>
-            </div>
+    <div className={bigCard}>
+      <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Weight Tracking</h1>
+      
+      {/* Stats Row - Current & Goal */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className={smallCard}>
+          <p className={text.label}>Current</p>
+          <p className={text.value}>{weightMetrics.currentWeight.toFixed(1)}</p>
+        </div>
             <div className={smallCard}>
               <p className={text.label}>Goal</p>
-              <p className={text.value}>{goalWeight} kg</p>
+              <p className={text.value}>{profile.goalWeight?.toFixed(1) || '80'}</p>
             </div>
-        </div>
-      </header>
+      </div>
 
-      <div className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-[#B19CD9] mb-3 dark:[text-shadow:0_0_10px_rgba(177,156,217,0.4)]">Add Today's Weight</h3>
+      {/* Weight Input Section */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-text-primary mb-3" style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Log Weight</h3>
         <WeightInput onAddWeight={onAddWeight} />
       </div>
 
-      <div className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
+      {/* Chart Section */}
+      <div>
         <div className="flex justify-center mb-3">
           <div className="flex gap-2">
             <button
@@ -92,10 +94,10 @@ const WeightTab: React.FC<WeightTabProps> = ({
           </div>
         </div>
         <div className="h-64 sm:h-80">
-          <WeightChart data={filteredWeights} goalWeight={goalWeight} />
+          <WeightChart data={filteredWeights} goalWeight={profile.goalWeight || 80} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

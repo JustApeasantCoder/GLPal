@@ -17,4 +17,5 @@ export interface UserProfile {
   gender: 'male' | 'female';
   height: number; // cm
   activityLevel: number; // multiplier
+  goalWeight?: number;
 }

@@ -20,9 +20,6 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight }) => {
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-accent-purple-light mb-1" style={{ textShadow: '0 0 5px var(--accent-purple-light)' }}>
-            Weight (kg)
-          </label>
           <input
             type="number"
             id="weight"
@@ -40,7 +37,7 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight }) => {
           type="submit"
           className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
         >
-          Add Weight
+          Log Weight
         </button>
       </form>
     </div>
