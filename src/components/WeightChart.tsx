@@ -1,7 +1,7 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeightEntry, UnitSystem } from '../types';
-import { formatWeight, convertWeightFromKg } from '../utils/unitConversion';
+import { formatWeight } from '../utils/unitConversion';
 
 interface WeightChartProps {
   data: WeightEntry[];
@@ -49,10 +49,15 @@ const getDotIndices = (dataLength: number): number[] => {
   return Array.from(indices).sort((a, b) => a - b);
 };
 
-const chartData = data.map(entry => ({
+// Remove duplicates while preserving order (keep first occurrence)
+  const dedupedData = data.filter((entry, index, self) => 
+    data.findIndex(e => e.weight === entry.weight) === index
+  );
+  
+  const chartData = dedupedData.map(entry => ({
     ...entry,
     displayDate: formatDate(entry.date),
-    displayWeight: convertWeightFromKg(entry.weight, unitSystem),
+    weight: entry.weight, // Keep raw kg data for chart
   }));
 
 const dotIndices = new Set(getDotIndices(data.length));
@@ -79,11 +84,11 @@ const dotIndices = new Set(getDotIndices(data.length));
             width={1}
             domain={[
                 (dataMin: number) => {
-                  const min = Math.floor(convertWeightFromKg(dataMin, unitSystem));
+                  const min = Math.floor(dataMin);
                   return Math.max(min - 1, 0);
                 },
                 (dataMax: number) => {
-                  const max = Math.ceil(convertWeightFromKg(dataMax, unitSystem));
+                  const max = Math.ceil(dataMax);
                   return max + 1;
                 }
               ]}
@@ -105,14 +110,14 @@ const dotIndices = new Set(getDotIndices(data.length));
             formatter={(value: number | undefined) => value !== undefined ? [formatWeight(value, unitSystem), 'Weight'] : ['', '']}
           />
           <ReferenceLine 
-            y={convertWeightFromKg(goalWeight, unitSystem)} 
+            y={goalWeight} 
             stroke="rgba(177, 156, 217, 0.8)" 
             strokeDasharray="5 5" 
             label={{ value: "Goal", fill: '#B19CD9', fontSize: 12 }}
           />
           <Line 
             type="monotone" 
-            dataKey="displayWeight" 
+            dataKey="weight" 
             stroke="url(#purpleGradient)" 
             strokeWidth={3}
             dot={(props: any) => {
