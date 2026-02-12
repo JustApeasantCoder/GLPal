@@ -3,7 +3,6 @@ import React from 'react';
 export interface WeightEntry {
   date: string;
   weight: number;
-  displayWeight?: number; // For chart display with unit conversion
 }
 
 export interface GLP1Entry {

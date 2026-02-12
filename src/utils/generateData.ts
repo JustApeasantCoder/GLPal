@@ -102,8 +102,4 @@ export const generateSimulatedData = (): void => {
       halfLifeHours: medication.halfLife
     });
   });
-
-  console.log('Generated 120 days of simulated weight data (105kg → 90kg → 100kg → 80kg)');
-  console.log(`Date range: ${startDate.toISOString().split('T')[0]} to ${new Date().toISOString().split('T')[0]}`);
-  console.log(`Sample GLP-1 entries added: ${medicationDates.length}`);
 };

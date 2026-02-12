@@ -75,7 +75,6 @@ function App() {
         
         // If no data exists, generate simulated data
         if (existingWeights.length === 0) {
-          console.log('No existing data found, generating simulated data...');
           generateSimulatedData();
           
           // Reload after generation

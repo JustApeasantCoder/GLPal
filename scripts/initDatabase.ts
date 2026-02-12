@@ -5,5 +5,4 @@ import { initializeDatabase } from '../src/utils/database';
 initializeDatabase();
 generateSimulatedData();
 
-console.log('Database initialization complete!');
 process.exit(0);
