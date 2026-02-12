@@ -78,7 +78,7 @@ const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => 
             </label>
             <input
               type="number"
-              step="0.1"
+              step="0.01"
               min="0.1"
               max="99.9"
               value={dose}

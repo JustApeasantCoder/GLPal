@@ -128,3 +128,10 @@ export const getUserProfile = (): UserProfile | null => {
 export const closeDatabase = (): void => {
   // No-op for localStorage
 };
+
+export const clearAllData = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.WEIGHT_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.GLP1_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
+  initializeDatabase();
+};

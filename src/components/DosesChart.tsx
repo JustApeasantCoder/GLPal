@@ -61,20 +61,22 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
   };
 
   const chartData = generateConcentrationData();
-
-  if (filteredData.length === 0) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-text-muted">
-        No dose data available. Log your first dose to see the chart.
-      </div>
-    );
-  }
+  const hasData = filteredData.length > 0;
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      {!hasData && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+          <div className="text-center text-text-muted">
+            <p className="text-sm">No dose data yet</p>
+            <p className="text-xs mt-1">Log your first dose to see the chart</p>
+          </div>
+        </div>
+      )}
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={undefined}>
         <AreaChart
           data={chartData}
+          style={{ opacity: hasData ? 1 : 0.3 }}
           margin={{
             top: 5,
             right: 5,
