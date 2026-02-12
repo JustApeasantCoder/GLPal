@@ -14,6 +14,7 @@
   --card-bg: rgba(255, 255, 255, 0.8);
   --card-border: rgba(177, 156, 217, 0.3);
   --accent-purple-light: #b19cd9;
+  --accent-purple-light-shadow: rgba(138, 43, 226, 0.4);
   --accent-purple-medium: #9c7bd3;
   --accent-purple-dark: #7c5fb8;
   --accent-mint: #4adea8;
@@ -35,6 +36,7 @@
   --card-bg: rgba(0, 0, 0, 0.3);
   --card-border: rgba(156, 123, 211, 0.2);
   --accent-purple-light: #b19cd9;
+  --accent-purple-light-shadow: rgba(138, 43, 226, 0.8);
   --accent-purple-medium: #9c7bd3;
   --accent-purple-dark: #5b4b8a;
   --accent-mint: #4adea8;

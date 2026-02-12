@@ -60,12 +60,24 @@ export const useThemeStyles = () => {
   const { isDarkMode } = useTheme();
   
   return {
+    // Big Card (Light & Dark Mode)
+    bigCard: isDarkMode 
+      ? "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border"
+      : "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border",
+    
     // Small Card (Light & Dark Mode)
     smallCard: isDarkMode 
       ? "h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-3 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between"
       : "h-16 sm:h-18 bg-white/80 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-3 rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between",
     
-// Text styles for small cards
+    // Big Card Text styles
+    bigCardText: {
+      title: "text-lg font-medium text-text-primary mb-3",
+      h1: "text-2xl font-bold text-gray-900 dark:text-[#B19CD9] mb-4 dark:[text-shadow:0_0_20px_rgba(177,156,217,0.6)]",
+      h2: "text-lg font-semibold text-text-primary mb-3",
+    },
+
+    // Text styles for small cards
     text: {
       label: isDarkMode 
         ? "text-xs text-[#B19CD9] font-medium"

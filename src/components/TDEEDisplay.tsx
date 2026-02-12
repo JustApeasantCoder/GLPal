@@ -18,14 +18,14 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   const loss05KgPerWeek = Math.round(tdee - deficit05Kg);
   const loss1KgPerWeek = Math.round(tdee - deficit1Kg);
   
-  const { smallCard, text, tdeeCard, tdeeText } = useThemeStyles();
+  const { bigCardText, smallCard, text, tdeeCard, tdeeText } = useThemeStyles();
   
   return (
 <div className="space-y-4">
   <div className="border-t border-card-border pt-4">
-    <h4 className="font-medium text-text-primary mb-3">
+    <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
       Weight Loss Calorie Targets
-    </h4>
+    </h1>
 
     <div className="space-y-2">
       {/* 0.5kg/week */}
@@ -69,8 +69,8 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
     {/* Info Section */}
     <div className="border-t border-card-border pt-4">
       <h4
-        className="font-medium text-text-primary mb-2"
-        style={{ textShadow: "0 0 10px var(--accent-purple-light)" }}
+        className={bigCardText.title}
+        style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}
       >
         Based on Current Weight: {currentWeight} kg
       </h4>

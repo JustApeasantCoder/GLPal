@@ -16,10 +16,10 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
   startWeight,
   goalWeight,
 }) => {
-  const { smallCard, text } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
   return (
-    <div className="bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border">
-      <h4 className="font-medium text-text-primary mb-3" style={{ textShadow: '0 0 10px var(--accent-purple-light)' }}>Performance Overview</h4>
+    <div className={bigCard}>
+      <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Performance Overview</h1>
       
       {/* Performance Overview Row */}
       <div className="space-y-3 mb-3">

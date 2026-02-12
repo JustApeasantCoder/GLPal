@@ -121,7 +121,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg border border-card-border py-2 z-50">
+        <div className="absolute right-0 mt-3 w-56 bg-card-bg rounded-2xl shadow-theme-lg border border-card-border py-2 z-50">
           <button
             onClick={handleTDEESettingsClick}
             className="w-full text-left px-4 py-3 text-text-muted hover:bg-accent-purple-light/10 transition-all duration-300 first:rounded-t-2xl hover:text-text-primary"

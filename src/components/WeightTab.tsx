@@ -23,12 +23,12 @@ const WeightTab: React.FC<WeightTabProps> = ({
   // Use custom hooks for data processing
   const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
-  const { smallCard, text } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   return (
     <>
-      <header className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-[#B19CD9] mb-3 dark:[text-shadow:0_0_20px_rgba(177,156,217,0.6)]">Weight Tracking</h1>
+      <header className={bigCard}>
+        <h1 className={bigCardText.h1}>Weight Tracking</h1>
         <div className="grid grid-cols-2 gap-3">
 <div className={smallCard}>
               <p className={text.label}>Current</p>

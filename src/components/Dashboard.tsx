@@ -23,7 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onAddWeight,
 }) => {
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
-  const { smallCard, text, button } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, button } = useThemeStyles();
 
   // Use custom hooks for data processing
   const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
@@ -32,8 +32,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   return (
     <>
       {/* Unified Dashboard Card */}
-      <div className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-[#B19CD9] mb-4 dark:[text-shadow:0_0_20px_rgba(177,156,217,0.6)]">Dashboard</h1>
+      <div className={bigCard}>
+        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dashboard</h1>
         
         {/* Metrics Section */}
         <div className="space-y-3 mb-6">
@@ -133,7 +133,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       />
 
       {/* Metabolic Profile */}
-      <div className="bg-white/80 dark:bg-black/30 backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-[0_8px_32px_rgba(156,123,211,0.2)] p-4 border border-gray-200 dark:border-[#9C7BD3]/20">
+      <div className={bigCard}>
         <TDEEDisplay profile={profile} currentWeight={weightMetrics.currentWeight} />
       </div>
     </>
