@@ -4,6 +4,7 @@ import WeightInput from './WeightInput';
 import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
 import { WeightEntry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
+import { formatWeight } from '../utils/unitConversion';
 
 interface WeightTabProps {
   weights: WeightEntry[];
@@ -24,6 +25,7 @@ const WeightTab: React.FC<WeightTabProps> = ({
   const weightMetrics = useWeightMetrics(weights, profile, profile.goalWeight || 80);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const unitSystem = profile.unitSystem || 'metric';
 
   return (
     <div className={bigCard}>
@@ -33,18 +35,18 @@ const WeightTab: React.FC<WeightTabProps> = ({
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className={smallCard}>
           <p className={text.label}>Current</p>
-          <p className={text.value}>{weightMetrics.currentWeight.toFixed(1)}</p>
+          <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
         </div>
             <div className={smallCard}>
               <p className={text.label}>Goal</p>
-              <p className={text.value}>{profile.goalWeight?.toFixed(1) || '80'}</p>
+              <p className={text.value}>{formatWeight(profile.goalWeight || 80, unitSystem)}</p>
             </div>
       </div>
 
       {/* Weight Input Section */}
       <div className="mb-6">
         <h3 className="text-sm font-semibold text-text-primary mb-3" style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Log Weight</h3>
-        <WeightInput onAddWeight={onAddWeight} />
+        <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} />
       </div>
 
       {/* Chart Section */}
@@ -94,7 +96,7 @@ const WeightTab: React.FC<WeightTabProps> = ({
           </div>
         </div>
         <div className="h-64 sm:h-80">
-          <WeightChart data={filteredWeights} goalWeight={profile.goalWeight || 80} />
+          <WeightChart data={filteredWeights} goalWeight={profile.goalWeight || 80} unitSystem={unitSystem} />
         </div>
       </div>
     </div>

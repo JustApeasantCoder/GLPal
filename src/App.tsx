@@ -6,7 +6,6 @@ import GLP1Tab from './components/GLP1Tab';
 import DosageTab from './components/DosageTab';
 import Navigation from './components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
-import { useWeightMetrics } from './hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
 import { 
   initializeDatabase, 
@@ -51,16 +50,16 @@ function App() {
     age: 35,
     gender: 'male',
     height: 180,
-    activityLevel: 1.5,
+    activityLevel: 1.2,
+    unitSystem: 'metric',
   });
 
   // Create debounced save function to prevent excessive localStorage writes
   const debouncedSave = useCallback(
     debounce((newProfile: UserProfile) => {
       saveUserProfile(newProfile);
-    }, 500), // 500ms debounce
-    []
-  );
+    }, 500) // 500ms debounce
+  , []);
 
   // Initialize database and load data
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,8 +114,7 @@ const handleAddWeight = (newWeight: number) => {
     setWeights(prev => [...prev, newEntry]);
   };
 
-// Calculate all weight metrics using custom hook
-  const weightMetrics = useWeightMetrics(weights, profile);
+// Use goal weight from profile with fallback
   const goalWeight = profile.goalWeight || 80;
 
 

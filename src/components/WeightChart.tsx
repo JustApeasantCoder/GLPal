@@ -1,13 +1,15 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { WeightEntry } from '../types';
+import { WeightEntry, UnitSystem } from '../types';
+import { formatWeight, convertWeightFromKg } from '../utils/unitConversion';
 
 interface WeightChartProps {
   data: WeightEntry[];
   goalWeight: number;
+  unitSystem?: UnitSystem;
 }
 
-const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
+const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem = 'metric' }) => {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -21,7 +23,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight }) => {
 
     return (
       <text x={x+22} y={y} textAnchor="start" fill="#94a3b8" fontSize={12}>
-        {payload.value}kg
+        {formatWeight(payload.value, unitSystem)}
       </text>
     );
   };
@@ -50,6 +52,7 @@ const getDotIndices = (dataLength: number): number[] => {
 const chartData = data.map(entry => ({
     ...entry,
     displayDate: formatDate(entry.date),
+    displayWeight: convertWeightFromKg(entry.weight, unitSystem),
   }));
 
 const dotIndices = new Set(getDotIndices(data.length));
@@ -76,11 +79,11 @@ const dotIndices = new Set(getDotIndices(data.length));
             width={1}
             domain={[
                 (dataMin: number) => {
-                  const min = Math.floor(dataMin);
+                  const min = Math.floor(convertWeightFromKg(dataMin, unitSystem));
                   return Math.max(min - 1, 0);
                 },
                 (dataMax: number) => {
-                  const max = Math.ceil(dataMax);
+                  const max = Math.ceil(convertWeightFromKg(dataMax, unitSystem));
                   return max + 1;
                 }
               ]}
@@ -99,16 +102,17 @@ const dotIndices = new Set(getDotIndices(data.length));
             }}
             labelStyle={{ color: '#B19CD9' }}
             itemStyle={{ color: '#9C7BD3' }}
+            formatter={(value: number | undefined) => value !== undefined ? [formatWeight(value, unitSystem), 'Weight'] : ['', '']}
           />
           <ReferenceLine 
-            y={goalWeight} 
+            y={convertWeightFromKg(goalWeight, unitSystem)} 
             stroke="rgba(177, 156, 217, 0.8)" 
             strokeDasharray="5 5" 
             label={{ value: "Goal", fill: '#B19CD9', fontSize: 12 }}
           />
           <Line 
             type="monotone" 
-            dataKey="weight" 
+            dataKey="displayWeight" 
             stroke="url(#purpleGradient)" 
             strokeWidth={3}
             dot={(props: any) => {

@@ -12,10 +12,13 @@ export interface GLP1Entry {
   halfLifeHours: number;
 }
 
+export type UnitSystem = 'metric' | 'imperial';
+
 export interface UserProfile {
   age: number;
   gender: 'male' | 'female';
-  height: number; // cm
+  height: number; // cm (stored as metric internally)
   activityLevel: number; // multiplier
-  goalWeight?: number;
+  goalWeight?: number; // kg (stored as metric internally)
+  unitSystem?: UnitSystem; // preferred display units
 }

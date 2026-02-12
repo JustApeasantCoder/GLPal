@@ -1,13 +1,15 @@
 import React from 'react';
 import { WeightAnalytics } from '../services';
-import { WeightEntry } from '../types';
+import { WeightEntry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
+import { formatWeight } from '../utils/unitConversion';
 
 interface PerformanceOverviewProps {
   weights: WeightEntry[];
   totalLoss: number;
   startWeight: number;
   goalWeight: number;
+  profile?: UserProfile;
 }
 
 const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
@@ -15,8 +17,10 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
   totalLoss,
   startWeight,
   goalWeight,
+  profile,
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const unitSystem = profile?.unitSystem || 'metric';
   return (
     <div className={bigCard}>
       <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Performance Overview</h1>
@@ -36,7 +40,7 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
             <p className={text.label}>Best Week</p>
 <div className="text-left">
             <p className={text.value}>
-              -{WeightAnalytics.calculateBestWeek(weights).toFixed(1)} kg
+              -{formatWeight(WeightAnalytics.calculateBestWeek(weights), unitSystem)}
             </p>
           </div>
           </div>
@@ -55,21 +59,21 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
           <div className={smallCard}>
             <p className={text.label}>Start Weight</p>
             <div className="text-left">
-              <p className={text.value}>{startWeight.toFixed(1)} kg</p>
+              <p className={text.value}>{formatWeight(startWeight, unitSystem)}</p>
             </div>
           </div>
           <div className={smallCard}>
             <p className={text.label}>Best Month</p>
             <div className="text-left">
               <p className={text.value}>
-                -{WeightAnalytics.calculateBestMonth(weights).toFixed(1)} kg
+                -{formatWeight(WeightAnalytics.calculateBestMonth(weights), unitSystem)}
               </p>
             </div>
           </div>
           <div className={smallCard}>
             <p className={text.label}>Total Loss</p>
             <div className="text-left">
-              <p className={text.value}>{totalLoss.toFixed(1)} kg</p>
+              <p className={text.value}>{formatWeight(totalLoss, unitSystem)}</p>
             </div>
           </div>
         </div>

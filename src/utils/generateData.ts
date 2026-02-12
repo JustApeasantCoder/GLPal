@@ -11,7 +11,7 @@ export const generateSimulatedData = (): void => {
       age: 35,
       gender: 'male',
       height: 180, // cm
-      activityLevel: 1.5 // moderate activity
+      activityLevel: 1.2 // Sedentary
     };
     saveUserProfile(profile);
   }

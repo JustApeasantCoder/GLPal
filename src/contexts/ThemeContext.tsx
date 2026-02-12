@@ -87,11 +87,11 @@ export const useThemeStyles = () => {
         : "text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
       // Special styling for Total Loss card (uses text-base and has nested span)
       totalLossValue: isDarkMode
-        ? "text-base font-bold text-white leading-tight [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
-        : "text-base font-bold text-gray-900 leading-tight dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
+        ? "text-base font-bold text-white leading-tight [text-shadow:0_0_3px_rgba(177,156,217,0.5)] inline-block"
+        : "text-base font-bold text-gray-900 leading-tight dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)] inline-block",
       percentage: isDarkMode
-        ? "text-xs text-[#B19CD9]/80 -mt-1 inline-block"
-        : "text-xs text-gray-500 dark:text-[#B19CD9]/80 -mt-1 inline-block",
+        ? "text-xs text-[#B19CD9]/80 inline-block"
+        : "text-xs text-gray-500 dark:text-[#B19CD9]/80 inline-block",
       bmiCategory: "text-xs font-medium -mt-1 inline-block"
     },
     

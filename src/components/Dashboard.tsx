@@ -6,6 +6,7 @@ import TDEEDisplay from './TDEEDisplay';
 import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
+import { formatWeight } from '../utils/unitConversion';
 
 interface DashboardProps {
   weights: WeightEntry[];
@@ -29,6 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
   const weightMetrics = useWeightMetrics(weights, profile, actualGoalWeight);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
+  const unitSystem = profile.unitSystem || 'metric';
 
   return (
     <>
@@ -42,18 +44,28 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div className={smallCard}>
               <p className={text.label}>Current</p>
-              <p className={text.value}>{weightMetrics.currentWeight.toFixed(1)} kg</p>
+              <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>BMI</p>
-              <p className={text.totalLossValue}>
-                {weightMetrics.bmi.toFixed(1)} <span className={`${text.bmiCategory} ${weightMetrics.bmiCategory.color}`}>({weightMetrics.bmiCategory.category})</span>
+              <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+                <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
+                  {weightMetrics.bmi.toFixed(1)}
+                </span>
+                <span className={`${text.bmiCategory} ${weightMetrics.bmiCategory.color}`}>
+                  ({weightMetrics.bmiCategory.category})
+                </span>
               </p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Total Loss</p>
-              <p className={text.totalLossValue}>
-                {weightMetrics.totalLoss.toFixed(1)} kg <span className={text.percentage}>({weightMetrics.totalLossPercentage.toFixed(1)}%)</span>
+              <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+                <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
+                  {formatWeight(weightMetrics.totalLoss, unitSystem)}
+                </span>
+                <span className={text.percentage}>
+                  ({weightMetrics.totalLossPercentage.toFixed(1)}%)
+                </span>
               </p>
             </div>
           </div>
@@ -63,19 +75,19 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className={smallCard}>
               <p className={text.label}>Weekly Avg</p>
               <p className={text.value}>
-                {weightMetrics.weeklyAverageLoss > 0 ? '-' : ''}{weightMetrics.weeklyAverageLoss.toFixed(1)} kg
+                {weightMetrics.weeklyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.weeklyAverageLoss), unitSystem)}
               </p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Monthly Avg</p>
               <p className={text.value}>
-                {weightMetrics.monthlyAverageLoss > 0 ? '-' : ''}{weightMetrics.monthlyAverageLoss.toFixed(1)} kg
+                {weightMetrics.monthlyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.monthlyAverageLoss), unitSystem)}
               </p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>To Lose</p>
               <p className={text.value}>
-                {(weightMetrics.currentWeight - actualGoalWeight).toFixed(1)} kg
+                {formatWeight(weightMetrics.currentWeight - actualGoalWeight, unitSystem)}
               </p>
             </div>
           </div>
@@ -114,7 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
             <div className="h-48 sm:h-56">
-              <WeightChart data={filteredWeights} goalWeight={actualGoalWeight} />
+              <WeightChart data={filteredWeights} goalWeight={actualGoalWeight} unitSystem={unitSystem} />
             </div>
           </div>
 
@@ -133,6 +145,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         totalLoss={weightMetrics.totalLoss}
         startWeight={weightMetrics.startWeight}
         goalWeight={actualGoalWeight}
+        profile={profile}
       />
 
       {/* Metabolic Profile */}
