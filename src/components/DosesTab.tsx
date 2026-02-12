@@ -8,7 +8,7 @@ import { useThemeStyles } from '../contexts/ThemeContext';
 
 interface DosesTabProps {
   dosesEntries: GLP1Entry[];
-  onAddDose: (dose: number, medication: string) => void;
+  onAddDose: (dose: number, medication: string, date: string) => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
 }

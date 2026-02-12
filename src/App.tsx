@@ -15,7 +15,6 @@ import {
   addWeightEntry, 
   addGLP1Entry,
   saveUserProfile,
-  clearGLP1Entries,
   clearAllData
 } from './utils/database';
 import { generateSimulatedWeightData } from './utils/generateData';
@@ -64,7 +63,6 @@ const [activeTab, setActiveTab] = useState<TabType>('dashboard');
     const initializeApp = () => {
 try {
         initializeDatabase();
-        clearGLP1Entries(); // Clear GLP-1 data for fresh start
         
         // Load existing data
         const existingWeights = getWeightEntries();
@@ -111,10 +109,9 @@ const handleAddWeight = (newWeight: number) => {
     setWeights(prev => [...prev, newEntry]);
   };
 
-  const handleAddDose = (dose: number, medication: string) => {
-    const today = new Date().toISOString().split('T')[0];
+  const handleAddDose = (dose: number, medication: string, date: string) => {
     const newEntry = { 
-      date: today, 
+      date, 
       medication, 
       dose, 
       halfLifeHours: 144 

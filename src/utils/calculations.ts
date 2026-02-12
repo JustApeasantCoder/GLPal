@@ -42,9 +42,26 @@ export const calculateGLP1Concentration = (
   halfLifeHours: number,
   currentDate: Date
 ): number => {
+  const ABSORPTION_HOURS = 12;
+  
   return doses.reduce((total, dose) => {
     const hoursElapsed = (currentDate.getTime() - dose.date.getTime()) / (1000 * 60 * 60);
-    const decayFactor = Math.exp(-0.693 * hoursElapsed / halfLifeHours);
-    return total + (dose.dose * decayFactor);
+    
+    if (hoursElapsed < 0) {
+      return total;
+    }
+    
+    let effectFactor: number;
+    
+    if (hoursElapsed < ABSORPTION_HOURS) {
+      const absorptionProgress = hoursElapsed / ABSORPTION_HOURS;
+      effectFactor = dose.dose * absorptionProgress;
+    } else {
+      const decayHours = hoursElapsed - ABSORPTION_HOURS;
+      const decayFactor = Math.exp(-0.693 * decayHours / halfLifeHours);
+      effectFactor = dose.dose * decayFactor;
+    }
+    
+    return total + effectFactor;
   }, 0);
 };
