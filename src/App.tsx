@@ -12,6 +12,7 @@ import {
   getGLP1Entries, 
   getUserProfile, 
   addWeightEntry, 
+  addGLP1Entry,
   saveUserProfile 
 } from './utils/database';
 import { generateSimulatedData } from './utils/generateData';
@@ -105,6 +106,22 @@ const handleAddWeight = (newWeight: number) => {
     setWeights(prev => [...prev, newEntry]);
   };
 
+  const handleAddDose = (dose: number, medication: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry = { 
+      date: today, 
+      medication, 
+      dose, 
+      halfLifeHours: 144 
+    };
+    
+    // Save to database
+    addGLP1Entry(newEntry);
+    
+    // Update state
+    setDosesEntries(prev => [...prev, newEntry]);
+  };
+
 // Use goal weight from profile with fallback
   const goalWeight = profile.goalWeight || 80;
 
@@ -155,7 +172,7 @@ return (
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
         <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl relative">
           <TabContent isActive={activeTab === 'dashboard'}>
-            <Dashboard
+<Dashboard
               weights={weights}
               dosesEntries={dosesEntries}
               profile={profile}
@@ -167,7 +184,7 @@ return (
 
 
           <TabContent isActive={activeTab === 'doses'}>
-            <DosesTab dosesEntries={dosesEntries} />
+            <DosesTab dosesEntries={dosesEntries} onAddDose={handleAddDose} />
           </TabContent>
 
           <TabContent isActive={activeTab === 'dosage'}>

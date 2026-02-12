@@ -142,10 +142,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* Weight Input Section */}
+      {/* Weight Input Section */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-text-primary mb-3" style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Log Weight</h3>
-            <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} />
+<WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} />
           </div>
         </div>
       </div>

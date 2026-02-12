@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DosesChart from './DosesChart';
+import DoseModal from './DoseModal';
 import { GLP1Entry } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
 
 interface DosesTabProps {
   dosesEntries: GLP1Entry[];
+  onAddDose: (dose: number, medication: string) => void;
 }
 
-const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries }) => {
+const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { bigCard, bigCardText } = useThemeStyles();
+
   return (
     <div className="space-y-3">
       <div className={bigCard}>
@@ -16,7 +20,19 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries }) => {
         <div className="h-64 sm:h-80">
           <DosesChart data={dosesEntries} />
         </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full mt-3 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg"
+        >
+          Log Dose
+        </button>
       </div>
+
+      <DoseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddDose={onAddDose}
+      />
     </div>
   );
 };
