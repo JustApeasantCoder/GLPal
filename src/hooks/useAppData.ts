@@ -13,7 +13,7 @@ import { generateSimulatedData } from '../utils/generateData';
 
 interface AppDataContextType {
   weights: WeightEntry[];
-  glp1Entries: GLP1Entry[];
+  dosesEntries: GLP1Entry[];
   profile: UserProfile;
   addWeight: (weight: number) => void;
   addGLP1Entry: (entry: Omit<GLP1Entry, 'date'>) => void;
@@ -23,7 +23,7 @@ interface AppDataContextType {
 
 export const useAppData = (): AppDataContextType => {
   const [weights, setWeights] = useState<WeightEntry[]>([]);
-  const [glp1Entries, setGLP1Entries] = useState<GLP1Entry[]>([]);
+  const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   const [profile, setProfile] = useState<UserProfile>({
     age: 35,
     gender: 'male',
@@ -62,10 +62,10 @@ export const useAppData = (): AppDataContextType => {
           const newWeightData = await getWeightEntries();
           const newGLP1Data = await getGLP1Entries();
           setWeights(newWeightData);
-          setGLP1Entries(newGLP1Data);
+          setDosesEntries(newGLP1Data);
         } else {
           setWeights(weightData);
-          setGLP1Entries(glp1Data);
+          setDosesEntries(glp1Data);
         }
       } catch (error) {
         console.error('Error initializing app data:', error);
@@ -97,7 +97,7 @@ export const useAppData = (): AppDataContextType => {
     
     try {
       await addGLP1Entry(newEntry);
-      setGLP1Entries(prev => [...prev, newEntry].sort((a, b) => 
+      setDosesEntries(prev => [...prev, newEntry].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
       ));
     } catch (error) {
@@ -116,7 +116,7 @@ export const useAppData = (): AppDataContextType => {
 
   return {
     weights,
-    glp1Entries,
+    dosesEntries,
     profile,
     addWeight,
     addGLP1Entry: addGLP1EntryFunc,

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import SettingsMenu from './components/SettingsMenu';
 import Dashboard from './components/Dashboard';
-import GLP1Tab from './components/GLP1Tab';
-import DosageTab from './components/DosageTab';
+import DosesTab from './components/DosesTab';
+import DosageCalculatorTab from './components/DosageCalculatorTab';
 import Navigation from './components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
@@ -16,7 +16,7 @@ import {
 } from './utils/database';
 import { generateSimulatedData } from './utils/generateData';
 
-type TabType = 'dashboard' | 'glp1' | 'dosage';
+type TabType = 'dashboard' | 'doses' | 'dosage';
 
 interface TabContentProps {
   children: React.ReactNode;
@@ -42,7 +42,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
-  const [glp1Entries, setGLP1Entries] = useState<GLP1Entry[]>([]);
+  const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   
   const [profile, setProfile] = useState<UserProfile>({
     age: 35,
@@ -77,10 +77,10 @@ function App() {
           const generatedWeights = getWeightEntries();
           const generatedGLP1 = getGLP1Entries();
           setWeights(generatedWeights);
-          setGLP1Entries(generatedGLP1);
+          setDosesEntries(generatedGLP1);
         } else {
           setWeights(existingWeights);
-          setGLP1Entries(existingGLP1);
+          setDosesEntries(existingGLP1);
         }
         
         // Load profile or use default
@@ -161,7 +161,7 @@ return (
           <TabContent isActive={activeTab === 'dashboard'}>
             <Dashboard
               weights={weights}
-              glp1Entries={glp1Entries}
+              dosesEntries={dosesEntries}
               profile={profile}
               goalWeight={goalWeight}
               onAddWeight={handleAddWeight}
@@ -170,12 +170,12 @@ return (
 
 
 
-          <TabContent isActive={activeTab === 'glp1'}>
-            <GLP1Tab glp1Entries={glp1Entries} />
+          <TabContent isActive={activeTab === 'doses'}>
+            <DosesTab dosesEntries={dosesEntries} />
           </TabContent>
 
           <TabContent isActive={activeTab === 'dosage'}>
-            <DosageTab />
+            <DosageCalculatorTab />
           </TabContent>
         </div>
       </main>

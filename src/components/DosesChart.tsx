@@ -3,18 +3,17 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { GLP1Entry } from '../types';
 import { calculateGLP1Concentration } from '../utils/calculations';
 
-interface GLP1ChartProps {
+interface DosesChartProps {
   data: GLP1Entry[];
 }
 
-const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
-  // Generate concentration data points
+const DosesChart: React.FC<DosesChartProps> = ({ data }) => {
   const generateConcentrationData = () => {
     if (data.length === 0) return [];
 
     const startDate = new Date(data[0].date);
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 14); // Show 14 days into future
+    endDate.setDate(endDate.getDate() + 14);
 
     const chartData = [];
     const doses = data.map(entry => ({
@@ -99,4 +98,4 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
   );
 };
 
-export default GLP1Chart;
+export default DosesChart;

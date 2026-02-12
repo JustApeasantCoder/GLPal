@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import WeightChart from './WeightChart';
-import GLP1Chart from './GLP1Chart';
+import DosesChart from './DosesChart';
 import PerformanceOverview from './PerformanceOverview';
 import TDEEDisplay from './TDEEDisplay';
 import WeightInput from './WeightInput';
@@ -12,7 +12,7 @@ import { formatWeight } from '../utils/unitConversion';
 
 interface DashboardProps {
   weights: WeightEntry[];
-  glp1Entries: GLP1Entry[];
+  dosesEntries: GLP1Entry[];
   profile: UserProfile;
   goalWeight?: number;
   onAddWeight: (weight: number) => void;
@@ -20,7 +20,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({
   weights,
-  glp1Entries,
+  dosesEntries,
   profile,
   goalWeight,
   onAddWeight,
@@ -42,8 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         
         {/* Metrics Section */}
         <div className="space-y-3 mb-6">
-          {/* Row 1: Current, BMI, Total Loss */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+{/* Row 1: Current, BMI, Total Loss */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Current</p>
               <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
@@ -138,7 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           {/* GLP-1 Status */}
           <div>
             <div className="h-32 sm:h-40">
-              <GLP1Chart data={glp1Entries} />
+              <DosesChart data={dosesEntries} />
             </div>
           </div>
 
