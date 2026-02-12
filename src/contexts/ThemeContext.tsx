@@ -83,24 +83,21 @@ export const useThemeStyles = () => {
     },
     
     
-    // TDEE Cards (rectangular, longer)
+    // TDEE Cards (long rectangular with small card colors)
     tdeeCard: isDarkMode
-      ? "flex justify-between items-center p-3 bg-gradient-to-r from-accent-purple-light/20 to-accent-purple-medium/20 backdrop-blur-sm rounded-xl border-accent-purple-light/30 shadow-theme hover:border-accent-purple-light/50 transition-all duration-300"
-      : "flex justify-between items-center p-3 bg-white/80 dark:from-accent-purple-light/10 dark:to-accent-purple-medium/20 dark:bg-gradient-to-br backdrop-blur-sm rounded-xl border-gray-200 dark:border-accent-purple-light/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)] hover:bg-gray-100 dark:hover:bg-accent-purple-light/20 hover:shadow-card-md",
+      ? "flex justify-between items-center p-3 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)]"
+      : "flex justify-between items-center p-3 bg-white/80 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)]",
     
     tdeeText: {
-      label: isDarkMode
-        ? "font-medium text-accent-purple-light"
-        : "font-medium text-gray-600 dark:text-accent-purple-light",
+      label: isDarkMode 
+        ? "text-s text-[#B19CD9] font-medium"
+        : "text-s text-gray-600 dark:text-[#B19CD9] font-medium",
       value: isDarkMode
-        ? "font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
-        : "font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
+        ? "text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
+        : "text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
       subtitle: isDarkMode
-        ? "text-sm text-text-muted"
-        : "text-sm text-text-muted",
-      description: isDarkMode
-        ? "text-sm text-text-muted"
-        : "text-sm text-text-muted"
+        ? "text-sm text-[#B19CD9]/80 -mt-1 inline-block"
+        : "text-sm text-gray-500 dark:text-[#B19CD9]/80 -mt-1 inline-block"
     },
     
     // Button styles with active state
