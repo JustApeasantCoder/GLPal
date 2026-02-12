@@ -52,16 +52,21 @@ const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => 
       const lastMed = getLastMedication();
       if (lastMed) {
         setSelectedMedication(lastMed);
-        const lastDoses = getLastDoses();
-        if (lastDoses[lastMed]) {
-          setDose(lastDoses[lastMed].toString());
-        } else {
-          const med = MEDICATIONS.find(m => m.id === lastMed);
-          if (med) setDose(med.defaultDose.toString());
-        }
       }
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (selectedMedication) {
+      const lastDoses = getLastDoses();
+      if (lastDoses[selectedMedication]) {
+        setDose(lastDoses[selectedMedication].toString());
+      } else {
+        const med = MEDICATIONS.find(m => m.id === selectedMedication);
+        if (med) setDose(med.defaultDose.toString());
+      }
+    }
+  }, [selectedMedication]);
 
   if (!isOpen) return null;
 
