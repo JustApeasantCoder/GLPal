@@ -1,28 +1,55 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { GLP1Entry } from '../types';
+import { ChartPeriod } from '../hooks';
 import { calculateGLP1Concentration } from '../utils/calculations';
 
 interface DosesChartProps {
   data: GLP1Entry[];
+  period: ChartPeriod;
 }
 
-const DosesChart: React.FC<DosesChartProps> = ({ data }) => {
-  const generateConcentrationData = () => {
+const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
+  const filteredData = useMemo(() => {
     if (data.length === 0) return [];
+    
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90days':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case 'all':
+      default:
+        startDate = new Date(0);
+        break;
+    }
+    
+    return data.filter(entry => new Date(entry.date) >= startDate);
+  }, [data, period]);
 
-    const startDate = new Date(data[0].date);
+  const generateConcentrationData = () => {
+    if (filteredData.length === 0) return [];
+
+    const startDate = new Date(filteredData[0].date);
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 14);
 
     const chartData = [];
-    const doses = data.map(entry => ({
+    const doses = filteredData.map(entry => ({
       date: new Date(entry.date),
       dose: entry.dose
     }));
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const concentration = calculateGLP1Concentration(doses, data[0].halfLifeHours, new Date(d));
+      const concentration = calculateGLP1Concentration(doses, filteredData[0].halfLifeHours, new Date(d));
       
       chartData.push({
         date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -34,6 +61,14 @@ const DosesChart: React.FC<DosesChartProps> = ({ data }) => {
   };
 
   const chartData = generateConcentrationData();
+
+  if (filteredData.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-text-muted">
+        No dose data available. Log your first dose to see the chart.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full">

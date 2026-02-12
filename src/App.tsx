@@ -6,6 +6,7 @@ import DosageCalculatorTab from './components/DosageCalculatorTab';
 import Navigation from './components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
+import { ChartPeriod } from './hooks';
 import { 
   initializeDatabase, 
   getWeightEntries, 
@@ -13,9 +14,10 @@ import {
   getUserProfile, 
   addWeightEntry, 
   addGLP1Entry,
-  saveUserProfile 
+  saveUserProfile,
+  clearGLP1Entries
 } from './utils/database';
-import { generateSimulatedData } from './utils/generateData';
+import { generateSimulatedWeightData } from './utils/generateData';
 
 type TabType = 'dashboard' | 'doses' | 'dosage';
 
@@ -36,8 +38,9 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   
@@ -58,8 +61,9 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const initializeApp = () => {
-      try {
+try {
         initializeDatabase();
+        clearGLP1Entries(); // Clear GLP-1 data for fresh start
         
         // Load existing data
         const existingWeights = getWeightEntries();
@@ -67,8 +71,8 @@ function App() {
         const existingProfile = getUserProfile();
         
         // If no data exists, generate simulated data
-        if (existingWeights.length === 0) {
-          generateSimulatedData();
+if (existingWeights.length === 0) {
+          generateSimulatedWeightData();
           
           // Reload after generation
           const generatedWeights = getWeightEntries();
@@ -178,13 +182,20 @@ return (
               profile={profile}
               goalWeight={goalWeight}
               onAddWeight={handleAddWeight}
+              chartPeriod={chartPeriod}
+              onChartPeriodChange={setChartPeriod}
             />
           </TabContent>
 
 
 
           <TabContent isActive={activeTab === 'doses'}>
-            <DosesTab dosesEntries={dosesEntries} onAddDose={handleAddDose} />
+            <DosesTab 
+              dosesEntries={dosesEntries} 
+              onAddDose={handleAddDose}
+              chartPeriod={chartPeriod}
+              onChartPeriodChange={setChartPeriod}
+            />
           </TabContent>
 
           <TabContent isActive={activeTab === 'dosage'}>

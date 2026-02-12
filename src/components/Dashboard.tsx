@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import WeightChart from './WeightChart';
 import DosesChart from './DosesChart';
 import PerformanceOverview from './PerformanceOverview';
 import TDEEDisplay from './TDEEDisplay';
 import WeightInput from './WeightInput';
 import BMIInfoTooltip from './BMIInfoTooltip';
+import PeriodSelector from './PeriodSelector';
 import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
@@ -16,6 +17,8 @@ interface DashboardProps {
   profile: UserProfile;
   goalWeight?: number;
   onAddWeight: (weight: number) => void;
+  chartPeriod: ChartPeriod;
+  onChartPeriodChange: (period: ChartPeriod) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -24,9 +27,10 @@ const Dashboard: React.FC<DashboardProps> = ({
   profile,
   goalWeight,
   onAddWeight,
+  chartPeriod,
+  onChartPeriodChange,
 }) => {
-  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
-  const { bigCard, bigCardText, smallCard, text, button } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   // Use custom hooks for data processing
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
@@ -100,36 +104,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Charts Section */}
         <div className="space-y-6">
-          {/* Weight Trends */}
+{/* Weight Trends */}
           <div>
-            <div className="flex justify-center mb-3">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setChartPeriod('week')}
-                  className={button(chartPeriod === 'week')}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => setChartPeriod('month')}
-                  className={button(chartPeriod === 'month')}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => setChartPeriod('90days')}
-                  className={button(chartPeriod === '90days')}
-                >
-                  90 days
-                </button>
-                <button
-                  onClick={() => setChartPeriod('all')}
-                  className={button(chartPeriod === 'all')}
-                >
-                  All Time
-                </button>
-              </div>
-            </div>
+            <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-48 sm:h-56">
               <WeightChart data={filteredWeights} goalWeight={actualGoalWeight} unitSystem={unitSystem} />
             </div>
@@ -138,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           {/* GLP-1 Status */}
           <div>
             <div className="h-32 sm:h-40">
-              <DosesChart data={dosesEntries} />
+              <DosesChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>
 

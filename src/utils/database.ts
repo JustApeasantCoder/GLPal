@@ -111,6 +111,10 @@ export const deleteGLP1Entry = (date: string): void => {
   localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(filtered));
 };
 
+export const clearGLP1Entries = (): void => {
+  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify([]));
+};
+
 // User profile
 export const saveUserProfile = (profile: UserProfile): void => {
   localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
