@@ -117,7 +117,7 @@ const handleAddWeight = (newWeight: number) => {
 
 // Calculate all weight metrics using custom hook
   const weightMetrics = useWeightMetrics(weights, profile);
-  const goalWeight = 80;
+  const goalWeight = profile.goalWeight || 80;
 
 
 

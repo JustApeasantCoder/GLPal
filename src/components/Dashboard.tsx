@@ -19,14 +19,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   weights,
   glp1Entries,
   profile,
-  goalWeight = 80,
+  goalWeight,
   onAddWeight,
 }) => {
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
   const { bigCard, bigCardText, smallCard, text, button } = useThemeStyles();
 
   // Use custom hooks for data processing
-  const weightMetrics = useWeightMetrics(weights, profile, goalWeight);
+  const actualGoalWeight = goalWeight || profile.goalWeight || 80;
+  const weightMetrics = useWeightMetrics(weights, profile, actualGoalWeight);
   const filteredWeights = useFilteredWeights(weights, chartPeriod);
 
   return (
@@ -74,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className={smallCard}>
               <p className={text.label}>To Lose</p>
               <p className={text.value}>
-                {(weightMetrics.currentWeight - goalWeight).toFixed(1)} kg
+                {(weightMetrics.currentWeight - actualGoalWeight).toFixed(1)} kg
               </p>
             </div>
           </div>
@@ -113,7 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
             <div className="h-48 sm:h-56">
-              <WeightChart data={filteredWeights} goalWeight={goalWeight} />
+              <WeightChart data={filteredWeights} goalWeight={actualGoalWeight} />
             </div>
           </div>
 
@@ -131,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         weights={weights}
         totalLoss={weightMetrics.totalLoss}
         startWeight={weightMetrics.startWeight}
-        goalWeight={weightMetrics.goalWeight}
+        goalWeight={actualGoalWeight}
       />
 
       {/* Metabolic Profile */}
