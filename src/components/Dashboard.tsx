@@ -114,7 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
           {/* GLP-1 Status */}
           <div>
-            <div className="h-32 sm:h-40">
+            <div className="h-48 sm:h-56">
               <DosesChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>

@@ -203,17 +203,19 @@ return (
 
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
-        <div className="w-full max-w-md mx-auto px-4 py-2 space-y-3 md:max-w-2xl lg:max-w-4xl relative">
+        <div className="w-full px-4 py-2 space-y-3 md:px-6 lg:px-8 relative">
           <TabContent isActive={activeTab === 'dashboard'}>
-<Dashboard
-              weights={weights}
-              dosesEntries={dosesEntries}
-              profile={profile}
-              goalWeight={goalWeight}
-              onAddWeight={handleAddWeight}
-              chartPeriod={chartPeriod}
-              onChartPeriodChange={setChartPeriod}
-            />
+            <div className="max-w-md mx-auto">
+              <Dashboard
+                weights={weights}
+                dosesEntries={dosesEntries}
+                profile={profile}
+                goalWeight={goalWeight}
+                onAddWeight={handleAddWeight}
+                chartPeriod={chartPeriod}
+                onChartPeriodChange={setChartPeriod}
+              />
+            </div>
           </TabContent>
 
 

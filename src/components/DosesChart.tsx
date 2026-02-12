@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { GLP1Entry } from '../types';
 import { ChartPeriod } from '../hooks';
 import { calculateGLP1Concentration } from '../utils/calculations';
@@ -190,6 +190,7 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
           />
           <XAxis 
             dataKey="date" 
+            height={20}
             tick={{ fontSize: 12, fill: '#94a3b8' }}
             axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
           />
@@ -237,25 +238,18 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
               />
             );
           })}
+          {medications.length > 1 && (
+            <Legend 
+              verticalAlign="bottom"
+              wrapperStyle={{ fontSize: '12px', paddingTop: '0px' }}
+              formatter={(value) => {
+                const displayName = value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, ' $1').trim();
+                return displayName;
+              }}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
-      {medications.length > 1 && (
-        <div className="flex flex-wrap justify-center gap-3 mt-2">
-          {medications.map((med, index) => {
-            const color = COLOR_PALETTE[index % COLOR_PALETTE.length];
-            const displayName = med.charAt(0).toUpperCase() + med.slice(1).replace(/([A-Z])/g, ' $1').trim();
-            return (
-              <div key={med} className="flex items-center gap-1.5">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: color.stroke }}
-                />
-                <span className="text-xs text-text-secondary">{displayName}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };
