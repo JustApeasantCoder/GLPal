@@ -3,6 +3,8 @@ import WeightChart from './WeightChart';
 import GLP1Chart from './GLP1Chart';
 import PerformanceOverview from './PerformanceOverview';
 import TDEEDisplay from './TDEEDisplay';
+import WeightInput from './WeightInput';
+import BMIInfoTooltip from './BMIInfoTooltip';
 import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
@@ -47,7 +49,10 @@ const Dashboard: React.FC<DashboardProps> = ({
               <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
             </div>
             <div className={smallCard}>
-              <p className={text.label}>BMI</p>
+              <div className="flex justify-between items-center mb-1">
+                <p className={text.label}>BMI</p>
+                <BMIInfoTooltip />
+              </div>
               <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
                 <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
                   {weightMetrics.bmi.toFixed(1)}
@@ -135,6 +140,12 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="h-32 sm:h-40">
               <GLP1Chart data={glp1Entries} />
             </div>
+          </div>
+
+          {/* Weight Input Section */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-text-primary mb-3" style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Log Weight</h3>
+            <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} />
           </div>
         </div>
       </div>

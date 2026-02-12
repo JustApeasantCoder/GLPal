@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import SettingsMenu from './components/SettingsMenu';
 import Dashboard from './components/Dashboard';
-import WeightTab from './components/WeightTab';
 import GLP1Tab from './components/GLP1Tab';
 import DosageTab from './components/DosageTab';
 import Navigation from './components/Navigation';
@@ -17,7 +16,7 @@ import {
 } from './utils/database';
 import { generateSimulatedData } from './utils/generateData';
 
-type TabType = 'dashboard' | 'weight' | 'glp1' | 'dosage';
+type TabType = 'dashboard' | 'glp1' | 'dosage';
 
 interface TabContentProps {
   children: React.ReactNode;
@@ -169,13 +168,7 @@ return (
             />
           </TabContent>
 
-          <TabContent isActive={activeTab === 'weight'}>
-            <WeightTab
-              weights={weights}
-              profile={profile}
-              onAddWeight={handleAddWeight}
-            />
-          </TabContent>
+
 
           <TabContent isActive={activeTab === 'glp1'}>
             <GLP1Tab glp1Entries={glp1Entries} />

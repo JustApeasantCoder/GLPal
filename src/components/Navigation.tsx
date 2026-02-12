@@ -1,6 +1,6 @@
 import React from 'react';
 
-type TabType = 'dashboard' | 'weight' | 'glp1' | 'dosage';
+type TabType = 'dashboard' | 'glp1' | 'dosage';
 
 interface NavigationProps {
   activeTab: TabType;
@@ -10,7 +10,6 @@ interface NavigationProps {
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
-    { id: 'weight', label: 'Weight' },
     { id: 'glp1', label: 'GLP-1' },
     { id: 'dosage', label: 'Dosage' }
   ] as const;
