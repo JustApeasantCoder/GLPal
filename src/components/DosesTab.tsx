@@ -15,17 +15,45 @@ interface DosesTabProps {
 
 const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPeriod, onChartPeriodChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { bigCard, bigCardText } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   return (
     <div className="space-y-3">
       <div className={bigCard}>
-        <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
-
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Doses</h1>
-        <div className="h-64 sm:h-80">
-          <DosesChart data={dosesEntries} period={chartPeriod} />
+        
+        {/* Stats and Chart Section */}
+        <div className="space-y-3">
+          {/* Empty Stats Cards */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
+            <div className={smallCard}>
+              <p className={text.label}>Total Doses</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Current Streak</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Avg Dose</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Peak Level</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Time Active</p>
+            </div>
+            <div className={smallCard}>
+              <p className={text.label}>Total Amount</p>
+            </div>
+          </div>
+          
+          <div>
+            <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
+            <div className="h-64 sm:h-80">
+              <DosesChart data={dosesEntries} period={chartPeriod} />
+            </div>
+          </div>
         </div>
+
         <button
           onClick={() => setIsModalOpen(true)}
           className="w-full mt-3 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg"

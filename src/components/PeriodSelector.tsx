@@ -13,7 +13,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({ value, onChange }) => {
   const periods: { value: ChartPeriod; label: string }[] = [
     { value: 'week', label: 'Week' },
     { value: 'month', label: 'Month' },
-    { value: '90days', label: '90 days' },
+    { value: '90days', label: '90 Days' },
     { value: 'all', label: 'All Time' },
   ];
 
