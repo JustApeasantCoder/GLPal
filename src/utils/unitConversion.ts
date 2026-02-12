@@ -30,9 +30,12 @@ export const feetInchesToCm = (feet: number, inches: number): number => {
 // Weight display formatting
 export const formatWeight = (weightKg: number, unitSystem: UnitSystem = 'metric'): string => {
   if (unitSystem === 'imperial') {
-    return `${kgToLbs(weightKg).toFixed(1)} lbs`;
+    const lbs = kgToLbs(weightKg);
+    const roundedLbs = Math.round(lbs * 10) / 10;
+    return `${roundedLbs.toFixed(1)} lbs`;
   }
-  return `${weightKg.toFixed(1)} kg`;
+  const roundedKg = Math.round(weightKg * 10) / 10;
+  return `${roundedKg.toFixed(1)} kg`;
 };
 
 // Height display formatting
@@ -46,12 +49,20 @@ export const formatHeight = (heightCm: number, unitSystem: UnitSystem = 'metric'
 
 // Weight input conversion (converts user input to kg for storage)
 export const convertWeightToKg = (weight: number, fromUnit: UnitSystem): number => {
-  return fromUnit === 'imperial' ? lbsToKg(weight) : weight;
+  if (fromUnit === 'imperial') {
+    // Round to 1 decimal place to avoid floating point precision issues
+    return Math.round(lbsToKg(weight) * 100) / 100;
+  }
+  return weight;
 };
 
 // Weight output conversion (converts stored kg to display unit)
 export const convertWeightFromKg = (weightKg: number, toUnit: UnitSystem): number => {
-  return toUnit === 'imperial' ? kgToLbs(weightKg) : weightKg;
+  if (toUnit === 'imperial') {
+    // Round to 1 decimal place to avoid floating point precision issues
+    return Math.round(kgToLbs(weightKg) * 10) / 10;
+  }
+  return weightKg;
 };
 
 // Height input conversion (converts user input to cm for storage)

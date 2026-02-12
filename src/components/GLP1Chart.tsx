@@ -45,7 +45,7 @@ const GLP1Chart: React.FC<GLP1ChartProps> = ({ data }) => {
             top: 5,
             right: 5,
             left: 5,
-            bottom: 25,
+            bottom: 5,
           }}
         >
           <CartesianGrid 

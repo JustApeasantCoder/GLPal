@@ -1,0 +1,77 @@
+# GLPal Project Configuration for mgrep
+
+## Search Patterns
+# Add common search patterns for GLPal development
+
+### Weight & Health Data
+weight tracking
+goal weight
+bmi calculation
+tdee calculation
+weight loss
+glp1 medication
+medication dose
+body measurements
+calorie deficit
+
+### React & Components  
+component props
+state management
+useEffect hook
+useCallback hook
+input handling
+form validation
+user settings
+
+### Data & Storage
+localStorage
+database operations
+data persistence
+unit conversion
+metric imperial
+weight formatting
+date formatting
+
+### UI & Styling
+tailwind css
+responsive design
+dark mode
+theme provider
+button styles
+form layout
+modal dialog
+
+### Error & Debug
+error handling
+validation error
+debug console
+warning message
+typescript error
+eslint warning
+build error
+
+### Performance & Optimization
+performance issue
+slow rendering
+memory leak
+optimization
+bundle size
+debounce input
+throttle function
+
+### Testing & Quality
+test coverage
+unit test
+integration test
+component testing
+accessibility
+user experience
+ux improvement
+
+### Development Workflow
+code review
+refactoring
+type safety
+documentation
+git commit
+deployment build

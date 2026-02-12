@@ -1,0 +1,33 @@
+# mgrep Configuration for GLPal Project
+# Use: mgrep "search term" or mgrep --help
+
+# Common Component Searches
+component=src/components
+hook=src/hooks
+utils=src/utils
+service=src/services
+type=src/types.ts
+
+# Quick Search Aliases (you can add more as needed)
+weight=weight, goal, lbs, kg, weight loss, weight entry, chart, analytics, tracking, input
+bmi=BMI, body mass, bmi category, bmi calculation, obese, overweight
+tdee=calorie, metabolism, basal, activity, energy, TDEE, BMR
+glp1=GLP1, medication, dose, semaglutide, tirzepatide, concentration, injection
+input=form, field, validation, change, handler, update, debounce
+state=useState, state, profile, settings, management
+theme=dark, mode, styling, tailwind, css, purple
+test=unit test, coverage, jest, testing, spec
+build=webpack, error, compile, typescript, TS, lint
+save=localStorage, database, persistence, storage, write
+unit=conversion, metric, imperial, height, feet, inches
+
+# File Extensions
+--type ts,tsx,js,jsx
+
+# Directories to Search
+--path src
+--exclude node_modules,build,.git,coverage
+
+# Result Formatting
+--context 2
+--number 10

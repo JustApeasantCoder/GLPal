@@ -22,19 +22,40 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onClose,
 }) => {
   const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
+  const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
+
+  const unitSystem = localProfile.unitSystem || 'metric';
 
   // Update local profile when parent profile changes
   useEffect(() => {
     setLocalProfile(profile);
-  }, [profile]);
+    // Sync pending goal weight with new profile data - no auto decimal
+    if (profile.goalWeight) {
+      const convertedValue = convertWeightFromKg(profile.goalWeight, unitSystem);
+      setPendingGoalWeight(convertedValue % 1 === 0 ? convertedValue.toString() : convertedValue.toFixed(1));
+    } else {
+      setPendingGoalWeight('');
+    }
+  }, [profile, unitSystem]);
+
+  // Update pending value when unit system changes
+  useEffect(() => {
+    if (localProfile.goalWeight) {
+      const convertedValue = convertWeightFromKg(localProfile.goalWeight, unitSystem);
+      setPendingGoalWeight(convertedValue % 1 === 0 ? convertedValue.toString() : convertedValue.toFixed(1));
+    } else {
+      setPendingGoalWeight('');
+    }
+  }, [unitSystem, localProfile.goalWeight]);
 
   if (!isOpen) return null;
 
-  const unitSystem = localProfile.unitSystem || 'metric';
-
-  // Convert goal weight to display units
+  // Convert goal weight to display units - no unnecessary decimals
   const goalWeightDisplayValue = localProfile.goalWeight 
-    ? convertWeightFromKg(localProfile.goalWeight, unitSystem)
+    ? (() => {
+        const converted = convertWeightFromKg(localProfile.goalWeight, unitSystem);
+        return converted % 1 === 0 ? converted.toString() : converted.toFixed(1);
+      })()
     : '';
 
   const handleUnitSystemChange = (newUnitSystem: UnitSystem) => {
@@ -44,19 +65,31 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   };
 
   const handleGoalWeightChange = (displayValue: string) => {
+    // Update local display immediately - instant responsive feel
+    setPendingGoalWeight(displayValue);
+    
     if (!displayValue) {
-      const updatedProfile = { ...localProfile, goalWeight: undefined };
-      setLocalProfile(updatedProfile);
-      onProfileUpdate(updatedProfile);
+      setLocalProfile({ ...localProfile, goalWeight: undefined });
       return;
     }
     
     const displayWeight = parseFloat(displayValue);
-    if (displayWeight > 0) {
+    if (displayWeight > 0 && !isNaN(displayWeight)) {
       const weightInKg = convertWeightToKg(displayWeight, unitSystem);
-      const updatedProfile = { ...localProfile, goalWeight: weightInKg };
-      setLocalProfile(updatedProfile);
-      onProfileUpdate(updatedProfile);
+      setLocalProfile({ ...localProfile, goalWeight: weightInKg });
+    }
+  };
+
+  const handleGoalWeightBlur = () => {
+    // Only update parent when user is done typing
+    if (pendingGoalWeight !== '') {
+      const displayWeight = parseFloat(pendingGoalWeight);
+      if (displayWeight > 0 && !isNaN(displayWeight)) {
+        const weightInKg = convertWeightToKg(displayWeight, unitSystem);
+        onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
+      } else if (!displayWeight) {
+        onProfileUpdate({ ...localProfile, goalWeight: undefined });
+      }
     }
   };
 
@@ -106,19 +139,20 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               <div className="space-y-4 mt-4">
                 <div>
                   <label htmlFor="goalWeight" className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
-                    Goal Weight {profile.unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
+                    Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
                   </label>
-                  <input
-                    type="number"
-                    id="goalWeight"
-                    step="0.1"
-                    min={unitSystem === 'imperial' ? "66" : "30"}
-                    max={unitSystem === 'imperial' ? "661" : "300"}
-                    value={goalWeightDisplayValue}
-                    onChange={(e) => handleGoalWeightChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-                    placeholder={`Enter your goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                  />
+                   <input
+                     type="number"
+                     id="goalWeight"
+                     step="0.1"
+                     min={unitSystem === 'imperial' ? "66" : "30"}
+                     max={unitSystem === 'imperial' ? "661" : "300"}
+                     value={pendingGoalWeight || goalWeightDisplayValue}
+                     onChange={(e) => handleGoalWeightChange(e.target.value)}
+                     onBlur={handleGoalWeightBlur}
+                     className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+                     placeholder={`Enter your goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                   />
                 </div>
               </div>
             </div>

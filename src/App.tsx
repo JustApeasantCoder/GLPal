@@ -16,7 +16,6 @@ import {
   saveUserProfile 
 } from './utils/database';
 import { generateSimulatedData } from './utils/generateData';
-import { debounce } from './utils/common';
 
 type TabType = 'dashboard' | 'weight' | 'glp1' | 'dosage';
 
@@ -54,12 +53,10 @@ function App() {
     unitSystem: 'metric',
   });
 
-  // Create debounced save function to prevent excessive localStorage writes
-  const debouncedSave = useCallback(
-    debounce((newProfile: UserProfile) => {
-      saveUserProfile(newProfile);
-    }, 500) // 500ms debounce
-  , []);
+  // Save profile immediately for responsive input experience
+  const handleSave = useCallback((newProfile: UserProfile) => {
+    saveUserProfile(newProfile);
+  }, []);
 
   // Initialize database and load data
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,9 +193,9 @@ return (
           // Update UI state immediately for responsive experience
           setProfile(newProfile);
           
-          // Debounce the actual save operation
-          debouncedSave(newProfile);
-        }, [])}
+          // Save immediately for responsive input
+          handleSave(newProfile);
+        }, [handleSave])}
         isDarkMode={isDarkMode}
         onThemeToggle={toggleTheme}
         isOpen={isSettingsOpen}
