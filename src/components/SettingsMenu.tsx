@@ -41,7 +41,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             {/* User Settings Section */}
             <div>
               <h3 className="text-lg font-medium text-text-primary mb-4" style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : '0 0 15px rgba(45,27,78,0.2)' }}>User Settings</h3>
-              <TDEECalculator profile={profile} onProfileUpdate={onProfileUpdate} onClose={onClose} />
+              <TDEECalculator profile={profile} onProfileUpdate={onProfileUpdate} />
               
               {/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
@@ -55,26 +55,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     step="0.1"
                     min="30"
                     max="300"
-                    defaultValue={profile.goalWeight || 80}
+                    value={profile.goalWeight || ''}
+                    onChange={(e) => onProfileUpdate({ ...profile, goalWeight: parseFloat(e.target.value) || undefined })}
                     className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
                     placeholder="Enter your goal weight"
                   />
-                </div>
-                
-                <div className="flex justify-end gap-3 mt-6">
-                  <button
-                    onClick={() => {
-                      const input = document.getElementById('goalWeight') as HTMLInputElement;
-                      const newGoalWeight = parseFloat(input?.value || '80');
-                      if (newGoalWeight && newGoalWeight > 0 && newGoalWeight < 500) {
-                        const updatedProfile = { ...profile, goalWeight: newGoalWeight };
-                        onProfileUpdate(updatedProfile);
-                      }
-                    }}
-                    className="bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white px-4 py-2 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
-                  >
-                    Save Goal
-                  </button>
                 </div>
               </div>
             </div>
@@ -105,10 +90,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             </div>
 
             {/* Close Button */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-card-border">
+            <div className="flex justify-end pt-4 border-t border-card-border">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300"
+                className="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300"
               >
                 Close
               </button>
