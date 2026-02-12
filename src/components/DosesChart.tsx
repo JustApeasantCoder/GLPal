@@ -4,18 +4,14 @@ import { GLP1Entry } from '../types';
 import { ChartPeriod } from '../hooks';
 import { calculateGLP1Concentration } from '../utils/calculations';
 
-const MEDICATION_COLORS: Record<string, { stroke: string; fill: string }> = {
-  semaglutide: { stroke: '#9C7BD3', fill: 'rgba(156, 123, 211, 0.3)' },
-  tirzepatide: { stroke: '#4ADEA8', fill: 'rgba(74, 222, 168, 0.3)' },
-  retatrutide: { stroke: '#F59E0B', fill: 'rgba(245, 158, 11, 0.3)' },
-  liraglutide: { stroke: '#EF4444', fill: 'rgba(239, 68, 68, 0.3)' },
-  dulaglutide: { stroke: '#3B82F6', fill: 'rgba(59, 130, 246, 0.3)' },
-  other: { stroke: '#94A3B8', fill: 'rgba(148, 163, 184, 0.3)' },
-};
-
-const getMedicationColor = (medication: string) => {
-  return MEDICATION_COLORS[medication] || MEDICATION_COLORS.other;
-};
+const COLOR_PALETTE = [
+  { stroke: '#9C7BD3', fill: 'rgba(156, 123, 211, 0.3)', name: 'Purple' },
+  { stroke: '#4ADEA8', fill: 'rgba(74, 222, 168, 0.3)', name: 'Mint' },
+  { stroke: '#F59E0B', fill: 'rgba(245, 158, 11, 0.3)', name: 'Orange' },
+  { stroke: '#EF4444', fill: 'rgba(239, 68, 68, 0.3)', name: 'Red' },
+  { stroke: '#3B82F6', fill: 'rgba(59, 130, 246, 0.3)', name: 'Blue' },
+  { stroke: '#94A3B8', fill: 'rgba(148, 163, 184, 0.3)', name: 'Gray' },
+];
 
 interface DosesChartProps {
   data: GLP1Entry[];
@@ -50,11 +46,16 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
     return sorted.filter(entry => new Date(entry.date) >= startDate);
   }, [data, period]);
 
-  const { medications, chartData } = useMemo(() => {
-    if (filteredData.length === 0) return { medications: [] as string[], chartData: [] as any[] };
+  const { medications, chartData, medicationColors } = useMemo(() => {
+    if (filteredData.length === 0) return { medications: [] as string[], chartData: [] as any[], medicationColors: {} as Record<string, { stroke: string; fill: string }> };
 
     const medsArray = filteredData.map(e => e.medication);
     const meds = Array.from(new Set(medsArray));
+    
+    const medicationColors: Record<string, { stroke: string; fill: string }> = {};
+    meds.forEach((med, index) => {
+      medicationColors[med] = COLOR_PALETTE[index % COLOR_PALETTE.length];
+    });
     
     const dosesByMed: Record<string, { date: Date; dose: number }[]> = {};
     meds.forEach(med => {
@@ -97,56 +98,56 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
           new Date(d)
         );
         dataPoint[med] = parseFloat(concentration.toFixed(3));
-      });
-
-      const allPeaks: { med: string; dose: number }[] = [];
-      meds.forEach(med => {
+        
         const peak = peakData[med].find(p => p.date === dateStr);
-        if (peak) allPeaks.push({ med, dose: peak.dose });
+        if (peak) {
+          dataPoint[`${med}Peak`] = peak.dose;
+        }
       });
-      dataPoint.peaks = allPeaks;
 
       generatedData.push(dataPoint);
     }
 
-    return { medications: meds, chartData: generatedData };
+    return { medications: meds, chartData: generatedData, medicationColors };
   }, [filteredData]);
 
   const hasData = filteredData.length > 0;
 
-  const CustomDot = (props: { cx?: number; cy?: number; payload?: { peaks?: { med: string; dose: number }[] } }) => {
-    const { cx, cy, payload } = props;
-    const peaks = payload?.peaks;
-    if (!peaks?.length || cx === undefined || cy === undefined) return null;
+  const getColor = (medication: string) => {
+    return medicationColors[medication] || COLOR_PALETTE[COLOR_PALETTE.length - 1];
+  };
 
+  const CustomDot = (props: { cx?: number; cy?: number; payload?: any; dataKey?: string }) => {
+    const { cx, cy, payload, dataKey } = props;
+    if (!dataKey || cx === undefined || cy === undefined) return null;
+    
+    const peakKey = `${dataKey}Peak`;
+    const dose = payload?.[peakKey];
+    
+    if (!dose) return null;
+    
+    const color = getColor(dataKey);
     return (
       <g>
-        {peaks.map((peak, i) => {
-          const color = getMedicationColor(peak.med);
-          return (
-            <g key={`${peak.med}-${i}`}>
-              <circle
-                cx={cx + i * 20 - (peaks.length - 1) * 10}
-                cy={cy}
-                r={5}
-                fill={color.stroke}
-                stroke="#2D1B4E"
-                strokeWidth={2}
-                filter="drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))"
-              />
-              <text
-                x={cx + i * 20 - (peaks.length - 1) * 10 + 10}
-                y={cy - 10}
-                textAnchor="middle"
-                fill={color.stroke}
-                fontSize={10}
-                fontWeight={600}
-              >
-                {peak.dose}mg
-              </text>
-            </g>
-          );
-        })}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={5}
+          fill={color.stroke}
+          stroke="#2D1B4E"
+          strokeWidth={2}
+          filter="drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))"
+        />
+        <text
+          x={cx + 10}
+          y={cy - 10}
+          textAnchor="middle"
+          fill={color.stroke}
+          fontSize={10}
+          fontWeight={600}
+        >
+          {dose}mg
+        </text>
       </g>
     );
   };
@@ -217,7 +218,7 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
             labelStyle={{ color: '#B19CD9' }}
           />
           {medications.map(med => {
-            const color = getMedicationColor(med);
+            const color = getColor(med);
             return (
               <Area 
                 key={med}
@@ -238,6 +239,23 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
           })}
         </AreaChart>
       </ResponsiveContainer>
+      {medications.length > 1 && (
+        <div className="flex flex-wrap justify-center gap-3 mt-2">
+          {medications.map((med, index) => {
+            const color = COLOR_PALETTE[index % COLOR_PALETTE.length];
+            const displayName = med.charAt(0).toUpperCase() + med.slice(1).replace(/([A-Z])/g, ' $1').trim();
+            return (
+              <div key={med} className="flex items-center gap-1.5">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: color.stroke }}
+                />
+                <span className="text-xs text-text-secondary">{displayName}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
