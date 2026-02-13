@@ -1,161 +1,167 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { WeightEntry, UnitSystem } from '../types';
+import React, { useMemo } from 'react';
+import ReactECharts from 'echarts-for-react';
+import { WeightEntry } from '../types';
 import { formatWeight } from '../utils/unitConversion';
 
 interface WeightChartProps {
   data: WeightEntry[];
   goalWeight: number;
-  unitSystem?: UnitSystem;
+  unitSystem?: 'metric' | 'imperial';
 }
 
 const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem = 'metric' }) => {
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const CustomYAxisTick = ({ x, y, payload, index, visibleTicksCount }: any) => {
-    // Hide first and last tick
-    if (index === 0 || index === visibleTicksCount - 1) {
-      return null;
+  const { chartOption } = useMemo(() => {
+    if (data.length === 0) {
+      return { chartOption: {} };
     }
 
+    const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    const chartData = sortedData.map(entry => {
+      const date = new Date(entry.date);
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        weight: entry.weight,
+      };
+    });
+
+    const weights = sortedData.map(e => e.weight);
+    const minWeight = Math.min(...weights);
+    const maxWeight = Math.max(...weights);
+    const padding = (maxWeight - minWeight) * 0.1 || 5;
+
+    const option = {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(20, 15, 35, 0.95)',
+        borderColor: 'rgba(177, 156, 217, 0.4)',
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: [12, 16],
+        extraCssText: 'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);',
+        textStyle: { color: '#E2E8F0', fontSize: 13 },
+        formatter: (params: any) => {
+          if (!params || !params.length) return '';
+          const item = params[0];
+          const weight = item.value[1];
+          const formattedWeight = formatWeight(weight, unitSystem);
+          return `<div style="font-weight: 600; margin-bottom: 4px;">${item.axisValue}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #9C7BD3; box-shadow: 0 0 6px #9C7BD380;"></span>
+              <span style="color: #94a3b8;">Weight:</span>
+              <span style="font-weight: 600; color: #fff;">${formattedWeight}</span>
+            </div>`;
+        },
+      },
+      grid: {
+        top: 10,
+        left: 10,
+        right: 10,
+        bottom: 25,
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: chartData.map(d => d.date),
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
+        axisTick: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
+        axisLabel: { fontSize: 12, color: '#94a3b8', margin: 10 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        position: 'right',
+        min: Math.floor(minWeight - padding),
+        max: Math.ceil(maxWeight + padding),
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { 
+          color: '#94a3b8',
+          fontSize: 11,
+          margin: 10,
+          formatter: (value: number) => formatWeight(value, unitSystem),
+        },
+        splitLine: {
+          lineStyle: { color: 'rgba(156, 123, 211, 0.1)', type: 'dashed' },
+        },
+      },
+      series: [
+        {
+          name: 'Weight',
+          type: 'line',
+          smooth: true,
+          showSymbol: false,
+          symbol: 'circle',
+          symbolSize: 10,
+          lineStyle: { width: 3, color: '#9C7BD3' },
+          itemStyle: { 
+            color: '#9C7BD3',
+            borderColor: '#2D1B4E',
+            borderWidth: 2,
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(156, 123, 211, 0.3)' },
+                { offset: 1, color: 'rgba(156, 123, 211, 0.02)' },
+              ],
+            },
+          },
+          data: chartData.map(d => [d.date, d.weight]),
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            lineStyle: { color: 'rgba(177, 156, 217, 0.6)', type: 'dashed', width: 2 },
+            data: [
+              { yAxis: goalWeight }
+            ],
+            label: { 
+              show: true, 
+              position: 'insideStartTop',
+              formatter: 'Goal',
+              color: '#B19CD9',
+              fontSize: 12,
+              padding: [0, 0, 0, 20],
+            },
+          },
+        },
+      ],
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0,
+          end: 100,
+          zoomOnMouseWheel: true,
+          moveOnMouseWheel: true,
+        },
+      ],
+    };
+
+    return { chartOption: option };
+  }, [data, goalWeight, unitSystem]);
+
+  if (data.length === 0) {
     return (
-      <text x={x+22} y={y} textAnchor="start" fill="#94a3b8" fontSize={12}>
-        {formatWeight(payload.value, unitSystem)}
-      </text>
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className="text-center text-text-muted">
+          <p className="text-sm">No weight data yet</p>
+          <p className="text-xs mt-1">Log your first weight to see the chart</p>
+        </div>
+      </div>
     );
-  };
-
-  // Generate indices for dots to show (up to 12 points evenly distributed)
-const getDotIndices = (dataLength: number): number[] => {
-  if (dataLength <= 12) {
-    // Show all points if 12 or fewer
-    return Array.from({ length: dataLength }, (_, i) => i);
   }
-  
-  // Show first, last, and 10 evenly distributed points in between
-  const indices = new Set<number>();
-  indices.add(0); // Always show first point
-  indices.add(dataLength - 1); // Always show last point
-  
-  // Add 10 evenly distributed points between first and last
-  const step = (dataLength - 1) / 11;
-  for (let i = 1; i <= 10; i++) {
-    indices.add(Math.round(i * step));
-  }
-  
-  return Array.from(indices).sort((a, b) => a - b);
-};
-
-// Remove duplicates while preserving order (keep first occurrence)
-  const dedupedData = data.filter((entry, index, self) => 
-    data.findIndex(e => e.weight === entry.weight) === index
-  );
-  
-  const chartData = dedupedData.map(entry => ({
-    ...entry,
-    displayDate: formatDate(entry.date),
-    weight: entry.weight, // Keep raw kg data for chart
-  }));
-
-const dotIndices = new Set(getDotIndices(data.length));
 
   return (
-    <div className="w-full h-[230px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={chartData}
-          margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(156, 123, 211, 0.1)" />
-
-          <XAxis
-            dataKey="displayDate"
-            padding={{ left: 10, right: 10 }}
-            tick={{ dy:-6, fontSize: 12, fill: '#94a3b8' }}
-            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
-            tickMargin={10}
-          />
-
-          <YAxis
-            orientation="left"
-            width={1}
-            domain={[
-                (dataMin: number) => {
-                  const min = Math.floor(dataMin);
-                  return Math.max(min - 1, 0);
-                },
-                (dataMax: number) => {
-                  const max = Math.ceil(dataMax);
-                  return max + 1;
-                }
-              ]}
-            axisLine={{ stroke: 'rgba(156, 123, 211, 0.2)' }}
-            tick={<CustomYAxisTick />}
-            tickCount={6}
-            tickMargin={10}
-          />
-
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'rgba(45, 27, 78, 0.8)', 
-              border: '1px solid rgba(177, 156, 217, 0.3)',
-              borderRadius: '8px',
-              boxShadow: '0 0 20px rgba(177, 156, 217, 0.3)'
-            }}
-            labelStyle={{ color: '#B19CD9' }}
-            itemStyle={{ color: '#9C7BD3' }}
-            formatter={(value: number | undefined) => value !== undefined ? [formatWeight(value, unitSystem), 'Weight'] : ['', '']}
-          />
-          <ReferenceLine 
-            y={goalWeight} 
-            stroke="rgba(177, 156, 217, 0.8)" 
-            strokeDasharray="5 5" 
-            label={{ value: "Goal", fill: '#B19CD9', fontSize: 12 }}
-          />
-          <Line 
-            type="monotone" 
-            dataKey="weight" 
-            stroke="url(#purpleGradient)" 
-            strokeWidth={3}
-            dot={(props: any) => {
-              const { cx, cy, index } = props;
-              // Only show dots for selected indices
-              if (dotIndices.has(index)) {
-                return (
-                  <circle 
-                    cx={cx} 
-                    cy={cy} 
-                    r={5}
-                    fill="#9C7BD3" 
-                    stroke="#2D1B4E"
-                    strokeWidth={2}
-                    filter="drop-shadow(0 0 8px rgba(156, 123, 211, 0.6))"
-                  />
-                );
-              }
-              // Hide other dots
-              return null;
-            }}
-            activeDot={{ 
-              r: 7,
-              fill: '#B19CD9',
-              stroke: '#2D1B4E',
-              strokeWidth: 2,
-              filter: 'drop-shadow(0 0 12px rgba(177, 156, 217, 0.8))'
-            }}
-          />
-          <defs>
-            <linearGradient id="purpleGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#2D1B4E" />
-              <stop offset="50%" stopColor="#9C7BD3" />
-              <stop offset="100%" stopColor="#B19CD9" />
-            </linearGradient>
-          </defs>
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="w-full h-full relative">
+      <ReactECharts
+        option={chartOption}
+        style={{ height: '100%', width: '100%', opacity: 1 }}
+        opts={{ renderer: 'svg' }}
+      />
     </div>
   );
 };
