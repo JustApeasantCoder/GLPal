@@ -91,17 +91,24 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
     });
     const totalCurrentDose = currentDoses.reduce((sum, d) => sum + d.dose, 0);
     
-    const lastDoseDate = new Date(sorted[0]?.date);
+    const sortedAsc = [...dosesEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const today = new Date();
-    const daysSinceLastDose = Math.floor((today.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
-    const nextDueDays = Math.max(0, 7 - daysSinceLastDose);
-    const nextDueDate = new Date(lastDoseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const getOrdinal = (n: number) => {
-      const s = ['th', 'st', 'nd', 'rd'];
-      const v = n % 100;
-      return n + (s[(v - 20) % 10] || s[v] || s[0]);
-    };
-    const nextDueDateStr = `(${getOrdinal(nextDueDate.getDate())})`;
+    today.setHours(0, 0, 0, 0);
+    
+    const nextDose = sortedAsc.find(d => {
+      const doseDate = new Date(d.date + 'T00:00:00');
+      doseDate.setHours(0, 0, 0, 0);
+      return doseDate >= today;
+    });
+    
+    let nextDueDays = 0;
+    let nextDueDateStr = 'N/A';
+    if (nextDose) {
+      const nextDoseDate = new Date(nextDose.date);
+      nextDoseDate.setHours(0, 0, 0, 0);
+      nextDueDays = Math.ceil((nextDoseDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
     
     const halfLife = sorted[0]?.halfLifeHours || 168;
     const currentLevel = calculateGLP1Concentration(
@@ -135,7 +142,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
             <div className={smallCard}>
               <p className={text.label}>Next Due</p>
               <p className={text.totalLossValue} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>{stats.nextDueDays} Day(s)</span>
+                <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>{stats.nextDueDays > 0 ? `${stats.nextDueDays} Day${stats.nextDueDays > 1 ? 's' : ''}` : 'Today'}</span>
                 <span className={text.percentage}>{stats.nextDueDateStr}</span>
               </p>
             </div>
