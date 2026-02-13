@@ -206,6 +206,27 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       ];
     }).flat();
     
+    // Add today marker line to the first series
+    if (series.length > 0 && todayIndex >= 0) {
+      const todayDateStr = xAxisDates[todayIndex];
+      (series[0] as any).markLine = {
+        silent: true,
+        symbol: 'none',
+        lineStyle: { color: '#4ADEA8', type: 'solid', width: 2 },
+        label: { 
+          show: true, 
+          position: 'start', 
+          formatter: 'Today',
+          color: '#4ADEA8',
+          fontSize: 11,
+          padding: [4, 8],
+        },
+        data: [
+          { xAxis: todayDateStr }
+        ],
+      };
+    }
+    
     const firstDateTime = firstDate.getTime();
     const lastDateTime = lastDate.getTime();
     const totalDays = Math.floor((lastDateTime - firstDateTime) / (24 * 60 * 60 * 1000));
@@ -276,18 +297,6 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         axisTick: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
         axisLabel: { fontSize: 12, color: '#94a3b8' },
         splitLine: { show: false },
-        axisPointer: {
-          type: 'line',
-          lineStyle: {
-            color: '#4ADEA8',
-            width: 1,
-            type: 'solid',
-          },
-          label: {
-            show: true,
-            backgroundColor: '#4ADEA8',
-          },
-        },
       },
       yAxis: {
         type: 'value',
