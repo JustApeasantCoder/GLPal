@@ -11,7 +11,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'doses', label: 'Doses' },
-    { id: 'dosage', label: 'Dosage Calculator' }
+    { id: 'dosage', label: 'Calc' }
   ] as const;
 
   return (
