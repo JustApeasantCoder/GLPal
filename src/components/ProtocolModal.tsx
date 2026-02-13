@@ -136,6 +136,28 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
               style={{ colorScheme: 'dark' }}
             />
+            <div className="flex gap-1 mt-2">
+              {[
+                { label: '1W', days: 7 },
+                { label: '2W', days: 14 },
+                { label: '1M', days: 30 },
+                { label: '1Y', days: 365 },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    if (startDate) {
+                      const endDate = new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000);
+                      setStopDate(endDate.toISOString().split('T')[0]);
+                    }
+                  }}
+                  className="flex-1 px-2 py-1 text-xs rounded border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] hover:bg-[#B19CD9]/20"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

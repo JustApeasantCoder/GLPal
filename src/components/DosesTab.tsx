@@ -7,7 +7,7 @@ import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateGLP1Concentration } from '../utils/calculations';
-import { addGLP1GeneratedEntry } from '../utils/database';
+import { addGLP1GeneratedEntry, clearGLP1Entries } from '../utils/database';
 import { MEDICATIONS, formatDate } from '../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/GLP1Service';
 
@@ -33,6 +33,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
+    clearGLP1Entries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     generatedDoses.forEach(entry => addGLP1GeneratedEntry(entry));
   };

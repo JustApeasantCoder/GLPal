@@ -51,8 +51,15 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       return { chartOption: {} };
     }
     
-    const firstDate = new Date(sortedData[0].date);
-    const lastDate = new Date(sortedData[sortedData.length - 1].date);
+    let firstDate = new Date(sortedData[0].date);
+    let lastDate = new Date(sortedData[sortedData.length - 1].date);
+    
+    // Ensure we show at least 14 days (2 weeks) of data
+    const minDays = 14;
+    const dataRangeDays = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
+    if (dataRangeDays < minDays) {
+      lastDate = new Date(firstDate.getTime() + minDays * 24 * 60 * 60 * 1000);
+    }
     
     // Calculate zoom based on last data date (not today)
     const lastDataDate = new Date(lastDate);
@@ -151,9 +158,10 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
           data: lineData,
         },
         {
-          name: med + '_dots',
+          name: med,
           type: 'scatter',
           z: 10,
+          showInLegend: false,
           emphasis: {
             scale: 1.2,
           },
@@ -171,23 +179,27 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       color: meds.map(med => medicationColors[med]?.stroke || '#9C7BD3'),
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(45, 27, 78, 0.8)',
-        borderColor: 'rgba(177, 156, 217, 0.3)',
-        borderRadius: 8,
-        boxShadow: '0 0 20px rgba(177, 156, 217, 0.3)',
-        textStyle: { color: '#B19CD9' },
+        backgroundColor: 'rgba(20, 15, 35, 0.95)',
+        borderColor: 'rgba(177, 156, 217, 0.4)',
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: [12, 16],
+        extraCssText: 'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);',
+        textStyle: { color: '#E2E8F0', fontSize: 13 },
         formatter: (params: any) => {
           if (!params || !params.length) return '';
-          const nonZeroParams = params.filter((p: any) => (p.value?.[1] ?? 0) > 0);
+          const filteredParams = params.filter((p: any) => p.seriesType !== 'scatter');
+          const nonZeroParams = filteredParams.filter((p: any) => (p.value?.[1] ?? 0) > 0);
           if (nonZeroParams.length === 0) return `${params[0].axisValue}<div style="color: #94a3b8; font-size: 11px;">No active dose</div>`;
           const dateStr = params[0].axisValue;
-          let html = `<div style="font-weight: 600; margin-bottom: 4px;">${dateStr}</div>`;
+          let html = `<div style="font-weight: 600; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(156, 123, 211, 0.2);">${dateStr}</div>`;
           nonZeroParams.forEach((item: any) => {
             const color = item.color || '#9C7BD3';
             const value = item.value?.[1] ?? 0;
-            html += `<div style="display: flex; align-items: center; gap: 8px; margin: 2px 0;">
-              <span style="width: 8px; height: 8px; border-radius: 50%; background: ${color};"></span>
-              <span>${item.seriesName}: <strong>${value.toFixed(1)} mg</strong></span>
+            html += `<div style="display: flex; align-items: center; gap: 10px; margin: 4px 0;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}80;"></span>
+              <span style="color: #94a3b8;">${item.seriesName}:</span>
+              <span style="font-weight: 600; color: #fff;">${value.toFixed(1)} mg</span>
             </div>`;
           });
           return html;

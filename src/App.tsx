@@ -120,7 +120,7 @@ const handleAddWeight = (newWeight: number) => {
     // Save to database (manual entry)
     addGLP1ManualEntry(newEntry);
     
-    // Update state
+    // Reload from database to ensure fresh data
     const allEntries = getAllGLP1Entries();
     setDosesEntries(allEntries);
   };

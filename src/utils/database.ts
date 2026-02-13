@@ -240,6 +240,8 @@ export const closeDatabase = (): void => {
 export const clearAllData = (): void => {
   localStorage.removeItem(STORAGE_KEYS.WEIGHT_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.GLP1_PROTOCOL);
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
   initializeDatabase();
 };
