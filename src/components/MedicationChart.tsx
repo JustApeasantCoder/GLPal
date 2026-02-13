@@ -93,10 +93,11 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
           nonZeroParams.forEach((item: any) => {
             const color = item.color || '#9C7BD3';
             const value = item.value?.[1] ?? 0;
+            const formattedValue = value < 1 ? value.toFixed(2) : value.toFixed(1);
             html += `<div style="display: flex; align-items: center; gap: 10px; margin: 4px 0;">
               <span style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}80;"></span>
               <span style="color: #94a3b8;">${item.seriesName}:</span>
-              <span style="font-weight: 600; color: #fff;">${value.toFixed(1)} mg</span>
+              <span style="font-weight: 600; color: #fff;">${formattedValue} mg</span>
             </div>`;
           });
           return html;

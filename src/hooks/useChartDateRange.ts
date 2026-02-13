@@ -3,7 +3,7 @@ import { ChartPeriod } from './useFilteredWeights';
 
 const PERIOD_WINDOW_DAYS: Record<ChartPeriod, number> = {
   week: 14,
-  month: 30,
+  month: 28,
   '90days': 90,
   all: Infinity,
 };

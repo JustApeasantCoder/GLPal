@@ -65,7 +65,7 @@ export const generateMedicationSeries = ({
       const dose = hasDose ? doseAmountByMed[med][dateStr] : undefined;
       const value = isNaN(concentration)
         ? null
-        : parseFloat(concentration.toFixed(1));
+        : concentration;
 
       const dateIndex = xAxisDates.indexOf(dateStr);
       if (dateIndex <= todayIndex) {
@@ -153,7 +153,7 @@ export const generateMedicationSeries = ({
       let lastShownValue: number | null = null;
 
       s.data = s.data.map((dot: any) => {
-        const doseValue = Math.round(dot.value[1]);
+        const doseValue = dot.value[1];
 
         let shouldShow = true;
         if (lastShownValue !== null && lastShownValue > 0) {
@@ -165,12 +165,13 @@ export const generateMedicationSeries = ({
 
         if (shouldShow) {
           lastShownValue = doseValue;
+          const formattedDoseValue = doseValue < 1 ? doseValue.toFixed(2) : doseValue.toFixed(1);
           return {
             ...dot,
             label: {
               show: true,
               position: 'top',
-              formatter: doseValue + 'mg',
+              formatter: formattedDoseValue + 'mg',
               color: '#E2E8F0',
               fontSize: 10,
               distance: 8,

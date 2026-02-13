@@ -144,8 +144,8 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               {[
                 { label: '1W', days: 7 },
                 { label: '2W', days: 14 },
-                { label: '1M', days: 30 },
-                { label: '1Y', days: 365 },
+                { label: '1M', days: 28 },
+                { label: '1Y', days: 336 },
               ].map((preset) => {
                 const isSelected = startDate && stopDate && stopDate === new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
                 return (
