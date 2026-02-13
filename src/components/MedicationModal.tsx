@@ -70,7 +70,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
         onClick={onClose}
       />
       <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Log Dose</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">+ Add Dose</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

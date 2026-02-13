@@ -216,6 +216,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                   <div className="flex-1">
                     <p className="text-sm font-medium text-text-primary">
                       {med?.name || protocol.medication} - {protocol.dose}mg
+                      {protocol.phase === 'titrate' && (
+                        <span className="ml-2 text-xs text-[#4ADEA8] font-medium">Titrate</span>
+                      )}
                     </p>
                     <p className="text-xs text-text-muted">
                       {formatDate(protocol.startDate)} → {protocol.stopDate ? formatDate(protocol.stopDate) : 'Ongoing'} ({formatFrequency(protocol.frequencyPerWeek)})

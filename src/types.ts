@@ -22,6 +22,7 @@ export interface MedicationProtocol {
   stopDate: string | null;
   halfLifeHours: number;
   isArchived?: boolean;
+  phase?: 'titrate' | 'maintenance';
 }
 
 export type GLP1Entry = MedicationEntry;

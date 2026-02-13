@@ -20,6 +20,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [stopDate, setStopDate] = useState<string>('');
   const [continuationInfo, setContinuationInfo] = useState<string | null>(null);
+  const [phase, setPhase] = useState<'titrate' | 'maintenance' | undefined>(undefined);
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [selectedDurationDays, setSelectedDurationDays] = useState<number>(() => {
     const saved = localStorage.getItem('protocolDurationDays');
@@ -38,19 +39,124 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         const filteredMeds = usedMedNames.filter(m => mainMeds.includes(m) || m !== 'Semaglutide (Ozempic/Wegovy)' && m !== 'Tirzepatide (Mounjaro/Zepbound)' && m !== 'Retatrutide' && m !== 'More Options');
         setSavedMedications(filteredMeds);
         localStorage.setItem('usedMedications', JSON.stringify(filteredMeds));
+        return filteredMeds;
       } else {
         const saved = localStorage.getItem('usedMedications');
         if (saved) {
           const parsed = JSON.parse(saved);
           setSavedMedications(parsed);
+          return parsed;
         } else {
           setSavedMedications([]);
+          return [];
         }
       }
     };
-    
-    loadMedications();
-  }, [isOpen, existingProtocols]);
+
+    if (isOpen) {
+      const loadedMeds = loadMedications();
+      
+      setConfirmAction(null);
+      if (mode === 'edit' && protocol) {
+        const med = MEDICATIONS.find(m => m.name === protocol.medication);
+        if (med) {
+          setSelectedMedication(med.id);
+        } else {
+          setSelectedMedication(protocol.medication);
+        }
+        setDose(protocol.dose.toString());
+        setFrequency(protocol.frequencyPerWeek.toString());
+        setStartDate(protocol.startDate);
+        setStopDate(protocol.stopDate || '');
+        setContinuationInfo(null);
+        setPhase(protocol.phase);
+        setShowOtherModal(false);
+        setCustomMedication('');
+      } else if (mode === 'add') {
+        const savedDuration = localStorage.getItem('protocolDurationDays');
+        const durationDays = savedDuration ? parseInt(savedDuration, 10) : 28;
+        
+        if (loadedMeds && loadedMeds.length > 0) {
+          const lastMedName = loadedMeds[loadedMeds.length - 1];
+          const med = MEDICATIONS.find(m => m.name === lastMedName);
+          if (med) {
+            const medId = med.id;
+            const medData = med;
+            
+            let newDose = medData.defaultDose.toString();
+            let newStartDate = new Date().toISOString().split('T')[0];
+            let continuation: string | null = null;
+            let isTitration = false;
+            
+            const medProtocols = (existingProtocols || [])
+              .filter(p => p.medication === medData.name || p.medication === medId);
+            
+            if (medProtocols.length > 0) {
+              const sortedProtocols = [...medProtocols].sort((a, b) => {
+                if (!a.stopDate) return 1;
+                if (!b.stopDate) return -1;
+                return new Date(b.stopDate).getTime() - new Date(a.stopDate).getTime();
+              });
+              
+              const lastProtocol = sortedProtocols[0];
+              
+              if (lastProtocol.stopDate) {
+                const lastEndDate = new Date(lastProtocol.stopDate);
+                newStartDate = lastEndDate.toISOString().split('T')[0];
+                continuation = `Continues from ${medData.name} protocol (ended ${lastProtocol.stopDate})`;
+                
+                const endDate = new Date(newStartDate);
+                endDate.setDate(endDate.getDate() + durationDays);
+                setStopDate(endDate.toISOString().split('T')[0]);
+              } else {
+                continuation = `Continues from ${medData.name} protocol (ongoing)`;
+                const endDate = new Date(newStartDate);
+                endDate.setDate(endDate.getDate() + durationDays);
+                setStopDate(endDate.toISOString().split('T')[0]);
+              }
+
+              if (medData.titrationDoses) {
+                const lastDoseIndex = medData.titrationDoses.indexOf(lastProtocol.dose);
+                if (lastDoseIndex >= 0 && lastDoseIndex < medData.titrationDoses.length - 1) {
+                  newDose = medData.titrationDoses[lastDoseIndex + 1].toString();
+                  isTitration = true;
+                }
+              }
+            }
+            
+            setSelectedMedication(medId);
+            setStartDate(newStartDate);
+            setDose(newDose);
+            setContinuationInfo(continuation);
+            setPhase(isTitration ? 'titrate' : undefined);
+            setFrequency('1');
+          } else {
+            setSelectedMedication('');
+            setDose('');
+            setFrequency('1');
+            const today = new Date().toISOString().split('T')[0];
+            setStartDate(today);
+            const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
+            setStopDate(defaultEndDate.toISOString().split('T')[0]);
+            setContinuationInfo(null);
+            setPhase(undefined);
+          }
+        } else {
+          setSelectedMedication('');
+          setDose('');
+          setFrequency('1');
+          const today = new Date().toISOString().split('T')[0];
+          setStartDate(today);
+          const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
+          setStopDate(defaultEndDate.toISOString().split('T')[0]);
+          setContinuationInfo(null);
+          setPhase(undefined);
+        }
+        setShowOtherModal(false);
+        setCustomMedication('');
+      }
+    }
+  }, [isOpen, mode, protocol, existingProtocols]);
 
   const getAllMedicationIds = () => {
     const mainIds = ['semaglutide', 'tirzepatide', 'retatrutide'];
@@ -81,59 +187,27 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     localStorage.setItem('protocolDurationDays', selectedDurationDays.toString());
   }, [selectedDurationDays]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setConfirmAction(null);
-      if (mode === 'edit' && protocol) {
-        const med = MEDICATIONS.find(m => m.name === protocol.medication);
-        if (med) {
-          setSelectedMedication(med.id);
-        } else {
-          setSelectedMedication(protocol.medication);
-        }
-        setDose(protocol.dose.toString());
-        setFrequency(protocol.frequencyPerWeek.toString());
-        setStartDate(protocol.startDate);
-        setStopDate(protocol.stopDate || '');
-        setContinuationInfo(null);
-        setShowOtherModal(false);
-        setCustomMedication('');
-      } else if (mode === 'add') {
-        const savedDuration = localStorage.getItem('protocolDurationDays');
-        const durationDays = savedDuration ? parseInt(savedDuration, 10) : 28;
-        setSelectedMedication('');
-        setDose('');
-        setFrequency('1');
-        const today = new Date().toISOString().split('T')[0];
-        setStartDate(today);
-        const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
-        setStopDate(defaultEndDate.toISOString().split('T')[0]);
-        setContinuationInfo(null);
-        setShowOtherModal(false);
-        setCustomMedication('');
-      }
-    }
-  }, [isOpen, mode, protocol]);
-
-  const handleMedicationSelect = (medicationId: string) => {
-    setSelectedMedication(medicationId);
+  const applyMedicationDefaults = (medicationId: string) => {
     const med = MEDICATIONS.find(m => m.id === medicationId);
-    
-    let newDose = med?.defaultDose.toString() || '1';
-    let newStartDate = new Date().toISOString().split('T')[0];
+    if (!med) return;
 
-    if (mode === 'add' && existingProtocols && med) {
+    let newDose = med.defaultDose.toString();
+    let newStartDate = new Date().toISOString().split('T')[0];
+    let isTitration = false;
+
+    if (mode === 'add' && existingProtocols) {
       const medName = med.name;
       const medProtocols = existingProtocols
-        .filter(p => p.medication === medName || p.medication === medicationId)
-        .filter(p => p.stopDate !== null);
+        .filter(p => p.medication === medName || p.medication === medicationId);
       
       if (medProtocols.length > 0) {
-        const lastProtocol = medProtocols.reduce((latest, p) => {
-          const pEnd = new Date(p.stopDate!);
-          const lEnd = new Date(latest.stopDate!);
-          return pEnd > lEnd ? p : latest;
+        const sortedProtocols = [...medProtocols].sort((a, b) => {
+          if (!a.stopDate) return 1;
+          if (!b.stopDate) return -1;
+          return new Date(b.stopDate).getTime() - new Date(a.stopDate).getTime();
         });
+        
+        const lastProtocol = sortedProtocols[0];
         
         if (lastProtocol.stopDate) {
           const lastEndDate = new Date(lastProtocol.stopDate);
@@ -143,21 +217,35 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           const endDate = new Date(newStartDate);
           endDate.setDate(endDate.getDate() + selectedDurationDays);
           setStopDate(endDate.toISOString().split('T')[0]);
+        } else {
+          newStartDate = new Date().toISOString().split('T')[0];
+          setContinuationInfo(`Continues from ${med.name} protocol (ongoing)`);
+          
+          const endDate = new Date(newStartDate);
+          endDate.setDate(endDate.getDate() + selectedDurationDays);
+          setStopDate(endDate.toISOString().split('T')[0]);
         }
 
-        if (medicationId === 'semaglutide' && med.titrationDoses) {
+        if (med.titrationDoses) {
           const lastDoseIndex = med.titrationDoses.indexOf(lastProtocol.dose);
           if (lastDoseIndex >= 0 && lastDoseIndex < med.titrationDoses.length - 1) {
             newDose = med.titrationDoses[lastDoseIndex + 1].toString();
+            isTitration = true;
           }
         }
       } else {
         setContinuationInfo(null);
       }
     }
-    
+
+    setSelectedMedication(medicationId);
     setStartDate(newStartDate);
     setDose(newDose);
+    setPhase(isTitration ? 'titrate' : undefined);
+  };
+
+  const handleMedicationSelect = (medicationId: string) => {
+    applyMedicationDefaults(medicationId);
   };
 
   const handleSave = () => {
@@ -201,6 +289,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       startDate,
       stopDate: stopDateValue,
       halfLifeHours: halfLife,
+      phase,
     };
 
     onSave(newProtocol);
@@ -331,7 +420,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date (optional)</label>
+            <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date</label>
             <input
               type="date"
               value={stopDate}
