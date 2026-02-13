@@ -6,11 +6,12 @@ import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateGLP1Concentration } from '../utils/calculations';
-import { saveGLP1Protocols, getGLP1Protocols, deleteGLP1Protocol, updateGLP1Protocol } from '../utils/database';
+import { saveGLP1Protocols, getGLP1Protocols, deleteGLP1Protocol, getArchivedProtocols, setGLP1Entries, clearGLP1Entries } from '../utils/database';
 
 interface DosesTabProps {
   dosesEntries: GLP1Entry[];
   onAddDose: (dose: number, medication: string, date: string) => void;
+  onRefreshDoses: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
 }
@@ -31,29 +32,229 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPeriod, onChartPeriodChange }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
+interface ProtocolModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (protocol: GLP1Protocol) => void;
+  onArchive?: (protocol: GLP1Protocol) => void;
+  onDelete?: (id: string) => void;
+  protocol?: GLP1Protocol | null;
+  mode: 'add' | 'edit';
+}
+
+const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode }) => {
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('1');
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [stopDate, setStopDate] = useState<string>('');
+  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setConfirmAction(null);
+      if (mode === 'edit' && protocol) {
+        setSelectedMedication(protocol.medication);
+        setDose(protocol.dose.toString());
+        setFrequency(protocol.frequencyPerWeek.toString());
+        setStartDate(protocol.startDate);
+        setStopDate(protocol.stopDate || '');
+      } else {
+        setSelectedMedication('');
+        setDose('');
+        setFrequency('1');
+        setStartDate(new Date().toISOString().split('T')[0]);
+        setStopDate('');
+      }
+    }
+  }, [isOpen, mode, protocol]);
+
+  const handleSave = () => {
+    const med = MEDICATIONS.find(m => m.id === selectedMedication);
+    if (!med || !dose || !frequency || !startDate) return;
+
+    const stopDateValue = stopDate 
+      ? stopDate 
+      : new Date(new Date(startDate).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    const newProtocol: GLP1Protocol = {
+      id: protocol?.id || generateId(),
+      medication: selectedMedication,
+      dose: parseFloat(dose),
+      frequencyPerWeek: parseInt(frequency),
+      startDate,
+      stopDate: stopDateValue,
+      halfLifeHours: med.halfLifeHours,
+    };
+
+    onSave(newProtocol);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
+        <h2 className="text-lg font-semibold text-text-primary mb-4">
+          {mode === 'add' ? 'Add Protocol' : 'Edit Protocol'}
+        </h2>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
+            <div className="space-y-1 max-h-24 overflow-y-auto">
+              {MEDICATIONS.map((med) => (
+                <button
+                  key={med.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedMedication(med.id);
+                    setDose(med.defaultDose.toString());
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                    selectedMedication === med.id
+                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                  }`}
+                >
+                  {med.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.1"
+                max="99.9"
+                value={dose}
+                onChange={(e) => setDose(e.target.value)}
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="Enter dose"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Per Week</label>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+              >
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+                <option value="4">4x</option>
+                <option value="5">5x</option>
+                <option value="6">6x</option>
+                <option value="7">Daily</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+              style={{ colorScheme: 'dark' }}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date (optional)</label>
+            <input
+              type="date"
+              value={stopDate}
+              onChange={(e) => setStopDate(e.target.value)}
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+              style={{ colorScheme: 'dark' }}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            {mode === 'edit' && onDelete && onArchive && !confirmAction && (
+              <>
+                <button
+                  onClick={() => setConfirmAction('archive')}
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                >
+                  Archive
+                </button>
+                <button
+                  onClick={() => setConfirmAction('delete')}
+                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+            {mode === 'edit' && confirmAction && (
+              <>
+                <button
+                  onClick={() => {
+                    if (protocol && confirmAction === 'archive' && onArchive) {
+                      onArchive(protocol);
+                    }
+                    if (protocol && confirmAction === 'delete' && onDelete) {
+                      onDelete(protocol.id);
+                    }
+                    onClose();
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                >
+                  Yes, {confirmAction}
+                </button>
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+            {mode === 'add' && (
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+              >
+                Cancel
+              </button>
+            )}
+            {!confirmAction && (
+              <button
+                onClick={handleSave}
+                className={`${mode === 'edit' ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm`}
+              >
+                Save
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshDoses, chartPeriod, onChartPeriodChange }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
+  const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   useEffect(() => {
     const savedProtocols = getGLP1Protocols();
     const validProtocols = Array.isArray(savedProtocols) ? savedProtocols : [];
     setProtocols(validProtocols);
-    if (validProtocols.length > 0) {
-      const lastProtocol = validProtocols[validProtocols.length - 1];
-      setSelectedMedication(lastProtocol.medication);
-      setDose(lastProtocol.dose.toString());
-      setFrequency(lastProtocol.frequencyPerWeek.toString());
-      setStartDate(lastProtocol.startDate);
-    }
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
@@ -61,6 +262,8 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPerio
     const generatedDoses: GLP1Entry[] = [];
 
     protocolList.forEach(prot => {
+      if (prot.isArchived) return;
+      
       const start = new Date(prot.startDate);
       const end = prot.stopDate ? new Date(prot.stopDate) : today;
       const intervalDays = 7 / prot.frequencyPerWeek;
@@ -82,45 +285,100 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPerio
     generatedDoses.forEach(entry => onAddDose(entry.dose, entry.medication, entry.date));
   };
 
-  const handleSaveProtocol = () => {
-    const med = MEDICATIONS.find(m => m.id === selectedMedication);
-    if (!med || !dose || !frequency || !startDate) return;
-
-    const newProtocol: GLP1Protocol = {
-      id: generateId(),
-      medication: selectedMedication,
-      dose: parseFloat(dose),
-      frequencyPerWeek: parseInt(frequency),
-      startDate,
-      stopDate: stopDate || null,
-      halfLifeHours: med.halfLifeHours,
-    };
-
-    const currentProtocols = Array.isArray(protocols) ? protocols : [];
-    const updatedProtocols = [...currentProtocols, newProtocol];
+  const handleSaveProtocol = (protocol: GLP1Protocol) => {
+    let updatedProtocols: GLP1Protocol[];
+    
+    if (protocolModalMode === 'add') {
+      updatedProtocols = [...(Array.isArray(protocols) ? protocols : []), protocol];
+    } else {
+      updatedProtocols = (Array.isArray(protocols) ? protocols : []).map(p => 
+        p.id === protocol.id ? protocol : p
+      );
+    }
+    
     saveGLP1Protocols(updatedProtocols);
     setProtocols(updatedProtocols);
     handleGenerateDoses(updatedProtocols);
-    setIsAddingNew(false);
-    setStopDate('');
+    onRefreshDoses();
   };
 
-  const handleStopProtocol = (protocol: GLP1Protocol, stopDate: string) => {
-    const updated = { ...protocol, stopDate };
-    updateGLP1Protocol(updated);
-    const currentProtocols = Array.isArray(protocols) ? protocols : [];
-    const updatedList = currentProtocols.map(p => p.id === protocol.id ? updated : p);
-    saveGLP1Protocols(updatedList);
-    setProtocols(updatedList);
-    setEditingProtocol(null);
+  const handleEditProtocol = (protocol: GLP1Protocol) => {
+    setEditingProtocol(protocol);
+    setProtocolModalMode('edit');
+    setIsProtocolModalOpen(true);
   };
 
   const handleDeleteProtocol = (id: string) => {
     deleteGLP1Protocol(id);
-    const currentProtocols = Array.isArray(protocols) ? protocols : [];
-    const updatedList = currentProtocols.filter(p => p.id !== id);
+    const updatedList = (Array.isArray(protocols) ? protocols : []).filter(p => p.id !== id);
     saveGLP1Protocols(updatedList);
+    
+    // Clear and regenerate all doses from remaining protocols
+    clearGLP1Entries();
+    const newDoses: GLP1Entry[] = [];
+    const today = new Date();
+    
+    updatedList.forEach(prot => {
+      const start = new Date(prot.startDate);
+      const end = prot.stopDate ? new Date(prot.stopDate) : today;
+      const intervalDays = 7 / prot.frequencyPerWeek;
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
+        const dateStr = d.toISOString().split('T')[0];
+        newDoses.push({
+          date: dateStr,
+          medication: prot.medication,
+          dose: prot.dose,
+          halfLifeHours: prot.halfLifeHours,
+        });
+      }
+    });
+    
+    // Sort by date and save
+    newDoses.sort((a, b) => a.date.localeCompare(b.date));
+    setGLP1Entries(newDoses);
     setProtocols(updatedList);
+    setEditingProtocol(null);
+    onRefreshDoses();
+  };
+
+  const handleArchiveProtocol = (protocol: GLP1Protocol) => {
+    // Add to archived storage
+    const archived = getArchivedProtocols();
+    archived.push({ ...protocol, isArchived: true });
+    localStorage.setItem('glp1_archived', JSON.stringify(archived));
+    
+    // Remove from active protocols
+    const updatedList = (Array.isArray(protocols) ? protocols : []).filter(p => p.id !== protocol.id);
+    saveGLP1Protocols(updatedList);
+    
+    // Clear and regenerate all doses from remaining protocols
+    clearGLP1Entries();
+    const newDoses: GLP1Entry[] = [];
+    const today = new Date();
+    
+    updatedList.forEach(prot => {
+      const start = new Date(prot.startDate);
+      const end = prot.stopDate ? new Date(prot.stopDate) : today;
+      const intervalDays = 7 / prot.frequencyPerWeek;
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
+        const dateStr = d.toISOString().split('T')[0];
+        newDoses.push({
+          date: dateStr,
+          medication: prot.medication,
+          dose: prot.dose,
+          halfLifeHours: prot.halfLifeHours,
+        });
+      }
+    });
+    
+    // Sort by date and save
+    newDoses.sort((a, b) => a.date.localeCompare(b.date));
+    setGLP1Entries(newDoses);
+    setProtocols(updatedList);
+    setEditingProtocol(null);
+    onRefreshDoses();
   };
 
   const handleRegenerate = () => {
@@ -184,9 +442,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPerio
       <div className={bigCard}>
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Doses</h1>
         
-        {/* Stats and Chart Section */}
         <div className="space-y-3 mb-6">
-          {/* Stats Cards */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Total Doses</p>
@@ -253,7 +509,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPerio
               return (
                 <div 
                   key={protocol.id}
-                  className="flex items-center justify-between bg-black/20 rounded-lg p-3 border border-accent-purple-light/20"
+                  className="flex items-center justify-between bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium text-text-primary">
@@ -263,156 +519,39 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, chartPerio
                       {formatDate(protocol.startDate)} → {protocol.stopDate ? formatDate(protocol.stopDate) : 'Ongoing'} ({protocol.frequencyPerWeek}x/week)
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    {!isActive && (
-                      <button
-                        onClick={() => handleDeleteProtocol(protocol.id)}
-                        className="text-xs text-red-400 hover:text-red-300"
-                      >
-                        Delete
-                      </button>
-                    )}
-                    {isActive && index === protocols.length - 1 && (
-                      <button
-                        onClick={() => setEditingProtocol(protocol)}
-                        className="text-xs text-accent-purple-light hover:text-accent-purple-medium"
-                      >
-                        Stop
-                      </button>
-                    )}
-                  </div>
+                  <button
+                    onClick={() => handleEditProtocol(protocol)}
+                    className="text-xs text-accent-purple-light hover:text-accent-purple-medium"
+                  >
+                    Edit
+                  </button>
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Stop Protocol Modal */}
-        {editingProtocol && (
-          <div className="mb-4 p-3 bg-black/20 rounded-lg border border-accent-purple-light/20">
-            <p className="text-sm text-text-secondary mb-2">Set stop date for this protocol:</p>
-            <input
-              type="date"
-              max={new Date().toISOString().split('T')[0]}
-              onChange={(e) => handleStopProtocol(editingProtocol, e.target.value)}
-              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-black/20 text-text-primary rounded-lg text-sm mb-2"
-              style={{ colorScheme: 'dark' }}
-            />
-          </div>
-        )}
-
-        {/* Add New Protocol Form */}
-        {isAddingNew ? (
-          <div className="space-y-4">
-            {/* Medication Selection */}
-            <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
-              <div className="space-y-1 max-h-24 overflow-y-auto">
-                {MEDICATIONS.map((med) => (
-                  <button
-                    key={med.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedMedication(med.id);
-                      setDose(med.defaultDose.toString());
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
-                      selectedMedication === med.id
-                        ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                        : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
-                    }`}
-                  >
-                    {med.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Dose and Frequency */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.1"
-                  max="99.9"
-                  value={dose}
-                  onChange={(e) => setDose(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="Enter dose"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Per Week</label>
-                <select
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                >
-                  <option value="1">1x</option>
-                  <option value="2">2x</option>
-                  <option value="3">3x</option>
-                  <option value="4">4x</option>
-                  <option value="5">5x</option>
-                  <option value="6">6x</option>
-                  <option value="7">Daily</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Start Date */}
-            <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
-              <input
-                type="date"
-                max={new Date().toISOString().split('T')[0]}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                style={{ colorScheme: 'dark' }}
-              />
-            </div>
-
-            {/* End Date (optional) */}
-            <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date (optional)</label>
-              <input
-                type="date"
-                value={stopDate}
-                onChange={(e) => setStopDate(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                style={{ colorScheme: 'dark' }}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setIsAddingNew(false);
-                  setStopDate('');
-                }}
-                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveProtocol}
-                className="flex-1 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsAddingNew(true)}
-            className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg text-sm"
-          >
-            + Add Protocol
-          </button>
-        )}
+        <button
+          onClick={() => {
+            setProtocolModalMode('add');
+            setEditingProtocol(null);
+            setIsProtocolModalOpen(true);
+          }}
+          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg text-sm"
+        >
+          + Add Protocol
+        </button>
       </div>
+
+      <ProtocolModal
+        isOpen={isProtocolModalOpen}
+        onClose={() => setIsProtocolModalOpen(false)}
+        onSave={handleSaveProtocol}
+        onArchive={handleArchiveProtocol}
+        onDelete={handleDeleteProtocol}
+        protocol={editingProtocol}
+        mode={protocolModalMode}
+      />
 
       <DoseModal
         isOpen={isModalOpen}

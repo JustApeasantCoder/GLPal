@@ -124,6 +124,11 @@ const handleAddWeight = (newWeight: number) => {
     setDosesEntries(prev => [...prev, newEntry]);
   };
 
+  const handleRefreshDoses = useCallback(() => {
+    const entries = getGLP1Entries();
+    setDosesEntries(entries);
+  }, []);
+
   const handleClearData = () => {
     if (window.confirm('Are you sure you want to delete all data? This cannot be undone.')) {
       clearAllData();
@@ -224,6 +229,7 @@ return (
             <DosesTab 
               dosesEntries={dosesEntries} 
               onAddDose={handleAddDose}
+              onRefreshDoses={handleRefreshDoses}
               chartPeriod={chartPeriod}
               onChartPeriodChange={setChartPeriod}
             />

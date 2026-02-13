@@ -20,6 +20,7 @@ export interface GLP1Protocol {
   startDate: string;
   stopDate: string | null; // null means ongoing
   halfLifeHours: number;
+  isArchived?: boolean; // true if archived (moved to manual entries)
 }
 
 export type UnitSystem = 'metric' | 'imperial';

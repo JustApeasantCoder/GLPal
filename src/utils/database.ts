@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   WEIGHT_ENTRIES: 'glpal_weight_entries',
   GLP1_ENTRIES: 'glp1_entries',
   GLP1_PROTOCOL: 'glp1_protocol',
+  GLP1_ARCHIVED: 'glp1_archived',
   USER_PROFILE: 'glpal_user_profile'
 };
 
@@ -116,6 +117,10 @@ export const clearGLP1Entries = (): void => {
   localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify([]));
 };
 
+export const setGLP1Entries = (entries: GLP1Entry[]): void => {
+  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(entries));
+};
+
 // GLP-1 Protocol (array of protocols)
 export const saveGLP1Protocols = (protocols: GLP1Protocol[]): void => {
   localStorage.setItem(STORAGE_KEYS.GLP1_PROTOCOL, JSON.stringify(protocols));
@@ -144,6 +149,26 @@ export const updateGLP1Protocol = (updatedProtocol: GLP1Protocol): void => {
 export const deleteGLP1Protocol = (id: string): void => {
   const protocols = getGLP1Protocols().filter(p => p.id !== id);
   saveGLP1Protocols(protocols);
+};
+
+// Archived protocols (moved from active when user clicks Archive)
+export const getArchivedProtocols = (): GLP1Protocol[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.GLP1_ARCHIVED);
+  return data ? JSON.parse(data) : [];
+};
+
+export const archiveProtocol = (protocol: GLP1Protocol): void => {
+  // Remove from active
+  deleteGLP1Protocol(protocol.id);
+  // Add to archived
+  const archived = getArchivedProtocols();
+  archived.push({ ...protocol, isArchived: true });
+  localStorage.setItem(STORAGE_KEYS.GLP1_ARCHIVED, JSON.stringify(archived));
+};
+
+export const deleteArchivedProtocol = (id: string): void => {
+  const archived = getArchivedProtocols().filter(p => p.id !== id);
+  localStorage.setItem(STORAGE_KEYS.GLP1_ARCHIVED, JSON.stringify(archived));
 };
 
 export const clearGLP1Protocol = (): void => {
