@@ -35,7 +35,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       
       if (existingProtocols && existingProtocols.length > 0) {
         const usedMedNames = Array.from(new Set(existingProtocols.map(p => p.medication)));
-        const filteredMeds = usedMedNames.filter(m => mainMeds.includes(m) || m !== 'Semaglutide (Ozempic/Wegovy)' && m !== 'Tirzepatide (Mounjaro/Zepbound)' && m !== 'Retatrutide' && m !== 'Custom +');
+        const filteredMeds = usedMedNames.filter(m => mainMeds.includes(m) || m !== 'Semaglutide (Ozempic/Wegovy)' && m !== 'Tirzepatide (Mounjaro/Zepbound)' && m !== 'Retatrutide' && m !== 'More Options');
         setSavedMedications(filteredMeds);
         localStorage.setItem('usedMedications', JSON.stringify(filteredMeds));
       } else {
@@ -72,7 +72,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     return getAllMedicationIds().includes(m.id);
   }).map(med => {
     if (med.id === 'other') {
-      return { ...med, name: 'Custom +' };
+      return { ...med, name: 'More Options' };
     }
     return med;
   });

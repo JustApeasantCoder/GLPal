@@ -111,11 +111,22 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
     
     const halfLife = sorted[0]?.halfLifeHours || 168;
-    const currentLevel = calculateMedicationConcentration(
-      sorted.map(e => ({ date: new Date(e.date), dose: e.dose })),
-      halfLife,
-      new Date()
-    );
+    
+    const medications = Array.from(new Set(sorted.map(e => e.medication)));
+    let totalCurrentLevel = 0;
+    
+    medications.forEach(med => {
+      const medEntries = sorted.filter(e => e.medication === med);
+      const medHalfLife = medEntries[0]?.halfLifeHours || 168;
+      const concentration = calculateMedicationConcentration(
+        medEntries.map(e => ({ date: new Date(e.date), dose: e.dose })),
+        medHalfLife,
+        new Date()
+      );
+      totalCurrentLevel += concentration;
+    });
+    
+    const currentLevel = totalCurrentLevel;
     
     const firstDoseDate = new Date(oldest.date);
     const timeActive = Math.floor((today.getTime() - firstDoseDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -152,6 +163,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
             <div className={smallCard}>
               <p className={text.label}>Current Level</p>
+              <p className={text.value}>{stats.currentLevel.toFixed(2)}mg</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Time Active</p>
@@ -164,7 +176,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-64 sm:h-80">
-              <MedicationChart data={medicationEntries} period={chartPeriod} />
+              <MedicationChart key={medicationEntries.length} data={medicationEntries} period={chartPeriod} />
             </div>
           </div>
         </div>

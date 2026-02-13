@@ -8,6 +8,10 @@ import ChartEmptyState from './ui/ChartEmptyState';
 
 import { ChartPeriod } from '../hooks';
 
+const shortenMedicationName = (name: string): string => {
+  return name.replace(/\s*\(.*?\)/g, '').trim();
+};
+
 interface MedicationChartProps {
   data: GLP1Entry[];
   period: ChartPeriod;
@@ -99,9 +103,10 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
             const color = item.color || '#9C7BD3';
             const value = item.value?.[1] ?? 0;
             const formattedValue = value < 1 ? value.toFixed(2) : value.toFixed(1);
+            const shortName = shortenMedicationName(item.seriesName);
             html += `<div style="display: flex; align-items: center; gap: 10px; margin: 4px 0;">
               <span style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}80;"></span>
-              <span style="color: #94a3b8;">${item.seriesName}:</span>
+              <span style="color: #94a3b8;">${shortName}:</span>
               <span style="font-weight: 600; color: #fff;">${formattedValue} mg</span>
             </div>`;
           });
@@ -115,12 +120,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
         itemWidth: 12,
         itemHeight: 12,
         textStyle: { fontSize: 12, color: '#94a3b8' },
-        formatter: (value: string) => {
-          return (
-            value.charAt(0).toUpperCase() +
-            value.slice(1).replace(/([A-Z])/g, ' $1').trim()
-          );
-        },
+        formatter: (value: string) => shortenMedicationName(value),
       },
       dataZoom: [
         {
