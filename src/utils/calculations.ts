@@ -37,7 +37,7 @@ export const calculateBMI = (weight: number, height: number): number => {
   return weight / (heightInMeters * heightInMeters);
 };
 
-export const calculateGLP1Concentration = (
+export const calculateMedicationConcentration = (
   doses: Array<{ date: Date; dose: number }>,
   halfLifeHours: number,
   currentDate: Date
@@ -65,3 +65,5 @@ export const calculateGLP1Concentration = (
     return total + effectFactor;
   }, 0);
 };
+
+export const calculateGLP1Concentration = calculateMedicationConcentration;

@@ -9,7 +9,7 @@ import {
   addGLP1ManualEntry,
   saveUserProfile 
 } from '../utils/database';
-import { generateSimulatedData } from '../utils/generateData';
+import { initializeSampleData, initializeSampleWeightData } from '../utils/sampleData';
 
 interface AppDataContextType {
   weights: WeightEntry[];
@@ -53,10 +53,10 @@ export const useAppData = (): AppDataContextType => {
         const weightData = await getWeightEntries();
         const glp1Data = await getAllGLP1Entries();
         
-        // If no data exists, generate simulated data
+        // If no data exists, generate sample data
         if (weightData.length === 0 && glp1Data.length === 0) {
           // Generate data directly (function operates on DB)
-          generateSimulatedData();
+          initializeSampleData();
           
           // Reload data after generation
           const newWeightData = await getWeightEntries();

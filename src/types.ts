@@ -5,7 +5,7 @@ export interface WeightEntry {
   weight: number;
 }
 
-export interface GLP1Entry {
+export interface MedicationEntry {
   date: string;
   medication: string;
   dose: number;
@@ -13,16 +13,19 @@ export interface GLP1Entry {
   isManual?: boolean;
 }
 
-export interface GLP1Protocol {
+export interface MedicationProtocol {
   id: string;
   medication: string;
   dose: number;
   frequencyPerWeek: number;
   startDate: string;
-  stopDate: string | null; // null means ongoing
+  stopDate: string | null;
   halfLifeHours: number;
-  isArchived?: boolean; // true if archived (moved to manual entries)
+  isArchived?: boolean;
 }
+
+export type GLP1Entry = MedicationEntry;
+export type GLP1Protocol = MedicationProtocol;
 
 export type UnitSystem = 'metric' | 'imperial';
 

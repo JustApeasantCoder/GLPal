@@ -34,8 +34,8 @@ export const formatWeight = (weightKg: number, unitSystem: UnitSystem = 'metric'
     const roundedLbs = Math.round(lbs * 10) / 10;
     return `${roundedLbs.toFixed(1)} lbs`;
   }
-  const roundedKg = Math.round(weightKg);
-  return `${roundedKg}kg`;
+  const roundedKg = Math.round(weightKg * 10) / 10;
+  return `${roundedKg.toFixed(1)}kg`;
 };
 
 // Height display formatting

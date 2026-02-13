@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import DoseModal from './DoseModal';
+import MedicationModal from './MedicationModal';
 
-interface DoseInputProps {
-  onAddDose: (dose: number, medication: string) => void;
+interface MedicationInputProps {
+  onAddMedication: (dose: number, medication: string) => void;
 }
 
-const DoseInput: React.FC<DoseInputProps> = ({ onAddDose }) => {
+const MedicationInput: React.FC<MedicationInputProps> = ({ onAddMedication }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAddDose = (dose: number, medication: string) => {
-    onAddDose(dose, medication);
+  const handleAddMedication = (dose: number, medication: string) => {
+    onAddMedication(dose, medication);
   };
 
   return (
@@ -21,13 +21,13 @@ const DoseInput: React.FC<DoseInputProps> = ({ onAddDose }) => {
         Log Dose
       </button>
       
-      <DoseModal
+      <MedicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAddDose={handleAddDose}
+        onAddMedication={handleAddMedication}
       />
     </>
   );
 };
 
-export default DoseInput;
+export default MedicationInput;

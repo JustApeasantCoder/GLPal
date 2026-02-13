@@ -1,7 +1,7 @@
 import { addWeightEntry, addGLP1Entry, initializeDatabase, getUserProfile, saveUserProfile } from './database';
 
 // Generate only weight data (no GLP-1 entries)
-export const generateSimulatedWeightData = (): void => {
+export const initializeSampleWeightData = (): void => {
   initializeDatabase();
   
   // Set up a default user profile if none exists
@@ -77,7 +77,7 @@ export const generateSimulatedWeightData = (): void => {
 };
 
 // Generate 120 days of weight data with drastic changes: 105kg → 90kg → 100kg → 80kg
-export const generateSimulatedData = (): void => {
+export const initializeSampleData = (): void => {
   initializeDatabase();
   
   // Set up a default user profile if none exists

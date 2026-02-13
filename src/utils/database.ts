@@ -7,6 +7,10 @@ const STORAGE_KEYS = {
   GLP1_MANUAL_ENTRIES: 'glp1_manual_entries',
   GLP1_PROTOCOL: 'glp1_protocol',
   GLP1_ARCHIVED: 'glp1_archived',
+  MEDICATION_ENTRIES: 'glpal_medication_entries',
+  MEDICATION_MANUAL_ENTRIES: 'glpal_medication_manual_entries',
+  MEDICATION_PROTOCOL: 'glpal_medication_protocol',
+  MEDICATION_ARCHIVED: 'glpal_medication_archived',
   USER_PROFILE: 'glpal_user_profile',
   LAST_DOSES: 'glpal_last_doses',
   LAST_MEDICATION: 'glpal_last_medication',
@@ -88,9 +92,9 @@ export const deleteWeightEntry = (date: string): void => {
   localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(filtered));
 };
 
-// GLP-1 entries
-export const addGLP1Entry = (entry: GLP1Entry): void => {
-  const entries = getGLP1Entries();
+// Medication entries (formerly GLP-1)
+export const addMedicationEntry = (entry: GLP1Entry): void => {
+  const entries = getMedicationEntries();
   const existingIndex = entries.findIndex(e => e.date === entry.date);
   
   if (existingIndex >= 0) {
@@ -99,33 +103,32 @@ export const addGLP1Entry = (entry: GLP1Entry): void => {
     entries.push(entry);
   }
   
-  // Sort by date
   entries.sort((a, b) => a.date.localeCompare(b.date));
   
-  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(entries));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
 };
 
-export const getGLP1Entries = (): GLP1Entry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.GLP1_ENTRIES);
+export const getMedicationEntries = (): GLP1Entry[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_ENTRIES);
   return data ? JSON.parse(data) : [];
 };
 
-export const deleteGLP1Entry = (date: string): void => {
-  const entries = getGLP1Entries();
+export const deleteMedicationEntry = (date: string): void => {
+  const entries = getMedicationEntries();
   const filtered = entries.filter(entry => entry.date !== date);
-  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(filtered));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(filtered));
 };
 
-export const clearGLP1Entries = (): void => {
-  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify([]));
+export const clearMedicationEntries = (): void => {
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify([]));
 };
 
-export const setGLP1Entries = (entries: GLP1Entry[]): void => {
-  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(entries));
+export const setMedicationEntries = (entries: GLP1Entry[]): void => {
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
 };
 
-export const addGLP1GeneratedEntry = (entry: GLP1Entry): void => {
-  const entries = getGLP1Entries();
+export const addMedicationGeneratedEntry = (entry: GLP1Entry): void => {
+  const entries = getMedicationEntries();
   const existingIndex = entries.findIndex(e => e.date === entry.date && e.medication === entry.medication);
   
   if (existingIndex >= 0) {
@@ -135,11 +138,11 @@ export const addGLP1GeneratedEntry = (entry: GLP1Entry): void => {
   }
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
-  localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify(entries));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
 };
 
-export const addGLP1ManualEntry = (entry: GLP1Entry): void => {
-  const entries = getGLP1ManualEntries();
+export const addMedicationManualEntry = (entry: GLP1Entry): void => {
+  const entries = getMedicationManualEntries();
   const existingIndex = entries.findIndex(e => e.date === entry.date && e.medication === entry.medication);
   
   if (existingIndex >= 0) {
@@ -149,79 +152,97 @@ export const addGLP1ManualEntry = (entry: GLP1Entry): void => {
   }
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
-  localStorage.setItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES, JSON.stringify(entries));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(entries));
 };
 
-export const getGLP1ManualEntries = (): GLP1Entry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES);
+export const getMedicationManualEntries = (): GLP1Entry[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES);
   return data ? JSON.parse(data) : [];
 };
 
-export const deleteGLP1ManualEntry = (date: string): void => {
-  const entries = getGLP1ManualEntries();
+export const deleteMedicationManualEntry = (date: string): void => {
+  const entries = getMedicationManualEntries();
   const filtered = entries.filter(entry => entry.date !== date);
-  localStorage.setItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES, JSON.stringify(filtered));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(filtered));
 };
 
-export const getAllGLP1Entries = (): GLP1Entry[] => {
-  const generated = getGLP1Entries();
-  const manual = getGLP1ManualEntries();
+export const getAllMedicationEntries = (): GLP1Entry[] => {
+  const generated = getMedicationEntries();
+  const manual = getMedicationManualEntries();
   return [...generated, ...manual].sort((a, b) => a.date.localeCompare(b.date));
 };
 
-// GLP-1 Protocol (array of protocols)
-export const saveGLP1Protocols = (protocols: GLP1Protocol[]): void => {
-  localStorage.setItem(STORAGE_KEYS.GLP1_PROTOCOL, JSON.stringify(protocols));
+// Medication Protocol
+export const saveMedicationProtocols = (protocols: GLP1Protocol[]): void => {
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_PROTOCOL, JSON.stringify(protocols));
 };
 
-export const getGLP1Protocols = (): GLP1Protocol[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.GLP1_PROTOCOL);
+export const getMedicationProtocols = (): GLP1Protocol[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_PROTOCOL);
   return data ? JSON.parse(data) : [];
 };
 
-export const addGLP1Protocol = (protocol: GLP1Protocol): void => {
-  const protocols = getGLP1Protocols();
+export const addMedicationProtocol = (protocol: GLP1Protocol): void => {
+  const protocols = getMedicationProtocols();
   protocols.push(protocol);
-  saveGLP1Protocols(protocols);
+  saveMedicationProtocols(protocols);
 };
 
-export const updateGLP1Protocol = (updatedProtocol: GLP1Protocol): void => {
-  const protocols = getGLP1Protocols();
+export const updateMedicationProtocol = (updatedProtocol: GLP1Protocol): void => {
+  const protocols = getMedicationProtocols();
   const index = protocols.findIndex(p => p.id === updatedProtocol.id);
   if (index >= 0) {
     protocols[index] = updatedProtocol;
-    saveGLP1Protocols(protocols);
+    saveMedicationProtocols(protocols);
   }
 };
 
-export const deleteGLP1Protocol = (id: string): void => {
-  const protocols = getGLP1Protocols().filter(p => p.id !== id);
-  saveGLP1Protocols(protocols);
+export const deleteMedicationProtocol = (id: string): void => {
+  const protocols = getMedicationProtocols().filter(p => p.id !== id);
+  saveMedicationProtocols(protocols);
 };
 
-// Archived protocols (moved from active when user clicks Archive)
-export const getArchivedProtocols = (): GLP1Protocol[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.GLP1_ARCHIVED);
+export const getArchivedMedicationProtocols = (): GLP1Protocol[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_ARCHIVED);
   return data ? JSON.parse(data) : [];
 };
 
-export const archiveProtocol = (protocol: GLP1Protocol): void => {
-  // Remove from active
-  deleteGLP1Protocol(protocol.id);
-  // Add to archived
-  const archived = getArchivedProtocols();
+export const archiveMedicationProtocol = (protocol: GLP1Protocol): void => {
+  deleteMedicationProtocol(protocol.id);
+  const archived = getArchivedMedicationProtocols();
   archived.push({ ...protocol, isArchived: true });
-  localStorage.setItem(STORAGE_KEYS.GLP1_ARCHIVED, JSON.stringify(archived));
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ARCHIVED, JSON.stringify(archived));
 };
 
-export const deleteArchivedProtocol = (id: string): void => {
-  const archived = getArchivedProtocols().filter(p => p.id !== id);
-  localStorage.setItem(STORAGE_KEYS.GLP1_ARCHIVED, JSON.stringify(archived));
+export const deleteArchivedMedicationProtocol = (id: string): void => {
+  const archived = getArchivedMedicationProtocols().filter(p => p.id !== id);
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_ARCHIVED, JSON.stringify(archived));
 };
 
-export const clearGLP1Protocol = (): void => {
-  localStorage.removeItem(STORAGE_KEYS.GLP1_PROTOCOL);
+export const clearMedicationProtocol = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.MEDICATION_PROTOCOL);
 };
+
+// Backward compatibility aliases
+export const addGLP1Entry = addMedicationEntry;
+export const getGLP1Entries = getMedicationEntries;
+export const deleteGLP1Entry = deleteMedicationEntry;
+export const clearGLP1Entries = clearMedicationEntries;
+export const setGLP1Entries = setMedicationEntries;
+export const addGLP1GeneratedEntry = addMedicationGeneratedEntry;
+export const addGLP1ManualEntry = addMedicationManualEntry;
+export const getGLP1ManualEntries = getMedicationManualEntries;
+export const deleteGLP1ManualEntry = deleteMedicationManualEntry;
+export const getAllGLP1Entries = getAllMedicationEntries;
+export const saveGLP1Protocols = saveMedicationProtocols;
+export const getGLP1Protocols = getMedicationProtocols;
+export const addGLP1Protocol = addMedicationProtocol;
+export const updateGLP1Protocol = updateMedicationProtocol;
+export const deleteGLP1Protocol = deleteMedicationProtocol;
+export const getArchivedProtocols = getArchivedMedicationProtocols;
+export const archiveProtocol = archiveMedicationProtocol;
+export const deleteArchivedProtocol = deleteArchivedMedicationProtocol;
+export const clearGLP1Protocol = clearMedicationProtocol;
 
 // User profile
 export const saveUserProfile = (profile: UserProfile): void => {
@@ -242,6 +263,9 @@ export const clearAllData = (): void => {
   localStorage.removeItem(STORAGE_KEYS.GLP1_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_PROTOCOL);
+  localStorage.removeItem(STORAGE_KEYS.MEDICATION_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES);
+  localStorage.removeItem(STORAGE_KEYS.MEDICATION_PROTOCOL);
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
   initializeDatabase();
 };

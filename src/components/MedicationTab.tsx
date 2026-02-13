@@ -1,25 +1,25 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import DosesChart from './DosesChart';
-import DoseModal from './DoseModal';
+import MedicationChart from './MedicationChart';
+import MedicationModal from './MedicationModal';
 import PeriodSelector from './PeriodSelector';
 import ProtocolModal from './ProtocolModal';
 import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
-import { calculateGLP1Concentration } from '../utils/calculations';
-import { addGLP1GeneratedEntry, clearGLP1Entries } from '../utils/database';
+import { calculateMedicationConcentration } from '../utils/calculations';
+import { addMedicationGeneratedEntry, clearMedicationEntries } from '../utils/database';
 import { MEDICATIONS, formatDate, formatFrequency } from '../constants/medications';
-import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/GLP1Service';
+import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/MedicationService';
 
-interface DosesTabProps {
-  dosesEntries: GLP1Entry[];
-  onAddDose: (dose: number, medication: string, date: string) => void;
-  onRefreshDoses: () => void;
+interface MedicationTabProps {
+  medicationEntries: GLP1Entry[];
+  onAddMedication: (dose: number, medication: string, date: string) => void;
+  onRefreshMedications: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
 }
 
-const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshDoses, chartPeriod, onChartPeriodChange }) => {
+const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, chartPeriod, onChartPeriodChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
@@ -33,16 +33,16 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
-    clearGLP1Entries();
+    clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
-    generatedDoses.forEach(entry => addGLP1GeneratedEntry(entry));
+    generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
   };
 
   const handleSaveProtocol = (protocol: GLP1Protocol) => {
     const updatedProtocols = saveProtocol(protocol, protocols);
     setProtocols(updatedProtocols);
     handleGenerateDoses(updatedProtocols);
-    onRefreshDoses();
+    onRefreshMedications();
   };
 
   const handleEditProtocol = (protocol: GLP1Protocol) => {
@@ -55,14 +55,14 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
     const updatedList = deleteProtocol(id, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
-    onRefreshDoses();
+    onRefreshMedications();
   };
 
   const handleArchiveProtocol = (protocol: GLP1Protocol) => {
     const updatedList = archiveProtocol(protocol, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
-    onRefreshDoses();
+    onRefreshMedications();
   };
 
   const handleRegenerate = () => {
@@ -72,16 +72,16 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
   };
 
   const stats = useMemo(() => {
-    if (dosesEntries.length === 0) {
+    if (medicationEntries.length === 0) {
       return { totalDoses: 0, currentDoses: [], totalCurrentDose: 0, nextDueDays: 0, nextDueDateStr: '', currentLevel: 0, timeActive: 0, thisMonth: 0 };
     }
 
-    const sorted = [...dosesEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const oldest = [...dosesEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const oldest = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
     
-    const totalDoses = dosesEntries.length;
+    const totalDoses = medicationEntries.length;
     
-    const meds = Array.from(new Set(dosesEntries.map(e => e.medication)));
+    const meds = Array.from(new Set(medicationEntries.map(e => e.medication)));
     const currentDoses: { med: string; dose: number }[] = [];
     meds.forEach(med => {
       const medDoses = sorted.filter(e => e.medication === med);
@@ -91,7 +91,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
     });
     const totalCurrentDose = currentDoses.reduce((sum, d) => sum + d.dose, 0);
     
-    const sortedAsc = [...dosesEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedAsc = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -111,7 +111,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
     }
     
     const halfLife = sorted[0]?.halfLifeHours || 168;
-    const currentLevel = calculateGLP1Concentration(
+    const currentLevel = calculateMedicationConcentration(
       sorted.map(e => ({ date: new Date(e.date), dose: e.dose })),
       halfLife,
       new Date()
@@ -120,13 +120,13 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
     const firstDoseDate = new Date(oldest.date);
     const timeActive = Math.floor((today.getTime() - firstDoseDate.getTime()) / (1000 * 60 * 60 * 24));
     
-    const thisMonth = dosesEntries.filter(e => {
+    const thisMonth = medicationEntries.filter(e => {
       const doseDate = new Date(e.date);
       return doseDate.getMonth() === today.getMonth() && doseDate.getFullYear() === today.getFullYear();
     }).length;
 
     return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, timeActive, thisMonth };
-  }, [dosesEntries]);
+  }, [medicationEntries]);
 
   return (
     <div className="space-y-3">
@@ -164,7 +164,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-64 sm:h-80">
-              <DosesChart data={dosesEntries} period={chartPeriod} />
+              <MedicationChart data={medicationEntries} period={chartPeriod} />
             </div>
           </div>
         </div>
@@ -243,13 +243,13 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
         mode={protocolModalMode}
       />
 
-      <DoseModal
+      <MedicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAddDose={onAddDose}
+        onAddMedication={onAddMedication}
       />
     </div>
   );
 };
 
-export default DosesTab;
+export default MedicationTab;

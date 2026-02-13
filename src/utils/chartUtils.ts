@@ -1,7 +1,24 @@
 import { useMemo } from 'react';
 import { WeightEntry, GLP1Entry } from '../types';
 
-// Date formatting utilities
+// Chart color palettes
+export const CHART_COLORS = {
+  medications: [
+    { stroke: '#9C7BD3', fill: 'rgba(156, 123, 211, 0.3)' },
+    { stroke: '#4ADEA8', fill: 'rgba(74, 222, 168, 0.3)' },
+    { stroke: '#F59E0B', fill: 'rgba(245, 158, 11, 0.3)' },
+    { stroke: '#EF4444', fill: 'rgba(239, 68, 68, 0.3)' },
+    { stroke: '#3B82F6', fill: 'rgba(59, 130, 246, 0.3)' },
+    { stroke: '#94A3B8', fill: 'rgba(148, 163, 184, 0.3)' },
+  ],
+  weight: {
+    stroke: '#9C7BD3',
+    fill: 'rgba(156, 123, 211, 0.3)',
+  },
+} as const;
+
+export const getMedicationColor = (index: number) => 
+  CHART_COLORS.medications[index % CHART_COLORS.medications.length];
 export const CHART_DATE_FORMATS = {
   short: (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
   medium: (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),

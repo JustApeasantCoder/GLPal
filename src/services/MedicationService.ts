@@ -1,5 +1,5 @@
 import { GLP1Entry, GLP1Protocol } from '../types';
-import { saveGLP1Protocols, getGLP1Protocols, deleteGLP1Protocol, getArchivedProtocols, setGLP1Entries } from '../utils/database';
+import { saveMedicationProtocols, getMedicationProtocols, deleteMedicationProtocol, getArchivedProtocols, setMedicationEntries } from '../utils/database';
 
 export const generateDosesFromProtocols = (
   protocols: GLP1Protocol[],
@@ -74,17 +74,17 @@ export const saveProtocol = (
     updatedProtocols = [...existing, protocol];
   }
   
-  saveGLP1Protocols(updatedProtocols);
+  saveMedicationProtocols(updatedProtocols);
   return updatedProtocols;
 };
 
 export const deleteProtocol = (id: string, existingProtocols: GLP1Protocol[]): GLP1Protocol[] => {
-  deleteGLP1Protocol(id);
+  deleteMedicationProtocol(id);
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== id);
-  saveGLP1Protocols(updatedList);
+  saveMedicationProtocols(updatedList);
   
   const newDoses = regenerateAllDoses(updatedList);
-  setGLP1Entries(newDoses);
+  setMedicationEntries(newDoses);
   
   return updatedList;
 };
@@ -92,18 +92,18 @@ export const deleteProtocol = (id: string, existingProtocols: GLP1Protocol[]): G
 export const archiveProtocol = (protocol: GLP1Protocol, existingProtocols: GLP1Protocol[]): GLP1Protocol[] => {
   const archived = getArchivedProtocols();
   archived.push({ ...protocol, isArchived: true });
-  localStorage.setItem('glp1_archived', JSON.stringify(archived));
+  localStorage.setItem('glpal_medication_archived', JSON.stringify(archived));
   
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== protocol.id);
-  saveGLP1Protocols(updatedList);
+  saveMedicationProtocols(updatedList);
   
   const newDoses = regenerateAllDoses(updatedList);
-  setGLP1Entries(newDoses);
+  setMedicationEntries(newDoses);
   
   return updatedList;
 };
 
 export const getActiveProtocols = (): GLP1Protocol[] => {
-  const protocols = getGLP1Protocols();
+  const protocols = getMedicationProtocols();
   return Array.isArray(protocols) ? protocols : [];
 };

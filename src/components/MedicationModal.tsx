@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { MEDICATIONS } from '../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../utils/database';
 
-interface DoseModalProps {
+interface MedicationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddDose: (dose: number, medication: string, date: string) => void;
+  onAddMedication: (dose: number, medication: string, date: string) => void;
 }
 
-const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => {
+const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication }) => {
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -43,7 +43,7 @@ const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => 
     if (selectedMedication && doseValue && doseValue > 0 && doseValue < 100) {
       saveLastMedication(selectedMedication);
       saveLastDose(selectedMedication, doseValue);
-      onAddDose(doseValue, selectedMedication, selectedDate);
+      onAddMedication(doseValue, selectedMedication, selectedDate);
       setSelectedMedication('');
       setDose('');
       onClose();
@@ -163,4 +163,4 @@ const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => 
   );
 };
 
-export default DoseModal;
+export default MedicationModal;

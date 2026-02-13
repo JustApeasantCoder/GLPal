@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import SettingsMenu from './components/SettingsMenu';
 import Dashboard from './components/Dashboard';
-import DosesTab from './components/DosesTab';
+import MedicationTab from './components/MedicationTab';
 import DosageCalculatorTab from './components/DosageCalculatorTab';
 import Navigation from './components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
@@ -17,7 +17,7 @@ import {
   saveUserProfile,
   clearAllData
 } from './utils/database';
-import { generateSimulatedWeightData } from './utils/generateData';
+import { initializeSampleWeightData } from './utils/sampleData';
 
 type TabType = 'dashboard' | 'doses' | 'dosage';
 
@@ -69,9 +69,9 @@ try {
         const existingGLP1 = getAllGLP1Entries();
         const existingProfile = getUserProfile();
         
-        // If no data exists, generate simulated data
+        // If no data exists, generate sample data
 if (existingWeights.length === 0) {
-          generateSimulatedWeightData();
+          initializeSampleWeightData();
           
           // Reload after generation
           const generatedWeights = getWeightEntries();
@@ -228,10 +228,10 @@ return (
 
           <TabContent isActive={activeTab === 'doses'}>
             <div className="max-w-md mx-auto">
-              <DosesTab 
-                dosesEntries={dosesEntries} 
-                onAddDose={handleAddDose}
-                onRefreshDoses={handleRefreshDoses}
+              <MedicationTab 
+                medicationEntries={dosesEntries} 
+                onAddMedication={handleAddDose}
+                onRefreshMedications={handleRefreshDoses}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
               />

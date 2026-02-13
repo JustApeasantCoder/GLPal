@@ -1,6 +1,6 @@
 import React from 'react';
 import WeightChart from './WeightChart';
-import DosesChart from './DosesChart';
+import MedicationChart from './MedicationChart';
 import PerformanceOverview from './PerformanceOverview';
 import TDEEDisplay from './TDEEDisplay';
 import WeightInput from './WeightInput';
@@ -111,10 +111,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          {/* GLP-1 Status */}
+          {/* Medication Status */}
           <div>
             <div className="h-48 sm:h-56">
-              <DosesChart data={dosesEntries} period={chartPeriod} />
+              <MedicationChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>
 
