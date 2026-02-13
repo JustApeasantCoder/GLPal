@@ -14,7 +14,7 @@ export const MEDICATIONS: Medication[] = [
   { id: 'retatrutide', name: 'Retatrutide', defaultDose: 12, halfLifeHours: 120 },
   { id: 'liraglutide', name: 'Liraglutide (Victoza/Saxenda)', defaultDose: 3, halfLifeHours: 13 },
   { id: 'dulaglutide', name: 'Dulaglutide (Trulicity)', defaultDose: 4.5, halfLifeHours: 108 },
-  { id: 'other', name: 'Other', defaultDose: 1, halfLifeHours: 120 },
+  { id: 'other', name: 'Custom', defaultDose: 1, halfLifeHours: 120 },
 ];
 
 export const getMedicationById = (id: string): Medication | undefined => {
