@@ -163,7 +163,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="w-full mt-3 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg"
+          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg"
         >
           Log Dose
         </button>

@@ -227,17 +227,22 @@ return (
 
 
           <TabContent isActive={activeTab === 'doses'}>
-            <DosesTab 
-              dosesEntries={dosesEntries} 
-              onAddDose={handleAddDose}
-              onRefreshDoses={handleRefreshDoses}
-              chartPeriod={chartPeriod}
-              onChartPeriodChange={setChartPeriod}
-            />
+            <div className="max-w-md mx-auto">
+              <DosesTab 
+                dosesEntries={dosesEntries} 
+                onAddDose={handleAddDose}
+                onRefreshDoses={handleRefreshDoses}
+                chartPeriod={chartPeriod}
+                onChartPeriodChange={setChartPeriod}
+              />
+            </div>
           </TabContent>
 
+
           <TabContent isActive={activeTab === 'dosage'}>
-            <DosageCalculatorTab />
+            <div className="max-w-md mx-auto">
+              <DosageCalculatorTab />
+            </div>
           </TabContent>
         </div>
       </main>

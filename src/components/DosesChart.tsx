@@ -53,10 +53,9 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
     
     const firstDate = new Date(sortedData[0].date);
     const lastDate = new Date(sortedData[sortedData.length - 1].date);
-    lastDate.setDate(lastDate.getDate() + 7);
     
     // Calculate zoom based on last data date (not today)
-    const lastDataDate = new Date(sortedData[sortedData.length - 1].date);
+    const lastDataDate = new Date(lastDate);
     lastDataDate.setHours(0, 0, 0, 0);
     const daysFromStartToLastData = (lastDataDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
     const totalDataDays = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
@@ -74,24 +73,26 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
     if (totalDataDays > daysToShow) {
       zoomStart = Math.max(0, Math.min(100, ((daysFromStartToLastData - daysToShow) / totalDataDays) * 100));
     }
-    console.log('period:', period, 'daysToShow:', daysToShow, 'daysFromStartToLastData:', daysFromStartToLastData, 'zoomStart:', zoomStart);
     
     const zoomEnd = 100;
     
-    const peakData: Record<string, { date: string; dose: number }[]> = {};
+    const doseDatesByMed: Record<string, Set<string>> = {};
+    const doseAmountByMed: Record<string, Record<string, number>> = {};
     meds.forEach(med => {
-      peakData[med] = [];
+      doseDatesByMed[med] = new Set();
+      doseAmountByMed[med] = {};
       dosesByMed[med].forEach(d => {
         const peakDate = new Date(d.date.getTime() + 24 * 60 * 60 * 1000);
-        peakData[med].push({
-          date: peakDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          dose: d.dose,
-        });
+        const dateKey = peakDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        doseDatesByMed[med].add(dateKey);
+        doseAmountByMed[med][dateKey] = d.dose;
       });
     });
     
     const series: any[] = meds.map(med => {
       const lineData: any[] = [];
+      const doseData: any[] = [];
+      const color = medicationColors[med];
       
       for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
         const concentration = calculateGLP1Concentration(
@@ -101,43 +102,65 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         );
         
         const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const peak = peakData[med].find(p => p.date === dateStr);
+        const hasDose = doseDatesByMed[med].has(dateStr);
+        const dose = hasDose ? doseAmountByMed[med][dateStr] : undefined;
+        const value = isNaN(concentration) ? null : parseFloat(concentration.toFixed(1));
         
-        lineData.push({
-          date: dateStr,
-          value: parseFloat(concentration.toFixed(3)),
-          dose: peak ? peak.dose : null,
-        });
+        lineData.push([dateStr, value]);
+        
+        if (dose) {
+          doseData.push({
+            name: dateStr,
+            value: [dateStr, value],
+            symbol: 'circle',
+            symbolSize: 10,
+            itemStyle: { 
+              color: color.stroke, 
+              borderColor: '#2D1B4E', 
+              borderWidth: 2,
+              shadowBlur: 8,
+              shadowColor: color.stroke + '99',
+            },
+          });
+        }
       }
       
-      const color = medicationColors[med];
-      return {
-        name: med,
-        type: 'line',
-        smooth: true,
-        symbol: (params: any) => params.data?.dose ? 'circle' : 'none',
-        symbolSize: (params: any) => params.data?.dose ? 8 : 0,
-        lineStyle: { width: 2, color: color.stroke },
-        itemStyle: { color: color.stroke },
-        emphasis: {
-          itemStyle: {
-            borderColor: '#2D1B4E',
-            borderWidth: 2,
+      return [
+        {
+          name: med,
+          type: 'line',
+          smooth: true,
+          showSymbol: false,
+          symbol: 'none',
+          lineStyle: { width: 2, color: color.stroke },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: color.fill },
+                { offset: 1, color: color.fill.replace('0.3', '0.02') },
+              ],
+            },
           },
-        },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: color.fill },
-              { offset: 1, color: color.fill.replace('0.3', '0.02') },
-            ],
+          emphasis: {
+            lineStyle: { width: 3 },
+            itemStyle: { opacity: 0 },
           },
+          triggerLineEvent: false,
+          data: lineData,
         },
-        data: lineData,
-      };
-    });
+        {
+          name: med + '_dots',
+          type: 'scatter',
+          z: 10,
+          emphasis: {
+            scale: 1.2,
+          },
+          data: doseData,
+        },
+      ];
+    }).flat();
     
     const firstDateTime = firstDate.getTime();
     const lastDateTime = lastDate.getTime();
@@ -145,6 +168,7 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
     
     const option = {
       backgroundColor: 'transparent',
+      color: meds.map(med => medicationColors[med]?.stroke || '#9C7BD3'),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(45, 27, 78, 0.8)',
@@ -154,16 +178,16 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         textStyle: { color: '#B19CD9' },
         formatter: (params: any) => {
           if (!params || !params.length) return '';
-          const nonZeroParams = params.filter((p: any) => p.value?.value > 0);
+          const nonZeroParams = params.filter((p: any) => (p.value?.[1] ?? 0) > 0);
           if (nonZeroParams.length === 0) return `${params[0].axisValue}<div style="color: #94a3b8; font-size: 11px;">No active dose</div>`;
           const dateStr = params[0].axisValue;
           let html = `<div style="font-weight: 600; margin-bottom: 4px;">${dateStr}</div>`;
           nonZeroParams.forEach((item: any) => {
             const color = item.color || '#9C7BD3';
-            const value = item.value?.value ?? 0;
+            const value = item.value?.[1] ?? 0;
             html += `<div style="display: flex; align-items: center; gap: 8px; margin: 2px 0;">
               <span style="width: 8px; height: 8px; border-radius: 50%; background: ${color};"></span>
-              <span>${item.seriesName}: <strong>${value.toFixed(3)} mg</strong></span>
+              <span>${item.seriesName}: <strong>${value.toFixed(1)} mg</strong></span>
             </div>`;
           });
           return html;
@@ -171,7 +195,10 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       },
       legend: {
         data: meds,
-        bottom: 25,
+        bottom: 0,
+        icon: 'circle',
+        itemWidth: 12,
+        itemHeight: 12,
         textStyle: { fontSize: 12, color: '#94a3b8' },
         formatter: (value: string) => {
           return value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, ' $1').trim();
@@ -190,7 +217,7 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         top: 10,
         left: 10,
         right: 10,
-        bottom: 65,
+        bottom: 25,
         containLabel: true,
       },
       xAxis: {
@@ -207,16 +234,15 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       },
       yAxis: {
         type: 'value',
-        orientation: 'left',
-        width: 1,
+        position: 'right',
         min: 0,
-        axisLine: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
+        axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: { 
           color: '#94a3b8',
           fontSize: 11,
           margin: 10,
-          formatter: (value: number) => value.toFixed(1),
+          formatter: (value: number) => value.toFixed(1) + ' mg',
         },
         splitLine: {
           lineStyle: { color: 'rgba(156, 123, 211, 0.1)', type: 'dashed' },
