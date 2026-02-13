@@ -1,9 +1,10 @@
-import { WeightEntry, GLP1Entry, UserProfile } from '../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile } from '../types';
 
 // localStorage-based database simulation for browser environment
 const STORAGE_KEYS = {
   WEIGHT_ENTRIES: 'glpal_weight_entries',
   GLP1_ENTRIES: 'glp1_entries',
+  GLP1_PROTOCOL: 'glp1_protocol',
   USER_PROFILE: 'glpal_user_profile'
 };
 
@@ -113,6 +114,40 @@ export const deleteGLP1Entry = (date: string): void => {
 
 export const clearGLP1Entries = (): void => {
   localStorage.setItem(STORAGE_KEYS.GLP1_ENTRIES, JSON.stringify([]));
+};
+
+// GLP-1 Protocol (array of protocols)
+export const saveGLP1Protocols = (protocols: GLP1Protocol[]): void => {
+  localStorage.setItem(STORAGE_KEYS.GLP1_PROTOCOL, JSON.stringify(protocols));
+};
+
+export const getGLP1Protocols = (): GLP1Protocol[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.GLP1_PROTOCOL);
+  return data ? JSON.parse(data) : [];
+};
+
+export const addGLP1Protocol = (protocol: GLP1Protocol): void => {
+  const protocols = getGLP1Protocols();
+  protocols.push(protocol);
+  saveGLP1Protocols(protocols);
+};
+
+export const updateGLP1Protocol = (updatedProtocol: GLP1Protocol): void => {
+  const protocols = getGLP1Protocols();
+  const index = protocols.findIndex(p => p.id === updatedProtocol.id);
+  if (index >= 0) {
+    protocols[index] = updatedProtocol;
+    saveGLP1Protocols(protocols);
+  }
+};
+
+export const deleteGLP1Protocol = (id: string): void => {
+  const protocols = getGLP1Protocols().filter(p => p.id !== id);
+  saveGLP1Protocols(protocols);
+};
+
+export const clearGLP1Protocol = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.GLP1_PROTOCOL);
 };
 
 // User profile

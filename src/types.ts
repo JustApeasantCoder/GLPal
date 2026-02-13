@@ -12,6 +12,16 @@ export interface GLP1Entry {
   halfLifeHours: number;
 }
 
+export interface GLP1Protocol {
+  id: string;
+  medication: string;
+  dose: number;
+  frequencyPerWeek: number;
+  startDate: string;
+  stopDate: string | null; // null means ongoing
+  halfLifeHours: number;
+}
+
 export type UnitSystem = 'metric' | 'imperial';
 
 export interface UserProfile {
