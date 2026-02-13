@@ -110,19 +110,23 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Per Week</label>
+              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dosing Schedule</label>
               <select
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value)}
                 className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
               >
-                <option value="1">1x</option>
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-                <option value="4">4x</option>
-                <option value="5">5x</option>
-                <option value="6">6x</option>
-                <option value="7">Daily</option>
+                <option value="7">Everyday</option>
+                <option value="3.5">Every 2 Days</option>
+                <option value="2.333">Every 3 Days</option>
+                <option value="2">Every 3.5 Days</option>
+                <option value="1.75">Every 4 Days</option>
+                <option value="1.4">Every 5 Days</option>
+                <option value="1.167">Every 6 Days</option>
+                <option value="1">Every Week</option>
+                <option value="0.5">Every 2 Weeks</option>
+                <option value="0.333">Every 3 Weeks</option>
+                <option value="0.233">Every Month</option>
               </select>
             </div>
           </div>

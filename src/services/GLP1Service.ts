@@ -15,7 +15,8 @@ export const generateDosesFromProtocols = (
     const end = prot.stopDate ? new Date(prot.stopDate) : today;
     const intervalDays = 7 / prot.frequencyPerWeek;
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
+    let d = new Date(start);
+    while (d <= end) {
       const dateStr = d.toISOString().split('T')[0];
       const existingEntry = existingEntries.find(e => e.date === dateStr && e.medication === prot.medication);
       if (!existingEntry) {
@@ -26,6 +27,7 @@ export const generateDosesFromProtocols = (
           halfLifeHours: prot.halfLifeHours,
         });
       }
+      d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
     }
   });
 
@@ -41,7 +43,8 @@ export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
     const end = prot.stopDate ? new Date(prot.stopDate) : today;
     const intervalDays = 7 / prot.frequencyPerWeek;
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
+    let d = new Date(start);
+    while (d <= end) {
       const dateStr = d.toISOString().split('T')[0];
       newDoses.push({
         date: dateStr,
@@ -49,6 +52,7 @@ export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
         dose: prot.dose,
         halfLifeHours: prot.halfLifeHours,
       });
+      d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
     }
   });
   

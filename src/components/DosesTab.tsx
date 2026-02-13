@@ -8,7 +8,7 @@ import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateGLP1Concentration } from '../utils/calculations';
 import { addGLP1GeneratedEntry, clearGLP1Entries } from '../utils/database';
-import { MEDICATIONS, formatDate } from '../constants/medications';
+import { MEDICATIONS, formatDate, formatFrequency } from '../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/GLP1Service';
 
 interface DosesTabProps {
@@ -199,7 +199,7 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
                       {med?.name || protocol.medication} - {protocol.dose}mg
                     </p>
                     <p className="text-xs text-text-muted">
-                      {formatDate(protocol.startDate)} → {protocol.stopDate ? formatDate(protocol.stopDate) : 'Ongoing'} ({protocol.frequencyPerWeek}x/week)
+                      {formatDate(protocol.startDate)} → {protocol.stopDate ? formatDate(protocol.stopDate) : 'Ongoing'} ({formatFrequency(protocol.frequencyPerWeek)})
                     </p>
                   </div>
                   <button

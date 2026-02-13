@@ -26,3 +26,20 @@ export const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
+
+export const formatFrequency = (frequencyPerWeek: number): string => {
+  const scheduleMap: Record<number, string> = {
+    7: 'Everyday',
+    3.5: 'Every 2 days',
+    2.333: 'Every 3 days',
+    2: 'Every 3.5 days',
+    1.75: 'Every 4 days',
+    1.4: 'Every 5 days',
+    1.167: 'Every 6 days',
+    1: 'Weekly',
+    0.5: 'Every 2 weeks',
+    0.333: 'Every 3 weeks',
+    0.233: 'Monthly',
+  };
+  return scheduleMap[frequencyPerWeek] || `${frequencyPerWeek}x/week`;
+};
