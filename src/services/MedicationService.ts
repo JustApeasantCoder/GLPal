@@ -16,7 +16,7 @@ export const generateDosesFromProtocols = (
     const intervalDays = 7 / prot.frequencyPerWeek;
 
     let d = new Date(start);
-    while (d <= end) {
+    while (d < end) {
       const dateStr = d.toISOString().split('T')[0];
       const existingEntry = existingEntries.find(e => e.date === dateStr && e.medication === prot.medication);
       if (!existingEntry) {
@@ -44,7 +44,7 @@ export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
     const intervalDays = 7 / prot.frequencyPerWeek;
 
     let d = new Date(start);
-    while (d <= end) {
+    while (d < end) {
       const dateStr = d.toISOString().split('T')[0];
       newDoses.push({
         date: dateStr,

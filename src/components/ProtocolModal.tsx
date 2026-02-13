@@ -123,8 +123,9 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     let newStartDate = new Date().toISOString().split('T')[0];
 
     if (mode === 'add' && existingProtocols && med) {
+      const medName = med.name;
       const medProtocols = existingProtocols
-        .filter(p => p.medication === medicationId)
+        .filter(p => p.medication === medName || p.medication === medicationId)
         .filter(p => p.stopDate !== null);
       
       if (medProtocols.length > 0) {
@@ -136,7 +137,6 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         
         if (lastProtocol.stopDate) {
           const lastEndDate = new Date(lastProtocol.stopDate);
-          lastEndDate.setDate(lastEndDate.getDate() + 1);
           newStartDate = lastEndDate.toISOString().split('T')[0];
           setContinuationInfo(`Continues from ${med.name} protocol (ended ${lastProtocol.stopDate})`);
           
