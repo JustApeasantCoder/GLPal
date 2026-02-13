@@ -222,14 +222,6 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
           type: 'scatter',
           z: 10,
           showInLegend: false,
-          label: {
-            show: true,
-            position: 'top',
-            formatter: (params: any) => params.value[1]?.toFixed(1) + 'mg',
-            color: '#E2E8F0',
-            fontSize: 10,
-            distance: 2,
-          },
           emphasis: {
             scale: 1.2,
           },
@@ -237,6 +229,42 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         },
       ];
     }).flat();
+    
+    // Add labels to all dots - show if value differs by >25% from previous shown label
+    series.forEach((s: any) => {
+      if (s.type === 'scatter' && s.data && s.data.length > 0) {
+        let lastShownValue: number | null = null;
+        
+        s.data = s.data.map((dot: any) => {
+          const doseValue = Math.round(dot.value[1]);
+          
+          let shouldShow = true;
+          if (lastShownValue !== null && lastShownValue > 0) {
+            const diff = Math.abs(doseValue - lastShownValue) / lastShownValue;
+            if (diff <= 0.25) {
+              shouldShow = false;
+            }
+          }
+          
+          if (shouldShow) {
+            lastShownValue = doseValue;
+            return {
+              ...dot,
+              label: {
+                show: true,
+                position: 'top',
+                formatter: doseValue + 'mg',
+                color: '#E2E8F0',
+                fontSize: 10,
+                distance: 8,
+              }
+            };
+          }
+          
+          return { ...dot, label: { show: false } };
+        });
+      }
+    });
     
     // Filter scatter dots to show max 6 in visible range
     series.forEach((s: any) => {

@@ -27,23 +27,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
       };
     });
 
-    // Generate indices for dots to show (up to 12 points evenly distributed)
-    const getDotIndices = (dataLength: number): number[] => {
-      if (dataLength <= 12) {
-        return Array.from({ length: dataLength }, (_, i) => i);
-      }
-      const indices = new Set<number>();
-      indices.add(0);
-      indices.add(dataLength - 1);
-      const step = (dataLength - 1) / 11;
-      for (let i = 1; i <= 10; i++) {
-        indices.add(Math.round(i * step));
-      }
-      return Array.from(indices).sort((a, b) => a - b);
-    };
-
-    const dotIndices = new Set(getDotIndices(chartData.length));
-
     const weights = sortedData.map(e => e.weight);
     const minWeight = Math.min(...weights);
     const maxWeight = Math.max(...weights);
@@ -52,6 +35,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
     // Calculate zoom to show last 30 days by default
     let firstDate = new Date(sortedData[0].date);
     let lastDate = new Date(sortedData[sortedData.length - 1].date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
     const actualLastDate = new Date(lastDate);
     actualLastDate.setHours(0, 0, 0, 0);
@@ -73,12 +58,43 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
       default: daysToShow = actualDataDays;
     }
     
+    // Generate x-axis dates for zoom calculation
+    const xAxisDates = chartData.map(d => d.date);
+    const totalPoints = xAxisDates.length;
+    const todayStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    let todayIndex = xAxisDates.indexOf(todayStr);
+    if (todayIndex === -1) {
+      todayIndex = totalPoints - 1;
+    }
+    
+    // Calculate visible range for filtering dots
     let zoomStart = 0;
     const zoomEnd = 100;
     if (actualDataDays > daysToShow) {
       zoomStart = ((actualDataDays - daysToShow) / actualDataDays) * 100;
     }
     zoomStart = Math.max(0, Math.min(100, zoomStart));
+    
+    const visibleStartIndex = Math.floor((zoomStart / 100) * totalPoints);
+    const visibleEndIndex = Math.ceil((zoomEnd / 100) * totalPoints);
+    
+    // Generate indices for dots to show (up to 12 points evenly distributed in visible range)
+    const getDotIndices = (dataLength: number): number[] => {
+      const visibleLength = visibleEndIndex - visibleStartIndex;
+      if (visibleLength <= 12) {
+        return Array.from({ length: visibleLength }, (_, i) => visibleStartIndex + i);
+      }
+      const indices: number[] = [];
+      indices.push(visibleStartIndex);
+      const step = (visibleLength - 1) / 11;
+      for (let i = 1; i <= 10; i++) {
+        indices.push(visibleStartIndex + Math.round(i * step));
+      }
+      indices.push(visibleEndIndex);
+      return Array.from(new Set(indices)).sort((a, b) => a - b);
+    };
+    
+    const dotIndices = new Set(getDotIndices(chartData.length));
 
     const option = {
       backgroundColor: 'transparent',
@@ -142,15 +158,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
           name: 'Weight',
           type: 'line',
           smooth: true,
-          showSymbol: true,
-          symbol: (params: any) => {
-            const index = params.dataIndex;
-            return dotIndices.has(index) ? 'circle' : 'none';
-          },
-          symbolSize: (params: any) => {
-            const index = params.dataIndex;
-            return dotIndices.has(index) ? 10 : 0;
-          },
+          showSymbol: false,
+          symbol: 'none',
           lineStyle: { width: 3, color: '#9C7BD3' },
           itemStyle: { 
             color: '#9C7BD3',
@@ -183,6 +192,34 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
               fontSize: 12,
               padding: [0, 0, 0, 20],
             },
+          },
+        },
+        {
+          name: 'WeightDots',
+          type: 'scatter',
+          z: 10,
+          data: chartData
+            .map((d, i) => ({ ...d, index: i }))
+            .filter(d => dotIndices.has(d.index))
+            .map(d => ({
+              value: [d.date, d.weight],
+              itemStyle: {
+                color: '#9C7BD3',
+                borderColor: '#2D1B4E',
+                borderWidth: 2,
+                shadowBlur: 8,
+                shadowColor: '#9C7BD399',
+              },
+            })),
+          symbol: 'circle',
+          symbolSize: 10,
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: any) => Math.round(params.value[1]) + 'kg',
+            color: '#E2E8F0',
+            fontSize: 10,
+            distance: 8,
           },
         },
       ],
