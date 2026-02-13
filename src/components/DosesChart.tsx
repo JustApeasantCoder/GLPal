@@ -119,6 +119,10 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       }
     }
     
+    // Calculate visible range for filtering dots
+    const visibleStartIndex = Math.floor((zoomStart / 100) * totalPoints);
+    const visibleEndIndex = Math.ceil((zoomEnd / 100) * totalPoints);
+    
     const doseDatesByMed: Record<string, Set<string>> = {};
     const doseAmountByMed: Record<string, Record<string, number>> = {};
     meds.forEach(med => {
@@ -133,7 +137,8 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
     });
     
     const series: any[] = meds.map(med => {
-      const lineData: any[] = [];
+      const lineDataBefore: any[] = [];
+      const lineDataAfter: any[] = [];
       const doseData: any[] = [];
       const color = medicationColors[med];
       
@@ -149,7 +154,13 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         const dose = hasDose ? doseAmountByMed[med][dateStr] : undefined;
         const value = isNaN(concentration) ? null : parseFloat(concentration.toFixed(1));
         
-        lineData.push([dateStr, value]);
+        const dateIndex = xAxisDates.indexOf(dateStr);
+        if (dateIndex <= todayIndex) {
+          lineDataBefore.push([dateStr, value]);
+        }
+        if (dateIndex >= todayIndex) {
+          lineDataAfter.push([dateStr, value]);
+        }
         
         if (dose) {
           doseData.push({
@@ -191,13 +202,34 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
             itemStyle: { opacity: 0 },
           },
           triggerLineEvent: false,
-          data: lineData,
+          data: lineDataBefore,
+        },
+        {
+          name: med + '_future',
+          type: 'line',
+          smooth: true,
+          showSymbol: false,
+          symbol: 'none',
+          lineStyle: { width: 2, color: color.stroke, type: 'dotted' },
+          emphasis: {
+            disabled: true,
+          },
+          triggerLineEvent: false,
+          data: lineDataAfter,
         },
         {
           name: med,
           type: 'scatter',
           z: 10,
           showInLegend: false,
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: any) => params.value[1]?.toFixed(1) + 'mg',
+            color: '#E2E8F0',
+            fontSize: 10,
+            distance: 2,
+          },
           emphasis: {
             scale: 1.2,
           },
@@ -206,21 +238,30 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       ];
     }).flat();
     
+    // Filter scatter dots to show max 6 in visible range
+    series.forEach((s: any) => {
+      if (s.type === 'scatter' && s.data && s.data.length > 0) {
+        const visibleDots = s.data.filter((dot: any) => {
+          const dotIndex = xAxisDates.indexOf(dot.value[0]);
+          return dotIndex >= visibleStartIndex && dotIndex <= visibleEndIndex;
+        });
+        
+        if (visibleDots.length > 6) {
+          const step = Math.floor(visibleDots.length / 6);
+          s.data = visibleDots.filter((_: any, i: number) => i % step === 0).slice(0, 6);
+        }
+      }
+    });
+    
     // Add today marker line to the first series
     if (series.length > 0 && todayIndex >= 0) {
       const todayDateStr = xAxisDates[todayIndex];
       (series[0] as any).markLine = {
         silent: true,
         symbol: 'none',
-        lineStyle: { color: '#4ADEA8', type: 'solid', width: 2 },
-        label: { 
-          show: true, 
-          position: 'start', 
-          formatter: 'Today',
-          color: '#4ADEA8',
-          fontSize: 11,
-          padding: [4, 8],
-        },
+        z: 100,
+        label: { show: false },
+        lineStyle: { type: 'dotted', width: 2 },
         data: [
           { xAxis: todayDateStr }
         ],
@@ -283,7 +324,7 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
         },
       ],
       grid: {
-        top: 10,
+        top: 15,
         left: 10,
         right: 10,
         bottom: 25,
@@ -308,7 +349,7 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
           color: '#94a3b8',
           fontSize: 11,
           margin: 10,
-          formatter: (value: number) => value.toFixed(1) + ' mg',
+          formatter: (value: number) => value.toFixed(1) + 'mg',
         },
         splitLine: {
           lineStyle: { color: 'rgba(156, 123, 211, 0.1)', type: 'dashed' },
