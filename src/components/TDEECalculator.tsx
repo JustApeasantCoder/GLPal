@@ -51,7 +51,7 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
             max="120"
             value={profile.age}
             onChange={(e) => handleChange({ ...profile, age: parseInt(e.target.value) || 0 })}
-            className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
 required
             />
             {unitSystem === 'imperial' && (
@@ -69,7 +69,7 @@ required
             id="gender"
             value={profile.gender}
             onChange={(e) => handleChange({ ...profile, gender: e.target.value as 'male' | 'female' })}
-            className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-mint focus:border-accent-mint transition-all duration-300"
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium transition-all duration-300"
           >
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -94,7 +94,7 @@ required
                     const heightInCm = feetInchesToCm(newFeet, newInches);
                     handleChange({ ...profile, height: heightInCm });
                   }}
-                  className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
                   placeholder="Feet"
                   required
                 />
@@ -112,7 +112,7 @@ required
                     const heightInCm = feetInchesToCm(newFeet, newInches);
                     handleChange({ ...profile, height: heightInCm });
                   }}
-                  className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
                   placeholder="Inches"
                   required
                 />
@@ -131,7 +131,7 @@ required
                 const heightInCm = convertHeightToCm(displayHeight, unitSystem);
                 handleChange({ ...profile, height: heightInCm });
               }}
-              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
               placeholder="Enter height in cm"
               required
             />
@@ -146,7 +146,7 @@ required
             id="activity"
             value={profile.activityLevel}
             onChange={(e) => handleChange({ ...profile, activityLevel: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-mint focus:border-accent-mint transition-all duration-300"
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium transition-all duration-300"
           >
             {activityLevels.map(level => (
               <option key={level.value} value={level.value}>

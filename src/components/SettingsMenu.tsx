@@ -94,21 +94,22 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      <div className="bg-card-bg backdrop-blur-3xl rounded-2xl shadow-theme-lg max-w-md w-full mx-auto border border-card-border overflow-y-auto hide-scrollbar" style={{ maxHeight: '80vh' }}>
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.6)' : '0 0 20px rgba(45,27,78,0.3)' }}>Settings</h2>
-            <button
-              onClick={onClose}
-              className="text-accent-purple-medium hover:text-accent-purple-light text-2xl leading-none p-1 rounded-lg hover:bg-accent-purple-light/10 transition-all duration-300"
-              style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}
-            >
-              ×
-            </button>
-          </div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-text-primary">
+            Settings
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-primary text-2xl leading-none p-1 rounded-lg hover:bg-white/10 transition-all"
+          >
+            ×
+          </button>
+        </div>
 
-          <div className="space-y-6">
+        <div className="space-y-4">
             {/* User Settings Section */}
             <div>
               <h3 className="text-lg font-medium text-text-primary mb-4" style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : '0 0 15px rgba(45,27,78,0.2)' }}>User Settings</h3>
@@ -127,7 +128,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     id="unitSystem"
                     value={localProfile.unitSystem || 'metric'}
                     onChange={(e) => handleUnitSystemChange(e.target.value as UnitSystem)}
-                    className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
+                    className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
                   >
                     <option value="metric">Metric (kg, cm)</option>
                     <option value="imperial">Imperial (lbs, ft/in)</option>
@@ -142,17 +143,17 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
                   </label>
                    <input
-                     type="number"
-                     id="goalWeight"
-                     step="0.1"
-                     min={unitSystem === 'imperial' ? "66" : "30"}
-                     max={unitSystem === 'imperial' ? "661" : "300"}
-                     value={pendingGoalWeight || goalWeightDisplayValue}
-                     onChange={(e) => handleGoalWeightChange(e.target.value)}
-                     onBlur={handleGoalWeightBlur}
-                     className="w-full px-3 py-2 border border-accent-purple-light/30 bg-card-bg backdrop-blur-sm text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-                     placeholder={`Enter your goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                   />
+                      type="number"
+                      id="goalWeight"
+                      step="0.1"
+                      min={unitSystem === 'imperial' ? "66" : "30"}
+                      max={unitSystem === 'imperial' ? "661" : "300"}
+                      value={pendingGoalWeight || goalWeightDisplayValue}
+                      onChange={(e) => handleGoalWeightChange(e.target.value)}
+                      onBlur={handleGoalWeightBlur}
+                      className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+                      placeholder={`Enter your goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                    />
                 </div>
               </div>
             </div>
@@ -160,7 +161,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             {/* Appearance Section */}
             <div>
               <h3 className="text-lg font-medium text-text-primary mb-4" style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : '0 0 15px rgba(45,27,78,0.2)' }}>Appearance</h3>
-              <div className="flex items-center justify-between p-3 rounded-lg border border-accent-purple-light/20">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-[#B19CD9]/20">
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -191,7 +192,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 Close
               </button>
             </div>
-          </div>
         </div>
       </div>
     </div>,

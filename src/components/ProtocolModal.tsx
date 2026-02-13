@@ -136,13 +136,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
               style={{ colorScheme: 'dark' }}
             />
-            <div className="flex gap-1 mt-2">
+            <div className="flex gap-2 mt-2">
               {[
                 { label: '1W', days: 7 },
                 { label: '2W', days: 14 },
                 { label: '1M', days: 30 },
                 { label: '1Y', days: 365 },
-              ].map((preset) => (
+              ].map((preset) => {
+                const isSelected = startDate && stopDate && stopDate === new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                return (
                 <button
                   key={preset.label}
                   type="button"
@@ -152,11 +154,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                       setStopDate(endDate.toISOString().split('T')[0]);
                     }
                   }}
-                  className="flex-1 px-2 py-1 text-xs rounded border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] hover:bg-[#B19CD9]/20"
+                  className={`flex-1 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
+                    isSelected 
+                      ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                      : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                  }`}
                 >
                   {preset.label}
                 </button>
-              ))}
+              )})}
             </div>
           </div>
 
