@@ -2,11 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import DosesChart from './DosesChart';
 import DoseModal from './DoseModal';
 import PeriodSelector from './PeriodSelector';
+import ProtocolModal from './ProtocolModal';
 import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateGLP1Concentration } from '../utils/calculations';
-import { saveGLP1Protocols, getGLP1Protocols, deleteGLP1Protocol, getArchivedProtocols, setGLP1Entries, clearGLP1Entries } from '../utils/database';
+import { addGLP1GeneratedEntry } from '../utils/database';
+import { MEDICATIONS, formatDate } from '../constants/medications';
+import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/GLP1Service';
 
 interface DosesTabProps {
   dosesEntries: GLP1Entry[];
@@ -15,233 +18,6 @@ interface DosesTabProps {
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
 }
-
-const MEDICATIONS = [
-  { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 2.4, halfLifeHours: 168 },
-  { id: 'tirzepatide', name: 'Tirzepatide (Mounjaro/Zepbound)', defaultDose: 15, halfLifeHours: 127 },
-  { id: 'retatrutide', name: 'Retatrutide', defaultDose: 12, halfLifeHours: 120 },
-  { id: 'liraglutide', name: 'Liraglutide (Victoza/Saxenda)', defaultDose: 3, halfLifeHours: 13 },
-  { id: 'dulaglutide', name: 'Dulaglutide (Trulicity)', defaultDose: 4.5, halfLifeHours: 108 },
-  { id: 'other', name: 'Other', defaultDose: 1, halfLifeHours: 120 },
-];
-
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-interface ProtocolModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (protocol: GLP1Protocol) => void;
-  onArchive?: (protocol: GLP1Protocol) => void;
-  onDelete?: (id: string) => void;
-  protocol?: GLP1Protocol | null;
-  mode: 'add' | 'edit';
-}
-
-const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode }) => {
-  const [selectedMedication, setSelectedMedication] = useState<string>('');
-  const [dose, setDose] = useState<string>('');
-  const [frequency, setFrequency] = useState<string>('1');
-  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [stopDate, setStopDate] = useState<string>('');
-  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setConfirmAction(null);
-      if (mode === 'edit' && protocol) {
-        setSelectedMedication(protocol.medication);
-        setDose(protocol.dose.toString());
-        setFrequency(protocol.frequencyPerWeek.toString());
-        setStartDate(protocol.startDate);
-        setStopDate(protocol.stopDate || '');
-      } else {
-        setSelectedMedication('');
-        setDose('');
-        setFrequency('1');
-        setStartDate(new Date().toISOString().split('T')[0]);
-        setStopDate('');
-      }
-    }
-  }, [isOpen, mode, protocol]);
-
-  const handleSave = () => {
-    const med = MEDICATIONS.find(m => m.id === selectedMedication);
-    if (!med || !dose || !frequency || !startDate) return;
-
-    const stopDateValue = stopDate 
-      ? stopDate 
-      : new Date(new Date(startDate).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    const newProtocol: GLP1Protocol = {
-      id: protocol?.id || generateId(),
-      medication: selectedMedication,
-      dose: parseFloat(dose),
-      frequencyPerWeek: parseInt(frequency),
-      startDate,
-      stopDate: stopDateValue,
-      halfLifeHours: med.halfLifeHours,
-    };
-
-    onSave(newProtocol);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">
-          {mode === 'add' ? 'Add Protocol' : 'Edit Protocol'}
-        </h2>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
-            <div className="space-y-1 max-h-24 overflow-y-auto">
-              {MEDICATIONS.map((med) => (
-                <button
-                  key={med.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedMedication(med.id);
-                    setDose(med.defaultDose.toString());
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
-                    selectedMedication === med.id
-                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
-                  }`}
-                >
-                  {med.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.1"
-                max="99.9"
-                value={dose}
-                onChange={(e) => setDose(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Enter dose"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Per Week</label>
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-              >
-                <option value="1">1x</option>
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-                <option value="4">4x</option>
-                <option value="5">5x</option>
-                <option value="6">6x</option>
-                <option value="7">Daily</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-              style={{ colorScheme: 'dark' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date (optional)</label>
-            <input
-              type="date"
-              value={stopDate}
-              onChange={(e) => setStopDate(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-              style={{ colorScheme: 'dark' }}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            {mode === 'edit' && onDelete && onArchive && !confirmAction && (
-              <>
-                <button
-                  onClick={() => setConfirmAction('archive')}
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
-                >
-                  Archive
-                </button>
-                <button
-                  onClick={() => setConfirmAction('delete')}
-                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                >
-                  Delete
-                </button>
-              </>
-            )}
-            {mode === 'edit' && confirmAction && (
-              <>
-                <button
-                  onClick={() => {
-                    if (protocol && confirmAction === 'archive' && onArchive) {
-                      onArchive(protocol);
-                    }
-                    if (protocol && confirmAction === 'delete' && onDelete) {
-                      onDelete(protocol.id);
-                    }
-                    onClose();
-                  }}
-                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                >
-                  Yes, {confirmAction}
-                </button>
-                <button
-                  onClick={() => setConfirmAction(null)}
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-            {mode === 'add' && (
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
-              >
-                Cancel
-              </button>
-            )}
-            {!confirmAction && (
-              <button
-                onClick={handleSave}
-                className={`${mode === 'edit' ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm`}
-              >
-                Save
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshDoses, chartPeriod, onChartPeriodChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -252,51 +28,17 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   useEffect(() => {
-    const savedProtocols = getGLP1Protocols();
-    const validProtocols = Array.isArray(savedProtocols) ? savedProtocols : [];
-    setProtocols(validProtocols);
+    const savedProtocols = getActiveProtocols();
+    setProtocols(savedProtocols);
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
-    const today = new Date();
-    const generatedDoses: GLP1Entry[] = [];
-
-    protocolList.forEach(prot => {
-      if (prot.isArchived) return;
-      
-      const start = new Date(prot.startDate);
-      const end = prot.stopDate ? new Date(prot.stopDate) : today;
-      const intervalDays = 7 / prot.frequencyPerWeek;
-
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
-        const dateStr = d.toISOString().split('T')[0];
-        const existingEntry = dosesEntries.find(e => e.date === dateStr && e.medication === prot.medication);
-        if (!existingEntry) {
-          generatedDoses.push({
-            date: dateStr,
-            medication: prot.medication,
-            dose: prot.dose,
-            halfLifeHours: prot.halfLifeHours,
-          });
-        }
-      }
-    });
-
-    generatedDoses.forEach(entry => onAddDose(entry.dose, entry.medication, entry.date));
+    const generatedDoses = generateDosesFromProtocols(protocolList, []);
+    generatedDoses.forEach(entry => addGLP1GeneratedEntry(entry));
   };
 
   const handleSaveProtocol = (protocol: GLP1Protocol) => {
-    let updatedProtocols: GLP1Protocol[];
-    
-    if (protocolModalMode === 'add') {
-      updatedProtocols = [...(Array.isArray(protocols) ? protocols : []), protocol];
-    } else {
-      updatedProtocols = (Array.isArray(protocols) ? protocols : []).map(p => 
-        p.id === protocol.id ? protocol : p
-      );
-    }
-    
-    saveGLP1Protocols(updatedProtocols);
+    const updatedProtocols = saveProtocol(protocol, protocols);
     setProtocols(updatedProtocols);
     handleGenerateDoses(updatedProtocols);
     onRefreshDoses();
@@ -309,73 +51,14 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
   };
 
   const handleDeleteProtocol = (id: string) => {
-    deleteGLP1Protocol(id);
-    const updatedList = (Array.isArray(protocols) ? protocols : []).filter(p => p.id !== id);
-    saveGLP1Protocols(updatedList);
-    
-    // Clear and regenerate all doses from remaining protocols
-    clearGLP1Entries();
-    const newDoses: GLP1Entry[] = [];
-    const today = new Date();
-    
-    updatedList.forEach(prot => {
-      const start = new Date(prot.startDate);
-      const end = prot.stopDate ? new Date(prot.stopDate) : today;
-      const intervalDays = 7 / prot.frequencyPerWeek;
-
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
-        const dateStr = d.toISOString().split('T')[0];
-        newDoses.push({
-          date: dateStr,
-          medication: prot.medication,
-          dose: prot.dose,
-          halfLifeHours: prot.halfLifeHours,
-        });
-      }
-    });
-    
-    // Sort by date and save
-    newDoses.sort((a, b) => a.date.localeCompare(b.date));
-    setGLP1Entries(newDoses);
+    const updatedList = deleteProtocol(id, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
     onRefreshDoses();
   };
 
   const handleArchiveProtocol = (protocol: GLP1Protocol) => {
-    // Add to archived storage
-    const archived = getArchivedProtocols();
-    archived.push({ ...protocol, isArchived: true });
-    localStorage.setItem('glp1_archived', JSON.stringify(archived));
-    
-    // Remove from active protocols
-    const updatedList = (Array.isArray(protocols) ? protocols : []).filter(p => p.id !== protocol.id);
-    saveGLP1Protocols(updatedList);
-    
-    // Clear and regenerate all doses from remaining protocols
-    clearGLP1Entries();
-    const newDoses: GLP1Entry[] = [];
-    const today = new Date();
-    
-    updatedList.forEach(prot => {
-      const start = new Date(prot.startDate);
-      const end = prot.stopDate ? new Date(prot.stopDate) : today;
-      const intervalDays = 7 / prot.frequencyPerWeek;
-
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + intervalDays)) {
-        const dateStr = d.toISOString().split('T')[0];
-        newDoses.push({
-          date: dateStr,
-          medication: prot.medication,
-          dose: prot.dose,
-          halfLifeHours: prot.halfLifeHours,
-        });
-      }
-    });
-    
-    // Sort by date and save
-    newDoses.sort((a, b) => a.date.localeCompare(b.date));
-    setGLP1Entries(newDoses);
+    const updatedList = archiveProtocol(protocol, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
     onRefreshDoses();
@@ -503,9 +186,8 @@ const DosesTab: React.FC<DosesTabProps> = ({ dosesEntries, onAddDose, onRefreshD
         {/* Saved Protocols List */}
         {protocols.length > 0 && (
           <div className="space-y-2 mb-4">
-            {protocols.map((protocol, index) => {
+            {protocols.map((protocol) => {
               const med = MEDICATIONS.find(m => m.id === protocol.medication);
-              const isActive = protocol.stopDate === null;
               return (
                 <div 
                   key={protocol.id}

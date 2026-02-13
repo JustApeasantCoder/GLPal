@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Brush } from 'recharts';
 import { GLP1Entry } from '../types';
 import { ChartPeriod } from '../hooks';
 import { calculateGLP1Concentration } from '../utils/calculations';
@@ -19,37 +19,12 @@ interface DosesChartProps {
 }
 
 const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
-  const filteredData = useMemo(() => {
-    if (data.length === 0) return [];
+  const { allChartData, medicationColors, brushRange } = useMemo(() => {
+    if (data.length === 0) return { allChartData: [], medicationColors: {}, brushRange: { startIndex: 0, endIndex: 0 } };
     
-    const now = new Date();
-    let startDate: Date;
+    const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
-    switch (period) {
-      case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case 'month':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case '90days':
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        break;
-      case 'all':
-      default:
-        startDate = new Date(0);
-        break;
-    }
-    
-    const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    return sorted.filter(entry => new Date(entry.date) >= startDate);
-  }, [data, period]);
-
-  const { medications, chartData, medicationColors } = useMemo(() => {
-    if (filteredData.length === 0) return { medications: [] as string[], chartData: [] as any[], medicationColors: {} as Record<string, { stroke: string; fill: string }> };
-
-    const medsArray = filteredData.map(e => e.medication);
+    const medsArray = sortedData.map(e => e.medication);
     const meds = Array.from(new Set(medsArray));
     
     const medicationColors: Record<string, { stroke: string; fill: string }> = {};
@@ -59,21 +34,21 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
     
     const dosesByMed: Record<string, { date: Date; dose: number }[]> = {};
     meds.forEach(med => {
-      dosesByMed[med] = filteredData
+      dosesByMed[med] = sortedData
         .filter(e => e.medication === med)
         .map(e => ({ date: new Date(e.date), dose: e.dose }));
     });
 
     const halfLifeByMed: Record<string, number> = {};
     meds.forEach(med => {
-      const medData = filteredData.find(e => e.medication === med);
+      const medData = sortedData.find(e => e.medication === med);
       if (medData) halfLifeByMed[med] = medData.halfLifeHours;
     });
 
-    const startDate = new Date(filteredData[0].date);
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 14);
-
+    const firstDate = new Date(sortedData[0].date);
+    const lastDate = new Date(sortedData[sortedData.length - 1].date);
+    lastDate.setDate(lastDate.getDate() + 7);
+    
     const peakData: Record<string, { date: string; dose: number }[]> = {};
     meds.forEach(med => {
       peakData[med] = [];
@@ -86,10 +61,10 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
       });
     });
 
-    const generatedData = [];
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const generatedData: any[] = [];
+    for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const dataPoint: any = { date: dateStr };
+      const dataPoint: any = { date: dateStr, fullDate: d.toISOString().split('T')[0] };
 
       meds.forEach(med => {
         const concentration = calculateGLP1Concentration(
@@ -107,11 +82,44 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
 
       generatedData.push(dataPoint);
     }
+    
+    let periodDays: number;
+    switch (period) {
+      case 'week': periodDays = 14; break;
+      case 'month': periodDays = 28; break;
+      case '90days': periodDays = 90; break;
+      default: periodDays = 120;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const viewStart = new Date(today.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const viewEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    let startIndex = 0;
+    let endIndex = generatedData.length - 1;
+    
+    for (let i = 0; i < generatedData.length; i++) {
+      const itemDate = new Date(generatedData[i].fullDate);
+      if (itemDate >= viewStart && startIndex === 0) {
+        startIndex = Math.max(0, i - 1);
+      }
+      if (itemDate <= viewEnd) {
+        endIndex = i;
+      }
+    }
+    
+    return { 
+      allChartData: generatedData, 
+      medicationColors,
+      brushRange: { startIndex, endIndex }
+    };
+  }, [data, period]);
 
-    return { medications: meds, chartData: generatedData, medicationColors };
-  }, [filteredData]);
-
-  const hasData = filteredData.length > 0;
+  const medications = Object.keys(medicationColors);
+  const hasData = data.length > 0;
+  
+  const chartData = allChartData;
 
   const getColor = (medication: string) => {
     return medicationColors[medication] || COLOR_PALETTE[COLOR_PALETTE.length - 1];
@@ -248,6 +256,15 @@ const DosesChart: React.FC<DosesChartProps> = ({ data, period }) => {
               }}
             />
           )}
+          <Brush 
+            dataKey="date" 
+            height={30}
+            stroke="#9C7BD3"
+            fill="#2D1B4E"
+            tickFormatter={() => ''}
+            startIndex={brushRange.startIndex}
+            endIndex={brushRange.endIndex}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>

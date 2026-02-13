@@ -10,10 +10,10 @@ import { ChartPeriod } from './hooks';
 import { 
   initializeDatabase, 
   getWeightEntries, 
-  getGLP1Entries, 
+  getAllGLP1Entries, 
   getUserProfile, 
   addWeightEntry, 
-  addGLP1Entry,
+  addGLP1ManualEntry,
   saveUserProfile,
   clearAllData
 } from './utils/database';
@@ -66,7 +66,7 @@ try {
         
         // Load existing data
         const existingWeights = getWeightEntries();
-        const existingGLP1 = getGLP1Entries();
+        const existingGLP1 = getAllGLP1Entries();
         const existingProfile = getUserProfile();
         
         // If no data exists, generate simulated data
@@ -75,7 +75,7 @@ if (existingWeights.length === 0) {
           
           // Reload after generation
           const generatedWeights = getWeightEntries();
-          const generatedGLP1 = getGLP1Entries();
+          const generatedGLP1 = getAllGLP1Entries();
           setWeights(generatedWeights);
           setDosesEntries(generatedGLP1);
         } else {
@@ -117,15 +117,16 @@ const handleAddWeight = (newWeight: number) => {
       halfLifeHours: 144 
     };
     
-    // Save to database
-    addGLP1Entry(newEntry);
+    // Save to database (manual entry)
+    addGLP1ManualEntry(newEntry);
     
     // Update state
-    setDosesEntries(prev => [...prev, newEntry]);
+    const allEntries = getAllGLP1Entries();
+    setDosesEntries(allEntries);
   };
 
   const handleRefreshDoses = useCallback(() => {
-    const entries = getGLP1Entries();
+    const entries = getAllGLP1Entries();
     setDosesEntries(entries);
   }, []);
 

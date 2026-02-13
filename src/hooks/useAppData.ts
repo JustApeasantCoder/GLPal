@@ -3,10 +3,10 @@ import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { 
   initializeDatabase, 
   getWeightEntries, 
-  getGLP1Entries, 
+  getAllGLP1Entries, 
   getUserProfile, 
   addWeightEntry, 
-  addGLP1Entry,
+  addGLP1ManualEntry,
   saveUserProfile 
 } from '../utils/database';
 import { generateSimulatedData } from '../utils/generateData';
@@ -51,7 +51,7 @@ export const useAppData = (): AppDataContextType => {
         
         // Load existing data
         const weightData = await getWeightEntries();
-        const glp1Data = await getGLP1Entries();
+        const glp1Data = await getAllGLP1Entries();
         
         // If no data exists, generate simulated data
         if (weightData.length === 0 && glp1Data.length === 0) {
@@ -60,7 +60,7 @@ export const useAppData = (): AppDataContextType => {
           
           // Reload data after generation
           const newWeightData = await getWeightEntries();
-          const newGLP1Data = await getGLP1Entries();
+          const newGLP1Data = await getAllGLP1Entries();
           setWeights(newWeightData);
           setDosesEntries(newGLP1Data);
         } else {
@@ -96,10 +96,9 @@ export const useAppData = (): AppDataContextType => {
     const newEntry: GLP1Entry = { ...entry, date: today };
     
     try {
-      await addGLP1Entry(newEntry);
-      setDosesEntries(prev => [...prev, newEntry].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      ));
+      await addGLP1ManualEntry(newEntry);
+      const allEntries = await getAllGLP1Entries();
+      setDosesEntries(allEntries);
     } catch (error) {
       console.error('Error adding GLP-1 entry:', error);
     }

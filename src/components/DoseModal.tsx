@@ -1,45 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { MEDICATIONS } from '../constants/medications';
+import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../utils/database';
 
 interface DoseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddDose: (dose: number, medication: string, date: string) => void;
 }
-
-const MEDICATIONS = [
-  { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 2.4 },
-  { id: 'tirzepatide', name: 'Tirzepatide (Mounjaro/Zepbound)', defaultDose: 15 },
-  { id: 'retatrutide', name: 'Retatrutide', defaultDose: 12 },
-  { id: 'liraglutide', name: 'Liraglutide (Victoza/Saxenda)', defaultDose: 3 },
-  { id: 'dulaglutide', name: 'Dulaglutide (Trulicity)', defaultDose: 4.5 },
-  { id: 'other', name: 'Other', defaultDose: 1 },
-];
-
-const LAST_DOSE_KEY = 'glpal_last_doses';
-const LAST_MEDICATION_KEY = 'glpal_last_medication';
-
-const getLastDoses = (): Record<string, number> => {
-  try {
-    const data = localStorage.getItem(LAST_DOSE_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
-};
-
-const saveLastDose = (medicationId: string, dose: number) => {
-  const lastDoses = getLastDoses();
-  lastDoses[medicationId] = dose;
-  localStorage.setItem(LAST_DOSE_KEY, JSON.stringify(lastDoses));
-};
-
-const getLastMedication = (): string => {
-  return localStorage.getItem(LAST_MEDICATION_KEY) || '';
-};
-
-const saveLastMedication = (medicationId: string) => {
-  localStorage.setItem(LAST_MEDICATION_KEY, medicationId);
-};
 
 const DoseModal: React.FC<DoseModalProps> = ({ isOpen, onClose, onAddDose }) => {
   const [selectedMedication, setSelectedMedication] = useState<string>('');

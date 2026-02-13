@@ -10,6 +10,7 @@ export interface GLP1Entry {
   medication: string;
   dose: number;
   halfLifeHours: number;
+  isManual?: boolean;
 }
 
 export interface GLP1Protocol {
