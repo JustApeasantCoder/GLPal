@@ -241,6 +241,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onDelete={handleDeleteProtocol}
         protocol={editingProtocol}
         mode={protocolModalMode}
+        existingProtocols={protocols}
       />
 
       <MedicationModal

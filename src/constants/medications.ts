@@ -3,10 +3,13 @@ export interface Medication {
   name: string;
   defaultDose: number;
   halfLifeHours: number;
+  titrationDoses?: number[];
 }
 
+export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8];
+
 export const MEDICATIONS: Medication[] = [
-  { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 2.4, halfLifeHours: 168 },
+  { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 0.25, halfLifeHours: 168, titrationDoses: SEMAGLUTIDE_TITRATION },
   { id: 'tirzepatide', name: 'Tirzepatide (Mounjaro/Zepbound)', defaultDose: 15, halfLifeHours: 127 },
   { id: 'retatrutide', name: 'Retatrutide', defaultDose: 12, halfLifeHours: 120 },
   { id: 'liraglutide', name: 'Liraglutide (Victoza/Saxenda)', defaultDose: 3, halfLifeHours: 13 },

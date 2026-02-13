@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GLP1Protocol } from '../types';
-import { MEDICATIONS, generateId } from '../constants/medications';
+import { MEDICATIONS, SEMAGLUTIDE_TITRATION, generateId } from '../constants/medications';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -10,15 +10,25 @@ interface ProtocolModalProps {
   onDelete?: (id: string) => void;
   protocol?: GLP1Protocol | null;
   mode: 'add' | 'edit';
+  existingProtocols?: GLP1Protocol[];
 }
 
-const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode }) => {
+const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols }) => {
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('1');
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [stopDate, setStopDate] = useState<string>('');
+  const [continuationInfo, setContinuationInfo] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+  const [selectedDurationDays, setSelectedDurationDays] = useState<number>(() => {
+    const saved = localStorage.getItem('protocolDurationDays');
+    return saved ? parseInt(saved, 10) : 28;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('protocolDurationDays', selectedDurationDays.toString());
+  }, [selectedDurationDays]);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,15 +39,58 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         setFrequency(protocol.frequencyPerWeek.toString());
         setStartDate(protocol.startDate);
         setStopDate(protocol.stopDate || '');
+        setContinuationInfo(null);
       } else {
         setSelectedMedication('');
         setDose('');
         setFrequency('1');
-        setStartDate(new Date().toISOString().split('T')[0]);
-        setStopDate('');
+        const today = new Date().toISOString().split('T')[0];
+        setStartDate(today);
+        const defaultEndDate = new Date(new Date(today).getTime() + selectedDurationDays * 24 * 60 * 60 * 1000);
+        setStopDate(defaultEndDate.toISOString().split('T')[0]);
+        setContinuationInfo(null);
       }
     }
-  }, [isOpen, mode, protocol]);
+  }, [isOpen, mode, protocol, selectedDurationDays]);
+
+  const handleMedicationSelect = (medicationId: string) => {
+    setSelectedMedication(medicationId);
+    const med = MEDICATIONS.find(m => m.id === medicationId);
+    
+    let newDose = med?.defaultDose.toString() || '1';
+
+    if (mode === 'add' && existingProtocols && med) {
+      const medProtocols = existingProtocols
+        .filter(p => p.medication === medicationId)
+        .filter(p => p.stopDate !== null);
+      
+      if (medProtocols.length > 0) {
+        const lastProtocol = medProtocols.reduce((latest, p) => {
+          const pEnd = new Date(p.stopDate!);
+          const lEnd = new Date(latest.stopDate!);
+          return pEnd > lEnd ? p : latest;
+        });
+        
+        if (lastProtocol.stopDate) {
+          const lastEndDate = new Date(lastProtocol.stopDate);
+          lastEndDate.setDate(lastEndDate.getDate() + 1);
+          setStartDate(lastEndDate.toISOString().split('T')[0]);
+          setContinuationInfo(`Continues from ${med.name} protocol (ended ${lastProtocol.stopDate})`);
+        }
+
+        if (medicationId === 'semaglutide' && med.titrationDoses) {
+          const lastDoseIndex = med.titrationDoses.indexOf(lastProtocol.dose);
+          if (lastDoseIndex >= 0 && lastDoseIndex < med.titrationDoses.length - 1) {
+            newDose = med.titrationDoses[lastDoseIndex + 1].toString();
+          }
+        }
+      } else {
+        setContinuationInfo(null);
+      }
+    }
+    
+    setDose(newDose);
+  };
 
   const handleSave = () => {
     const med = MEDICATIONS.find(m => m.id === selectedMedication);
@@ -79,10 +132,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 <button
                   key={med.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedMedication(med.id);
-                    setDose(med.defaultDose.toString());
-                  }}
+                  onClick={() => handleMedicationSelect(med.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
                     selectedMedication === med.id
                       ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
@@ -136,10 +186,16 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setContinuationInfo(null);
+              }}
               className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
               style={{ colorScheme: 'dark' }}
             />
+            {continuationInfo && (
+              <p className="text-xs text-[#4ADEA8] mt-1">{continuationInfo}</p>
+            )}
             <div className="flex gap-2 mt-2">
               {[
                 { label: '1W', days: 7 },
@@ -147,12 +203,13 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 { label: '1M', days: 28 },
                 { label: '1Y', days: 336 },
               ].map((preset) => {
-                const isSelected = startDate && stopDate && stopDate === new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const isSelected = selectedDurationDays === preset.days;
                 return (
                 <button
                   key={preset.label}
                   type="button"
                   onClick={() => {
+                    setSelectedDurationDays(preset.days);
                     if (startDate) {
                       const endDate = new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000);
                       setStopDate(endDate.toISOString().split('T')[0]);

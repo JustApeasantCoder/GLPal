@@ -33,6 +33,11 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
     [data]
   );
 
+  const extendedLastDate = useMemo(() => {
+    const futureDays = 60;
+    return new Date(lastDataDate.getTime() + futureDays * 24 * 60 * 60 * 1000);
+  }, [lastDataDate]);
+
   const {
     xAxisDates,
     todayIndex,
@@ -40,7 +45,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
     zoomEnd,
     visibleStartIndex,
     visibleEndIndex,
-  } = useChartDateRange(firstDataDate, lastDataDate, period);
+  } = useChartDateRange(firstDataDate, extendedLastDate, period);
 
   const chartOption = useMemo(() => {
     if (data.length === 0) {
@@ -53,7 +58,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
       dosesByMed,
       halfLifeByMed,
       firstDate: firstDataDate,
-      lastDate: lastDataDate,
+      lastDate: extendedLastDate,
       xAxisDates,
       todayIndex,
       visibleStartIndex,

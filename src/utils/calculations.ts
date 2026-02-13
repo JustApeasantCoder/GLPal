@@ -42,7 +42,7 @@ export const calculateMedicationConcentration = (
   halfLifeHours: number,
   currentDate: Date
 ): number => {
-  const ABSORPTION_HOURS = 12;
+  const ABSORPTION_HOURS = 24;
   
   return doses.reduce((total, dose) => {
     const hoursElapsed = (currentDate.getTime() - dose.date.getTime()) / (1000 * 60 * 60);
