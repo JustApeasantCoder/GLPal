@@ -61,27 +61,63 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       lastDate = new Date(firstDate.getTime() + minDays * 24 * 60 * 60 * 1000);
     }
     
-    // Calculate zoom based on last data date (not today)
-    const lastDataDate = new Date(lastDate);
-    lastDataDate.setHours(0, 0, 0, 0);
-    const daysFromStartToLastData = (lastDataDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
-    const totalDataDays = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
-    
-    let daysToShow: number;
-    switch (period) {
-      case 'week': daysToShow = 14; break;
-      case 'month': daysToShow = 30; break;
-      case '90days': daysToShow = 90; break;
-      case 'all': daysToShow = totalDataDays; break;
-      default: daysToShow = totalDataDays;
+    // Always extend to today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (lastDate < today) {
+      lastDate = today;
     }
+    
+    // Generate x-axis data first so we can find today's index
+    const xAxisDates: string[] = [];
+    for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
+      xAxisDates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    }
+    
+    // Find the index of today in the x-axis data
+    const todayStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    let todayIndex = xAxisDates.indexOf(todayStr);
+    
+    // If today is not found (shouldn't happen now since firstDate = today), use 0
+    if (todayIndex === -1) {
+      todayIndex = 0;
+    }
+    
+    const totalPoints = xAxisDates.length;
+    
+    const todayPercent = ((todayIndex + 1) / totalPoints) * 100;
     
     let zoomStart = 0;
-    if (totalDataDays > daysToShow) {
-      zoomStart = Math.max(0, Math.min(100, ((daysFromStartToLastData - daysToShow) / totalDataDays) * 100));
-    }
+    let zoomEnd = 100;
     
-    const zoomEnd = 100;
+    if (period === 'week') {
+      const windowPoints = 14;
+      if (todayIndex === 0) {
+        zoomStart = 0;
+        zoomEnd = (windowPoints / totalPoints) * 100;
+      } else {
+        zoomEnd = todayPercent;
+        zoomStart = Math.max(0, todayPercent - (windowPoints / totalPoints) * 100);
+      }
+    } else if (period === 'month') {
+      const windowPoints = 30;
+      if (todayIndex === 0) {
+        zoomStart = 0;
+        zoomEnd = (windowPoints / totalPoints) * 100;
+      } else {
+        zoomEnd = todayPercent;
+        zoomStart = Math.max(0, todayPercent - (windowPoints / totalPoints) * 100);
+      }
+    } else if (period === '90days') {
+      const windowPoints = 90;
+      if (todayIndex === 0) {
+        zoomStart = 0;
+        zoomEnd = (windowPoints / totalPoints) * 100;
+      } else {
+        zoomEnd = todayPercent;
+        zoomStart = Math.max(0, todayPercent - (windowPoints / totalPoints) * 100);
+      }
+    }
     
     const doseDatesByMed: Record<string, Set<string>> = {};
     const doseAmountByMed: Record<string, Record<string, number>> = {};
@@ -234,15 +270,24 @@ const DosesChartECharts: React.FC<DosesChartEChartsProps> = ({ data, period }) =
       },
       xAxis: {
         type: 'category',
-        data: Array.from({ length: totalDays + 1 }, (_, i) => {
-          const d = new Date(firstDateTime + i * 24 * 60 * 60 * 1000);
-          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        }),
+        data: xAxisDates,
         boundaryGap: false,
         axisLine: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
         axisTick: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
         axisLabel: { fontSize: 12, color: '#94a3b8' },
         splitLine: { show: false },
+        axisPointer: {
+          type: 'line',
+          lineStyle: {
+            color: '#4ADEA8',
+            width: 1,
+            type: 'solid',
+          },
+          label: {
+            show: true,
+            backgroundColor: '#4ADEA8',
+          },
+        },
       },
       yAxis: {
         type: 'value',

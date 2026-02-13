@@ -2,14 +2,16 @@ import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { WeightEntry } from '../types';
 import { formatWeight } from '../utils/unitConversion';
+import { ChartPeriod } from '../hooks';
 
 interface WeightChartProps {
   data: WeightEntry[];
   goalWeight: number;
   unitSystem?: 'metric' | 'imperial';
+  period?: ChartPeriod;
 }
 
-const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem = 'metric' }) => {
+const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem = 'metric', period = 'month' }) => {
   const { chartOption } = useMemo(() => {
     if (data.length === 0) {
       return { chartOption: {} };
@@ -25,10 +27,58 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
       };
     });
 
+    // Generate indices for dots to show (up to 12 points evenly distributed)
+    const getDotIndices = (dataLength: number): number[] => {
+      if (dataLength <= 12) {
+        return Array.from({ length: dataLength }, (_, i) => i);
+      }
+      const indices = new Set<number>();
+      indices.add(0);
+      indices.add(dataLength - 1);
+      const step = (dataLength - 1) / 11;
+      for (let i = 1; i <= 10; i++) {
+        indices.add(Math.round(i * step));
+      }
+      return Array.from(indices).sort((a, b) => a - b);
+    };
+
+    const dotIndices = new Set(getDotIndices(chartData.length));
+
     const weights = sortedData.map(e => e.weight);
     const minWeight = Math.min(...weights);
     const maxWeight = Math.max(...weights);
     const padding = (maxWeight - minWeight) * 0.1 || 5;
+
+    // Calculate zoom to show last 30 days by default
+    let firstDate = new Date(sortedData[0].date);
+    let lastDate = new Date(sortedData[sortedData.length - 1].date);
+    
+    const actualLastDate = new Date(lastDate);
+    actualLastDate.setHours(0, 0, 0, 0);
+    
+    // Add 120 days padding to allow zooming out to full range
+    lastDate = new Date(lastDate.getTime() + 120 * 24 * 60 * 60 * 1000);
+    
+    // Calculate zoom based on last data date
+    const daysFromStartToLastData = (actualLastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
+    const totalDataDays = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
+    const actualDataDays = daysFromStartToLastData;
+    
+    let daysToShow: number;
+    switch (period) {
+      case 'week': daysToShow = 14; break;
+      case 'month': daysToShow = 30; break;
+      case '90days': daysToShow = 90; break;
+      case 'all': daysToShow = actualDataDays; break;
+      default: daysToShow = actualDataDays;
+    }
+    
+    let zoomStart = 0;
+    const zoomEnd = 100;
+    if (actualDataDays > daysToShow) {
+      zoomStart = ((actualDataDays - daysToShow) / actualDataDays) * 100;
+    }
+    zoomStart = Math.max(0, Math.min(100, zoomStart));
 
     const option = {
       backgroundColor: 'transparent',
@@ -92,9 +142,15 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
           name: 'Weight',
           type: 'line',
           smooth: true,
-          showSymbol: false,
-          symbol: 'circle',
-          symbolSize: 10,
+          showSymbol: true,
+          symbol: (params: any) => {
+            const index = params.dataIndex;
+            return dotIndices.has(index) ? 'circle' : 'none';
+          },
+          symbolSize: (params: any) => {
+            const index = params.dataIndex;
+            return dotIndices.has(index) ? 10 : 0;
+          },
           lineStyle: { width: 3, color: '#9C7BD3' },
           itemStyle: { 
             color: '#9C7BD3',
@@ -133,8 +189,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
       dataZoom: [
         {
           type: 'inside',
-          start: 0,
-          end: 100,
+          start: zoomStart,
+          end: zoomEnd,
           zoomOnMouseWheel: true,
           moveOnMouseWheel: true,
         },
@@ -142,7 +198,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, goalWeight, unitSystem 
     };
 
     return { chartOption: option };
-  }, [data, goalWeight, unitSystem]);
+  }, [data, goalWeight, unitSystem, period]);
 
   if (data.length === 0) {
     return (

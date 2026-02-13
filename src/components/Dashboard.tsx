@@ -6,7 +6,7 @@ import TDEEDisplay from './TDEEDisplay';
 import WeightInput from './WeightInput';
 import BMIInfoTooltip from './BMIInfoTooltip';
 import PeriodSelector from './PeriodSelector';
-import { useWeightMetrics, useFilteredWeights, type ChartPeriod } from '../hooks';
+import { useWeightMetrics, type ChartPeriod } from '../hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { formatWeight } from '../utils/unitConversion';
@@ -35,7 +35,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   // Use custom hooks for data processing
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
   const weightMetrics = useWeightMetrics(weights, profile, actualGoalWeight);
-  const filteredWeights = useFilteredWeights(weights, chartPeriod);
   const unitSystem = profile.unitSystem || 'metric';
 
   return (
@@ -108,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-48 sm:h-56">
-              <WeightChart data={filteredWeights} goalWeight={actualGoalWeight} unitSystem={unitSystem} />
+              <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} />
             </div>
           </div>
 
