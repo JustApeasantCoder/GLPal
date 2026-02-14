@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GLP1Protocol } from '../types';
 import { MEDICATIONS, SEMAGLUTIDE_TITRATION, generateId, Medication } from '../constants/medications';
+import DateWheelPickerModal from './ui/DateWheelPickerModal';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -26,9 +27,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     const saved = localStorage.getItem('protocolDurationDays');
     return saved ? parseInt(saved, 10) : 28;
   });
-  const [showOtherModal, setShowOtherModal] = useState(false);
+const [showOtherModal, setShowOtherModal] = useState(false);
   const [customMedication, setCustomMedication] = useState('');
   const [savedMedications, setSavedMedications] = useState<string[]>([]);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showStopDatePicker, setShowStopDatePicker] = useState(false);
 
   useEffect(() => {
     const loadMedications = () => {
@@ -387,22 +390,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             </div>
           </div>
 
-          <div>
+<div>
             <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setContinuationInfo(null);
-                if (selectedDurationDays && e.target.value) {
-                  const endDate = new Date(new Date(e.target.value).getTime() + selectedDurationDays * 24 * 60 * 60 * 1000);
-                  setStopDate(endDate.toISOString().split('T')[0]);
-                }
-              }}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-              style={{ colorScheme: 'dark' }}
-            />
+            <button
+              type="button"
+              onClick={() => setShowStartDatePicker(true)}
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+            >
+              {startDate ? new Date(startDate).toLocaleDateString() : 'Select date'}
+            </button>
             {continuationInfo && (
               <p className="text-xs text-[#4ADEA8] mt-1">{continuationInfo}</p>
             )}
@@ -437,15 +433,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             </div>
           </div>
 
-          <div>
+<div>
             <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date</label>
-            <input
-              type="date"
-              value={stopDate}
-              onChange={(e) => setStopDate(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-              style={{ colorScheme: 'dark' }}
-            />
+            <button
+              type="button"
+              onClick={() => setShowStopDatePicker(true)}
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+            >
+              {stopDate ? new Date(stopDate).toLocaleDateString() : 'Select date'}
+            </button>
           </div>
 
           <div className="flex gap-2">
@@ -509,62 +505,89 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         </div>
       </div>
 
-      {showOtherModal && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 modal-content-fade-in">
-            <h3 className="text-lg font-semibold text-white mb-4">Select Medication</h3>
-            <div className="space-y-2 mb-4">
-              {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
+{showOtherModal && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+            <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
+            <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 modal-content-fade-in">
+              <h3 className="text-lg font-semibold text-white mb-4">Select Medication</h3>
+              <div className="space-y-2 mb-4">
+                {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
+                  <button
+                    key={med.id}
+                    type="button"
+                    onClick={() => {
+                      handleMedicationSelect(med.id);
+                      setShowOtherModal(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                      selectedMedication === med.id
+                        ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                        : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                    }`}
+                  >
+                    {med.name}
+                  </button>
+                ))}
+              </div>
+              <div className="border-t border-[#B19CD9]/20 pt-4">
+                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Or enter custom medication</label>
+                <input
+                  type="text"
+                  value={customMedication}
+                  onChange={(e) => setCustomMedication(e.target.value)}
+                  placeholder="Custom medication name"
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm mb-2"
+                />
                 <button
-                  key={med.id}
-                  type="button"
                   onClick={() => {
-                    handleMedicationSelect(med.id);
-                    setShowOtherModal(false);
+                    if (customMedication.trim()) {
+                      setSelectedMedication('custom:' + customMedication.trim());
+                      setDose('1');
+                      setShowOtherModal(false);
+                    }
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
-                    selectedMedication === med.id
-                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
-                  }`}
+                  disabled={!customMedication.trim()}
+                  className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm disabled:opacity-50"
                 >
-                  {med.name}
+                  Add Custom
                 </button>
-              ))}
-            </div>
-            <div className="border-t border-[#B19CD9]/20 pt-4">
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Or enter custom medication</label>
-              <input
-                type="text"
-                value={customMedication}
-                onChange={(e) => setCustomMedication(e.target.value)}
-                placeholder="Custom medication name"
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm mb-2"
-              />
+              </div>
               <button
-                onClick={() => {
-                  if (customMedication.trim()) {
-                    setSelectedMedication('custom:' + customMedication.trim());
-                    setDose('1');
-                    setShowOtherModal(false);
-                  }
-                }}
-                disabled={!customMedication.trim()}
-                className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm disabled:opacity-50"
+                onClick={() => setShowOtherModal(false)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white"
               >
-                Add Custom
+                ✕
               </button>
             </div>
-            <button
-              onClick={() => setShowOtherModal(false)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
           </div>
-        </div>
-      )}
+        )}
+
+        {showStartDatePicker && (
+          <DateWheelPickerModal
+            isOpen={showStartDatePicker}
+            value={startDate}
+            onChange={(date) => {
+              setStartDate(date);
+              setContinuationInfo(null);
+              if (selectedDurationDays && date) {
+                const endDate = new Date(new Date(date).getTime() + selectedDurationDays * 24 * 60 * 60 * 1000);
+                setStopDate(endDate.toISOString().split('T')[0]);
+              }
+            }}
+            onClose={() => setShowStartDatePicker(false)}
+          />
+        )}
+
+        {showStopDatePicker && (
+          <DateWheelPickerModal
+            isOpen={showStopDatePicker}
+            value={stopDate}
+            onChange={(date) => {
+              setStopDate(date);
+            }}
+            onClose={() => setShowStopDatePicker(false)}
+          />
+        )}
     </div>
   );
 };

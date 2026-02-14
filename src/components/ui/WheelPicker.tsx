@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 
 interface WheelPickerProps {
   value: string;
@@ -49,6 +49,12 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
       }
     }
   }, [value, options, isTouchDevice]);
+
+  useLayoutEffect(() => {
+    if (isTouchDevice && containerRef.current && currentIndex > 0) {
+      containerRef.current.scrollTop = currentIndex * ITEM_HEIGHT;
+    }
+  }, [isTouchDevice, currentIndex]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent<HTMLDivElement>) => {

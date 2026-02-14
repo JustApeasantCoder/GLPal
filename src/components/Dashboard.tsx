@@ -9,7 +9,7 @@ import PeriodSelector from './PeriodSelector';
 import { useWeightMetrics, type ChartPeriod } from '../hooks';
 import { WeightEntry, GLP1Entry, UserProfile } from '../types';
 import { useThemeStyles } from '../contexts/ThemeContext';
-import { formatWeight } from '../utils/unitConversion';
+import { formatWeight, convertWeightFromKg } from '../utils/unitConversion';
 
 interface DashboardProps {
   weights: WeightEntry[];
@@ -36,6 +36,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
   const weightMetrics = useWeightMetrics(weights, profile, actualGoalWeight);
   const unitSystem = profile.unitSystem || 'metric';
+
+  const lastWeight = weights.length > 0 ? weights[weights.length - 1].weight : null;
+  const lastWeightDisplay = lastWeight ? convertWeightFromKg(lastWeight, unitSystem) : null;
 
   return (
     <>
@@ -118,9 +121,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-      {/* Weight Input Section */}
+{/* Weight Input Section */}
           <div className="mb-6">
-<WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} />
+            <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} lastWeight={lastWeightDisplay} />
           </div>
         </div>
       </div>

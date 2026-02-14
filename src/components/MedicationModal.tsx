@@ -103,7 +103,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                 value={selectedDate}
                 readOnly
                 onClick={() => setShowDatePicker(true)}
-                className="w-full px-3 py-2 pr-10 border border-accent-purple-light/30 bg-black/20 text-text-primary rounded-lg cursor-pointer"
+                className="w-full px-3 py-2 pr-10 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg cursor-pointer"
                 placeholder="Select date"
               />
               <svg
@@ -142,8 +142,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                   onClick={() => handleMedicationSelect(med.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
                     selectedMedication === med.id
-                      ? 'bg-accent-purple-light/30 border border-accent-purple-light'
-                      : 'bg-black/20 border border-transparent hover:bg-accent-purple-light/10'
+                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
                   }`}
                 >
                   <span className="text-sm text-text-primary">{med.name}</span>
@@ -163,7 +163,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
               max="99.9"
               value={dose}
               onChange={(e) => setDose(e.target.value)}
-              className="w-full px-3 py-2 border border-accent-purple-light/30 bg-black/20 text-text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium"
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium"
               placeholder="Enter dose"
               required
             />
