@@ -214,8 +214,8 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
             );
           })}
 
-        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 top-0 h-[36px] pointer-events-none bg-gradient-to-b from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" />
-        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 bottom-0 h-[36px] pointer-events-none bg-gradient-to-t from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" />
+        {/* <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 top-0 h-[36px] pointer-events-none bg-gradient-to-b from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" />
+        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 bottom-0 h-[36px] pointer-events-none bg-gradient-to-t from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" /> */}
       </div>
     </div>
   );
