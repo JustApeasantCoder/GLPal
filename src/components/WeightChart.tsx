@@ -108,8 +108,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
       yAxis: {
         type: 'value',
         position: 'right',
-        min: Math.floor(minWeight - weightPadding),
-        max: Math.ceil(maxWeight + weightPadding),
+        scale: true,
         axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: {
@@ -129,7 +128,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
           smooth: true,
           showSymbol: false,
           symbol: 'none',
-          lineStyle: { width: 3, color: '#9C7BD3' },
+          lineStyle: { width: 2, color: '#9C7BD3' },
           itemStyle: {
             color: '#9C7BD3',
             borderColor: '#2D1B4E',
@@ -219,9 +218,6 @@ const WeightChart: React.FC<WeightChartProps> = ({
     goalWeight,
     unitSystem,
     zoomStart,
-    visibleStartIndex,
-    visibleEndIndex,
-    firstDataDate,
   ]);
 
   if (data.length === 0) {
