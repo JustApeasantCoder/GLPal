@@ -88,7 +88,7 @@ return (
           </div>
         </div>
 
-<div>
+        <div>
           <label className="block text-sm font-medium text-accent-purple-light mb-1">
             Height ({unitSystem === 'imperial' ? 'ft/in' : 'cm'})
           </label>
@@ -106,16 +106,46 @@ return (
 
         <div>
           <label className="block text-sm font-medium text-accent-purple-light mb-1">
-            Activity Level
+            Units
           </label>
-          <button
-            type="button"
-            onClick={() => setShowActivityPicker(true)}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
-          >
-            {activityLevels.find(l => l.value === profile.activityLevel)?.label || 'Select activity level'}
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleChange({ ...profile, unitSystem: 'metric' })}
+              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                (profile.unitSystem || 'metric') === 'metric'
+                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+              }`}
+            >
+              Metric
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange({ ...profile, unitSystem: 'imperial' })}
+              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                profile.unitSystem === 'imperial'
+                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+              }`}
+            >
+              Imperial
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-accent-purple-light mb-1">
+          Activity Level
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowActivityPicker(true)}
+          className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+        >
+          {activityLevels.find(l => l.value === profile.activityLevel)?.label || 'Select activity level'}
+        </button>
       </div>
 
       <NumberPickerModal

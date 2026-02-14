@@ -45,6 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* Unified Dashboard Card */}
       <div className={bigCard}>
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dashboard</h1>
+        <div className="border-t border-[#B19CD9]/20 mb-4"></div>
         
         {/* Metrics Section */}
         <div className="space-y-3 mb-6">
@@ -104,6 +105,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
+        <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
         {/* Charts Section */}
         <div className="space-y-6">
 {/* Weight Trends */}
@@ -120,6 +123,8 @@ const Dashboard: React.FC<DashboardProps> = ({
               <MedicationChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>
+
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
 {/* Weight Input Section */}
           <div className="mb-6">

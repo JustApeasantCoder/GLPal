@@ -26,13 +26,14 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   const { bigCardText, tdeeCard, tdeeText } = useThemeStyles();
   
   return (
-<div className="space-y-4">
-  <div className="border-t border-card-border pt-4">
-    <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
-      Weight Loss Calorie Targets
-    </h1>
+    <div className="space-y-4">
+    <div>
+      <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
+        Weight Loss Calorie Targets
+      </h1>
+      <div className="border-t border-[#B19CD9]/20 mt-3"></div>
 
-    <div className="space-y-2">
+      <div className="space-y-2">
       {/* 0.5kg/week */}
       <div className={tdeeCard}>
         <div>

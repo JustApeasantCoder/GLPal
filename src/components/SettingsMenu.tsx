@@ -135,39 +135,6 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
     onProfileUpdate(updatedProfile);
   }} />
               
-              {/* Unit System Setting */}
-              <div className="space-y-4 mt-4">
-                <div>
-                  <label className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
-                    Units
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleUnitSystemChange('metric')}
-                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                        (localProfile.unitSystem || 'metric') === 'metric'
-                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                          : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                      }`}
-                    >
-                      Metric
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleUnitSystemChange('imperial')}
-                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                        localProfile.unitSystem === 'imperial'
-                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                          : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                      }`}
-                    >
-                      Imperial
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               {/* Separator */}
               <div className="border-t border-[#B19CD9]/20 my-4"></div>
 

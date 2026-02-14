@@ -93,6 +93,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
       />
       <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className="text-xl font-semibold text-white mb-6">Log Dose</h2>
+        <div className="border-t border-[#B19CD9]/20 mb-6"></div>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -147,6 +148,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
           />
 
           <div className="mb-4">
+            <div className="border-t border-[#B19CD9]/20 my-4"></div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Medication
             </label>
@@ -169,6 +171,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
           </div>
 
           <div className="mb-4">
+            <div className="border-t border-[#B19CD9]/20 my-4"></div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Dose (mg)
             </label>
@@ -180,6 +183,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
               {dose ? `${dose} mg` : 'Select dose'}
             </button>
           </div>
+
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div className="flex gap-3">
             <button

@@ -62,8 +62,8 @@ export const useThemeStyles = () => {
   return {
     // Big Card (Light & Dark Mode)
     bigCard: isDarkMode 
-      ? "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border"
-      : "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border",
+      ? "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border mt-3 mb-3"
+      : "bg-card-bg backdrop-blur-lg rounded-2xl shadow-theme p-4 border border-card-border mt-3 mb-3",
     
     // Small Card (Light & Dark Mode)
     smallCard: isDarkMode 

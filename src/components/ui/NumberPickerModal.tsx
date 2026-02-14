@@ -130,6 +130,7 @@ const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
               {label}
             </h3>
           </div>
+          <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
           <div className="flex items-center justify-center gap-3 mb-4 px-4">
             {/* Primary wheel */}
@@ -170,6 +171,8 @@ const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
               />
             )}
           </div>
+
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div className="flex gap-3">
             <button

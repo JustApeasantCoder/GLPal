@@ -150,6 +150,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     <div className="space-y-3">
       <div className={bigCard}>
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Doses</h1>
+        <div className="border-t border-[#B19CD9]/20 mb-4"></div>
         
         <div className="space-y-3 mb-6">
           <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
@@ -182,6 +183,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
           </div>
           
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-64 sm:h-80">
@@ -189,6 +192,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
           </div>
         </div>
+
+        <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
         <Button onClick={() => setIsModalOpen(true)} fullWidth>
           + Log Dose
@@ -208,6 +213,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </button>
           )}
         </div>
+        <div className="border-t border-[#B19CD9]/20 mb-4"></div>
         
         {/* Saved Protocols List */}
         {protocols.length > 0 && (
@@ -241,6 +247,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             })}
           </div>
         )}
+
+        <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
         <Button 
           onClick={() => {
