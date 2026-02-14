@@ -296,12 +296,30 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     onClose();
   };
 
-  if (!isOpen) return null;
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isVisible && !isClosing) {
+      setIsClosing(true);
+      setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
+      <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div className={`relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`} style={{ backdropFilter: 'blur(20px)' }}>
         <h2 className="text-lg font-semibold text-text-primary mb-4">
           {mode === 'add' ? 'Add Protocol' : 'Edit Protocol'}
         </h2>
@@ -493,8 +511,8 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
       {showOtherModal && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowOtherModal(false)} />
-          <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-xs p-4">
+          <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(4px)' }} onClick={() => setShowOtherModal(false)} />
+          <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-xs p-4 modal-content-fade-in" style={{ backdropFilter: 'blur(20px)' }}>
             <h3 className="text-md font-semibold text-text-primary mb-4">Select Medication</h3>
             <div className="space-y-2 mb-4">
               {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (

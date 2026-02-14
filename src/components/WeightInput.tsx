@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UnitSystem } from '../types';
 import { getWeightUnit, convertWeightToKg } from '../utils/unitConversion';
+import Button from './ui/Button';
 
 interface WeightInputProps {
   onAddWeight: (weight: number) => void;
@@ -38,12 +39,9 @@ const handleSubmit = (e: React.FormEvent) => {
             required
           />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg transform hover:scale-[1.02]"
-        >
-          Log Weight
-        </button>
+        <Button type="submit" fullWidth>
+          + Log Weight
+        </Button>
       </form>
     </div>
   );

@@ -114,3 +114,82 @@ code {
 .tab-fade-in {
   animation: fadeIn 500ms ease-in-out;
 }
+
+/* Modal animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Backdrop fade animations */
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Modal container - fade in/out entire including backdrop */
+.modal-fade-in {
+  animation: modalFadeIn 300ms ease-out;
+}
+
+.modal-fade-out {
+  animation: modalFadeOut 200ms ease-in;
+}
+
+/* Backdrop animations */
+.backdrop-fade-in {
+  animation: backdropFadeIn 300ms ease-out forwards;
+}
+
+.backdrop-fade-out {
+  animation: backdropFadeOut 200ms ease-in forwards;
+}
+
+/* Inner modal content - always visible, only scales */
+.modal-content-fade-in {
+  animation: modalContentIn 300ms ease-out;
+}
+
+@keyframes modalContentIn {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+}

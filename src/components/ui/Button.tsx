@@ -3,11 +3,13 @@ import React from 'react';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'accent' | 'mint';
   size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({ 
-  variant = 'primary', 
+  variant = 'accent', 
   size = 'md',
+  fullWidth = false,
   className = '', 
   children,
   ...props 
@@ -16,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   
   const variantClasses = {
     primary: "bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white shadow-theme hover:shadow-theme-lg hover:from-accent-purple-dark hover:to-accent-purple-medium",
-    accent: "bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]",
+    accent: "bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]",
     mint: "bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white shadow-[0_0_15px_rgba(74,222,168,0.4)]"
   };
 
@@ -28,7 +30,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button 
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       {...props}
     >
       {children}

@@ -35,6 +35,9 @@ function createWindow() {
       width: 0 !important;
       height: 0 !important;
     }
+    body.modal-open {
+      overflow: hidden !important;
+    }
   `);
 
   mainWindow.webContents.once('did-finish-load', () => {

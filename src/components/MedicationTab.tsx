@@ -3,6 +3,7 @@ import MedicationChart from './MedicationChart';
 import MedicationModal from './MedicationModal';
 import PeriodSelector from './PeriodSelector';
 import ProtocolModal from './ProtocolModal';
+import Button from './ui/Button';
 import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
@@ -189,12 +190,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           </div>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg"
-        >
-          Log Dose
-        </button>
+        <Button onClick={() => setIsModalOpen(true)} fullWidth>
+          + Log Dose
+        </Button>
       </div>
 
       {/* Protocol Card */}
@@ -244,16 +242,16 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           </div>
         )}
 
-        <button
+        <Button 
           onClick={() => {
             setProtocolModalMode('add');
             setEditingProtocol(null);
             setIsProtocolModalOpen(true);
-          }}
-          className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:from-accent-purple-dark hover:to-accent-purple-medium transition-all duration-300 shadow-theme hover:shadow-theme-lg text-sm"
+          }} 
+          fullWidth
         >
           + Add Protocol
-        </button>
+        </Button>
       </div>
 
       <ProtocolModal

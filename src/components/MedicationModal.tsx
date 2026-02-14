@@ -12,6 +12,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,7 +37,22 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
     }
   }, [selectedMedication]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isVisible && !isClosing) {
+      setIsClosing(true);
+      setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,10 +83,11 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
+        style={{ backdropFilter: 'blur(4px)' }}
         onClick={onClose}
       />
-      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
+      <div className={`relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`} style={{ backdropFilter: 'blur(20px)' }}>
         <h2 className="text-lg font-semibold text-text-primary mb-4">+ Add Dose</h2>
         
         <form onSubmit={handleSubmit}>

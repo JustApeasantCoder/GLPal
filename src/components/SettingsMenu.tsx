@@ -48,7 +48,25 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
     }
   }, [unitSystem, localProfile.goalWeight]);
 
-  if (!isOpen) return null;
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isVisible && !isClosing) {
+      setIsClosing(true);
+      setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   // Convert goal weight to display units - no unnecessary decimals
   const goalWeightDisplayValue = localProfile.goalWeight 
@@ -95,8 +113,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4">
+      <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div className={`relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`} style={{ backdropFilter: 'blur(20px)' }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-text-primary">
             Settings
