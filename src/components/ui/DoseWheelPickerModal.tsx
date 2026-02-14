@@ -123,7 +123,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
                   key={`preset-${val}`}
                   type="button"
                   onClick={() => setLocalValue(val)}
-                  className={`flex-1 px-3 py-2 text-xs rounded-lg transition-all duration-300 ${
+                  className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                       : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
