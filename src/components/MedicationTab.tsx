@@ -72,28 +72,30 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   };
 
   const stats = useMemo(() => {
-    if (medicationEntries.length === 0) {
-      return { totalDoses: 0, currentDoses: [], totalCurrentDose: 0, nextDueDays: 0, nextDueDateStr: '', currentLevel: 0, timeActive: 0, thisMonth: 0 };
-    }
-
-    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const oldest = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    const totalDoses = medicationEntries.length;
+    const pastDoses = medicationEntries.filter(e => {
+      const doseDate = new Date(e.date + 'T00:00:00');
+      doseDate.setHours(0, 0, 0, 0);
+      return doseDate <= today;
+    });
     
-    const meds = Array.from(new Set(medicationEntries.map(e => e.medication)));
+    const totalDoses = pastDoses.length;
+    
     const currentDoses: { med: string; dose: number }[] = [];
+    const meds = Array.from(new Set(medicationEntries.map(e => e.medication)));
     meds.forEach(med => {
-      const medDoses = sorted.filter(e => e.medication === med);
-      if (medDoses.length > 0) {
-        currentDoses.push({ med: med, dose: medDoses[0].dose });
+      const sorted = [...medicationEntries]
+        .filter(e => e.medication === med)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      if (sorted.length > 0) {
+        currentDoses.push({ med: med, dose: sorted[0].dose });
       }
     });
     const totalCurrentDose = currentDoses.reduce((sum, d) => sum + d.dose, 0);
     
     const sortedAsc = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     
     const nextDose = sortedAsc.find(d => {
       const doseDate = new Date(d.date + 'T00:00:00');
@@ -110,6 +112,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     
+    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const halfLife = sorted[0]?.halfLifeHours || 168;
     
     const medications = Array.from(new Set(sorted.map(e => e.medication)));
@@ -128,15 +131,18 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     
     const currentLevel = totalCurrentLevel;
     
-    const firstDoseDate = new Date(oldest.date);
-    const timeActive = Math.floor((today.getTime() - firstDoseDate.getTime()) / (1000 * 60 * 60 * 24));
-    
     const thisMonth = medicationEntries.filter(e => {
       const doseDate = new Date(e.date);
       return doseDate.getMonth() === today.getMonth() && doseDate.getFullYear() === today.getFullYear();
     }).length;
+    
+    const plannedDoses = medicationEntries.filter(e => {
+      const doseDate = new Date(e.date + 'T00:00:00');
+      doseDate.setHours(0, 0, 0, 0);
+      return doseDate > today;
+    }).length;
 
-    return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, timeActive, thisMonth };
+    return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, thisMonth, plannedDoses };
   }, [medicationEntries]);
 
   return (
@@ -166,10 +172,12 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               <p className={text.value}>{stats.currentLevel.toFixed(2)}mg</p>
             </div>
             <div className={smallCard}>
-              <p className={text.label}>Time Active</p>
+              <p className={text.label}>Planned Doses</p>
+              <p className={text.value}>{stats.plannedDoses}</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>This Month</p>
+              <p className={text.value}>{stats.thisMonth}</p>
             </div>
           </div>
           
