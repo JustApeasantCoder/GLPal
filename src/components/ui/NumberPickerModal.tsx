@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import WheelPicker from './WheelPicker';
 
-interface WeightWheelPickerModalProps {
+interface NumberPickerModalProps {
   isOpen: boolean;
   onSave: (value: string) => void;
   onClose: () => void;
@@ -11,20 +11,28 @@ interface WeightWheelPickerModalProps {
   label?: string;
   decimals?: number;
   defaultValue?: string;
+  secondaryMin?: number;
+  secondaryMax?: number;
+  secondaryLabel?: string;
+  secondaryDefaultValue?: string;
 }
 
-const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
+const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
   isOpen,
   onSave,
   onClose,
   min = 0,
-  max = 500,
+  max = 100,
   label = 'Select Value',
-  decimals = 1,
+  decimals = 0,
   defaultValue,
+  secondaryMin,
+  secondaryMax,
+  secondaryLabel,
+  secondaryDefaultValue,
 }) => {
-  const getInitialValue = () => defaultValue || '1';
-  const [localValue, setLocalValue] = useState(defaultValue || '1');
+  const [localValue, setLocalValue] = useState(defaultValue || String(min));
+  const [secondaryValue, setSecondaryValue] = useState(secondaryDefaultValue || String(secondaryMin || 0));
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -32,7 +40,8 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
-      setLocalValue(defaultValue || '1');
+      setLocalValue(defaultValue || String(min));
+      setSecondaryValue(secondaryDefaultValue || String(secondaryMin || 0));
     } else if (isVisible && !isClosing) {
       setIsClosing(true);
       setTimeout(() => {
@@ -40,10 +49,10 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
         setIsClosing(false);
       }, 200);
     }
-  }, [isOpen]);
+  }, [isOpen, defaultValue, min, secondaryDefaultValue, secondaryMin]);
 
   const parsedValue = useMemo(() => {
-    const num = parseFloat(localValue);
+    const num = parseFloat(localValue) || 0;
     const whole = Math.floor(num);
     const decimal = Math.round((num - whole) * Math.pow(10, decimals));
     return { whole, decimal };
@@ -53,13 +62,23 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
     return Array.from({ length: max - min + 1 }, (_, i) => String(min + i));
   }, [min, max]);
 
+  const secondaryNumbers = useMemo(() => {
+    if (secondaryMin === undefined || secondaryMax === undefined) return [];
+    return Array.from({ length: secondaryMax - secondaryMin + 1 }, (_, i) => String(secondaryMin + i));
+  }, [secondaryMin, secondaryMax]);
+
   const decimalOptions = useMemo(() => {
     return Array.from({ length: Math.pow(10, decimals) }, (_, i) => 
       String(i).padStart(decimals, '0')
     );
   }, [decimals]);
 
-  const handleChange = (type: 'whole' | 'decimal', newValue: string) => {
+  const handleChange = (type: 'whole' | 'decimal' | 'secondary', newValue: string) => {
+    if (type === 'secondary') {
+      setSecondaryValue(newValue);
+      return;
+    }
+
     let newWhole = parsedValue.whole;
     let newDecimal = parsedValue.decimal;
 
@@ -69,12 +88,18 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
       newDecimal = parseInt(newValue);
     }
 
-    const formatted = `${newWhole}.${String(newDecimal).padStart(decimals, '0')}`;
+    const formatted = decimals > 0 
+      ? `${newWhole}.${String(newDecimal).padStart(decimals, '0')}`
+      : String(newWhole);
     setLocalValue(formatted);
   };
 
   const handleDone = () => {
-    onSave(localValue);
+    if (secondaryMin !== undefined && secondaryMax !== undefined) {
+      onSave(`${localValue}'${secondaryValue}"`);
+    } else {
+      onSave(localValue);
+    }
     onClose();
   };
 
@@ -106,20 +131,44 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
             </h3>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-4 px-4">
-            <WheelPicker
-              value={String(parsedValue.whole)}
-              onChange={(v) => handleChange('whole', v)}
-              options={wholeNumbers}
-            />
-
-            <span className="text-white text-2xl font-bold">.</span>
-
-            <WheelPicker
-              value={String(parsedValue.decimal).padStart(decimals, '0')}
-              onChange={(v) => handleChange('decimal', v)}
-              options={decimalOptions}
-            />
+          <div className="flex items-center justify-center gap-3 mb-4 px-4">
+            {/* Primary wheel */}
+            {decimals > 0 ? (
+              <>
+                <WheelPicker
+                  value={String(parsedValue.whole)}
+                  onChange={(v) => handleChange('whole', v)}
+                  options={wholeNumbers}
+                />
+                <span className="text-white text-2xl font-bold mt-6">.</span>
+                <WheelPicker
+                  value={String(parsedValue.decimal).padStart(decimals, '0')}
+                  onChange={(v) => handleChange('decimal', v)}
+                  options={decimalOptions}
+                />
+              </>
+            ) : secondaryMin !== undefined ? (
+              <>
+                <WheelPicker
+                  value={localValue.replace('"', '').replace("'", '')}
+                  onChange={(v) => handleChange('whole', v)}
+                  options={wholeNumbers}
+                />
+                <span className="text-white text-2xl font-bold mt-6">'</span>
+                <WheelPicker
+                  value={secondaryValue}
+                  onChange={(v) => handleChange('secondary', v)}
+                  options={secondaryNumbers}
+                />
+                <span className="text-white text-2xl font-bold mt-6">"</span>
+              </>
+            ) : (
+              <WheelPicker
+                value={String(parsedValue.whole)}
+                onChange={(v) => handleChange('whole', v)}
+                options={wholeNumbers}
+              />
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -145,4 +194,4 @@ const WeightWheelPickerModal: React.FC<WeightWheelPickerModalProps> = ({
   return ReactDOM.createPortal(modal, document.body);
 };
 
-export default WeightWheelPickerModal;
+export default NumberPickerModal;

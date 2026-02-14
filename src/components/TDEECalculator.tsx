@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { convertHeightFromCm, convertHeightToCm, feetInchesToCm } from '../utils/unitConversion';
+import NumberPickerModal from './ui/NumberPickerModal';
+import BottomSheetModal from './ui/BottomSheetModal';
 
 interface TDEECalculatorProps {
   profile: UserProfile;
@@ -9,6 +11,9 @@ interface TDEECalculatorProps {
 
 const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate }) => {
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
+  const [showAgePicker, setShowAgePicker] = useState(false);
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
+  const [showActivityPicker, setShowActivityPicker] = useState(false);
 
   // Sync local state with parent profile when it changes (including unit system changes)
   useEffect(() => {
@@ -29,133 +34,151 @@ const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile
     ? [Math.floor(heightDisplayValue / 12), Math.round(heightDisplayValue % 12)]
     : [0, 0];
 
-  const activityLevels = [
-    { value: 1.2, label: 'Sedentary (little or no exercise)' },
-    { value: 1.375, label: 'Lightly active (1-3 days/week)' },
-    { value: 1.55, label: 'Moderately active (3-5 days/week)' },
-    { value: 1.725, label: 'Very active (6-7 days/week)' },
-    { value: 1.9, label: 'Extremely active (physical job)' },
+const activityLevels = [
+    { value: 1.2, label: 'Sedentary (Little or No Exercise)' },
+    { value: 1.375, label: 'Lightly Active (1-3 Days/Week)' },
+    { value: 1.55, label: 'Moderately Active (3-5 Days/Week)' },
+    { value: 1.725, label: 'Very Active (6-7 Days/Week)' },
+    { value: 1.9, label: 'Extremely Active (Physical Job)' },
   ];
 
-  return (
+return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="age" className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className="block text-sm font-medium text-accent-purple-light mb-1">
             Age
           </label>
-          <input
-            type="number"
-            id="age"
-            min="1"
-            max="120"
-            value={profile.age}
-            onChange={(e) => handleChange({ ...profile, age: parseInt(e.target.value) || 0 })}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-required
-            />
-            {unitSystem === 'imperial' && (
-              <p className="text-xs text-accent-purple-light mt-1">
-                {/*{feet}'{inches}" ({Math.round(heightDisplayValue)} inches total)*/}
-              </p>
-            )}
-        </div>
-
-        <div>
-          <label htmlFor="gender" className="block text-sm font-medium text-accent-purple-light mb-1">
-            Gender
-          </label>
-          <select
-            id="gender"
-            value={profile.gender}
-            onChange={(e) => handleChange({ ...profile, gender: e.target.value as 'male' | 'female' })}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium transition-all duration-300"
+          <button
+            type="button"
+            onClick={() => setShowAgePicker(true)}
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
           >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
+            {profile.age || 'Select age'}
+          </button>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-accent-purple-light mb-1">
+            Gender
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleChange({ ...profile, gender: 'male' })}
+              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                profile.gender === 'male'
+                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+              }`}
+            >
+              Male
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange({ ...profile, gender: 'female' })}
+              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                profile.gender === 'female'
+                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+              }`}
+            >
+              Female
+            </button>
+          </div>
+        </div>
+
+<div>
+          <label className="block text-sm font-medium text-accent-purple-light mb-1">
             Height ({unitSystem === 'imperial' ? 'ft/in' : 'cm'})
           </label>
-          {unitSystem === 'imperial' ? (
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <input
-                  type="number"
-                  min="3"
-                  max="8"
-                  value={feet}
-                  onChange={(e) => {
-                    const newFeet = parseInt(e.target.value) || 0;
-                    const newInches = inches || 0;
-                    const heightInCm = feetInchesToCm(newFeet, newInches);
-                    handleChange({ ...profile, height: heightInCm });
-                  }}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-                  placeholder="Feet"
-                  required
-                />
-                <p className="text-xs text-accent-purple-light mt-1">feet</p>
-              </div>
-              <div className="flex-1">
-                <input
-                  type="number"
-                  min="0"
-                  max="11"
-                  value={inches}
-                  onChange={(e) => {
-                    const newInches = parseInt(e.target.value) || 0;
-                    const newFeet = feet || 0;
-                    const heightInCm = feetInchesToCm(newFeet, newInches);
-                    handleChange({ ...profile, height: heightInCm });
-                  }}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-                  placeholder="Inches"
-                  required
-                />
-                <p className="text-xs text-accent-purple-light mt-1">inches</p>
-              </div>
-            </div>
-          ) : (
-            <input
-              type="number"
-              id="height"
-              min="50"
-              max="250"
-              value={Math.round(heightDisplayValue)}
-              onChange={(e) => {
-                const displayHeight = parseInt(e.target.value) || 0;
-                const heightInCm = convertHeightToCm(displayHeight, unitSystem);
-                handleChange({ ...profile, height: heightInCm });
-              }}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium placeholder-text-muted transition-all duration-300"
-              placeholder="Enter height in cm"
-              required
-            />
-          )}
+          <button
+            type="button"
+            onClick={() => setShowHeightPicker(true)}
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+          >
+            {unitSystem === 'imperial' 
+              ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
+              : `${Math.round(heightDisplayValue)} cm`
+            }
+          </button>
         </div>
 
         <div>
-          <label htmlFor="activity" className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className="block text-sm font-medium text-accent-purple-light mb-1">
             Activity Level
           </label>
-          <select
-            id="activity"
-            value={profile.activityLevel}
-            onChange={(e) => handleChange({ ...profile, activityLevel: parseFloat(e.target.value) })}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium focus:border-accent-purple-medium transition-all duration-300"
+          <button
+            type="button"
+            onClick={() => setShowActivityPicker(true)}
+            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
           >
-            {activityLevels.map(level => (
-              <option key={level.value} value={level.value}>
-                {level.label}
-              </option>
-            ))}
-          </select>
+            {activityLevels.find(l => l.value === profile.activityLevel)?.label || 'Select activity level'}
+          </button>
         </div>
       </div>
+
+      <NumberPickerModal
+        isOpen={showAgePicker}
+        onSave={(value) => {
+          const ageValue = parseInt(value);
+          if (ageValue && ageValue > 0) {
+            handleChange({ ...profile, age: ageValue });
+          }
+          setShowAgePicker(false);
+        }}
+        onClose={() => setShowAgePicker(false)}
+        min={1}
+        max={120}
+        label="Age"
+        decimals={0}
+        defaultValue={String(profile.age || 30)}
+      />
+
+      <NumberPickerModal
+        isOpen={showHeightPicker}
+        onSave={(value) => {
+          let heightCm: number;
+          if (unitSystem === 'imperial' && value.includes("'")) {
+            const match = value.match(/(\d+)'(\d+)"/);
+            if (match) {
+              heightCm = feetInchesToCm(parseInt(match[1]), parseInt(match[2]));
+            } else {
+              heightCm = parseFloat(value) || profile.height;
+            }
+          } else {
+            heightCm = parseFloat(value);
+          }
+          if (heightCm && heightCm > 0) {
+            handleChange({ ...profile, height: heightCm });
+          }
+          setShowHeightPicker(false);
+        }}
+        onClose={() => setShowHeightPicker(false)}
+        min={unitSystem === 'imperial' ? 3 : 50}
+        max={unitSystem === 'imperial' ? 8 : 250}
+        label={unitSystem === 'imperial' ? "Height (ft/in)" : "Height (cm)"}
+        decimals={0}
+        defaultValue={unitSystem === 'imperial' 
+          ? String(Math.floor(heightDisplayValue / 12)) 
+          : String(Math.round(profile.height || 170))
+        }
+        secondaryMin={unitSystem === 'imperial' ? 0 : undefined}
+        secondaryMax={unitSystem === 'imperial' ? 11 : undefined}
+        secondaryDefaultValue={unitSystem === 'imperial' 
+          ? String(Math.round(heightDisplayValue % 12)) 
+          : undefined
+        }
+      />
+
+      <BottomSheetModal
+        isOpen={showActivityPicker}
+        title="Activity Level"
+        options={activityLevels}
+        value={profile.activityLevel}
+        onSelect={(val) => handleChange({ ...profile, activityLevel: parseFloat(String(val)) })}
+        onClose={() => setShowActivityPicker(false)}
+      />
     </div>
   );
 };

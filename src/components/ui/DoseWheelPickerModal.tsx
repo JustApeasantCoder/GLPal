@@ -106,12 +106,6 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
             <h3 className="text-xl font-semibold text-white">
               {label}
             </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
           </div>
 
           {/* Preset buttons */}

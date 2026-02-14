@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { UserProfile, UnitSystem } from '../types';
 import TDEECalculator from './TDEECalculator';
 import { convertWeightFromKg, convertWeightToKg } from '../utils/unitConversion';
+import WeightWheelPickerModal from './ui/WeightWheelPickerModal';
 
 interface SettingsMenuProps {
   profile: UserProfile;
@@ -21,8 +22,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
+const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
+  const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
 
   const unitSystem = localProfile.unitSystem || 'metric';
 
@@ -118,13 +120,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-white">
             Settings
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-text-muted hover:text-text-primary text-2xl leading-none p-1 rounded-lg hover:bg-white/10 transition-all"
-          >
-            ×
-          </button>
+</h2>
         </div>
 
         <div className="space-y-4">
@@ -139,39 +135,49 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               {/* Unit System Setting */}
               <div className="space-y-4 mt-4">
                 <div>
-                  <label htmlFor="unitSystem" className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
+                  <label className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
                     Units
                   </label>
-                  <select
-                    id="unitSystem"
-                    value={localProfile.unitSystem || 'metric'}
-                    onChange={(e) => handleUnitSystemChange(e.target.value as UnitSystem)}
-                    className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                  >
-                    <option value="metric">Metric (kg, cm)</option>
-                    <option value="imperial">Imperial (lbs, ft/in)</option>
-                  </select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleUnitSystemChange('metric')}
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                        (localProfile.unitSystem || 'metric') === 'metric'
+                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                          : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                      }`}
+                    >
+                      Metric
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUnitSystemChange('imperial')}
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                        localProfile.unitSystem === 'imperial'
+                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                          : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                      }`}
+                    >
+                      Imperial
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Goal Weight Setting */}
+{/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
                 <div>
-                  <label htmlFor="goalWeight" className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
+                  <label className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
                     Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
                   </label>
-                   <input
-                      type="number"
-                      id="goalWeight"
-                      step="0.1"
-                      min={unitSystem === 'imperial' ? "66" : "30"}
-                      max={unitSystem === 'imperial' ? "661" : "300"}
-                      value={pendingGoalWeight || goalWeightDisplayValue}
-                      onChange={(e) => handleGoalWeightChange(e.target.value)}
-                      onBlur={handleGoalWeightBlur}
-                      className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                      placeholder={`Enter your goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                    />
+                  <button
+                    type="button"
+                    onClick={() => setShowGoalWeightPicker(true)}
+                    className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+                  >
+                    {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                  </button>
                 </div>
               </div>
             </div>
@@ -201,7 +207,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               </div>
             </div>
 
-            {/* Close Button */}
+{/* Close Button */}
             <div className="flex justify-end pt-4 border-t border-card-border">
               <button
                 onClick={onClose}
@@ -212,6 +218,25 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             </div>
         </div>
       </div>
+
+      <WeightWheelPickerModal
+        isOpen={showGoalWeightPicker}
+        onSave={(value) => {
+          const weightValue = parseFloat(value);
+          if (weightValue && weightValue > 0) {
+            const weightInKg = convertWeightToKg(weightValue, unitSystem);
+            setPendingGoalWeight(value);
+            onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
+          }
+          setShowGoalWeightPicker(false);
+        }}
+        onClose={() => setShowGoalWeightPicker(false)}
+        min={1}
+        max={unitSystem === 'imperial' ? 1100 : 500}
+        label="Goal Weight"
+        decimals={1}
+        defaultValue={goalWeightDisplayValue || (unitSystem === 'imperial' ? '150' : '70')}
+      />
     </div>,
     document.body
   );
