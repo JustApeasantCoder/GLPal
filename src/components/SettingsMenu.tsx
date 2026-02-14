@@ -124,6 +124,9 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
         </div>
 
         <div className="space-y-4">
+            {/* Separator */}
+            <div className="border-t border-[#B19CD9]/20"></div>
+
             {/* User Settings Section */}
             <div>
               <h3 className="text-lg font-medium text-text-primary mb-4" style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : '0 0 15px rgba(45,27,78,0.2)' }}>User Settings</h3>
@@ -165,7 +168,10 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                 </div>
               </div>
 
-{/* Goal Weight Setting */}
+              {/* Separator */}
+              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
+              {/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
                 <div>
                   <label className="block text-sm font-medium text-accent-purple-light mb-2" style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : '0 0 10px rgba(45,27,78,0.2)' }}>
@@ -181,6 +187,9 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                 </div>
               </div>
             </div>
+
+            {/* Separator */}
+            <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
             {/* Appearance Section */}
             <div>
@@ -207,7 +216,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
               </div>
             </div>
 
-{/* Close Button */}
+            {/* Close Button */}
             <div className="flex justify-end pt-4 border-t border-card-border">
               <button
                 onClick={onClose}
