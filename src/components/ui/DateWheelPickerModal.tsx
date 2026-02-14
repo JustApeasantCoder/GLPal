@@ -65,22 +65,16 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
   if (!isVisible) return null;
 
   const handleChange = (type: 'year' | 'month' | 'day', newValue: string) => {
-    let newDay = parseInt(day);
-    
     if (type === 'month') {
       const newMonth = parseInt(newValue);
       const daysInNewMonth = new Date(parseInt(year), newMonth, 0).getDate();
-      if (newDay > daysInNewMonth) {
-        newDay = daysInNewMonth;
-      }
+      const newDay = Math.min(parseInt(day), daysInNewMonth);
       const formatted = `${year}-${newValue.padStart(2, '0')}-${String(newDay).padStart(2, '0')}`;
       setLocalDate(formatted);
     } else if (type === 'year') {
       const newYear = parseInt(newValue);
       const daysInNewMonth = new Date(newYear, parseInt(month) - 1, 0).getDate();
-      if (newDay > daysInNewMonth) {
-        newDay = daysInNewMonth;
-      }
+      const newDay = Math.min(parseInt(day), daysInNewMonth);
       const formatted = `${newValue}-${month}-${String(newDay).padStart(2, '0')}`;
       setLocalDate(formatted);
     } else if (type === 'day') {
@@ -120,7 +114,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
             format={(v) => monthNames[parseInt(v) - 1]}
           />
           <WheelPicker
-            value={String(Math.min(parseInt(day), daysInMonth)).padStart(2, '0')}
+            value={day}
             onChange={(v) => handleChange('day', v)}
             options={days}
           />
