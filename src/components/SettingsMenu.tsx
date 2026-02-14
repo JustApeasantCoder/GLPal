@@ -113,10 +113,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(4px)' }} onClick={onClose} />
-      <div className={`relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`} style={{ backdropFilter: 'blur(20px)' }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-text-primary">
+      <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
+      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-white">
             Settings
           </h2>
           <button

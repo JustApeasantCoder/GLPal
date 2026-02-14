@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MEDICATIONS } from '../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../utils/database';
+import DateWheelPickerModal from './ui/DateWheelPickerModal';
 
 interface MedicationModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -83,12 +85,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div 
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
-        style={{ backdropFilter: 'blur(4px)' }}
+        className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
+        style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative bg-card-bg backdrop-blur-xl rounded-2xl shadow-theme-lg border border-card-border w-full max-w-sm p-4 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`} style={{ backdropFilter: 'blur(20px)' }}>
-        <h2 className="text-lg font-semibold text-text-primary mb-4">+ Add Dose</h2>
+      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+        <h2 className="text-xl font-semibold text-white mb-6">Log Dose</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -97,13 +99,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             </label>
             <div className="relative">
               <input
-                type="date"
+                type="text"
                 value={selectedDate}
-                max={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 pr-10 border border-accent-purple-light/30 bg-black/20 text-text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium appearance-none"
-                style={{ colorScheme: 'dark' }}
-                required
+                readOnly
+                onClick={() => setShowDatePicker(true)}
+                className="w-full px-3 py-2 pr-10 border border-accent-purple-light/30 bg-black/20 text-text-primary rounded-lg cursor-pointer"
+                placeholder="Select date"
               />
               <svg
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted pointer-events-none"
@@ -120,6 +121,14 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
               </svg>
             </div>
           </div>
+
+          <DateWheelPickerModal
+            isOpen={showDatePicker}
+            value={selectedDate}
+            onChange={setSelectedDate}
+            onClose={() => setShowDatePicker(false)}
+            maxDate={new Date().toISOString().split('T')[0]}
+          />
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-text-secondary mb-2">
@@ -160,17 +169,17 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 rounded-lg border border-accent-purple-light/30 text-text-secondary hover:bg-accent-purple-light/10 transition-all"
+              className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white hover:shadow-theme transition-all"
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
             >
               Log Dose
             </button>
