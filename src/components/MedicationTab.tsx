@@ -4,7 +4,6 @@ import MedicationModal from './MedicationModal';
 import PeriodSelector from './PeriodSelector';
 import ProtocolModal from './ProtocolModal';
 import Button from './ui/Button';
-import BottomSheetModal from './ui/BottomSheetModal';
 import DateWheelPickerModal from './ui/DateWheelPickerModal';
 import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
@@ -28,6 +27,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
+  const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
+  const [officialScheduleMedication, setOfficialScheduleMedication] = useState<string>('semaglutide');
+  const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
+  const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
   const [expandedMedications, setExpandedMedications] = useState<Set<string>>(() => {
     const savedProtocols = getActiveProtocols();
     if (savedProtocols.length === 0) return new Set();
@@ -36,20 +40,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       return med?.name || p.medication;
     }));
   });
-  const [showPresetModal, setShowPresetModal] = useState(false);
-  const [presetStep, setPresetStep] = useState<1 | 2>(1);
-  const [presetMedication, setPresetMedication] = useState<string>('');
-  const [presetStartDate, setPresetStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [presetEndDate, setPresetEndDate] = useState<string>('');
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
-
-  useEffect(() => {
-    if (showPresetModal && presetStep === 1 && presetMedication) {
-      setPresetStep(2);
-    }
-  }, [presetMedication, presetStep, showPresetModal]);
 
   useEffect(() => {
     const savedProtocols = getActiveProtocols();
@@ -67,67 +58,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
-  };
-
-  const handleCreatePresetSchedule = (extendOnly: boolean = false) => {
-    if (!presetMedication || !presetStartDate || (!extendOnly && !presetEndDate)) return;
-    
-    const med = MEDICATIONS.find(m => m.id === presetMedication);
-    if (!med || !med.titrationDoses || med.titrationDoses.length === 0) return;
-    
-    const highestDose = med.titrationDoses[med.titrationDoses.length - 1];
-    
-    if (extendOnly && presetEndDate) {
-      const newProtocol: GLP1Protocol = {
-        id: generateId(),
-        medication: presetMedication,
-        dose: highestDose,
-        frequencyPerWeek: 1,
-        startDate: presetStartDate,
-        stopDate: presetEndDate,
-        phase: 'maintenance',
-        halfLifeHours: med.halfLifeHours,
-      };
-      
-      const updatedProtocols = [...protocols, newProtocol];
-      setProtocols(updatedProtocols);
-      handleGenerateDoses(updatedProtocols);
-      onRefreshMedications();
-    } else {
-      const startDate = new Date(presetStartDate);
-      const endDate = new Date(presetEndDate);
-      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const daysPerDose = totalDays / med.titrationDoses.length;
-      
-      const newProtocols: GLP1Protocol[] = med.titrationDoses!.map((dose, index) => {
-        const phaseStart = new Date(startDate.getTime() + index * daysPerDose * 24 * 60 * 60 * 1000);
-        const phaseEnd = index < med.titrationDoses!.length - 1 
-          ? new Date(startDate.getTime() + (index + 1) * daysPerDose * 24 * 60 * 60 * 1000 - 1)
-          : endDate;
-        
-        return {
-          id: generateId(),
-          medication: presetMedication,
-          dose: dose,
-          frequencyPerWeek: 1,
-          startDate: phaseStart.toISOString().split('T')[0],
-          stopDate: phaseEnd.toISOString().split('T')[0],
-          phase: 'titrate' as const,
-          halfLifeHours: med.halfLifeHours,
-        };
-      });
-      
-      const updatedProtocols = [...protocols, ...newProtocols];
-      setProtocols(updatedProtocols);
-      handleGenerateDoses(updatedProtocols);
-      onRefreshMedications();
-    }
-    
-    setShowPresetModal(false);
-    setPresetStep(1);
-    setPresetMedication('');
-    setPresetStartDate(new Date().toISOString().split('T')[0]);
-    setPresetEndDate('');
   };
 
   const toggleMedication = (medicationName: string) => {
@@ -305,7 +235,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
       {/* Protocol Card */}
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Protocol</h1>
+        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dosing Plans</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         {/* Saved Protocols List - Grouped by Medication */}
@@ -399,15 +329,17 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             fullWidth
             variant="accent"
           >
-            + Add Protocol
+            + Custom Plan
           </Button>
 
           <Button 
-            onClick={() => setShowPresetModal(true)} 
+            onClick={() => {
+              setShowOfficialScheduleModal(true);
+            }} 
             fullWidth
             variant="accent"
           >
-            + Add Preset
+            + Official Schedule
           </Button>
         </div>
       </div>
@@ -423,130 +355,108 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         existingProtocols={protocols}
       />
 
-      <MedicationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddMedication={onAddMedication}
-      />
-
-      <BottomSheetModal
-        isOpen={showPresetModal && presetStep === 1}
-        title="Add Pre-set Schedule"
-        options={MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0).map(m => ({ value: m.id, label: m.name }))}
-        value={presetMedication}
-        closeOnSelect={false}
-        closeOnBackdrop={false}
-        onSelect={(val) => {
-          setPresetMedication(String(val));
-          setPresetStartDate(new Date().toISOString().split('T')[0]);
-          setPresetEndDate('');
-        }}
-        onClose={() => {
-          setShowPresetModal(false);
-          setPresetStep(1);
-          setPresetMedication('');
-        }}
-      />
-
-      {showPresetModal && presetStep === 2 && presetMedication && (
-      <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-          style={{ backdropFilter: 'blur(8px)' }}
-          onClick={() => setShowPresetModal(false)}
-        />
-        <div className="relative w-full max-w-sm">
-          <div className="relative isolate rounded-2xl border border-[#B19CD9]/30 shadow-2xl bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Set Schedule Dates</h3>
+      {showOfficialScheduleModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOfficialScheduleModal(false)} />
+          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6">
+            <h2 className="text-xl font-semibold text-white mb-6">Add Official Schedule</h2>
+            <div className="border-t border-[#B19CD9]/20 mb-3"></div>
             
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
+                <select
+                  value={officialScheduleMedication}
+                  onChange={(e) => setOfficialScheduleMedication(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+                >
+                  {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0).map(med => (
+                    <option key={med.id} value={med.id}>{med.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Split Dosing</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOfficialScheduleSplitDosing(false)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                      !officialScheduleSplitDosing
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white'
+                        : 'bg-black/20 text-[#B19CD9] border border-[#B19CD9]/30'
+                    }`}
+                  >
+                    No
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOfficialScheduleSplitDosing(true)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                      officialScheduleSplitDosing
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white'
+                        : 'bg-black/20 text-[#B19CD9] border border-[#B19CD9]/30'
+                    }`}
+                  >
+                    Yes
+                  </button>
+                </div>
+                {officialScheduleSplitDosing && (
+                  <p className="text-xs text-[#4ADEA8] mt-1">Dose will be split in half and taken every 3.5 days</p>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
                 <button
                   type="button"
-                  onClick={() => setShowStartDatePicker(true)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+                  onClick={() => setShowOfficialScheduleDatePicker(true)}
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
                 >
-                  {new Date(presetStartDate).toLocaleDateString()}
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date</label>
-                <div className="flex gap-1 mb-2">
-                  {[
-                    { label: '1M', days: 30 },
-                    { label: '3M', days: 90 },
-                    { label: '6M', days: 180 },
-                    { label: '1Y', days: 365 },
-                  ].map((preset) => (
-                    <button
-                      key={preset.days}
-                      type="button"
-                      onClick={() => {
-                        const med = MEDICATIONS.find(m => m.id === presetMedication);
-                        if (!med || !med.titrationDoses) return;
-                        const end = new Date(presetStartDate);
-                        end.setDate(end.getDate() + preset.days);
-                        const endStr = end.toISOString().split('T')[0];
-                        const newProtocol: GLP1Protocol = {
-                          id: generateId(),
-                          medication: presetMedication,
-                          dose: med.titrationDoses[med.titrationDoses.length - 1],
-                          frequencyPerWeek: 1,
-                          startDate: presetStartDate,
-                          stopDate: endStr,
-                          phase: 'maintenance',
-                          halfLifeHours: med.halfLifeHours,
-                        };
-                        const updatedProtocols = [...protocols, newProtocol];
-                        setProtocols(updatedProtocols);
-                        handleGenerateDoses(updatedProtocols);
-                        onRefreshMedications();
-                        setShowPresetModal(false);
-                        setPresetStep(1);
-                        setPresetMedication('');
-                        setPresetStartDate(new Date().toISOString().split('T')[0]);
-                        setPresetEndDate('');
-                      }}
-                      className="flex-1 py-1 text-xs rounded-lg bg-[#B19CD9]/20 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/30"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowEndDatePicker(true)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
-                >
-                  {presetEndDate ? new Date(presetEndDate).toLocaleDateString() : 'Select date'}
+                  {new Date(officialScheduleStartDate).toLocaleDateString()}
                 </button>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => {
-                    setPresetStep(1);
-                  }}
-                  className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={() => {
-                    setShowPresetModal(false);
-                    setPresetStep(1);
-                    setPresetMedication('');
-                  }}
+                  onClick={() => setShowOfficialScheduleModal(false)}
                   className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => handleCreatePresetSchedule(false)}
-                  disabled={!presetMedication || !presetStartDate || !presetEndDate}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    const med = MEDICATIONS.find(m => m.id === officialScheduleMedication);
+                    if (!med?.titrationDoses || med.titrationDoses.length === 0) return;
+                    
+                    const titrationDoses = med.titrationDoses;
+                    const daysPerDose = 28;
+                    const freqValue = officialScheduleSplitDosing ? 2 : 1;
+
+                    const titrationProtocols: GLP1Protocol[] = titrationDoses.map((titrationDose, index) => {
+                      const phaseStart = new Date(new Date(officialScheduleStartDate).getTime() + index * daysPerDose * 24 * 60 * 60 * 1000);
+                      const phaseEnd = new Date(new Date(officialScheduleStartDate).getTime() + (index + 1) * daysPerDose * 24 * 60 * 60 * 1000 - 1);
+
+                      return {
+                        id: generateId(),
+                        medication: med.name,
+                        dose: officialScheduleSplitDosing ? titrationDose / 2 : titrationDose,
+                        frequencyPerWeek: freqValue,
+                        startDate: phaseStart.toISOString().split('T')[0],
+                        stopDate: phaseEnd.toISOString().split('T')[0],
+                        halfLifeHours: med.halfLifeHours,
+                        phase: 'titrate' as const,
+                      };
+                    });
+
+                    const updatedProtocols = [...protocols, ...titrationProtocols];
+                    setProtocols(updatedProtocols);
+                    handleGenerateDoses(updatedProtocols);
+                    onRefreshMedications();
+                    setShowOfficialScheduleModal(false);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
                 >
                   Create
                 </button>
@@ -554,28 +464,22 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
           </div>
         </div>
-      </div>
       )}
-      
-      <DateWheelPickerModal
-        isOpen={showStartDatePicker}
-        value={presetStartDate}
-        onChange={(date) => {
-          setPresetStartDate(date);
-          setShowStartDatePicker(false);
-        }}
-        onClose={() => setShowStartDatePicker(false)}
-      />
 
       <DateWheelPickerModal
-        isOpen={showEndDatePicker}
-        value={presetEndDate || new Date().toISOString().split('T')[0]}
+        isOpen={showOfficialScheduleDatePicker}
+        value={officialScheduleStartDate}
         onChange={(date) => {
-          setPresetEndDate(date);
-          setShowEndDatePicker(false);
+          setOfficialScheduleStartDate(date);
+          setShowOfficialScheduleDatePicker(false);
         }}
-        onClose={() => setShowEndDatePicker(false)}
-        minDate={presetStartDate}
+        onClose={() => setShowOfficialScheduleDatePicker(false)}
+      />
+
+      <MedicationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddMedication={onAddMedication}
       />
     </div>
   );
