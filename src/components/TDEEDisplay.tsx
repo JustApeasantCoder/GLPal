@@ -33,7 +33,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
       </h1>
       <div className="border-t border-[#B19CD9]/20 mt-3"></div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 my-3">
       {/* 0.5kg/week */}
       <div className={tdeeCard}>
         <div>

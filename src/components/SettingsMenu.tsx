@@ -136,7 +136,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   }} />
               
               {/* Separator */}
-              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+              <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
               {/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
@@ -156,7 +156,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
             </div>
 
             {/* Separator */}
-            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
             {/* Appearance Section */}
             <div>

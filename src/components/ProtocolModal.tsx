@@ -328,7 +328,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
         <h2 className="text-xl font-semibold text-white mb-6">
           {mode === 'add' ? 'Add Protocol' : 'Edit Protocol'}
         </h2>
-        <div className="border-t border-[#B19CD9]/20 mb-6"></div>
+        <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
         <div className="space-y-4">
           <div>
@@ -357,7 +357,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             </div>
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+          <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="grid grid-cols-2 gap-3">
 <div>
@@ -392,7 +392,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             </div>
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+          <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div>
             <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
@@ -448,7 +448,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             </button>
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+          <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="flex gap-2">
             {mode === 'edit' && onDelete && onArchive && !confirmAction && (

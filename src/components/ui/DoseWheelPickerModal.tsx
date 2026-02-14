@@ -107,7 +107,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
               {label}
             </h3>
           </div>
-          <div className="border-t border-[#B19CD9]/20 mb-4"></div>
+          <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
           {/* Preset buttons */}
           <div className="grid grid-cols-4 gap-2 mb-4">
@@ -146,7 +146,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
             />
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+          <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="flex gap-3">
             <button

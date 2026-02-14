@@ -71,7 +71,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
               {title}
             </h3>
           </div>
-          <div className="border-t border-[#B19CD9]/20 mb-4"></div>
+          <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {options.map((option) => (
