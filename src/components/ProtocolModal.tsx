@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GLP1Protocol } from '../types';
 import { MEDICATIONS, SEMAGLUTIDE_TITRATION, generateId, Medication } from '../constants/medications';
 import DateWheelPickerModal from './ui/DateWheelPickerModal';
+import DoseWheelPickerModal from './ui/DoseWheelPickerModal';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
   const [savedMedications, setSavedMedications] = useState<string[]>([]);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
+  const [showDosePicker, setShowDosePicker] = useState(false);
 
   useEffect(() => {
     const loadMedications = () => {
@@ -355,18 +357,15 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
+<div>
               <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.1"
-                max="99.9"
-                value={dose}
-                onChange={(e) => setDose(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Enter dose"
-              />
+              <button
+                type="button"
+                onClick={() => setShowDosePicker(true)}
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+              >
+                {dose ? `${dose} mg` : 'Select dose'}
+              </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dosing Schedule</label>
@@ -586,6 +585,22 @@ const [showOtherModal, setShowOtherModal] = useState(false);
               setStopDate(date);
             }}
             onClose={() => setShowStopDatePicker(false)}
+          />
+        )}
+
+        {showDosePicker && (
+          <DoseWheelPickerModal
+            isOpen={showDosePicker}
+            onSave={(value) => {
+              setDose(value);
+              setShowDosePicker(false);
+            }}
+            onClose={() => setShowDosePicker(false)}
+            min={0}
+            max={100}
+            label="Select Dose (mg)"
+            decimals={2}
+            defaultValue={dose || '0.25'}
           />
         )}
     </div>

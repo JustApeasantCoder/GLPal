@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MEDICATIONS } from '../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../utils/database';
 import DateWheelPickerModal from './ui/DateWheelPickerModal';
+import DoseWheelPickerModal from './ui/DoseWheelPickerModal';
 
 interface MedicationModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDosePicker, setShowDosePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -130,6 +132,20 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             maxDate={new Date().toISOString().split('T')[0]}
           />
 
+          <DoseWheelPickerModal
+            isOpen={showDosePicker}
+            onSave={(value) => {
+              setDose(value);
+              setShowDosePicker(false);
+            }}
+            onClose={() => setShowDosePicker(false)}
+            min={0}
+            max={100}
+            label="Select Dose (mg)"
+            decimals={2}
+            defaultValue={dose || '0.25'}
+          />
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Medication
@@ -156,17 +172,13 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Dose (mg)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.1"
-              max="99.9"
-              value={dose}
-              onChange={(e) => setDose(e.target.value)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-purple-medium"
-              placeholder="Enter dose"
-              required
-            />
+            <button
+              type="button"
+              onClick={() => setShowDosePicker(true)}
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg text-left"
+            >
+              {dose ? `${dose} mg` : 'Select dose'}
+            </button>
           </div>
 
           <div className="flex gap-3">

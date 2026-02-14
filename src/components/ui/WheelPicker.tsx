@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface WheelPickerProps {
   value: string;
@@ -19,6 +19,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
   format = (v) => v,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
 
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.max(0, options.indexOf(value))
@@ -33,28 +34,19 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
     }
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const idx = options.indexOf(value);
     if (idx >= 0 && idx !== currentIndex) {
       setCurrentIndex(idx);
-      if (!isTouchDevice && containerRef.current) {
-        containerRef.current.style.transform = `translateY(${
-          VISIBLE_HEIGHT / 2 - idx * ITEM_HEIGHT - ITEM_HEIGHT / 2
-        }px)`;
-      } else if (isTouchDevice && containerRef.current) {
+
+      if (isTouchDevice && containerRef.current) {
         containerRef.current.scrollTo({
           top: idx * ITEM_HEIGHT,
-          behavior: 'smooth',
+          behavior: 'auto',
         });
       }
     }
   }, [value, options, isTouchDevice]);
-
-  useLayoutEffect(() => {
-    if (isTouchDevice && containerRef.current && currentIndex > 0) {
-      containerRef.current.scrollTop = currentIndex * ITEM_HEIGHT;
-    }
-  }, [isTouchDevice, currentIndex]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent<HTMLDivElement>) => {
@@ -172,14 +164,15 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
         }
       >
         {!isTouchDevice && (
-          <div
+<div
+            ref={innerRef}
             style={{
               transform: `translateY(${
                 VISIBLE_HEIGHT / 2 -
                 currentIndex * ITEM_HEIGHT -
                 ITEM_HEIGHT / 2
               }px)`,
-              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transition: 'transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
               transformStyle: 'preserve-3d',
             }}
           >
