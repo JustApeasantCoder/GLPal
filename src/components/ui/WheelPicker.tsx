@@ -8,8 +8,8 @@ interface WheelPickerProps {
   format?: (value: string) => string;
 }
 
-const ITEM_HEIGHT = 40;
-const VISIBLE_HEIGHT = 120;
+const ITEM_HEIGHT = 44;
+const VISIBLE_HEIGHT = 132;
 
 const WheelPicker: React.FC<WheelPickerProps> = ({
   value,
@@ -86,7 +86,6 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
       setCurrentIndex((prev) => {
         let next = prev + direction * steps;
         
-        // Prevent overscroll - don't update if at boundary
         if (next < 0 || next >= options.length) {
           return prev;
         }
@@ -112,17 +111,36 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
     }
   }, [currentIndex, options, onChange, isTouchDevice]);
 
+  const getItemStyle = (index: number) => {
+    const distance = Math.abs(index - currentIndex);
+    const maxDistance = 2;
+    const clampedDistance = Math.min(distance, maxDistance);
+    
+    const scale = 1 - clampedDistance * 0.15;
+    const opacity = 1 - clampedDistance * 0.05;
+    const translateZ = -clampedDistance * 10;
+    
+    const isSelected = index === currentIndex;
+    
+    return {
+      transform: `scale(${scale}) translateZ(${translateZ}px)`,
+      opacity,
+      color: isSelected ? '#fff' : `rgba(177, 156, 217, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`,
+      fontWeight: isSelected ? 700 : 400,
+    };
+  };
+
   return (
     <div className="flex flex-col items-center">
       {label && (
-        <span className="text-xs text-[#B19CD9] mb-1">{label}</span>
+        <span className="text-xs text-[#B19CD9] mb-2 font-medium tracking-wider uppercase">{label}</span>
       )}
 
       <div
         ref={containerRef}
         draggable={false}
         onDragStart={(e) => e.preventDefault()}
-        className={`relative h-[120px] w-16 rounded-lg border border-[#B19CD9]/30 bg-black/20 select-none ${
+        className={`relative h-[132px] w-20 rounded-2xl border border-[#B19CD9]/40 bg-gradient-to-b from-[#1a1625]/80 to-[#0d0a15]/90 select-none shadow-lg shadow-purple-900/20 ${
           !isTouchDevice
             ? 'cursor-grab active:cursor-grabbing overflow-hidden'
             : 'overflow-y-scroll snap-y snap-mandatory'
@@ -141,7 +159,10 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
                 paddingTop: VISIBLE_HEIGHT / 2 - ITEM_HEIGHT / 2,
                 paddingBottom: VISIBLE_HEIGHT / 2 - ITEM_HEIGHT / 2,
               }
-            : { userSelect: 'none' }
+            : { 
+                userSelect: 'none',
+                perspective: '500px',
+              }
         }
       >
         {!isTouchDevice && (
@@ -152,47 +173,40 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
                 currentIndex * ITEM_HEIGHT -
                 ITEM_HEIGHT / 2
               }px)`,
-              transition: 'transform 0.15s',
+              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transformStyle: 'preserve-3d',
             }}
           >
-            {options.map((option, index) => {
-              const isMiddle = index === currentIndex;
-              return (
-                <div
-                  key={option}
-                  draggable={false}
-                  className="flex items-center justify-center text-sm font-medium h-[40px] transition-all duration-150 select-none"
-                  style={{
-                    color: isMiddle
-                      ? 'white'
-                      : 'rgba(177,156,217,0.7)',
-                    fontWeight: isMiddle ? 600 : 400,
-                    transform: `scale(${isMiddle ? 1.1 : 0.9})`,
-                    opacity: isMiddle ? 1 : 0.5,
-                  }}
-                >
-                  {format(option)}
-                </div>
-              );
-            })}
+            {options.map((option, index) => (
+              <div
+                key={option}
+                draggable={false}
+                className="flex items-center justify-center text-base font-bold h-[44px] transition-all duration-200 select-none"
+                style={getItemStyle(index)}
+              >
+                {format(option)}
+              </div>
+            ))}
           </div>
         )}
 
         {isTouchDevice &&
           options.map((option, index) => {
-            const isMiddle = index === currentIndex;
+            const distance = Math.abs(index - currentIndex);
+            const scale = 1 - Math.min(distance, 2) * 0.15;
+            const opacity = 1 - Math.min(distance, 2) * 0.05;
+            const isSelected = index === currentIndex;
+            
             return (
               <div
                 key={option}
                 draggable={false}
-                className="snap-center flex items-center justify-center text-sm font-medium h-[40px] transition-all duration-150 select-none"
+                className="snap-center flex items-center justify-center text-base font-bold h-[44px] transition-all duration-200 select-none"
                 style={{
-                  color: isMiddle
-                    ? 'white'
-                    : 'rgba(177,156,217,0.7)',
-                  fontWeight: isMiddle ? 600 : 400,
-                  transform: `scale(${isMiddle ? 1.1 : 0.9})`,
-                  opacity: isMiddle ? 1 : 0.5,
+                  transform: `scale(${scale})`,
+                  opacity,
+                  color: isSelected ? '#fff' : `rgba(177, 156, 217, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`,
+                  fontWeight: isSelected ? 700 : 400,
                 }}
               >
                 {format(option)}
@@ -200,18 +214,8 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
             );
           })}
 
-        <div
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()}
-          className="absolute left-0 right-0 pointer-events-none border-y-2 border-[#B19CD9]/60 select-none"
-          style={{
-            top: VISIBLE_HEIGHT / 2 - ITEM_HEIGHT / 2,
-            height: ITEM_HEIGHT,
-          }}
-        />
-
-        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 top-0 h-[60px] pointer-events-none bg-gradient-to-b from-[#0d0a15] to-transparent" />
-        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 bottom-0 h-[60px] pointer-events-none bg-gradient-to-t from-[#0d0a15] to-transparent" />
+        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 top-0 h-[36px] pointer-events-none bg-gradient-to-b from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" />
+        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 bottom-0 h-[36px] pointer-events-none bg-gradient-to-t from-[#0d0a15] via-[#0d0a15]/70 to-transparent select-none" />
       </div>
     </div>
   );

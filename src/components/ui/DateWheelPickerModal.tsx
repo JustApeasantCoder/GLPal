@@ -125,7 +125,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
   return (
     <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
       <div
-        className={`fixed inset-0 bg-black/60 ${
+        className={`fixed inset-0 bg-black/40 ${
           isClosing
             ? 'backdrop-fade-out'
             : 'backdrop-fade-in'
@@ -142,19 +142,14 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
               : 'modal-content-fade-in'
           }`}
         >
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-white">
               Select Date
             </h3>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-            >
-              ×
-            </button>
+            <div className="w-8" />
           </div>
 
-          <div className="flex items-center justify-center gap-3 mb-8 px-4">
+          <div className="flex items-center justify-center gap-3 mb-4 px-4">
             <WheelPicker
               value={month}
               onChange={(v) =>
