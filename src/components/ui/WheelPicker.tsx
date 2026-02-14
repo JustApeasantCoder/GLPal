@@ -172,7 +172,7 @@ useEffect(() => {
                 currentIndex * ITEM_HEIGHT -
                 ITEM_HEIGHT / 2
               }px)`,
-              transition: 'transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
+              transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
               transformStyle: 'preserve-3d',
             }}
           >

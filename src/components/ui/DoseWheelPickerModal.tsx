@@ -114,46 +114,41 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-4 px-4">
-            {/* Left presets */}
-            <div className="flex flex-col gap-2">
-              {['0', '10', '20'].map((val) => (
+          {/* Preset buttons */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {['0.25', '0.5', '1.0', '2.0'].map((val) => {
+              const isSelected = localValue === val;
+              return (
                 <button
-                  key={`left-${val}`}
-                  onClick={() => setLocalValue(`${val}.${String(parsedValue.decimal).padStart(decimals, '0')}`)}
-                  className="text-xs text-[#B19CD9] hover:text-white transition-colors"
+                  key={`preset-${val}`}
+                  type="button"
+                  onClick={() => setLocalValue(val)}
+                  className={`flex-1 px-3 py-2 text-xs rounded-lg transition-all duration-300 ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                      : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                  }`}
                 >
-                  {val}
+                  {val}mg
                 </button>
-              ))}
-            </div>
+              );
+            })}
+          </div>
 
+          <div className="flex items-center justify-center gap-3 mb-4 px-2">
             <WheelPicker
               value={String(parsedValue.whole)}
               onChange={(v) => handleChange('whole', v)}
               options={wholeNumbers}
             />
 
-            <span className="text-white text-2xl font-bold">.</span>
+            <span className="text-white text-2xl font-bold mt-6">.</span>
 
             <WheelPicker
               value={String(parsedValue.decimal).padStart(decimals, '0')}
               onChange={(v) => handleChange('decimal', v)}
               options={decimalOptions}
             />
-
-            {/* Right presets */}
-            <div className="flex flex-col gap-2">
-              {['0', '25', '50'].map((val) => (
-                <button
-                  key={`right-${val}`}
-                  onClick={() => setLocalValue(`${parsedValue.whole}.${val.padStart(decimals, '0')}`)}
-                  className="text-xs text-[#B19CD9] hover:text-white transition-colors"
-                >
-                  {val}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="flex gap-3">
