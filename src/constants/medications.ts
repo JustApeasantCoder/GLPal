@@ -7,11 +7,15 @@ export interface Medication {
 }
 
 export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 2, 2.4];
+export const TIRZEPATIDE_TITRATION = [2.5, 5, 7.5, 10, 12.5, 15];
+export const RETATRUTIDE_TITRATION = [1, 2, 4, 6, 8, 9, 12];
+export const CAGRILINTIDE_TITRATION = [0.25, 0.5, 1, 1.5, 2.4];
 
 export const MEDICATIONS: Medication[] = [
   { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 0.25, halfLifeHours: 168, titrationDoses: SEMAGLUTIDE_TITRATION },
-  { id: 'tirzepatide', name: 'Tirzepatide (Mounjaro/Zepbound)', defaultDose: 15, halfLifeHours: 127 },
-  { id: 'retatrutide', name: 'Retatrutide', defaultDose: 12, halfLifeHours: 120 },
+  { id: 'tirzepatide', name: 'Tirzepatide (Mounjaro/Zepbound)', defaultDose: 2.5, halfLifeHours: 127, titrationDoses: TIRZEPATIDE_TITRATION },
+  { id: 'retatrutide', name: 'Retatrutide', defaultDose: 1, halfLifeHours: 120, titrationDoses: RETATRUTIDE_TITRATION },
+  { id: 'cagrilintide', name: 'Cagrilintide (Amycretin)', defaultDose: 0.25, halfLifeHours: 168, titrationDoses: CAGRILINTIDE_TITRATION },
   { id: 'liraglutide', name: 'Liraglutide (Victoza/Saxenda)', defaultDose: 3, halfLifeHours: 13 },
   { id: 'dulaglutide', name: 'Dulaglutide (Trulicity)', defaultDose: 4.5, halfLifeHours: 108 },
   { id: 'other', name: 'Custom', defaultDose: 1, halfLifeHours: 120 },
