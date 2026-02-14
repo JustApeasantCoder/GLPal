@@ -13,6 +13,8 @@ interface BottomSheetModalProps {
   value: string | number;
   onSelect: (value: string | number) => void;
   onClose: () => void;
+  closeOnSelect?: boolean;
+  closeOnBackdrop?: boolean;
 }
 
 const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
@@ -22,6 +24,8 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
   value,
   onSelect,
   onClose,
+  closeOnSelect = true,
+  closeOnBackdrop = true,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -41,13 +45,16 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 
   const handleSelect = (optionValue: string | number) => {
     onSelect(optionValue);
-    onClose();
+    if (closeOnSelect) {
+      onClose();
+    }
   };
 
   if (!isVisible) return null;
 
   const modal = (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+      {closeOnBackdrop && (
       <div
         className={`absolute inset-0 bg-black/60 ${
           isClosing
@@ -57,6 +64,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
+      )}
 
       <div className="relative w-full max-w-sm">
         <div

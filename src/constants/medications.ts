@@ -6,7 +6,7 @@ export interface Medication {
   titrationDoses?: number[];
 }
 
-export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 2];
+export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 2, 2.4];
 
 export const MEDICATIONS: Medication[] = [
   { id: 'semaglutide', name: 'Semaglutide (Ozempic/Wegovy)', defaultDose: 0.25, halfLifeHours: 168, titrationDoses: SEMAGLUTIDE_TITRATION },
