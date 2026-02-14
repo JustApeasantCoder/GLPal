@@ -24,9 +24,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
     Math.max(0, options.indexOf(value))
   );
 
-  // Detect touch device
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsTouchDevice(
@@ -35,13 +33,10 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
     }
   }, []);
 
-  // Sync external value
   useEffect(() => {
     const idx = options.indexOf(value);
-
     if (idx >= 0 && idx !== currentIndex) {
       setCurrentIndex(idx);
-
       if (!isTouchDevice && containerRef.current) {
         containerRef.current.style.transform = `translateY(${
           VISIBLE_HEIGHT / 2 - idx * ITEM_HEIGHT - ITEM_HEIGHT / 2
@@ -55,20 +50,14 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
     }
   }, [value, options, isTouchDevice]);
 
-  // ---------------- Desktop (non-touch) ----------------
-
   const handleWheel = useCallback(
     (e: React.WheelEvent<HTMLDivElement>) => {
       e.preventDefault();
-
       const direction = e.deltaY > 0 ? 1 : -1;
-
       setCurrentIndex((prev) => {
         let next = prev + direction;
-
         if (next < 0) next = 0;
         if (next >= options.length) next = options.length - 1;
-
         onChange(options[next]);
         return next;
       });
@@ -79,58 +68,44 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
   const isDragging = useRef(false);
   const startY = useRef(0);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
     startY.current = e.clientY;
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging.current) return;
-
+    e.preventDefault();
     const delta = startY.current - e.clientY;
-
     if (Math.abs(delta) >= ITEM_HEIGHT) {
       const steps = Math.floor(Math.abs(delta) / ITEM_HEIGHT);
       const direction = delta > 0 ? 1 : -1;
-
       setCurrentIndex((prev) => {
         let next = prev + direction * steps;
-
-        if (next < 0) next = 0;
-        if (next >= options.length) next = options.length - 1;
-
+        
+        // Prevent overscroll - don't update if at boundary
+        if (next < 0 || next >= options.length) {
+          return prev;
+        }
+        
         onChange(options[next]);
         return next;
       });
-
       startY.current = e.clientY;
     }
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     isDragging.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
   };
-
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove, { passive: false });
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('dragstart', (e) => e.preventDefault());
-    };
-  }, []);
-
-  // ---------------- Mobile Scroll ----------------
 
   const handleScroll = useCallback(() => {
     if (!containerRef.current || !isTouchDevice) return;
-
     const idx = Math.round(containerRef.current.scrollTop / ITEM_HEIGHT);
-
     if (idx >= 0 && idx < options.length && idx !== currentIndex) {
       setCurrentIndex(idx);
       onChange(options[idx]);
@@ -153,11 +128,9 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
             : 'overflow-y-scroll snap-y snap-mandatory'
         }`}
         onWheel={!isTouchDevice ? handleWheel : undefined}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (!isTouchDevice) handleMouseDown(e);
-        }}
+        onPointerDown={!isTouchDevice ? handlePointerDown : undefined}
+        onPointerMove={!isTouchDevice ? handlePointerMove : undefined}
+        onPointerUp={!isTouchDevice ? handlePointerUp : undefined}
         onScroll={isTouchDevice ? handleScroll : undefined}
         style={
           isTouchDevice
@@ -171,7 +144,6 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
             : { userSelect: 'none' }
         }
       >
-        {/* Desktop Items */}
         {!isTouchDevice && (
           <div
             style={{
@@ -185,7 +157,6 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
           >
             {options.map((option, index) => {
               const isMiddle = index === currentIndex;
-
               return (
                 <div
                   key={option}
@@ -207,11 +178,9 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
           </div>
         )}
 
-        {/* Mobile Items */}
         {isTouchDevice &&
           options.map((option, index) => {
             const isMiddle = index === currentIndex;
-
             return (
               <div
                 key={option}
@@ -231,8 +200,9 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
             );
           })}
 
-        {/* Selection Indicator */}
         <div
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
           className="absolute left-0 right-0 pointer-events-none border-y-2 border-[#B19CD9]/60 select-none"
           style={{
             top: VISIBLE_HEIGHT / 2 - ITEM_HEIGHT / 2,
@@ -240,9 +210,8 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
           }}
         />
 
-        {/* Gradients */}
-        <div className="absolute inset-x-0 top-0 h-[60px] pointer-events-none bg-gradient-to-b from-[#0d0a15] to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-[60px] pointer-events-none bg-gradient-to-t from-[#0d0a15] to-transparent" />
+        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 top-0 h-[60px] pointer-events-none bg-gradient-to-b from-[#0d0a15] to-transparent" />
+        <div draggable={false} onDragStart={(e) => e.preventDefault()} className="absolute inset-x-0 bottom-0 h-[60px] pointer-events-none bg-gradient-to-t from-[#0d0a15] to-transparent" />
       </div>
     </div>
   );
