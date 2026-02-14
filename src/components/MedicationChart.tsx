@@ -4,6 +4,7 @@ import { GLP1Entry } from '../types';
 import { useMedicationChartData } from '../hooks/useChartDataProcessor';
 import { useChartDateRange } from '../hooks/useChartDateRange';
 import { generateMedicationSeries } from '../utils/medicationChartUtils';
+import { CHART_COLORS } from '../utils/chartUtils';
 import ChartEmptyState from './ui/ChartEmptyState';
 
 import { ChartPeriod } from '../hooks';
@@ -71,9 +72,9 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
 
     const option = {
       backgroundColor: 'transparent',
-      color: medications.map(
+      color: [CHART_COLORS.combined.stroke, ...medications.map(
         (med) => medicationColors[med]?.stroke || '#9C7BD3'
-      ),
+      )],
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(20, 15, 35, 0.95)',
@@ -114,7 +115,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
         },
       },
       legend: {
-        data: medications,
+        data: ['Combined', ...medications],
         bottom: 0,
         icon: 'circle',
         itemWidth: 12,

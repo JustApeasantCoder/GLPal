@@ -1,5 +1,6 @@
 import { GLP1Entry } from '../types';
 import { calculateMedicationConcentration } from '../utils/calculations';
+import { CHART_COLORS } from './chartUtils';
 
 interface MedicationSeriesParams {
   medications: string[];
@@ -28,6 +29,8 @@ export const generateMedicationSeries = ({
 }: MedicationSeriesParams) => {
   const doseDatesByMed: Record<string, Set<string>> = {};
   const doseAmountByMed: Record<string, Record<string, number>> = {};
+  const combinedDoseDates = new Set<string>();
+  const combinedDoseAmounts: Record<string, number> = {};
 
   medications.forEach((med) => {
     doseDatesByMed[med] = new Set();
@@ -40,7 +43,165 @@ export const generateMedicationSeries = ({
       });
       doseDatesByMed[med].add(dateKey);
       doseAmountByMed[med][dateKey] = d.dose;
+      combinedDoseDates.add(dateKey);
+      combinedDoseAmounts[dateKey] = (combinedDoseAmounts[dateKey] || 0) + d.dose;
     });
+  });
+
+  const combinedColor = CHART_COLORS.combined;
+  const combinedSeries: any[] = [];
+  const combinedLineDataBefore: any[] = [];
+  const combinedLineDataAfter: any[] = [];
+  const combinedDoseData: any[] = [];
+
+  const combinedDoseDatesArray = Array.from(combinedDoseDates);
+  
+  const iterateDate = new Date(firstDate);
+  while (iterateDate <= lastDate) {
+    let totalConcentration = 0;
+    medications.forEach((med) => {
+      totalConcentration += calculateMedicationConcentration(
+        dosesByMed[med],
+        halfLifeByMed[med],
+        new Date(iterateDate)
+      );
+    });
+
+    const dateStr = iterateDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const hasDose = combinedDoseDates.has(dateStr);
+    const dose = hasDose ? combinedDoseAmounts[dateStr] : undefined;
+    const value = isNaN(totalConcentration) ? null : totalConcentration;
+
+    const dateIndex = xAxisDates.indexOf(dateStr);
+    if (dateIndex <= todayIndex) {
+      combinedLineDataBefore.push([dateStr, value]);
+    }
+    if (dateIndex >= todayIndex) {
+      combinedLineDataAfter.push([dateStr, value]);
+    }
+
+    if (dose) {
+      combinedDoseData.push({
+        name: dateStr,
+        value: [dateStr, value],
+        symbol: 'circle',
+        symbolSize: 10,
+        itemStyle: {
+          color: combinedColor.stroke,
+          borderColor: '#2D1B4E',
+          borderWidth: 2,
+          shadowBlur: 8,
+          shadowColor: combinedColor.stroke + '99',
+        },
+      });
+    }
+
+    iterateDate.setDate(iterateDate.getDate() + 1);
+  }
+
+  if (medications.length > 0) {
+    combinedSeries.push(
+      {
+        name: 'Combined',
+        type: 'line',
+        smooth: true,
+        showSymbol: false,
+        symbol: 'none',
+        lineStyle: { width: 2, color: combinedColor.stroke },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: combinedColor.fill },
+              { offset: 1, color: combinedColor.fill.replace('0.3', '0.02') },
+            ],
+          },
+        },
+        emphasis: {
+          lineStyle: { width: 3 },
+          itemStyle: { opacity: 0 },
+        },
+        triggerLineEvent: false,
+        data: combinedLineDataBefore,
+      },
+      {
+        name: 'Combined',
+        type: 'line',
+        smooth: true,
+        showSymbol: false,
+        symbol: 'none',
+        lineStyle: { width: 2, color: combinedColor.stroke, type: 'dotted' },
+        emphasis: {
+          disabled: true,
+        },
+        triggerLineEvent: false,
+        data: combinedLineDataAfter,
+      },
+      {
+        name: 'Combined',
+        type: 'scatter',
+        z: 10,
+        showInLegend: false,
+        emphasis: {
+          scale: 1.2,
+        },
+        data: combinedDoseData,
+      }
+    );
+  }
+
+  combinedSeries.forEach((s: any) => {
+    if (s.type === 'scatter' && s.data && s.data.length > 0) {
+      let lastShownValue: number | null = null;
+      s.data = s.data.map((dot: any) => {
+        const doseValue = dot.value[1];
+        let shouldShow = true;
+        if (lastShownValue !== null && lastShownValue > 0) {
+          const diff = Math.abs(doseValue - lastShownValue) / lastShownValue;
+          if (diff <= 0.25) {
+            shouldShow = false;
+          }
+        }
+        if (shouldShow) {
+          lastShownValue = doseValue;
+          const formattedDoseValue = doseValue < 1 ? doseValue.toFixed(2) : doseValue.toFixed(1);
+          return {
+            ...dot,
+            label: {
+              show: true,
+              position: 'top',
+              formatter: formattedDoseValue + 'mg',
+              color: '#E2E8F0',
+              fontSize: 10,
+              distance: 8,
+            },
+          };
+        }
+        return { ...dot, label: { show: false } };
+      });
+    }
+  });
+
+  combinedSeries.forEach((s: any) => {
+    if (s.type === 'scatter' && s.data && s.data.length > 0) {
+      const visibleDots = s.data.filter((dot: any) => {
+        const dotIndex = xAxisDates.indexOf(dot.value[0]);
+        return dotIndex >= visibleStartIndex && dotIndex <= visibleEndIndex;
+      });
+      if (visibleDots.length > 6) {
+        const step = Math.floor(visibleDots.length / 6);
+        s.data = visibleDots
+          .filter((_: any, i: number) => i % step === 0)
+          .slice(0, 6);
+      }
+    }
   });
 
   const series: any[] = medications.map((med) => {
@@ -200,17 +361,35 @@ export const generateMedicationSeries = ({
     }
   });
 
-  if (series.length > 0 && todayIndex >= 0) {
+  if (todayIndex >= 0) {
     const todayDateStr = xAxisDates[todayIndex];
-    (series[0] as any).markLine = {
+    const markLineConfig = {
       silent: true,
       symbol: 'none',
       z: 100,
       label: { show: false },
-      lineStyle: { type: 'dotted', width: 2 },
+      lineStyle: { type: 'dotted', width: 2, color: '#94A3B8' },
       data: [{ xAxis: todayDateStr }],
     };
+
+    if (combinedSeries.length > 0) {
+      (combinedSeries[0] as any).markLine = markLineConfig;
+    }
+    if (series.length > 0) {
+      (series[0] as any).markLine = markLineConfig;
+    }
+
+    const todayLineSeries = [
+      {
+        name: 'Today',
+        type: 'line',
+        markLine: markLineConfig,
+        data: [],
+      },
+    ];
+
+    return [...todayLineSeries, ...combinedSeries, ...series];
   }
 
-  return series;
+  return [...combinedSeries, ...series];
 };

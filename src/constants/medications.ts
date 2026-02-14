@@ -6,7 +6,7 @@ export interface Medication {
   titrationDoses?: number[];
 }
 
-export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 2, 2.4];
+export const SEMAGLUTIDE_TITRATION = [0.25, 0.5, 1, 1.7, 2.4];
 export const TIRZEPATIDE_TITRATION = [2.5, 5, 7.5, 10, 12.5, 15];
 export const RETATRUTIDE_TITRATION = [1, 2, 4, 6, 8, 9, 12];
 export const CAGRILINTIDE_TITRATION = [0.25, 0.5, 1, 1.5, 2.4];

@@ -3,6 +3,7 @@ import { GLP1Protocol } from '../types';
 import { MEDICATIONS, SEMAGLUTIDE_TITRATION, generateId, Medication } from '../constants/medications';
 import DateWheelPickerModal from './ui/DateWheelPickerModal';
 import DoseWheelPickerModal from './ui/DoseWheelPickerModal';
+import BottomSheetModal from './ui/BottomSheetModal';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -34,6 +35,21 @@ const [showOtherModal, setShowOtherModal] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
   const [showDosePicker, setShowDosePicker] = useState(false);
+  const [showSchedulePicker, setShowSchedulePicker] = useState(false);
+
+  const frequencyOptions = [
+    { value: '7', label: 'Everyday' },
+    { value: '3.5', label: 'Every 2 Days' },
+    { value: '2.333', label: 'Every 3 Days' },
+    { value: '2', label: 'Every 3.5 Days' },
+    { value: '1.75', label: 'Every 4 Days' },
+    { value: '1.4', label: 'Every 5 Days' },
+    { value: '1.167', label: 'Every 6 Days' },
+    { value: '1', label: 'Every Week' },
+    { value: '0.5', label: 'Every 2 Weeks' },
+    { value: '0.333', label: 'Every 3 Weeks' },
+    { value: '0.233', label: 'Every Month' },
+  ];
 
   useEffect(() => {
     const loadMedications = () => {
@@ -360,7 +376,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="grid grid-cols-2 gap-3">
-<div>
+            <div>
               <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
               <button
                 type="button"
@@ -372,24 +388,15 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             </div>
             <div>
               <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dosing Schedule</label>
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
+              <button
+                type="button"
+                onClick={() => setShowSchedulePicker(true)}
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
               >
-                <option value="7">Everyday</option>
-                <option value="3.5">Every 2 Days</option>
-                <option value="2.333">Every 3 Days</option>
-                <option value="2">Every 3.5 Days</option>
-                <option value="1.75">Every 4 Days</option>
-                <option value="1.4">Every 5 Days</option>
-                <option value="1.167">Every 6 Days</option>
-                <option value="1">Every Week</option>
-                <option value="0.5">Every 2 Weeks</option>
-                <option value="0.333">Every 3 Weeks</option>
-                <option value="0.233">Every Month</option>
-              </select>
+                {frequencyOptions.find(f => f.value === frequency)?.label || 'Select schedule'}
+              </button>
             </div>
+            <p className="col-span-2 text-xs text-[#4ADEA8] mt-1">Pre-filled with official label dose. Enter only the dose prescribed by your healthcare provider.</p>
           </div>
 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
@@ -604,6 +611,18 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             defaultValue={dose || '0.25'}
           />
         )}
+
+        <BottomSheetModal
+          isOpen={showSchedulePicker}
+          title="Dosing Schedule"
+          options={frequencyOptions}
+          value={frequency}
+          onSelect={(val) => {
+            setFrequency(String(val));
+            setShowSchedulePicker(false);
+          }}
+          onClose={() => setShowSchedulePicker(false)}
+        />
     </div>
   );
 };

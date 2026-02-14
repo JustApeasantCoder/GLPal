@@ -9,7 +9,7 @@ import { GLP1Entry, GLP1Protocol } from '../types';
 import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateMedicationConcentration } from '../utils/calculations';
-import { addMedicationGeneratedEntry, clearMedicationEntries } from '../utils/database';
+import { addMedicationGeneratedEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols } from '../utils/database';
 import { MEDICATIONS, formatDateShort, formatFrequency, generateId } from '../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/MedicationService';
 
@@ -28,10 +28,12 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
   const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [officialScheduleMedication, setOfficialScheduleMedication] = useState<string>('semaglutide');
   const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
+  const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [expandedMedications, setExpandedMedications] = useState<Set<string>>(() => {
     const savedProtocols = getActiveProtocols();
     if (savedProtocols.length === 0) return new Set();
@@ -70,6 +72,27 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       }
       return newSet;
     });
+  };
+
+  const handleDeleteMedication = (medicationName: string) => {
+    let updatedProtocols = [...protocols];
+    protocols.forEach(p => {
+      const med = MEDICATIONS.find(m => m.id === p.medication);
+      if ((med?.name || p.medication) === medicationName) {
+        deleteMedicationProtocol(p.id);
+        updatedProtocols = updatedProtocols.filter(proc => proc.id !== p.id);
+      }
+    });
+    saveMedicationProtocols(updatedProtocols);
+    setProtocols(updatedProtocols);
+    handleGenerateDoses(updatedProtocols);
+    onRefreshMedications();
+    setExpandedMedications(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(medicationName);
+      return newSet;
+    });
+    setDeleteConfirmMed(null);
   };
 
   const handleSaveProtocol = (protocol: GLP1Protocol) => {
@@ -266,14 +289,27 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                     <p className="text-base font-medium text-text-primary">{medicationName}</p>
                     <p className="text-sm text-text-muted">{formatFrequency(medProtocols[0].frequencyPerWeek)}</p>
                   </div>
-                  <svg 
-                    className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirmMed(medicationName);
+                      }}
+                      className="text-text-muted hover:text-red-400 p-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                    <svg 
+                      className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </button>
                 {isExpanded && (
                 <div className="space-y-1">
@@ -334,7 +370,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
           <Button 
             onClick={() => {
-              setShowOfficialScheduleModal(true);
+              setShowDisclaimer(true);
             }} 
             fullWidth
             variant="accent"
@@ -365,15 +401,22 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
-                <select
-                  value={officialScheduleMedication}
-                  onChange={(e) => setOfficialScheduleMedication(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm"
-                >
-                  {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0).map(med => (
-                    <option key={med.id} value={med.id}>{med.name}</option>
+                <div className="grid grid-cols-1 gap-2">
+                  {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0 && ['semaglutide', 'tirzepatide'].includes(m.id)).map(med => (
+                    <button
+                      key={med.id}
+                      type="button"
+                      onClick={() => setOfficialScheduleMedication(med.id)}
+                      className={`text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                        officialScheduleMedication === med.id
+                          ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                          : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                      }`}
+                    >
+                      {med.name}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div>
@@ -481,6 +524,62 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onClose={() => setIsModalOpen(false)}
         onAddMedication={onAddMedication}
       />
+
+      {deleteConfirmMed && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setDeleteConfirmMed(null)} />
+          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6">
+            <h2 className="text-xl font-semibold text-white mb-2">Delete {deleteConfirmMed}?</h2>
+            <p className="text-sm text-text-muted mb-6">This will remove all protocols for this medication. This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmMed(null)}
+                className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteMedication(deleteConfirmMed)}
+                className="flex-1 py-3 rounded-xl bg-red-500/80 text-white font-medium hover:bg-red-500 transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDisclaimer && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDisclaimer(false)} />
+          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Disclaimer</h2>
+            <p className="text-sm text-text-muted mb-4 leading-relaxed">
+              This app is for informational and tracking purposes only. Medication schedules shown are based on publicly available prescribing information and are not medical advice.
+            </p>
+            <p className="text-sm text-text-muted mb-6 leading-relaxed">
+              By continuing, you confirm that the selected schedule was prescribed by your licensed healthcare provider. This app does not prescribe, recommend, or adjust medication doses. Always consult your healthcare provider before starting, stopping, or changing any medication.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDisclaimer(false)}
+                className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowDisclaimer(false);
+                  setShowOfficialScheduleModal(true);
+                }}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
+              >
+                I Understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

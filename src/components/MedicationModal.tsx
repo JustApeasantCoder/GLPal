@@ -182,6 +182,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             >
               {dose ? `${dose} mg` : 'Select dose'}
             </button>
+            <p className="text-xs text-[#4ADEA8] mt-1">Enter only the dose prescribed by your healthcare provider.</p>
           </div>
 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>

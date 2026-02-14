@@ -11,6 +11,7 @@ export const CHART_COLORS = {
     { stroke: '#3B82F6', fill: 'rgba(59, 130, 246, 0.3)' },
     { stroke: '#94A3B8', fill: 'rgba(148, 163, 184, 0.3)' },
   ],
+  combined: { stroke: '#EC4899', fill: 'rgba(236, 72, 153, 0.3)' },
   weight: {
     stroke: '#9C7BD3',
     fill: 'rgba(156, 123, 211, 0.3)',
