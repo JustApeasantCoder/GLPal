@@ -9,7 +9,7 @@ import { ChartPeriod } from '../hooks';
 import { useThemeStyles } from '../contexts/ThemeContext';
 import { calculateMedicationConcentration } from '../utils/calculations';
 import { addMedicationGeneratedEntry, clearMedicationEntries } from '../utils/database';
-import { MEDICATIONS, formatDate, formatFrequency } from '../constants/medications';
+import { MEDICATIONS, formatDateShort, formatFrequency } from '../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../services/MedicationService';
 
 interface MedicationTabProps {
@@ -26,17 +26,44 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
+  const [expandedMedications, setExpandedMedications] = useState<Set<string>>(() => {
+    const savedProtocols = getActiveProtocols();
+    if (savedProtocols.length === 0) return new Set();
+    return new Set(savedProtocols.map(p => {
+      const med = MEDICATIONS.find(m => m.id === p.medication);
+      return med?.name || p.medication;
+    }));
+  });
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   useEffect(() => {
     const savedProtocols = getActiveProtocols();
     setProtocols(savedProtocols);
+    if (savedProtocols.length > 0) {
+      const medNames = new Set(savedProtocols.map(p => {
+        const med = MEDICATIONS.find(m => m.id === p.medication);
+        return med?.name || p.medication;
+      }));
+      setExpandedMedications(medNames);
+    }
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
     clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
+  };
+
+  const toggleMedication = (medicationName: string) => {
+    setExpandedMedications(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(medicationName)) {
+        newSet.delete(medicationName);
+      } else {
+        newSet.add(medicationName);
+      }
+      return newSet;
+    });
   };
 
   const handleSaveProtocol = (protocol: GLP1Protocol) => {
@@ -202,47 +229,83 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
       {/* Protocol Card */}
       <div className={bigCard}>
-        <div className="flex justify-between items-center mb-4">
-          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Protocol</h1>
-          {protocols.length > 0 && (
-            <button
-              onClick={handleRegenerate}
-              className="text-xs text-accent-purple-light hover:text-accent-purple-medium"
-            >
-              Regenerate
-            </button>
-          )}
-        </div>
+        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Protocol</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {/* Saved Protocols List */}
+        {/* Saved Protocols List - Grouped by Medication */}
         {protocols.length > 0 && (
-          <div className="space-y-2 mb-4">
-            {protocols.map((protocol) => {
-              const med = MEDICATIONS.find(m => m.id === protocol.medication);
+          <div className="space-y-3 mb-4">
+            {Object.entries(
+              protocols.reduce((acc, protocol) => {
+                const med = MEDICATIONS.find(m => m.id === protocol.medication);
+                const medName = med?.name || protocol.medication;
+                if (!acc[medName]) {
+                  acc[medName] = [];
+                }
+                acc[medName].push(protocol);
+                return acc;
+              }, {} as Record<string, GLP1Protocol[]>)
+            ).map(([medicationName, medProtocols]) => {
+              const isExpanded = expandedMedications.size === 0 || expandedMedications.has(medicationName);
               return (
-                <div 
-                  key={protocol.id}
-                  className="flex items-center justify-between bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+              <div 
+                key={medicationName}
+                className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+              >
+                <button 
+                  onClick={() => toggleMedication(medicationName)}
+                  className="w-full flex items-center justify-between mb-2"
                 >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-text-primary">
-                      {med?.name || protocol.medication} - {protocol.dose}mg
-                      {protocol.phase === 'titrate' && (
-                        <span className="ml-2 text-xs text-[#4ADEA8] font-medium">Titrate</span>
-                      )}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {formatDate(protocol.startDate)} → {protocol.stopDate ? formatDate(protocol.stopDate) : 'Ongoing'} ({formatFrequency(protocol.frequencyPerWeek)})
-                    </p>
+                  <div className="text-left">
+                    <p className="text-base font-medium text-text-primary">{medicationName}</p>
+                    <p className="text-sm text-text-muted">{formatFrequency(medProtocols[0].frequencyPerWeek)}</p>
                   </div>
-                  <button
-                    onClick={() => handleEditProtocol(protocol)}
-                    className="text-xs text-accent-purple-light hover:text-accent-purple-medium"
+                  <svg 
+                    className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
                   >
-                    Edit
-                  </button>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isExpanded && (
+                <div className="space-y-1">
+                  {medProtocols.map((protocol, index) => (
+                    <div key={protocol.id}>
+                      <div className="flex items-start justify-between gap-2 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-text-primary whitespace-nowrap">
+                            {protocol.dose}mg
+                          </span>
+                          {protocol.phase === 'titrate' && (
+                            <span className="text-[#4ADEA8]">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-text-muted whitespace-nowrap">
+                            {formatDateShort(protocol.startDate)} → {protocol.stopDate ? formatDateShort(protocol.stopDate) : 'Ongoing'}
+                          </span>
+                          <button
+                            onClick={() => handleEditProtocol(protocol)}
+                            className="text-sm text-accent-purple-light hover:text-accent-purple-medium"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                      {index < medProtocols.length - 1 && (
+                        <div className="border-b border-[#B19CD9]/20"></div>
+                      )}
+                    </div>
+                  ))}
                 </div>
+                )}
+              </div>
               );
             })}
           </div>

@@ -30,6 +30,11 @@ export const formatDate = (dateStr: string): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+export const formatDateShort = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
 export const formatFrequency = (frequencyPerWeek: number): string => {
   const scheduleMap: Record<number, string> = {
     7: 'Everyday',

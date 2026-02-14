@@ -67,8 +67,8 @@ export const useThemeStyles = () => {
     
     // Small Card (Light & Dark Mode)
     smallCard: isDarkMode 
-      ? "min-h-16 sm:h-18 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-2 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between"
-      : "min-h-16 sm:h-18 bg-white/80 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-2 rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between",
+      ? "min-h-16 sm:min-h-20 bg-gradient-to-br from-[#B19CD9]/20 to-[#9C7BD3]/20 backdrop-blur-sm p-2 rounded-xl border border-[#B19CD9]/30 shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between"
+      : "min-h-16 sm:min-h-20 bg-white/80 dark:from-[#B19CD9]/20 dark:to-[#9C7BD3]/20 dark:bg-gradient-to-br backdrop-blur-sm p-2 rounded-xl border border-gray-200 dark:border-[#B19CD9]/30 shadow-sm dark:shadow-[0_0_5px_rgba(177,156,217,0.3)] flex flex-col justify-between",
     
     // Big Card Text styles
     bigCardText: {
@@ -90,8 +90,8 @@ export const useThemeStyles = () => {
         ? "text-base font-bold text-white leading-tight [text-shadow:0_0_3px_rgba(177,156,217,0.5)] inline-block"
         : "text-base font-bold text-gray-900 leading-tight dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)] inline-block",
       percentage: isDarkMode
-        ? "text-[length:clamp(0.5rem,2cqw,0.75rem)] text-[#B19CD9]/80 inline-block"
-        : "text-[length:clamp(0.5rem,2cqw,0.75rem)] text-gray-500 dark:text-[#B19CD9]/80 inline-block",
+        ? "text-[length:clamp(0.5rem,2.5cqw,0.75rem)] text-[#B19CD9]/80 inline-block"
+        : "text-[length:clamp(0.5rem,2.5cqw,0.75rem)] text-gray-500 dark:text-[#B19CD9]/80 inline-block",
       bmiCategory: "text-xs font-medium -mt-1 inline-block"
     },
     
@@ -103,8 +103,8 @@ export const useThemeStyles = () => {
     
     tdeeText: {
       label: isDarkMode 
-        ? "text-s text-[#B19CD9] font-medium"
-        : "text-s text-gray-600 dark:text-[#B19CD9] font-medium",
+        ? "text-xs text-[#B19CD9] font-medium"
+        : "text-xs text-gray-600 dark:text-[#B19CD9] font-medium",
       value: isDarkMode
         ? "text-lg font-bold text-white [text-shadow:0_0_3px_rgba(177,156,217,0.5)]"
         : "text-lg font-bold text-gray-900 dark:text-white dark:[text-shadow:0_0_3px_rgba(177,156,217,0.5)]",
