@@ -204,7 +204,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
         },
       },
       grid: {
-        top: 10,
+        top: 0,
         left: 10,
         right: 10,
         bottom: 25,

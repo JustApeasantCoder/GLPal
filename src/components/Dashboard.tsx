@@ -112,14 +112,14 @@ const Dashboard: React.FC<DashboardProps> = ({
 {/* Weight Trends */}
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
-            <div className="h-48 sm:h-56">
+            <div className="h-64 sm:h-72">
               <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} />
             </div>
           </div>
 
           {/* Medication Status */}
           <div>
-            <div className="h-48 sm:h-56">
+            <div className="h-64 sm:h-72">
               <MedicationChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>
