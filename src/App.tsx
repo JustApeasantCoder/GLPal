@@ -47,6 +47,7 @@ const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
+  const [logRefreshKey, setLogRefreshKey] = useState(0);
   
   const [profile, setProfile] = useState<UserProfile>({
     age: 35,
@@ -288,6 +289,7 @@ return (
                 medicationEntries={dosesEntries} 
                 onAddMedication={handleAddDose}
                 onRefreshMedications={handleRefreshDoses}
+                onLogDose={() => setLogRefreshKey(k => k + 1)}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
               />
@@ -302,7 +304,7 @@ return (
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
             <div className="max-w-md mx-auto">
-              <LogTab />
+              <LogTab refreshKey={logRefreshKey} />
             </div>
           </TabContent>
         </div>

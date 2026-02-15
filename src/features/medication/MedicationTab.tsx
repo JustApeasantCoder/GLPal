@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import MedicationChart from './components/MedicationChart';
 import MedicationModal from './components/MedicationModal';
+import LogDoseModal from './components/LogDoseModal';
 import PeriodSelector from '../../shared/components/PeriodSelector';
 import ProtocolModal from './components/ProtocolModal';
 import Button from '../../shared/components/Button';
@@ -17,12 +18,16 @@ interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
   onAddMedication: (dose: number, medication: string, date: string) => void;
   onRefreshMedications: () => void;
+  onLogDose: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
 }
 
-const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, chartPeriod, onChartPeriodChange }) => {
+const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, onLogDose, chartPeriod, onChartPeriodChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLogDoseModal, setShowLogDoseModal] = useState(false);
+  const [isLogging, setIsLogging] = useState(false);
+  const [activeProtocolForModal, setActiveProtocolForModal] = useState<GLP1Protocol | null>(null);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
@@ -167,16 +172,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     });
 
     if (activeProtocol) {
-      const today = new Date().toISOString().split('T')[0];
-      const newEntry: GLP1Entry = {
-        date: today,
-        medication: activeProtocol.medication,
-        dose: activeProtocol.dose,
-        halfLifeHours: activeProtocol.halfLifeHours,
-        isManual: true
-      };
-      addMedicationManualEntry(newEntry);
-      onRefreshMedications();
+      setIsLogging(true);
+      setActiveProtocolForModal(activeProtocol);
+      setShowLogDoseModal(true);
     } else {
       setIsModalOpen(true);
     }
@@ -431,7 +429,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                   onClick={handleLogDoseNow}
                   className="mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm shadow-[0_0_20px_rgba(74,222,168,0.5)] hover:shadow-[0_0_30px_rgba(74,222,168,0.7)] transition-all duration-300 hover:scale-[1.02]"
                 >
-                  {stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now'}
+                  {isLogging ? 'Logging...' : (stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now')}
                 </button>
               )}
             </div>
@@ -760,6 +758,20 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddMedication={onAddMedication}
+      />
+
+      <LogDoseModal
+        isOpen={showLogDoseModal}
+        onClose={() => {
+          setShowLogDoseModal(false);
+          setIsLogging(false);
+        }}
+        onSave={() => {
+          onRefreshMedications();
+          onLogDose();
+          setIsLogging(false);
+        }}
+        protocol={activeProtocolForModal}
       />
 
       {deleteConfirmMed && (

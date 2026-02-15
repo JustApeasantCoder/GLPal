@@ -11,6 +11,10 @@ export interface MedicationEntry {
   dose: number;
   halfLifeHours: number;
   isManual?: boolean;
+  time?: string;
+  painLevel?: number;
+  injectionSite?: string;
+  isr?: string;
 }
 
 export interface MedicationProtocol {

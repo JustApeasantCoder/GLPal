@@ -7,7 +7,11 @@ const bigCardText = {
   title: "text-lg font-bold text-text-primary mb-2"
 };
 
-const LogTab: React.FC = () => {
+interface LogTabProps {
+  refreshKey?: number;
+}
+
+const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
 
@@ -19,12 +23,7 @@ const LogTab: React.FC = () => {
       setProtocols(prots);
     };
     loadData();
-  }, []);
-
-  const getDoseForDate = (dateStr: string): number => {
-    const entry = manualEntries.find(e => e.date === dateStr);
-    return entry?.dose || 0;
-  };
+  }, [refreshKey]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -53,18 +52,54 @@ const LogTab: React.FC = () => {
             {manualEntries.map((entry) => (
               <div 
                 key={entry.date}
-                className="flex justify-between items-center bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+                className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
               >
-                <div>
-                  <p className="text-text-primary font-medium">{formatDate(entry.date)}</p>
-                  <p className="text-text-muted text-sm">{entry.medication}</p>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-text-primary font-medium">{formatDate(entry.date)}</p>
+                    <p className="text-text-muted text-sm">{entry.medication}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[#4ADEA8] font-bold">{entry.dose}mg</p>
+                    {entry.isManual && (
+                      <span className="text-xs text-[#B19CD9]">Manual</span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[#4ADEA8] font-bold">{entry.dose}mg</p>
-                  {entry.isManual && (
-                    <span className="text-xs text-[#B19CD9]">Manual</span>
-                  )}
-                </div>
+                {(entry.time || entry.painLevel || entry.injectionSite || entry.isr) && (
+                  <div className="border-t border-[#B19CD9]/10 pt-2 mt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {entry.time && (
+                        <span className="text-xs bg-[#B19CD9]/20 text-[#B19CD9] px-2 py-1 rounded">
+                          {entry.time}
+                        </span>
+                      )}
+                      {entry.painLevel !== undefined && entry.painLevel > 0 && (
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          entry.painLevel <= 3 ? 'bg-green-500/20 text-green-400' :
+                          entry.painLevel <= 6 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          Pain: {entry.painLevel}/10
+                        </span>
+                      )}
+                      {entry.injectionSite && (
+                        <span className="text-xs bg-[#4ADEA8]/20 text-[#4ADEA8] px-2 py-1 rounded">
+                          {entry.injectionSite}
+                        </span>
+                      )}
+                      {entry.isr && entry.isr !== 'None' && (
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          entry.isr === 'Mild' ? 'bg-yellow-500/20 text-yellow-400' :
+                          entry.isr === 'Moderate' ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          ISR: {entry.isr}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
