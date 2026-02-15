@@ -29,6 +29,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
   const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false);
   const [officialScheduleMedication, setOfficialScheduleMedication] = useState<string>('semaglutide');
   const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
@@ -355,7 +356,12 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
           <Button 
             onClick={() => {
-              setShowDisclaimer(true);
+              const acknowledged = localStorage.getItem('glpal_disclaimer_acknowledged');
+              if (acknowledged === 'true') {
+                setShowOfficialScheduleModal(true);
+              } else {
+                setShowDisclaimer(true);
+              }
             }} 
             fullWidth
             variant="accent"
@@ -377,9 +383,19 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       />
 
       {showOfficialScheduleModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOfficialScheduleModal(false)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6">
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ animation: 'fadeIn 0.2s ease-out' }}
+        >
+          <div 
+            className="fixed inset-0 bg-black/60" 
+            style={{ backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease-out' }} 
+            onClick={() => setShowOfficialScheduleModal(false)} 
+          />
+          <div 
+            className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6"
+            style={{ animation: 'slideUp 0.2s ease-out' }}
+          >
             <h2 className="text-xl font-semibold text-white mb-6">Add Official Schedule</h2>
             <div className="border-t border-[#B19CD9]/20 mb-3"></div>
             
@@ -511,9 +527,19 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       />
 
       {deleteConfirmMed && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setDeleteConfirmMed(null)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6">
+        <div 
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+          style={{ animation: 'fadeIn 0.2s ease-out' }}
+        >
+          <div 
+            className="fixed inset-0 bg-black/60" 
+            style={{ backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease-out' }} 
+            onClick={() => setDeleteConfirmMed(null)} 
+          />
+          <div 
+            className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6"
+            style={{ animation: 'slideUp 0.2s ease-out' }}
+          >
             <h2 className="text-xl font-semibold text-white mb-2">Delete {deleteConfirmMed}?</h2>
             <p className="text-sm text-text-muted mb-6">This will remove all protocols for this medication. This action cannot be undone.</p>
             <div className="flex gap-3">
@@ -535,9 +561,21 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       )}
 
       {showDisclaimer && (
-        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDisclaimer(false)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6">
+        <div 
+          className="fixed inset-0 z-[10001] flex items-center justify-center p-4"
+          style={{ 
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <div 
+            className="fixed inset-0 bg-black/60" 
+            style={{ backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease-out' }} 
+            onClick={() => { setShowDisclaimer(false); setDisclaimerAcknowledged(false); }} 
+          />
+          <div 
+            className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6"
+            style={{ animation: 'slideUp 0.2s ease-out' }}
+          >
             <h2 className="text-xl font-semibold text-white mb-4">Disclaimer</h2>
             <p className="text-sm text-text-muted mb-4 leading-relaxed">
               This app is for informational and tracking purposes only. Medication schedules shown are based on publicly available prescribing information and are not medical advice.
@@ -545,21 +583,47 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             <p className="text-sm text-text-muted mb-6 leading-relaxed">
               By continuing, you confirm that the selected schedule was prescribed by your licensed healthcare provider. This app does not prescribe, recommend, or adjust medication doses. Always consult your healthcare provider before starting, stopping, or changing any medication.
             </p>
+            <label className="flex items-start gap-3 mb-6 cursor-pointer">
+              <div className="relative mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={disclaimerAcknowledged}
+                  onChange={(e) => setDisclaimerAcknowledged(e.target.checked)}
+                  className="peer w-5 h-5 appearance-none rounded border border-[#B19CD9]/50 bg-black/30 checked:bg-[#B19CD9] checked:border-[#B19CD9] cursor-pointer transition-all"
+                />
+                <svg
+                  className="absolute top-0.5 left-0.5 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm text-[#4ADEA8]">I understand and agree to the above</span>
+            </label>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowDisclaimer(false)}
+                onClick={() => { setShowDisclaimer(false); setDisclaimerAcknowledged(false); }}
                 className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={() => {
+                  localStorage.setItem('glpal_disclaimer_acknowledged', 'true');
                   setShowDisclaimer(false);
+                  setDisclaimerAcknowledged(false);
                   setShowOfficialScheduleModal(true);
                 }}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
+                disabled={!disclaimerAcknowledged}
+                className={`flex-1 py-3 rounded-xl bg-gradient-to-r font-medium transition-all ${
+                  disclaimerAcknowledged
+                    ? 'from-[#B19CD9] to-[#9C7BD3] text-white hover:shadow-[0_0_20px_rgba(177,156,217,0.5)]'
+                    : 'from-[#B19CD9]/50 to-[#9C7BD3]/50 text-white/50 cursor-not-allowed'
+                }`}
               >
-                I Understand
+                Continue
               </button>
             </div>
           </div>

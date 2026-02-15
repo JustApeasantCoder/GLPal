@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { GLP1Entry } from '../types';
 import { useMedicationChartData } from '../hooks/useChartDataProcessor';
@@ -19,6 +19,7 @@ interface MedicationChartProps {
 }
 
 const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
+  const chartRef = useRef<any>(null);
   const { medications, medicationColors, dosesByMed, halfLifeByMed } =
     useMedicationChartData(data);
 
@@ -119,6 +120,9 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
         itemHeight: 12,
         textStyle: { fontSize: 12, color: '#94a3b8' },
         formatter: (value: string) => shortenMedicationName(value),
+        tooltip: {
+          trigger: 'item',
+        },
       },
       dataZoom: [
         {
@@ -193,9 +197,34 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
   return (
     <div className="w-full h-full relative">
       <ReactECharts
+        ref={chartRef}
         option={chartOption}
         style={{ height: '100%', width: '100%', opacity: 1 }}
         opts={{ renderer: 'svg' }}
+        onEvents={{
+          'legendselectchanged': (params: any) => {
+            const { selected, name } = params;
+            const chart = chartRef.current?.getEchartsInstance();
+            if (!chart) return;
+            
+            const isSelected = selected[name];
+            
+            medications.forEach((med) => {
+              if (name === med) {
+                chart.dispatchAction({
+                  type: isSelected ? 'legendSelect' : 'legendUnSelect',
+                  name: med + '_future',
+                });
+              }
+              if (name === med + '_future') {
+                chart.dispatchAction({
+                  type: isSelected ? 'legendSelect' : 'legendUnSelect',
+                  name: med,
+                });
+              }
+            });
+          },
+        }}
       />
     </div>
   );

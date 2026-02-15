@@ -31,11 +31,6 @@ export const calculateMonthlyWeightLoss = (dailyCalorieDeficit: number): number 
   return ((dailyCalorieDeficit * 30) / 7700);
 };
 
-export const calculateBMI = (weight: number, height: number): number => {
-  // Convert height from cm to meters
-  const heightInMeters = height / 100;
-  return weight / (heightInMeters * heightInMeters);
-};
 
 export const calculateMedicationConcentration = (
   doses: Array<{ date: Date; dose: number }>,
