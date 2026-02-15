@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { WeightEntry, GLP1Entry } from '../types';
 import { formatWeight } from '../utils/unitConversion';
@@ -8,6 +8,10 @@ import ChartEmptyState from './ui/ChartEmptyState';
 import { ChartPeriod } from '../hooks';
 import { getMedicationColor } from '../utils/chartUtils';
 
+const shortenMedicationName = (name: string): string => {
+  return name.replace(/\s*\(.*?\)/g, '').trim();
+};
+
 interface WeightChartProps {
   data: WeightEntry[];
   goalWeight: number;
@@ -15,6 +19,7 @@ interface WeightChartProps {
   period?: ChartPeriod;
   medicationData?: GLP1Entry[];
   visibleMedications?: string[];
+  onLegendChange?: (visibleMeds: string[]) => void;
 }
 
 const WeightChart: React.FC<WeightChartProps> = ({
@@ -23,10 +28,15 @@ const WeightChart: React.FC<WeightChartProps> = ({
   unitSystem = 'metric',
   period = 'month',
   medicationData = [],
-  visibleMedications,
+  visibleMedications: externalVisibleMedications,
+  onLegendChange,
 }) => {
+  const [localVisibleMedications, setLocalVisibleMedications] = useState<string[] | undefined>(undefined);
+  const visibleMedications = externalVisibleMedications !== undefined ? externalVisibleMedications : localVisibleMedications;
+  
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
+  const chartRef = useRef<any>(null);
 
   const firstDataDate = useMemo(
     () => (sortedData.length > 0 ? sortedData[0].date : new Date()),
@@ -115,7 +125,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
       const shouldShowAll = visibleMedications === undefined;
       
       return doseChanges
-        .filter(change => shouldShowAll || (visibleMedications && visibleMedications.includes(change.medication)))
+        .filter(change => shouldShowAll || (visibleMedications && visibleMedications.includes(shortenMedicationName(change.medication))))
         .map(change => {
           const changeDate = new Date(change.date);
           const formattedDate = changeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -179,6 +189,18 @@ const WeightChart: React.FC<WeightChartProps> = ({
               <span style="color: #94a3b8;">Weight:</span>
               <span style="font-weight: 600; color: #fff;">${formattedWeight}</span>
             </div>`;
+        },
+      },
+      legend: {
+        data: doseChanges.length > 0 ? Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication)))) : [],
+        bottom: 0,
+        icon: 'circle',
+        itemWidth: 12,
+        itemHeight: 12,
+        textStyle: { fontSize: 12, color: '#94a3b8' },
+        formatter: (value: string) => shortenMedicationName(value),
+        tooltip: {
+          trigger: 'item',
         },
       },
       grid: {
@@ -337,6 +359,25 @@ const WeightChart: React.FC<WeightChartProps> = ({
             textShadowOffsetY: 1,
           },
         }] : []),
+        ...(() => {
+          const allMeds = Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication))));
+          return allMeds.map(med => {
+            const originalMed = medicationData.find(e => shortenMedicationName(e.medication) === med);
+            const allMedications = Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication))));
+            const medicationColors: Record<string, { stroke: string; fill: string }> = {};
+            allMedications.forEach((m, index) => {
+              medicationColors[m] = getMedicationColor(index);
+            });
+            return {
+              name: med,
+              type: 'scatter',
+              data: [],
+              itemStyle: { color: medicationColors[med]?.stroke || '#4ADEA8' },
+              symbol: 'circle',
+              symbolSize: 8,
+            };
+          });
+        })(),
       ],
       dataZoom: [
         {
@@ -376,9 +417,22 @@ const WeightChart: React.FC<WeightChartProps> = ({
   return (
     <div className="w-full h-full relative">
       <ReactECharts
+        ref={chartRef}
         option={chartOption}
         style={{ height: '100%', width: '100%', opacity: 1 }}
         opts={{ renderer: 'svg' }}
+        onEvents={{
+          'legendselectchanged': (params: any) => {
+            const { selected } = params;
+            const allMeds = Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication))));
+            const visibleMeds = allMeds.filter(med => selected[med] !== false);
+            
+            if (onLegendChange) {
+              onLegendChange(visibleMeds);
+            }
+            setLocalVisibleMedications(visibleMeds);
+          },
+        }}
       />
     </div>
   );

@@ -31,7 +31,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   onChartPeriodChange,
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
-  const [visibleMedications, setVisibleMedications] = useState<string[]>([]);
 
   // Use custom hooks for data processing
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
@@ -114,14 +113,14 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-48 sm:h-56">
-              <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} visibleMedications={visibleMedications} />
+              <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} />
             </div>
           </div>
 
           {/* Medication Status */}
           <div>
             <div className="h-48 sm:h-56">
-              <MedicationChart data={dosesEntries} period={chartPeriod} onLegendChange={setVisibleMedications} />
+              <MedicationChart data={dosesEntries} period={chartPeriod} />
             </div>
           </div>
 
