@@ -6,7 +6,7 @@ import ProtocolModal from './components/ProtocolModal';
 import Button from '../../shared/components/Button';
 import DateWheelPickerModal from '../../shared/components/DateWheelPickerModal';
 import { GLP1Entry, GLP1Protocol } from '../../types';
-import { ChartPeriod } from '../../shared/hooks';
+import { ChartPeriod, useTime } from '../../shared/hooks';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { calculateMedicationConcentration } from '../../shared/utils/calculations';
 import { addMedicationGeneratedEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols } from '../../shared/utils/database';
@@ -121,73 +121,84 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
-  // Live time updates for progress bar - fast but not too fast
-  const [, setTick] = useState(0);
+  // Use time hook for live updates (every 100ms) - uses timeService internally
+  const now = useTime(100);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTick(t => t + 1); // Force re-render
-    }, 100); // Every 100ms
-    return () => clearInterval(timer);
-  }, []);
-
-  // Use ref to store simulation start time
-  const simStartRef = React.useRef<number>(0);
-
-  // Calculate stats on every render (triggered by tick)
+  // Calculate stats based on real dates + simulated time
   const stats = (() => {
-    const now = Date.now();
+    // Get actual last dose from medication entries
+    const sortedEntries = [...medicationEntries].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
     
-    // Initialize: first time sets the start time
-    if (simStartRef.current === 0) {
-      const stored = localStorage.getItem('glpal_sim_start');
-      if (stored) {
-        simStartRef.current = parseInt(stored);
-      } else {
-        simStartRef.current = now;
-        localStorage.setItem('glpal_sim_start', now.toString());
-      }
+    const lastEntry = sortedEntries[0];
+    const lastDoseDate = lastEntry ? new Date(lastEntry.date) : null;
+    const lastDoseDateStr = lastDoseDate 
+      ? lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'N/A';
+    
+    // Get interval from protocol (default 7 days)
+    let intervalDays = 7;
+    if (protocols && protocols.length > 0) {
+      intervalDays = Math.round(7 / protocols[0].frequencyPerWeek);
     }
     
-    // Speed: 1 real second = 6 hours (21600x)
-    const realElapsed = now - simStartRef.current;
-    const simElapsedMs = realElapsed * 21600; // ms of simulation time passed
+    // Calculate next dose based on real dates
+    let nextDueDays = 0;
+    let nextDueHours = 0;
+    let nextDueMinutes = 0;
+    let nextDueSeconds = 0;
+    let daysSinceLastDose = 0;
+    let nextDueDateStr = 'N/A';
     
-    // Start with 6 days (in ms), subtract elapsed to get remaining
-    const totalMs = 6 * 24 * 60 * 60 * 1000; // 6 days in ms
-    let remainingMs = totalMs - simElapsedMs;
-    
-    // Calculate days, hours, minutes, seconds
-    let nextDueDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
-    let nextDueHours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    let nextDueMinutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    let nextDueSeconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-    
-    // Fix negative hours when days is 0 but still in the day
-    if (remainingMs < 0 && nextDueDays === 0) {
-      nextDueHours = Math.ceil(remainingMs / (1000 * 60 * 60));
-      if (nextDueHours < 0) {
-        nextDueDays = -1;
-        nextDueHours = 24 + nextDueHours;
+    if (lastDoseDate) {
+      // Current time (from timeService - allows simulation)
+      const currentTime = new Date(now);
+      currentTime.setHours(0, 0, 0, 0);
+      
+      // Days since last dose
+      daysSinceLastDose = Math.floor((currentTime.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Next expected dose
+      const nextDoseDate = new Date(lastDoseDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      // Time remaining
+      const diffMs = nextDoseDate.getTime() - currentTime.getTime();
+      nextDueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      nextDueHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      nextDueMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      nextDueSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
+      // Fix negative hours
+      if (diffMs < 0 && nextDueDays === 0) {
+        nextDueHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        if (nextDueHours < 0) {
+          nextDueDays = -1;
+          nextDueHours = 24 + nextDueHours;
+        }
       }
     }
-    
-    // Last dose = 1 day ago from simulation start
-    const lastDoseDate = new Date(simStartRef.current - (24 * 60 * 60 * 1000));
-    const lastDoseDateStr = lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    
-    // Days since last dose increases with simulation time
-    const daysSinceLastDose = 1 + (simElapsedMs / (24 * 60 * 60 * 1000));
-    const intervalDays = 7;
-    
-    // Next dose date = based on remaining time
-    const nextDoseDate = new Date(now + remainingMs);
-    const nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     
     const totalDoses = medicationEntries.length;
     const totalCurrentDose = medicationEntries.length > 0 ? medicationEntries[0].dose : 0;
     
-    return { totalDoses, currentDoses: [], totalCurrentDose, nextDueDays, nextDueHours, nextDueMinutes, nextDueSeconds, nextDueDateStr, currentLevel: 0, thisMonth: 0, plannedDoses: 0, lastDoseDateStr, daysSinceLastDose, intervalDays };
+    return { 
+      totalDoses, 
+      currentDoses: [], 
+      totalCurrentDose, 
+      nextDueDays, 
+      nextDueHours, 
+      nextDueMinutes, 
+      nextDueSeconds, 
+      nextDueDateStr, 
+      currentLevel: 0, 
+      thisMonth: 0, 
+      plannedDoses: 0, 
+      lastDoseDateStr, 
+      daysSinceLastDose, 
+      intervalDays 
+    };
   })();
 
   return (

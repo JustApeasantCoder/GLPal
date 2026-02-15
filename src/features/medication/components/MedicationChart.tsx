@@ -6,6 +6,7 @@ import { useChartDateRange } from '../../../shared/hooks/useChartDateRange';
 import { generateMedicationSeries } from '../../../shared/utils/medicationChartUtils';
 import { CHART_COLORS } from '../../../shared/utils/chartUtils';
 import ChartEmptyState from '../../../shared/components/ChartEmptyState';
+import { useTime } from '../../../shared/hooks';
 
 import { ChartPeriod } from '../../../shared/hooks';
 
@@ -23,6 +24,10 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
   const chartRef = useRef<any>(null);
   const { medications, medicationColors, dosesByMed, halfLifeByMed } =
     useMedicationChartData(data);
+
+  // Use time service for simulated time
+  const now = useTime(1000);
+  const simulatedNow = new Date(now);
 
   const firstDataDate = useMemo(
     () =>
@@ -52,7 +57,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
     zoomEnd,
     visibleStartIndex,
     visibleEndIndex,
-  } = useChartDateRange(firstDataDate, extendedLastDate, period);
+  } = useChartDateRange(firstDataDate, extendedLastDate, period, 14, simulatedNow);
 
   const chartOption = useMemo(() => {
     if (data.length === 0) {

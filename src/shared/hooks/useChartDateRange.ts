@@ -24,13 +24,16 @@ export const useChartDateRange = (
   firstDataDate: Date,
   lastDataDate: Date,
   period: ChartPeriod,
-  minDays: number = 14
+  minDays: number = 14,
+  currentDate?: Date
 ): DateRangeResult => {
+  const now = currentDate || new Date();
+  
   return useMemo(() => {
     let firstDate = new Date(firstDataDate);
     let lastDate = new Date(lastDataDate);
 
-    const today = new Date();
+    const today = new Date(now);
     today.setHours(0, 0, 0, 0);
 
     const dataRangeDays =
@@ -90,13 +93,14 @@ export const useChartDateRange = (
       visibleEndIndex,
       totalPoints,
     };
-  }, [firstDataDate, lastDataDate, period, minDays]);
+  }, [firstDataDate, lastDataDate, period, minDays, now.getTime()]);
 };
 
 export const useWeightChartDateRange = (
   firstDataDate: Date,
   lastDataDate: Date,
-  period: ChartPeriod
+  period: ChartPeriod,
+  currentDate?: Date
 ): {
   firstDate: Date;
   lastDate: Date;
@@ -105,8 +109,10 @@ export const useWeightChartDateRange = (
   visibleEndIndex: number;
   totalPoints: number;
 } => {
+  const now = currentDate || new Date();
+  
   return useMemo(() => {
-    const today = new Date();
+    const today = new Date(now);
     today.setHours(0, 0, 0, 0);
 
     const actualLastDate = new Date(lastDataDate);
@@ -157,5 +163,5 @@ export const useWeightChartDateRange = (
       visibleEndIndex,
       totalPoints,
     };
-  }, [firstDataDate, lastDataDate, period]);
+  }, [firstDataDate, lastDataDate, period, now.getTime()]);
 };

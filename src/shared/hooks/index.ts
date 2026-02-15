@@ -4,6 +4,7 @@ export { useMedicationChartData, useWeightChartData } from './useChartDataProces
 export { useChartDateRange, useWeightChartDateRange } from './useChartDateRange';
 export { useAppData } from './useAppData';
 export { useUnitConversion, createUnitConverter } from './useUnitConversion';
+export { useTime } from './useTime';
 export { 
   useFormValidation, 
   createFormValidator,
