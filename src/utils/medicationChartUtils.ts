@@ -183,6 +183,15 @@ export const generateMedicationSeries = ({
               color: '#E2E8F0',
               fontSize: 10,
               distance: 8,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              borderRadius: 4,
+              borderColor: 'rgba(0,0,0,0.4)',
+              borderWidth: 1,
+              padding: [2, 2],
+              textShadowColor: 'rgba(0,0,0,0.8)',
+              textShadowBlur: 4,
+              textShadowOffsetX: 1,
+              textShadowOffsetY: 1,
             },
           };
         }
@@ -340,6 +349,15 @@ export const generateMedicationSeries = ({
               color: '#E2E8F0',
               fontSize: 10,
               distance: 8,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              borderRadius: 4,
+              borderColor: 'rgba(0,0,0,0.4)',
+              borderWidth: 1,
+              padding: [2, 2],
+              textShadowColor: 'rgba(0,0,0,0.8)',
+              textShadowBlur: 4,
+              textShadowOffsetX: 1,
+              textShadowOffsetY: 1,
             },
           };
         }
