@@ -379,17 +379,8 @@ export const generateMedicationSeries = ({
       (series[0] as any).markLine = markLineConfig;
     }
 
-    const todayLineSeries = [
-      {
-        name: 'Today',
-        type: 'line',
-        markLine: markLineConfig,
-        data: [],
-      },
-    ];
-
-    return [...todayLineSeries, ...combinedSeries, ...series];
+    return [...(medications.length > 1 ? combinedSeries : []), ...series];
   }
 
-  return [...combinedSeries, ...series];
+  return [...(medications.length > 1 ? combinedSeries : []), ...series];
 };

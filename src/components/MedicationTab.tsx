@@ -34,14 +34,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
-  const [expandedMedications, setExpandedMedications] = useState<Set<string>>(() => {
-    const savedProtocols = getActiveProtocols();
-    if (savedProtocols.length === 0) return new Set();
-    return new Set(savedProtocols.map(p => {
-      const med = MEDICATIONS.find(m => m.id === p.medication);
-      return med?.name || p.medication;
-    }));
-  });
+  const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   useEffect(() => {
@@ -52,7 +45,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         const med = MEDICATIONS.find(m => m.id === p.medication);
         return med?.name || p.medication;
       }));
-      setExpandedMedications(medNames);
     }
   }, []);
 
@@ -63,7 +55,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   };
 
   const toggleMedication = (medicationName: string) => {
-    setExpandedMedications(prev => {
+    setCollapsedMedications(prev => {
       const newSet = new Set(prev);
       if (newSet.has(medicationName)) {
         newSet.delete(medicationName);
@@ -87,7 +79,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     setProtocols(updatedProtocols);
     handleGenerateDoses(updatedProtocols);
     onRefreshMedications();
-    setExpandedMedications(prev => {
+    setCollapsedMedications(prev => {
       const newSet = new Set(prev);
       newSet.delete(medicationName);
       return newSet;
@@ -275,7 +267,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                 return acc;
               }, {} as Record<string, GLP1Protocol[]>)
             ).map(([medicationName, medProtocols]) => {
-              const isExpanded = expandedMedications.size === 0 || expandedMedications.has(medicationName);
+              const isExpanded = !collapsedMedications.has(medicationName);
               return (
               <div 
                 key={medicationName}
@@ -289,27 +281,14 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                     <p className="text-base font-medium text-text-primary">{medicationName}</p>
                     <p className="text-sm text-text-muted">{formatFrequency(medProtocols[0].frequencyPerWeek)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfirmMed(medicationName);
-                      }}
-                      className="text-text-muted hover:text-red-400 p-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                    <svg 
-                      className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
                 {isExpanded && (
                 <div className="space-y-1">
@@ -345,6 +324,12 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                       )}
                     </div>
                   ))}
+                  <button
+                    onClick={() => setDeleteConfirmMed(medicationName)}
+                    className="mt-2 px-2 py-1 text-xs text-red-400 hover:text-red-500 border border-red-500/30 rounded hover:bg-red-500/10 transition-all"
+                  >
+                    Delete
+                  </button>
                 </div>
                 )}
               </div>
