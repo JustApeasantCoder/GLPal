@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { WeightEntry } from '../types';
+import { WeightEntry, GLP1Entry } from '../types';
 import { formatWeight } from '../utils/unitConversion';
 import { useWeightChartData } from '../hooks/useChartDataProcessor';
 import { useWeightChartDateRange } from '../hooks/useChartDateRange';
@@ -12,6 +12,7 @@ interface WeightChartProps {
   goalWeight: number;
   unitSystem?: 'metric' | 'imperial';
   period?: ChartPeriod;
+  medicationData?: GLP1Entry[];
 }
 
 const WeightChart: React.FC<WeightChartProps> = ({
@@ -19,6 +20,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
   goalWeight,
   unitSystem = 'metric',
   period = 'month',
+  medicationData = [],
 }) => {
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
@@ -38,6 +40,31 @@ const WeightChart: React.FC<WeightChartProps> = ({
 
   const { zoomStart, visibleStartIndex, visibleEndIndex, totalPoints } =
     useWeightChartDateRange(firstDataDate, lastDataDate, period);
+
+  const doseChanges = useMemo(() => {
+    if (!medicationData || medicationData.length === 0) return [];
+    
+    const sortedMeds = [...medicationData].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    const changes: { date: string; dose: number; medication: string }[] = [];
+    let currentDose: number | null = null;
+    let currentMed: string | null = null;
+    
+    for (const entry of sortedMeds) {
+      if (currentDose === null || currentMed !== entry.medication) {
+        changes.push({ date: entry.date, dose: entry.dose, medication: entry.medication });
+        currentDose = entry.dose;
+        currentMed = entry.medication;
+      } else if (entry.dose !== currentDose) {
+        changes.push({ date: entry.date, dose: entry.dose, medication: entry.medication });
+        currentDose = entry.dose;
+      }
+    }
+    
+    return changes;
+  }, [medicationData]);
 
   const chartOption = useMemo(() => {
     if (data.length === 0) {
@@ -60,6 +87,47 @@ const WeightChart: React.FC<WeightChartProps> = ({
     };
 
     const dotIndices = new Set(getDotIndices(sortedData.length));
+
+    const doseChangeMarkers = (() => {
+      if (doseChanges.length === 0) return [];
+      
+      const displayDates = sortedData.map(d => d.displayDate);
+      
+      return doseChanges
+        .map(change => {
+          const changeDate = new Date(change.date);
+          const formattedDate = changeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const index = displayDates.indexOf(formattedDate);
+          
+          if (index === -1) {
+            const closestIndex = displayDates.findIndex((_, i) => {
+              const dateD = new Date(firstDataDate.getTime() + i * 24 * 60 * 60 * 1000);
+              return dateD >= changeDate;
+            });
+            if (closestIndex === -1) return null;
+            
+            const closestDate = displayDates[closestIndex];
+            const weightAtDate = sortedData[closestIndex]?.weight;
+            if (!weightAtDate) return null;
+            
+            return {
+              value: [closestDate, weightAtDate],
+              dose: change.dose,
+              medication: change.medication,
+            };
+          }
+          
+          const weightAtDate = sortedData[index]?.weight;
+          if (!weightAtDate) return null;
+          
+          return {
+            value: [formattedDate, weightAtDate],
+            dose: change.dose,
+            medication: change.medication,
+          };
+        })
+        .filter(Boolean);
+    })();
 
     const option = {
       backgroundColor: 'transparent',
@@ -196,6 +264,32 @@ const WeightChart: React.FC<WeightChartProps> = ({
             distance: 8,
           },
         },
+        ...(doseChangeMarkers.length > 0 ? [{
+          name: 'DoseChanges',
+          type: 'scatter',
+          z: 20,
+          data: doseChangeMarkers.map((m: any) => ({
+            value: m.value,
+            itemStyle: {
+              color: '#4ADEA8',
+              borderColor: '#1a3d2e',
+              borderWidth: 2,
+              shadowBlur: 8,
+              shadowColor: '#4ADEA899',
+            },
+          })),
+          symbol: 'circle',
+          symbolSize: 12,
+          label: {
+            show: true,
+            position: 'bottom',
+            formatter: (params: any) => params.data.dose + 'mg',
+            color: '#4ADEA8',
+            fontSize: 10,
+            distance: 8,
+            fontWeight: 600,
+          },
+        }] : []),
       ],
       dataZoom: [
         {
@@ -218,6 +312,8 @@ const WeightChart: React.FC<WeightChartProps> = ({
     goalWeight,
     unitSystem,
     zoomStart,
+    medicationData,
+    doseChanges,
   ]);
 
   if (data.length === 0) {
