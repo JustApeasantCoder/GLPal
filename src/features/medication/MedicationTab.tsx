@@ -15,6 +15,7 @@ import { GLP1Entry, GLP1Protocol } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { addMedicationGeneratedEntry, addMedicationManualEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols, getMedicationManualEntries } from '../../shared/utils/database';
+import { timeService } from '../../core/timeService';
 import { MEDICATIONS, generateId } from '../../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../../services/MedicationService';
 
@@ -140,17 +141,18 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   };
 
   const handleLogDoseNow = () => {
+    const now = new Date(timeService.now());
+    now.setHours(0, 0, 0, 0);
+    
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
       const start = new Date(p.startDate);
       const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-      return today >= start && today <= end;
+      return now >= start && now <= end;
     });
 
     if (activeProtocol) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = now.toISOString().split('T')[0];
       const newEntry: GLP1Entry = {
         date: today,
         medication: activeProtocol.medication,

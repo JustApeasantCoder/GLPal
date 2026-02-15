@@ -103,7 +103,7 @@ try {
   }, []); // Empty dependency array - run only once
 
 const handleAddWeight = (newWeight: number) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date(timeService.now()).toISOString().split('T')[0];
     const newEntry = { date: today, weight: newWeight };
     
     // Save to database
