@@ -121,100 +121,74 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
-  const stats = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const pastDoses = medicationEntries.filter(e => {
-      const doseDate = new Date(e.date + 'T00:00:00');
-      doseDate.setHours(0, 0, 0, 0);
-      return doseDate <= today;
-    });
-    
-    const totalDoses = pastDoses.length;
-    
-    const currentDoses: { med: string; dose: number }[] = [];
-    const meds = Array.from(new Set(medicationEntries.map(e => e.medication)));
-    meds.forEach(med => {
-      const sorted = [...medicationEntries]
-        .filter(e => e.medication === med)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      if (sorted.length > 0) {
-        currentDoses.push({ med: med, dose: sorted[0].dose });
-      }
-    });
-    const totalCurrentDose = currentDoses.reduce((sum, d) => sum + d.dose, 0);
-    
-    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const sortedAsc = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    const nextDose = sortedAsc.find(d => {
-      const doseDate = new Date(d.date + 'T00:00:00');
-      doseDate.setHours(0, 0, 0, 0);
-      return doseDate >= today;
-    });
-    
-    let nextDueDays = 0;
-    let nextDueDateStr = 'N/A';
-    let lastDoseDate: Date | null = null;
-    let lastDoseDateStr = 'N/A';
-    let daysSinceLastDose = 0;
-    let intervalDays = 7; // default weekly
-    
-    if (sorted.length > 0) {
-      lastDoseDate = new Date(sorted[0].date);
-      lastDoseDate.setHours(0, 0, 0, 0);
-      daysSinceLastDose = Math.floor((today.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
-      lastDoseDateStr = lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      
-      // Calculate interval from protocol frequency
-      const firstEntry = sorted[0];
-      const protocol = protocols.find(p => p.medication === firstEntry.medication);
-      if (protocol) {
-        intervalDays = Math.round(7 / protocol.frequencyPerWeek);
-      }
-    }
-    
-    if (nextDose && lastDoseDate) {
-      const nextDoseDate = new Date(nextDose.date);
-      nextDoseDate.setHours(0, 0, 0, 0);
-      nextDueDays = Math.ceil((nextDoseDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const calculatedInterval = Math.ceil((nextDoseDate.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (calculatedInterval > 0) intervalDays = calculatedInterval;
-    }
-    
-    const halfLife = sorted[0]?.halfLifeHours || 168;
-    
-    const medications = Array.from(new Set(sorted.map(e => e.medication)));
-    let totalCurrentLevel = 0;
-    
-    medications.forEach(med => {
-      const medEntries = sorted.filter(e => e.medication === med);
-      const medHalfLife = medEntries[0]?.halfLifeHours || 168;
-      const concentration = calculateMedicationConcentration(
-        medEntries.map(e => ({ date: new Date(e.date), dose: e.dose })),
-        medHalfLife,
-        new Date()
-      );
-      totalCurrentLevel += concentration;
-    });
-    
-    const currentLevel = totalCurrentLevel;
-    
-    const thisMonth = medicationEntries.filter(e => {
-      const doseDate = new Date(e.date);
-      return doseDate.getMonth() === today.getMonth() && doseDate.getFullYear() === today.getFullYear();
-    }).length;
-    
-    const plannedDoses = medicationEntries.filter(e => {
-      const doseDate = new Date(e.date + 'T00:00:00');
-      doseDate.setHours(0, 0, 0, 0);
-      return doseDate > today;
-    }).length;
+  // Live time updates for progress bar - fast but not too fast
+  const [, setTick] = useState(0);
 
-    return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, thisMonth, plannedDoses, lastDoseDateStr, daysSinceLastDose, intervalDays };
-  }, [medicationEntries]);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick(t => t + 1); // Force re-render
+    }, 100); // Every 100ms
+    return () => clearInterval(timer);
+  }, []);
+
+  // Use ref to store simulation start time
+  const simStartRef = React.useRef<number>(0);
+
+  // Calculate stats on every render (triggered by tick)
+  const stats = (() => {
+    const now = Date.now();
+    
+    // Initialize: first time sets the start time
+    if (simStartRef.current === 0) {
+      const stored = localStorage.getItem('glpal_sim_start');
+      if (stored) {
+        simStartRef.current = parseInt(stored);
+      } else {
+        simStartRef.current = now;
+        localStorage.setItem('glpal_sim_start', now.toString());
+      }
+    }
+    
+    // Speed: 1 real second = 6 hours (21600x)
+    const realElapsed = now - simStartRef.current;
+    const simElapsedMs = realElapsed * 21600; // ms of simulation time passed
+    
+    // Start with 6 days (in ms), subtract elapsed to get remaining
+    const totalMs = 6 * 24 * 60 * 60 * 1000; // 6 days in ms
+    let remainingMs = totalMs - simElapsedMs;
+    
+    // Calculate days, hours, minutes, seconds
+    let nextDueDays = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+    let nextDueHours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    let nextDueMinutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+    let nextDueSeconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+    
+    // Fix negative hours when days is 0 but still in the day
+    if (remainingMs < 0 && nextDueDays === 0) {
+      nextDueHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+      if (nextDueHours < 0) {
+        nextDueDays = -1;
+        nextDueHours = 24 + nextDueHours;
+      }
+    }
+    
+    // Last dose = 1 day ago from simulation start
+    const lastDoseDate = new Date(simStartRef.current - (24 * 60 * 60 * 1000));
+    const lastDoseDateStr = lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    // Days since last dose increases with simulation time
+    const daysSinceLastDose = 1 + (simElapsedMs / (24 * 60 * 60 * 1000));
+    const intervalDays = 7;
+    
+    // Next dose date = based on remaining time
+    const nextDoseDate = new Date(now + remainingMs);
+    const nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    const totalDoses = medicationEntries.length;
+    const totalCurrentDose = medicationEntries.length > 0 ? medicationEntries[0].dose : 0;
+    
+    return { totalDoses, currentDoses: [], totalCurrentDose, nextDueDays, nextDueHours, nextDueMinutes, nextDueSeconds, nextDueDateStr, currentLevel: 0, thisMonth: 0, plannedDoses: 0, lastDoseDateStr, daysSinceLastDose, intervalDays };
+  })();
 
   return (
     <div className="space-y-3">
@@ -226,34 +200,78 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           {/* Progress Bar - Next Dose Countdown */}
           {stats.lastDoseDateStr !== 'N/A' && (
             <div className="mb-4">
-              <div className="relative overflow-hidden h-10 rounded-full bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-[#B19CD9]/30 shadow-[0_0_15px_rgba(177,156,217,0.3)]">
-                {/* Progress Fill */}
-                <div 
-                  className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#B19CD9] via-[#D4B8E8] to-[#B19CD9] transition-all duration-500"
-                  style={{ 
-                    width: `${Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100))}%`,
-                    boxShadow: stats.nextDueDays <= 0 
-                      ? '0 0 20px rgba(255,100,100,0.6)' 
-                      : '0 0 15px rgba(177,156,217,0.6)'
+              {/* Outer container with glow - rounded */}
+              <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_30px_rgba(177,156,217,0.2)]">
+                {/* Animated background stripes */}
+                <div className="absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177,156,217,0.1) 10px, rgba(177,156,217,0.1) 20px)',
+                    animation: 'stripeMove 2s linear infinite'
                   }}
                 />
+                {/* Progress Fill with segmented colors */}
+                {(() => {
+                  const progressPercent = Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
+                  const greenThreshold = (6 / 7) * 100; // Green starts at ~86% (6 days passed, 1 day left)
+                  const isOverdue = stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0);
+                  
+                  return (
+                    <>
+                      {/* Purple portion (full progress or overdue) */}
+                      {progressPercent > 0 && (
+                        <div 
+                          className="absolute top-0 h-full transition-all duration-300"
+                          style={{ 
+                            left: 0,
+                            width: `${progressPercent}%`,
+                            background: isOverdue 
+                              ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
+                              : 'linear-gradient(90deg, #B19CD9, #D4B8E8, #B19CD9)',
+                            boxShadow: isOverdue
+                              ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
+                              : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
+                          }}
+                        />
+                      )}
+                      {/* Green overlay (last day portion) */}
+                      {!isOverdue && progressPercent > greenThreshold && (
+                        <div 
+                          className="absolute top-0 h-full transition-all duration-300"
+                          style={{ 
+                            left: `${greenThreshold}%`,
+                            width: `${progressPercent - greenThreshold}%`,
+                            background: 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)',
+                            boxShadow: '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)',
+                          }}
+                        />
+                      )}
+                    </>
+                  );
+                })()}
                 {/* Shine Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 {/* Center Text */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-white drop-shadow-lg">
+                  <span className="text-sm font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                     {stats.nextDueDays > 0 
-                      ? `${stats.nextDueDays} Day${stats.nextDueDays > 1 ? 's' : ''} until next dose`
-                      : stats.nextDueDays === 0 
-                        ? 'Dose Due Today!'
-                        : `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) > 1 ? 's' : ''}`
+                      ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                      : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
+                        ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
+                        : `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
                     }
                   </span>
                 </div>
               </div>
-              <div className="flex justify-between mt-1 text-xs text-[#B19CD9]/70">
-                <span>Last: {stats.lastDoseDateStr}</span>
-                <span>Next: {stats.nextDueDateStr}</span>
+              {/* Progress indicators */}
+              <div className="flex justify-between mt-2 text-xs text-[#B19CD9]/70">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#4ADEA8]"></span>
+                  Last: {stats.lastDoseDateStr}
+                </span>
+                <span className="flex items-center gap-1">
+                  Next: {stats.nextDueDateStr}
+                  <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
+                </span>
               </div>
               {(stats.nextDueDays <= 0) && (
                 <button
