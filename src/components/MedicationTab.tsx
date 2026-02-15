@@ -495,6 +495,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                     });
 
                     const updatedProtocols = [...protocols, ...titrationProtocols];
+                    saveMedicationProtocols(updatedProtocols);
                     setProtocols(updatedProtocols);
                     handleGenerateDoses(updatedProtocols);
                     onRefreshMedications();

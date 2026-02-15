@@ -16,9 +16,10 @@ const shortenMedicationName = (name: string): string => {
 interface MedicationChartProps {
   data: GLP1Entry[];
   period: ChartPeriod;
+  onLegendChange?: (visibleMeds: string[]) => void;
 }
 
-const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
+const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegendChange }) => {
   const chartRef = useRef<any>(null);
   const { medications, medicationColors, dosesByMed, halfLifeByMed } =
     useMedicationChartData(data);
@@ -236,6 +237,11 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
                 });
               }
             });
+            
+            if (onLegendChange) {
+              const visibleMeds = medications.filter(med => selected[med] !== false && selected[med] !== undefined);
+              onLegendChange(visibleMeds);
+            }
           },
         }}
       />

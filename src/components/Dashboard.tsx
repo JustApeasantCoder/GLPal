@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import WeightChart from './WeightChart';
 import MedicationChart from './MedicationChart';
 import PerformanceOverview from './PerformanceOverview';
@@ -31,6 +31,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onChartPeriodChange,
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const [visibleMedications, setVisibleMedications] = useState<string[]>([]);
 
   // Use custom hooks for data processing
   const actualGoalWeight = goalWeight || profile.goalWeight || 80;
@@ -113,14 +114,14 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
             <div className="h-48 sm:h-56">
-              <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} />
+              <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} visibleMedications={visibleMedications} />
             </div>
           </div>
 
           {/* Medication Status */}
           <div>
             <div className="h-48 sm:h-56">
-              <MedicationChart data={dosesEntries} period={chartPeriod} />
+              <MedicationChart data={dosesEntries} period={chartPeriod} onLegendChange={setVisibleMedications} />
             </div>
           </div>
 

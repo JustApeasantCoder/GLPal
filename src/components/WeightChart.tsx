@@ -6,6 +6,7 @@ import { useWeightChartData } from '../hooks/useChartDataProcessor';
 import { useWeightChartDateRange } from '../hooks/useChartDateRange';
 import ChartEmptyState from './ui/ChartEmptyState';
 import { ChartPeriod } from '../hooks';
+import { getMedicationColor } from '../utils/chartUtils';
 
 interface WeightChartProps {
   data: WeightEntry[];
@@ -13,6 +14,7 @@ interface WeightChartProps {
   unitSystem?: 'metric' | 'imperial';
   period?: ChartPeriod;
   medicationData?: GLP1Entry[];
+  visibleMedications?: string[];
 }
 
 const WeightChart: React.FC<WeightChartProps> = ({
@@ -21,6 +23,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
   unitSystem = 'metric',
   period = 'month',
   medicationData = [],
+  visibleMedications = [],
 }) => {
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
@@ -48,18 +51,35 @@ const WeightChart: React.FC<WeightChartProps> = ({
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
-    const changes: { date: string; dose: number; medication: string }[] = [];
-    let currentDose: number | null = null;
-    let currentMed: string | null = null;
+    const allMedications = Array.from(new Set(sortedMeds.map(e => e.medication)));
+    const medicationColors: Record<string, { stroke: string; fill: string }> = {};
+    allMedications.forEach((med, index) => {
+      medicationColors[med] = getMedicationColor(index);
+    });
+    
+    const changes: { date: string; dose: number; medication: string; color: string }[] = [];
+    const lastDosePerMed: Record<string, number> = {};
     
     for (const entry of sortedMeds) {
-      if (currentDose === null || currentMed !== entry.medication) {
-        changes.push({ date: entry.date, dose: entry.dose, medication: entry.medication });
-        currentDose = entry.dose;
-        currentMed = entry.medication;
-      } else if (entry.dose !== currentDose) {
-        changes.push({ date: entry.date, dose: entry.dose, medication: entry.medication });
-        currentDose = entry.dose;
+      const prevDose = lastDosePerMed[entry.medication];
+      if (prevDose === undefined) {
+        lastDosePerMed[entry.medication] = entry.dose;
+        changes.push({ 
+          date: entry.date, 
+          dose: entry.dose, 
+          medication: entry.medication,
+          color: medicationColors[entry.medication]?.stroke || '#4ADEA8',
+        });
+      } else if (entry.dose > prevDose) {
+        lastDosePerMed[entry.medication] = entry.dose;
+        changes.push({ 
+          date: entry.date, 
+          dose: entry.dose, 
+          medication: entry.medication,
+          color: medicationColors[entry.medication]?.stroke || '#4ADEA8',
+        });
+      } else if (entry.dose < prevDose) {
+        lastDosePerMed[entry.medication] = entry.dose;
       }
     }
     
@@ -92,8 +112,10 @@ const WeightChart: React.FC<WeightChartProps> = ({
       if (doseChanges.length === 0) return [];
       
       const displayDates = sortedData.map(d => d.displayDate);
+      const shouldShowAll = visibleMedications.length === 0;
       
       return doseChanges
+        .filter(change => shouldShowAll || visibleMedications.includes(change.medication))
         .map(change => {
           const changeDate = new Date(change.date);
           const formattedDate = changeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -114,6 +136,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
               value: [closestDate, weightAtDate],
               dose: change.dose,
               medication: change.medication,
+              color: change.color,
             };
           }
           
@@ -124,6 +147,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             value: [formattedDate, weightAtDate],
             dose: change.dose,
             medication: change.medication,
+            color: change.color,
           };
         })
         .filter(Boolean);
@@ -269,25 +293,27 @@ const WeightChart: React.FC<WeightChartProps> = ({
           type: 'scatter',
           z: 20,
           data: doseChangeMarkers.map((m: any) => ({
-            value: m.value,
+            value: [m.value[0], m.value[1], m.dose],
             itemStyle: {
-              color: '#4ADEA8',
+              color: m.color,
               borderColor: '#1a3d2e',
               borderWidth: 2,
               shadowBlur: 8,
-              shadowColor: '#4ADEA899',
+              shadowColor: m.color + '99',
             },
           })),
-          symbol: 'circle',
+          symbol: 'pin',
           symbolSize: 12,
+          symbolOffset: [0, -40],
+          
           label: {
             show: true,
-            position: 'bottom',
-            formatter: (params: any) => params.data.dose + 'mg',
-            color: '#4ADEA8',
+            position: 'right',
+            formatter: (params: any) => params.value[2] + 'mg',
+            color: '#fff',
             fontSize: 10,
-            distance: 8,
-            fontWeight: 600,
+            distance: 2,
+
           },
         }] : []),
       ],
@@ -314,6 +340,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
     zoomStart,
     medicationData,
     doseChanges,
+    visibleMedications,
   ]);
 
   if (data.length === 0) {
