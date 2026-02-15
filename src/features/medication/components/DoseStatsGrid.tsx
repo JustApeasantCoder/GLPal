@@ -13,7 +13,7 @@ const DoseStatsGrid: React.FC<DoseStatsGridProps> = ({ stats }) => {
     <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
       <div className={smallCard}>
         <p className={text.label}>Total Doses</p>
-        <p className={text.value}>{stats.totalDoses}</p>
+        <p className={text.value}>{stats.plannedDoses + stats.loggedDoses}</p>
       </div>
       <div className={smallCard}>
         <p className={text.label}>Next Due</p>
@@ -36,7 +36,7 @@ const DoseStatsGrid: React.FC<DoseStatsGridProps> = ({ stats }) => {
       </div>
       <div className={smallCard}>
         <p className={text.label}>Logged Doses</p>
-        <p className={text.value}>{stats.thisMonth}</p>
+        <p className={text.value}>{stats.loggedDoses}</p>
       </div>
     </div>
   );

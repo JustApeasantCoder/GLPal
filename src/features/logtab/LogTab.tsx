@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GLP1Entry, GLP1Protocol } from '../../types';
-import { getMedicationManualEntries, getMedicationProtocols } from '../../shared/utils/database';
+import { getAllMedicationEntries, getMedicationProtocols } from '../../shared/utils/database';
 
 const bigCard = "bg-black/30 backdrop-blur-lg rounded-2xl p-4 border border-[#9C7BD3]/20";
 const bigCardText = {
@@ -8,21 +8,21 @@ const bigCardText = {
 };
 
 const LogTab: React.FC = () => {
-  const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
+  const [entries, setEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
 
   useEffect(() => {
     const loadData = () => {
-      const entries = getMedicationManualEntries();
+      const allEntries = getAllMedicationEntries();
       const prots = getMedicationProtocols();
-      setManualEntries(entries.sort((a, b) => b.date.localeCompare(a.date)));
+      setEntries(allEntries.sort((a, b) => b.date.localeCompare(a.date)));
       setProtocols(prots);
     };
     loadData();
   }, []);
 
   const getDoseForDate = (dateStr: string): number => {
-    const entry = manualEntries.find(e => e.date === dateStr);
+    const entry = entries.find(e => e.date === dateStr);
     return entry?.dose || 0;
   };
 
@@ -46,11 +46,11 @@ const LogTab: React.FC = () => {
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dose Log</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {manualEntries.length === 0 ? (
-          <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
+        {entries.length === 0 ? (
+          <p className="text-text-muted text-center py-8">No doses logged yet.</p>
         ) : (
           <div className="space-y-2">
-            {manualEntries.map((entry) => (
+            {entries.map((entry) => (
               <div 
                 key={entry.date}
                 className="flex justify-between items-center bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"

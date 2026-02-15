@@ -49,41 +49,15 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
+    // Clear only generated entries, keep manual entries
     clearMedicationEntries();
-    const generatedDoses = generateDosesFromProtocols(protocolList, []);
-    generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
     
     const nowDate = new Date(now);
     nowDate.setHours(0, 0, 0, 0);
     
-    protocolList.forEach(protocol => {
-      if (protocol.isArchived) return;
-      
-      const start = new Date(protocol.startDate);
-      const stop = protocol.stopDate ? new Date(protocol.stopDate) : nowDate;
-      const intervalDays = 7 / protocol.frequencyPerWeek;
-      
-      let d = new Date(start);
-      while (d <= stop && d <= nowDate) {
-        const dateStr = d.toISOString().split('T')[0];
-        
-        const existingManual = getMedicationManualEntries();
-        const alreadyLogged = existingManual.some(e => e.date === dateStr && e.medication === protocol.medication);
-        
-        if (!alreadyLogged) {
-          const manualEntry: GLP1Entry = {
-            date: dateStr,
-            medication: protocol.medication,
-            dose: protocol.dose,
-            halfLifeHours: protocol.halfLifeHours,
-            isManual: true
-          };
-          addMedicationManualEntry(manualEntry);
-        }
-        
-        d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
-      }
-    });
+    // Generate doses from protocols (these are the planned/auto-generated doses)
+    const generatedDoses = generateDosesFromProtocols(protocolList, []);
+    generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
   };
 
   const toggleMedication = (medicationName: string) => {
@@ -145,6 +119,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const now = new Date(timeService.now());
     now.setHours(0, 0, 0, 0);
     
+    // Find the most recent protocol (either active or the latest one that ended recently)
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
       const start = new Date(p.startDate);
@@ -152,13 +127,26 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       return now >= start && now <= end;
     });
 
-    if (activeProtocol) {
+    // If no active protocol, find the most recent non-archived protocol
+    let targetProtocol = activeProtocol;
+    if (!targetProtocol) {
+      const nonArchivedProtocols = protocols?.filter(p => !p.isArchived) || [];
+      if (nonArchivedProtocols.length > 0) {
+        // Sort by start date descending to get the most recent
+        nonArchivedProtocols.sort((a, b) => 
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+        targetProtocol = nonArchivedProtocols[0];
+      }
+    }
+
+    if (targetProtocol) {
       const today = now.toISOString().split('T')[0];
       const newEntry: GLP1Entry = {
         date: today,
-        medication: activeProtocol.medication,
-        dose: activeProtocol.dose,
-        halfLifeHours: activeProtocol.halfLifeHours,
+        medication: targetProtocol.medication,
+        dose: targetProtocol.dose,
+        halfLifeHours: targetProtocol.halfLifeHours,
         isManual: true
       };
       addMedicationManualEntry(newEntry);

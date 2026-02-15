@@ -125,13 +125,13 @@ const handleAddWeight = (newWeight: number) => {
     // Save to database (manual entry)
     addGLP1ManualEntry(newEntry);
     
-    // Reload generated entries for chart (manual entries go to Log tab)
-    const generatedEntries = getMedicationEntries();
-    setDosesEntries(generatedEntries);
+    // Reload all entries for chart
+    const allEntries = getAllGLP1Entries();
+    setDosesEntries(allEntries);
   };
 
   const handleRefreshDoses = useCallback(() => {
-    const entries = getMedicationEntries();
+    const entries = getAllGLP1Entries();
     setDosesEntries(entries);
   }, []);
 
