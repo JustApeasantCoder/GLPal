@@ -23,7 +23,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
   unitSystem = 'metric',
   period = 'month',
   medicationData = [],
-  visibleMedications = [],
+  visibleMedications,
 }) => {
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
@@ -112,10 +112,10 @@ const WeightChart: React.FC<WeightChartProps> = ({
       if (doseChanges.length === 0) return [];
       
       const displayDates = sortedData.map(d => d.displayDate);
-      const shouldShowAll = visibleMedications.length === 0;
+      const shouldShowAll = visibleMedications === undefined;
       
       return doseChanges
-        .filter(change => shouldShowAll || visibleMedications.includes(change.medication))
+        .filter(change => shouldShowAll || (visibleMedications && visibleMedications.includes(change.medication)))
         .map(change => {
           const changeDate = new Date(change.date);
           const formattedDate = changeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });

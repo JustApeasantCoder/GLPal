@@ -239,8 +239,15 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
             });
             
             if (onLegendChange) {
-              const visibleMeds = medications.filter(med => selected[med] !== false && selected[med] !== undefined);
-              onLegendChange(visibleMeds);
+              const anyHidden = Object.values(selected).some(v => v === false);
+              if (!anyHidden) {
+                onLegendChange(medications);
+              } else {
+                const visibleMeds = medications.filter(med => 
+                  selected[med] !== false
+                );
+                onLegendChange(visibleMeds);
+              }
             }
           },
         }}
