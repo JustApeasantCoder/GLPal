@@ -10,14 +10,9 @@ interface LogDoseModalProps {
   protocol: GLP1Protocol | null;
 }
 
-const INJECTION_SITES = [
-  'Abdomen (left)',
-  'Abdomen (right)',
-  'Thigh (left)',
-  'Thigh (right)',
-  'Arm (left)',
-  'Arm (right)',
-];
+const INJECTION_AREAS = ['Abdomen', 'Thigh', 'Arm', 'Buttock'];
+const INJECTION_SIDES = ['Left', 'Right'];
+const INJECTION_POSITIONS = ['Upper', 'Middle', 'Lower'];
 
 const ISR_SEVERITY = [
   'None',
@@ -28,7 +23,9 @@ const ISR_SEVERITY = [
 
 const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
   const [painLevel, setPainLevel] = useState<number>(0);
-  const [injectionSite, setInjectionSite] = useState<string>('');
+  const [injectionArea, setInjectionArea] = useState<string>('');
+  const [injectionSide, setInjectionSide] = useState<string>('');
+  const [injectionPosition, setInjectionPosition] = useState<string>('');
   const [isr, setIsr] = useState<string>('None');
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -39,7 +36,9 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
       const now = timeService.nowDate();
       setCurrentTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
       setPainLevel(0);
-      setInjectionSite('');
+      setInjectionArea('');
+      setInjectionSide('');
+      setInjectionPosition('');
       setIsr('None');
       setIsVisible(true);
       setIsClosing(false);
@@ -63,10 +62,20 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
     day: 'numeric' 
   });
 
+  const getInjectionSiteString = () => {
+    const parts = [];
+    if (injectionSide) parts.push(injectionSide);
+    if (injectionPosition) parts.push(injectionPosition);
+    if (injectionArea) parts.push(injectionArea);
+    return parts.join(' ');
+  };
+
   const handleSave = () => {
     if (!protocol) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
+    const injectionSite = getInjectionSiteString();
+    
     const newEntry: GLP1Entry = {
       date: todayStr,
       medication: protocol.medication,
@@ -83,6 +92,34 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
     onSave();
     onClose();
   };
+
+  const renderSelector = (
+    label: string,
+    options: string[],
+    selected: string,
+    onSelect: (val: string) => void,
+    cols: number = 4
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-text-secondary mb-2">{label}</label>
+      <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        {options.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => onSelect(selected === opt ? '' : opt)}
+            className={`py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-[1.02] ${
+              selected === opt
+                ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
+                : 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -129,10 +166,10 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
                   key={level}
                   type="button"
                   onClick={() => setPainLevel(level)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     painLevel === level
-                      ? 'bg-[#EF4444]/50 border border-[#EF4444] text-white'
-                      : 'bg-black/20 border border-transparent text-text-muted hover:bg-[#EF4444]/10'
+                      ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                      : 'bg-black/20 border border-[#EF4444]/30 text-text-muted hover:bg-[#EF4444]/20 hover:border-[#EF4444]/50'
                   }`}
                 >
                   {level}
@@ -141,48 +178,50 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
             </div>
           </div>
 
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Injection Site (optional)
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              {INJECTION_SITES.map((site) => (
-                <button
-                  key={site}
-                  type="button"
-                  onClick={() => setInjectionSite(site)}
-                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                    injectionSite === site
-                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9] text-white'
-                      : 'bg-black/20 border border-transparent text-text-muted hover:bg-[#B19CD9]/10'
-                  }`}
-                >
-                  {site}
-                </button>
-              ))}
+            {renderSelector('Area', INJECTION_AREAS, injectionArea, setInjectionArea, 4)}
+            <div className="mt-2">
+              {renderSelector('Side', INJECTION_SIDES, injectionSide, setInjectionSide, 2)}
             </div>
+            <div className="mt-2">
+              {renderSelector('Position', INJECTION_POSITIONS, injectionPosition, setInjectionPosition, 3)}
+            </div>
+            {getInjectionSiteString() && (
+              <div className="mt-3 text-center">
+                <span className="text-sm bg-[#4ADEA8]/20 text-[#4ADEA8] px-3 py-1 rounded-lg">
+                  Selected: {getInjectionSiteString()}
+                </span>
+              </div>
+            )}
           </div>
+
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Injection Site Reaction (optional)
             </label>
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               {ISR_SEVERITY.map((severity) => (
                 <button
                   key={severity}
                   type="button"
                   onClick={() => setIsr(severity)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     isr === severity
                       ? severity === 'None'
-                        ? 'bg-[#4ADEA8]/50 border border-[#4ADEA8] text-white'
+                        ? 'bg-gradient-to-r from-[#4ADEA8] to-[#6EE7B7] text-white shadow-[0_0_10px_rgba(74,222,168,0.4)]'
                         : severity === 'Mild'
-                          ? 'bg-yellow-500/50 border border-yellow-500 text-white'
+                          ? 'bg-gradient-to-r from-[#EAB308] to-[#FACC15] text-white shadow-[0_0_10px_rgba(234,179,8,0.4)]'
                           : severity === 'Moderate'
-                            ? 'bg-orange-500/50 border border-orange-500 text-white'
-                            : 'bg-red-500/50 border border-red-500 text-white'
-                      : 'bg-black/20 border border-transparent text-text-muted hover:bg-[#B19CD9]/10'
+                            ? 'bg-gradient-to-r from-[#F97316] to-[#FB923C] text-white shadow-[0_0_10px_rgba(249,115,22,0.4)]'
+                            : 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                      : 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
                   }`}
                 >
                   {severity}
