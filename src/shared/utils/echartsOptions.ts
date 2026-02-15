@@ -1,4 +1,4 @@
-import { CHART_COLORS } from './chartUtils';
+import { CHART_COLORS } from '../../features/weight/utils/chartUtils';
 
 export interface BaseChartOptions {
   xAxisDates: string[];

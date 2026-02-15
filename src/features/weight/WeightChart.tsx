@@ -2,18 +2,15 @@ import React, { useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { WeightEntry, GLP1Entry } from '../../types';
 import { formatWeight } from '../../shared/utils/unitConversion';
-import { useWeightChartData } from '../../shared/hooks/useChartDataProcessor';
-import { useWeightChartDateRange } from '../../shared/hooks/useChartDateRange';
+import { useWeightChartData } from './hooks/useChartDataProcessor';
+import { useWeightChartDateRange } from './hooks/useChartDateRange';
 import ChartEmptyState from '../../shared/components/ChartEmptyState';
-import { ChartPeriod } from '../../shared/hooks';
-import { getMedicationColor } from '../../shared/utils/chartUtils';
+import { ChartPeriod } from './hooks/useFilteredWeights';
+import { shortenMedicationName } from './weightChartUtils';
+import { useDoseChanges } from './useDoseChanges';
 import { timeService } from '../../core/timeService';
 
 const getToday = () => new Date(timeService.now());
-
-const shortenMedicationName = (name: string): string => {
-  return name.replace(/\s*\(.*?\)/g, '').trim();
-};
 
 interface WeightChartProps {
   data: WeightEntry[];
@@ -36,7 +33,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
 }) => {
   const [localVisibleMedications, setLocalVisibleMedications] = useState<string[] | undefined>(undefined);
   const visibleMedications = externalVisibleMedications !== undefined ? externalVisibleMedications : localVisibleMedications;
-  
+
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
   const chartRef = useRef<any>(null);
@@ -57,47 +54,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
   const { zoomStart, visibleStartIndex, visibleEndIndex, totalPoints } =
     useWeightChartDateRange(firstDataDate, lastDataDate, period, getToday());
 
-  const doseChanges = useMemo(() => {
-    if (!medicationData || medicationData.length === 0) return [];
-    
-    const sortedMeds = [...medicationData].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    
-    const allMedications = Array.from(new Set(sortedMeds.map(e => e.medication)));
-    const medicationColors: Record<string, { stroke: string; fill: string }> = {};
-    allMedications.forEach((med, index) => {
-      medicationColors[med] = getMedicationColor(index);
-    });
-    
-    const changes: { date: string; dose: number; medication: string; color: string }[] = [];
-    const lastDosePerMed: Record<string, number> = {};
-    
-    for (const entry of sortedMeds) {
-      const prevDose = lastDosePerMed[entry.medication];
-      if (prevDose === undefined) {
-        lastDosePerMed[entry.medication] = entry.dose;
-        changes.push({ 
-          date: entry.date, 
-          dose: entry.dose, 
-          medication: entry.medication,
-          color: medicationColors[entry.medication]?.stroke || '#4ADEA8',
-        });
-      } else if (entry.dose > prevDose) {
-        lastDosePerMed[entry.medication] = entry.dose;
-        changes.push({ 
-          date: entry.date, 
-          dose: entry.dose, 
-          medication: entry.medication,
-          color: medicationColors[entry.medication]?.stroke || '#4ADEA8',
-        });
-      } else if (entry.dose < prevDose) {
-        lastDosePerMed[entry.medication] = entry.dose;
-      }
-    }
-    
-    return changes;
-  }, [medicationData]);
+  const doseChanges = useDoseChanges(medicationData);
 
   const chartOption = useMemo(() => {
     if (data.length === 0) {
@@ -123,28 +80,28 @@ const WeightChart: React.FC<WeightChartProps> = ({
 
     const doseChangeMarkers = (() => {
       if (doseChanges.length === 0) return [];
-      
+
       const displayDates = sortedData.map(d => d.displayDate);
       const shouldShowAll = visibleMedications === undefined;
-      
+
       return doseChanges
         .filter(change => shouldShowAll || (visibleMedications && visibleMedications.includes(shortenMedicationName(change.medication))))
         .map(change => {
           const changeDate = new Date(change.date);
           const formattedDate = changeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           const index = displayDates.indexOf(formattedDate);
-          
+
           if (index === -1) {
             const closestIndex = displayDates.findIndex((_, i) => {
               const dateD = new Date(firstDataDate.getTime() + i * 24 * 60 * 60 * 1000);
               return dateD >= changeDate;
             });
             if (closestIndex === -1) return null;
-            
+
             const closestDate = displayDates[closestIndex];
             const weightAtDate = sortedData[closestIndex]?.weight;
             if (!weightAtDate) return null;
-            
+
             return {
               value: [closestDate, weightAtDate],
               dose: change.dose,
@@ -152,10 +109,10 @@ const WeightChart: React.FC<WeightChartProps> = ({
               color: change.color,
             };
           }
-          
+
           const weightAtDate = sortedData[index]?.weight;
           if (!weightAtDate) return null;
-          
+
           return {
             value: [formattedDate, weightAtDate],
             dose: change.dose,
@@ -343,7 +300,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
           symbol: 'pin',
           symbolSize: 12,
           symbolOffset: [0, -40],
-          
+
           label: {
             show: true,
             position: 'right',
@@ -369,6 +326,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             const allMedications = Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication))));
             const medicationColors: Record<string, { stroke: string; fill: string }> = {};
             allMedications.forEach((m, index) => {
+              const { getMedicationColor } = require('./weightChartUtils');
               medicationColors[m] = getMedicationColor(index);
             });
             return {
@@ -406,6 +364,9 @@ const WeightChart: React.FC<WeightChartProps> = ({
     medicationData,
     doseChanges,
     visibleMedications,
+    firstDataDate,
+    visibleStartIndex,
+    visibleEndIndex,
   ]);
 
   if (data.length === 0) {
@@ -429,7 +390,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             const { selected } = params;
             const allMeds = Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication))));
             const visibleMeds = allMeds.filter(med => selected[med] !== false);
-            
+
             if (onLegendChange) {
               onLegendChange(visibleMeds);
             }

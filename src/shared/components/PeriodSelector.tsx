@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChartPeriod } from '../hooks';
+import { ChartPeriod } from '../../features/weight/hooks/useFilteredWeights';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 
 interface PeriodSelectorProps {

@@ -6,7 +6,8 @@ import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
-import { ChartPeriod, useTime } from './shared/hooks';
+import { ChartPeriod } from './features/weight/hooks/useFilteredWeights';
+import { useTime } from './shared/hooks';
 import { 
   initializeDatabase, 
   getWeightEntries, 
@@ -20,7 +21,7 @@ import {
 } from './shared/utils/database';
 import { initializeSampleWeightData } from './shared/utils/sampleData';
 import { timeService } from './core/timeService';
-import LogTab from './features/medication/LogTab';
+import LogTab from './features/logtab/LogTab';
 
 type TabType = 'dashboard' | 'doses' | 'dosage' | 'log';
 

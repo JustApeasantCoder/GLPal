@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { GLP1Entry, WeightEntry } from '../../types';
+import { GLP1Entry, WeightEntry } from '../../../types';
 import { getMedicationColor } from '../utils/chartUtils';
 
 interface ProcessedMedicationData {

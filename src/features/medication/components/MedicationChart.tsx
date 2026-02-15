@@ -1,14 +1,14 @@
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { GLP1Entry } from '../../../types';
-import { useMedicationChartData } from '../../../shared/hooks/useChartDataProcessor';
-import { useChartDateRange } from '../../../shared/hooks/useChartDateRange';
-import { generateMedicationSeries } from '../../../shared/utils/medicationChartUtils';
-import { CHART_COLORS } from '../../../shared/utils/chartUtils';
+import { useMedicationChartData } from '../../weight/hooks/useChartDataProcessor';
+import { useChartDateRange } from '../../weight/hooks/useChartDateRange';
+import { generateMedicationSeries } from '../utils/medicationChartUtils';
+import { CHART_COLORS } from '../../weight/utils/chartUtils';
 import ChartEmptyState from '../../../shared/components/ChartEmptyState';
 import { useTime } from '../../../shared/hooks';
 
-import { ChartPeriod } from '../../../shared/hooks';
+import { ChartPeriod } from '../../weight/hooks/useFilteredWeights';
 
 const shortenMedicationName = (name: string): string => {
   return name.replace(/\s*\(.*?\)/g, '').trim();

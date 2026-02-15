@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { WeightEntry, GLP1Entry } from '../../types';
+import { WeightEntry, GLP1Entry } from '../../../types';
 
 // Chart color palettes
 export const CHART_COLORS = {

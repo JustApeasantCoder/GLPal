@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { WeightEntry } from '../../types';
+import { WeightEntry } from '../../../types';
 
 export type ChartPeriod = 'week' | 'month' | '90days' | 'all';
 
