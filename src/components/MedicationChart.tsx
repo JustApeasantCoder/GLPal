@@ -88,7 +88,19 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
           const filteredParams = params.filter(
             (p: any) => p.seriesType !== 'scatter'
           );
-          const nonZeroParams = filteredParams.filter(
+          const processedParams = filteredParams.map((p: any) => ({
+            ...p,
+            seriesName: p.seriesName?.replace('_future', '') || p.seriesName,
+          }));
+          const dedupedParams: any[] = [];
+          const seen = new Set<string>();
+          for (const p of processedParams) {
+            if (!seen.has(p.seriesName)) {
+              seen.add(p.seriesName);
+              dedupedParams.push(p);
+            }
+          }
+          const nonZeroParams = dedupedParams.filter(
             (p: any) => (p.value?.[1] ?? 0) > 0
           );
           const dateStr = params[0].axisValue;
@@ -209,17 +221,18 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period }) => {
             
             const isSelected = selected[name];
             
+            if (name === 'Combined') {
+              chart.dispatchAction({
+                type: isSelected ? 'legendSelect' : 'legendUnSelect',
+                name: 'Combined_future',
+              });
+            }
+            
             medications.forEach((med) => {
               if (name === med) {
                 chart.dispatchAction({
                   type: isSelected ? 'legendSelect' : 'legendUnSelect',
                   name: med + '_future',
-                });
-              }
-              if (name === med + '_future') {
-                chart.dispatchAction({
-                  type: isSelected ? 'legendSelect' : 'legendUnSelect',
-                  name: med,
                 });
               }
             });

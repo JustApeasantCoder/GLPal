@@ -110,6 +110,7 @@ export const generateMedicationSeries = ({
         smooth: true,
         showSymbol: false,
         symbol: 'none',
+        itemStyle: { color: combinedColor.stroke },
         lineStyle: { width: 2, color: combinedColor.stroke },
         areaStyle: {
           color: {
@@ -132,11 +133,12 @@ export const generateMedicationSeries = ({
         data: combinedLineDataBefore,
       },
       {
-        name: 'Combined',
+        name: 'Combined_future',
         type: 'line',
         smooth: true,
         showSymbol: false,
         symbol: 'none',
+        showInLegend: false,
         lineStyle: { width: 2, color: combinedColor.stroke, type: 'dotted' },
         emphasis: {
           disabled: true,
@@ -262,6 +264,7 @@ export const generateMedicationSeries = ({
         smooth: true,
         showSymbol: false,
         symbol: 'none',
+        itemStyle: { color: color.stroke },
         lineStyle: { width: 2, color: color.stroke },
         areaStyle: {
           color: {
@@ -289,6 +292,7 @@ export const generateMedicationSeries = ({
         smooth: true,
         showSymbol: false,
         symbol: 'none',
+        showInLegend: false,
         lineStyle: { width: 2, color: color.stroke, type: 'dotted' },
         emphasis: {
           disabled: true,
@@ -372,14 +376,25 @@ export const generateMedicationSeries = ({
       data: [{ xAxis: todayDateStr }],
     };
 
+    const todayLineSeries = {
+      name: 'Today',
+      type: 'line',
+      markLine: markLineConfig,
+      data: [],
+      silent: true,
+      animation: false,
+      lineStyle: { opacity: 0 },
+      areaStyle: { opacity: 0 },
+    };
+
     if (combinedSeries.length > 0) {
-      (combinedSeries[0] as any).markLine = markLineConfig;
+      (combinedSeries[2] as any).markLine = markLineConfig;
     }
     if (series.length > 0) {
-      (series[0] as any).markLine = markLineConfig;
+      (series[2] as any).markLine = markLineConfig;
     }
 
-    return [...(medications.length > 1 ? combinedSeries : []), ...series];
+    return [...(medications.length > 1 ? combinedSeries : []), ...series, todayLineSeries];
   }
 
   return [...(medications.length > 1 ? combinedSeries : []), ...series];

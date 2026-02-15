@@ -366,7 +366,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             fullWidth
             variant="accent"
           >
-            + Official Schedule
+            + Schedule
           </Button>
         </div>
       </div>
@@ -396,14 +396,14 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6"
             style={{ animation: 'slideUp 0.2s ease-out' }}
           >
-            <h2 className="text-xl font-semibold text-white mb-6">Add Official Schedule</h2>
+            <h2 className="text-xl font-semibold text-white mb-6">Add Schedule</h2>
             <div className="border-t border-[#B19CD9]/20 mb-3"></div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
                 <div className="grid grid-cols-1 gap-2">
-                  {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0 && ['semaglutide', 'tirzepatide'].includes(m.id)).map(med => (
+                  {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0 && ['semaglutide', 'tirzepatide', 'retatrutide', 'cagrilintide'].includes(m.id)).map(med => (
                     <button
                       key={med.id}
                       type="button"
