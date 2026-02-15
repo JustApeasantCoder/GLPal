@@ -3,6 +3,9 @@ import { MEDICATIONS } from '../../../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../../../shared/utils/database';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
+import { timeService } from '../../../core/timeService';
+
+const getTodayString = () => new Date(timeService.now()).toISOString().split('T')[0];
 
 interface MedicationModalProps {
   isOpen: boolean;
@@ -13,7 +16,7 @@ interface MedicationModalProps {
 const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication }) => {
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDosePicker, setShowDosePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -21,7 +24,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedDate(new Date().toISOString().split('T')[0]);
+      setSelectedDate(getTodayString());
       const lastMed = getLastMedication();
       if (lastMed) {
         setSelectedMedication(lastMed);
@@ -130,7 +133,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             value={selectedDate}
             onChange={setSelectedDate}
             onClose={() => setShowDatePicker(false)}
-            maxDate={new Date().toISOString().split('T')[0]}
+            maxDate={getTodayString()}
           />
 
           <DoseWheelPickerModal

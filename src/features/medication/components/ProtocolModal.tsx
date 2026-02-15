@@ -4,6 +4,9 @@ import { MEDICATIONS, SEMAGLUTIDE_TITRATION, generateId, Medication } from '../.
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
+import { timeService } from '../../../core/timeService';
+
+const getTodayString = () => new Date(timeService.now()).toISOString().split('T')[0];
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -20,7 +23,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('1');
-  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState<string>(getTodayString());
   const [stopDate, setStopDate] = useState<string>('');
   const [continuationInfo, setContinuationInfo] = useState<string | null>(null);
   const [phase, setPhase] = useState<'titrate' | 'maintenance' | undefined>(undefined);
@@ -105,7 +108,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             const medData = med;
             
             let newDose = medData.defaultDose.toString();
-            let newStartDate = new Date().toISOString().split('T')[0];
+            let newStartDate = getTodayString();
             let continuation: string | null = null;
             let isTitration = false;
             
@@ -155,7 +158,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             setSelectedMedication('');
             setDose('');
             setFrequency('1');
-            const today = new Date().toISOString().split('T')[0];
+            const today = getTodayString();
             setStartDate(today);
             const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
             setStopDate(defaultEndDate.toISOString().split('T')[0]);
@@ -166,7 +169,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           setSelectedMedication('');
           setDose('');
           setFrequency('1');
-          const today = new Date().toISOString().split('T')[0];
+          const today = getTodayString();
           setStartDate(today);
           const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
           setStopDate(defaultEndDate.toISOString().split('T')[0]);
@@ -213,7 +216,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
     if (!med) return;
 
     let newDose = med.defaultDose.toString();
-    let newStartDate = new Date().toISOString().split('T')[0];
+    let newStartDate = getTodayString();
     let isTitration = false;
 
     if (mode === 'add' && existingProtocols) {
@@ -239,7 +242,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           endDate.setDate(endDate.getDate() + selectedDurationDays);
           setStopDate(endDate.toISOString().split('T')[0]);
         } else {
-          newStartDate = new Date().toISOString().split('T')[0];
+          newStartDate = getTodayString();
           setContinuationInfo(`Continues from ${med.name} protocol (ongoing)`);
           
           const endDate = new Date(newStartDate);

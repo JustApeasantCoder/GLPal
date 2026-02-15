@@ -7,6 +7,9 @@ import { useWeightChartDateRange } from '../../shared/hooks/useChartDateRange';
 import ChartEmptyState from '../../shared/components/ChartEmptyState';
 import { ChartPeriod } from '../../shared/hooks';
 import { getMedicationColor } from '../../shared/utils/chartUtils';
+import { timeService } from '../../core/timeService';
+
+const getToday = () => new Date(timeService.now());
 
 const shortenMedicationName = (name: string): string => {
   return name.replace(/\s*\(.*?\)/g, '').trim();
@@ -39,7 +42,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
   const chartRef = useRef<any>(null);
 
   const firstDataDate = useMemo(
-    () => (sortedData.length > 0 ? sortedData[0].date : new Date()),
+    () => (sortedData.length > 0 ? sortedData[0].date : getToday()),
     [sortedData]
   );
 
@@ -47,12 +50,12 @@ const WeightChart: React.FC<WeightChartProps> = ({
     () =>
       sortedData.length > 0
         ? sortedData[sortedData.length - 1].date
-        : new Date(),
+        : getToday(),
     [sortedData]
   );
 
   const { zoomStart, visibleStartIndex, visibleEndIndex, totalPoints } =
-    useWeightChartDateRange(firstDataDate, lastDataDate, period);
+    useWeightChartDateRange(firstDataDate, lastDataDate, period, getToday());
 
   const doseChanges = useMemo(() => {
     if (!medicationData || medicationData.length === 0) return [];

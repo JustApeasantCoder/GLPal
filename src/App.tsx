@@ -6,11 +6,12 @@ import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
-import { ChartPeriod } from './shared/hooks';
+import { ChartPeriod, useTime } from './shared/hooks';
 import { 
   initializeDatabase, 
   getWeightEntries, 
   getAllGLP1Entries, 
+  getMedicationEntries,
   getUserProfile, 
   addWeightEntry, 
   addGLP1ManualEntry,
@@ -19,8 +20,9 @@ import {
 } from './shared/utils/database';
 import { initializeSampleWeightData } from './shared/utils/sampleData';
 import { timeService } from './core/timeService';
+import LogTab from './features/medication/LogTab';
 
-type TabType = 'dashboard' | 'doses' | 'dosage';
+type TabType = 'dashboard' | 'doses' | 'dosage' | 'log';
 
 interface TabContentProps {
   children: React.ReactNode;
@@ -39,6 +41,7 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
+  const now = useTime(1000);
 const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
@@ -67,16 +70,16 @@ try {
         
         // Load existing data
         const existingWeights = getWeightEntries();
-        const existingGLP1 = getAllGLP1Entries();
+        const existingGLP1 = getMedicationEntries();
         const existingProfile = getUserProfile();
         
         // If no data exists, generate sample data
-if (existingWeights.length === 0) {
+        if (existingWeights.length === 0) {
           initializeSampleWeightData();
           
           // Reload after generation
           const generatedWeights = getWeightEntries();
-          const generatedGLP1 = getAllGLP1Entries();
+          const generatedGLP1 = getMedicationEntries();
           setWeights(generatedWeights);
           setDosesEntries(generatedGLP1);
         } else {
@@ -121,13 +124,13 @@ const handleAddWeight = (newWeight: number) => {
     // Save to database (manual entry)
     addGLP1ManualEntry(newEntry);
     
-    // Reload from database to ensure fresh data
-    const allEntries = getAllGLP1Entries();
-    setDosesEntries(allEntries);
+    // Reload generated entries for chart (manual entries go to Log tab)
+    const generatedEntries = getMedicationEntries();
+    setDosesEntries(generatedEntries);
   };
 
   const handleRefreshDoses = useCallback(() => {
-    const entries = getAllGLP1Entries();
+    const entries = getMedicationEntries();
     setDosesEntries(entries);
   }, []);
 
@@ -150,7 +153,12 @@ return (
       {/* Fixed top navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-b border-card-border px-4 py-3 z-50 shadow-theme">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold text-text-primary" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>GLPal</h1>
+          <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>
+            GLPal
+            <span className="text-sm font-normal text-text-muted">
+              {new Date(now).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </h1>
           <div className="flex items-center gap-2">
             <button
               onClick={handleClearData}
@@ -290,6 +298,11 @@ return (
           <TabContent isActive={activeTab === 'dosage'}>
             <div className="max-w-md mx-auto">
               <DosageCalculatorTab />
+            </div>
+          </TabContent>
+          <TabContent isActive={activeTab === 'log'}>
+            <div className="max-w-md mx-auto">
+              <LogTab />
             </div>
           </TabContent>
         </div>

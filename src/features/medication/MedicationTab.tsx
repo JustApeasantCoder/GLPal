@@ -9,7 +9,7 @@ import { GLP1Entry, GLP1Protocol } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { calculateMedicationConcentration } from '../../shared/utils/calculations';
-import { addMedicationGeneratedEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols } from '../../shared/utils/database';
+import { addMedicationGeneratedEntry, addMedicationManualEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols, getMedicationManualEntries } from '../../shared/utils/database';
 import { MEDICATIONS, formatDateShort, formatFrequency, generateId } from '../../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../../services/MedicationService';
 
@@ -53,6 +53,41 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
+    
+    // Auto-log past and today's doses
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    protocolList.forEach(protocol => {
+      if (protocol.isArchived) return;
+      
+      const start = new Date(protocol.startDate);
+      const stop = protocol.stopDate ? new Date(protocol.stopDate) : now;
+      const intervalDays = 7 / protocol.frequencyPerWeek;
+      
+      let d = new Date(start);
+      while (d <= stop && d <= now) {
+        const dateStr = d.toISOString().split('T')[0];
+        
+        // Check if already logged
+        const existingManual = getMedicationManualEntries();
+        const alreadyLogged = existingManual.some(e => e.date === dateStr && e.medication === protocol.medication);
+        
+        if (!alreadyLogged) {
+          // Auto-log this dose
+          const manualEntry: GLP1Entry = {
+            date: dateStr,
+            medication: protocol.medication,
+            dose: protocol.dose,
+            halfLifeHours: protocol.halfLifeHours,
+            isManual: true
+          };
+          addMedicationManualEntry(manualEntry);
+        }
+        
+        d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+      }
+    });
   };
 
   const toggleMedication = (medicationName: string) => {
@@ -121,56 +156,131 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
+  const handleLogDoseNow = () => {
+    const activeProtocol = protocols?.find(p => {
+      if (p.isArchived) return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(p.startDate);
+      const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
+      return today >= start && today <= end;
+    });
+
+    if (activeProtocol) {
+      const today = new Date().toISOString().split('T')[0];
+      const newEntry: GLP1Entry = {
+        date: today,
+        medication: activeProtocol.medication,
+        dose: activeProtocol.dose,
+        halfLifeHours: activeProtocol.halfLifeHours,
+        isManual: true
+      };
+      addMedicationManualEntry(newEntry);
+      onRefreshMedications();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   // Use time hook for live updates (every 100ms) - uses timeService internally
   const now = useTime(100);
 
   // Calculate stats based on real dates + simulated time
   const stats = (() => {
-    // Get actual last dose from medication entries
+    const currentTime = new Date(now);
+    currentTime.setHours(0, 0, 0, 0);
+    
+    // Find active protocol (the one that covers today's date)
+    const activeProtocol = protocols?.find(p => {
+      if (p.isArchived) return false;
+      const start = new Date(p.startDate);
+      const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
+      return currentTime >= start && currentTime <= end;
+    });
+    
+    // Get interval from active protocol (default 7 days)
+    let intervalDays = 7;
+    if (activeProtocol) {
+      intervalDays = Math.round(7 / activeProtocol.frequencyPerWeek);
+    }
+    
+    // Get all medication entries (both generated and manually logged)
     const sortedEntries = [...medicationEntries].sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     
-    const lastEntry = sortedEntries[0];
-    const lastDoseDate = lastEntry ? new Date(lastEntry.date) : null;
+    // Find last scheduled dose based on active protocol (most recent dose on or before today)
+    let lastScheduledDate: Date | null = null;
+    if (activeProtocol) {
+      const protocolStart = new Date(activeProtocol.startDate);
+      const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
+      
+      let scheduledDate = new Date(protocolStart);
+      while (scheduledDate <= currentTime) {
+        lastScheduledDate = new Date(scheduledDate);
+        scheduledDate = new Date(scheduledDate.getTime() + intervalMs);
+      }
+    }
+    
+    const lastDoseDate = lastScheduledDate;
     const lastDoseDateStr = lastDoseDate 
       ? lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       : 'N/A';
     
-    // Get interval from protocol (default 7 days)
-    let intervalDays = 7;
-    if (protocols && protocols.length > 0) {
-      intervalDays = Math.round(7 / protocols[0].frequencyPerWeek);
-    }
-    
-    // Calculate next dose based on real dates
+    // Calculate next dose based on active protocol schedule
     let nextDueDays = 0;
     let nextDueHours = 0;
     let nextDueMinutes = 0;
     let nextDueSeconds = 0;
     let daysSinceLastDose = 0;
     let nextDueDateStr = 'N/A';
+    let nextDoseDate: Date | null = null;
     
-    if (lastDoseDate) {
-      // Current time (from timeService - allows simulation)
-      const currentTime = new Date(now);
-      currentTime.setHours(0, 0, 0, 0);
+    if (activeProtocol) {
+      const protocolStart = new Date(activeProtocol.startDate);
+      const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
       
-      // Days since last dose
-      daysSinceLastDose = Math.floor((currentTime.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      // Next expected dose
-      const nextDoseDate = new Date(lastDoseDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+      // Find the next scheduled dose after current time
+      let scheduledDate = new Date(protocolStart);
+      while (scheduledDate <= currentTime) {
+        scheduledDate = new Date(scheduledDate.getTime() + intervalMs);
+      }
+      nextDoseDate = scheduledDate;
       nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
-      // Time remaining
+      // Time remaining until next dose
       const diffMs = nextDoseDate.getTime() - currentTime.getTime();
       nextDueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       nextDueHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       nextDueMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
       nextDueSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
       
+      // Days since last dose (with fractional days for smooth animation)
+      if (lastDoseDate) {
+        daysSinceLastDose = (currentTime.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24);
+      }
+      
       // Fix negative hours
+      if (diffMs < 0 && nextDueDays === 0) {
+        nextDueHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        if (nextDueHours < 0) {
+          nextDueDays = -1;
+          nextDueHours = 24 + nextDueHours;
+        }
+      }
+    } else if (lastDoseDate) {
+      // Fallback to last dose + interval if no active protocol
+      daysSinceLastDose = (currentTime.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24);
+      
+      nextDoseDate = new Date(lastDoseDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const diffMs = nextDoseDate.getTime() - currentTime.getTime();
+      nextDueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      nextDueHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      nextDueMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      nextDueSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
       if (diffMs < 0 && nextDueDays === 0) {
         nextDueHours = Math.ceil(diffMs / (1000 * 60 * 60));
         if (nextDueHours < 0) {
@@ -183,6 +293,36 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const totalDoses = medicationEntries.length;
     const totalCurrentDose = medicationEntries.length > 0 ? medicationEntries[0].dose : 0;
     
+    const nowDate = new Date(now);
+    const thisMonthDoses = medicationEntries.filter(entry => {
+      const entryDate = new Date(entry.date);
+      return entryDate.getMonth() === nowDate.getMonth() && 
+             entryDate.getFullYear() === nowDate.getFullYear();
+    }).length;
+    
+    const upcomingDoses = (() => {
+      if (!protocols || protocols.length === 0) return 0;
+      const activeProtocols = protocols.filter(p => !p.isArchived);
+      if (activeProtocols.length === 0) return 0;
+      
+      const nextMonth = new Date(nowDate);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      let count = 0;
+      activeProtocols.forEach(protocol => {
+        const start = new Date(protocol.startDate);
+        const end = protocol.stopDate ? new Date(protocol.stopDate) : nextMonth;
+        const intervalDays = 7 / protocol.frequencyPerWeek;
+        
+        let d = new Date(start);
+        while (d <= end && d <= nextMonth) {
+          if (d > nowDate) count++;
+          d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+        }
+      });
+      return count;
+    })();
+    
     return { 
       totalDoses, 
       currentDoses: [], 
@@ -193,8 +333,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       nextDueSeconds, 
       nextDueDateStr, 
       currentLevel: 0, 
-      thisMonth: 0, 
-      plannedDoses: 0, 
+      thisMonth: thisMonthDoses, 
+      plannedDoses: upcomingDoses, 
       lastDoseDateStr, 
       daysSinceLastDose, 
       intervalDays 
@@ -268,7 +408,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                       ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
                       : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
                         ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
-                        : `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                        : stats.nextDueDays < 0
+                          ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                          : `${Math.abs(stats.nextDueHours)} Hour${Math.abs(stats.nextDueHours) !== 1 ? 's' : ''} Overdue`
                     }
                   </span>
                 </div>
@@ -286,8 +428,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               </div>
               {(stats.nextDueDays <= 0) && (
                 <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-semibold text-sm shadow-[0_0_20px_rgba(177,156,217,0.5)] hover:shadow-[0_0_30px_rgba(177,156,217,0.7)] transition-all duration-300 hover:scale-[1.02]"
+                  onClick={handleLogDoseNow}
+                  className="mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm shadow-[0_0_20px_rgba(74,222,168,0.5)] hover:shadow-[0_0_30px_rgba(74,222,168,0.7)] transition-all duration-300 hover:scale-[1.02]"
                 >
                   {stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now'}
                 </button>
@@ -320,7 +462,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               <p className={text.value}>{stats.plannedDoses}</p>
             </div>
             <div className={smallCard}>
-              <p className={text.label}>This Month</p>
+              <p className={text.label}>Logged Doses</p>
               <p className={text.value}>{stats.thisMonth}</p>
             </div>
           </div>
@@ -338,7 +480,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
         <Button onClick={() => setIsModalOpen(true)} fullWidth>
-          + Log Dose
+          + Log Dose Manually
         </Button>
       </div>
 

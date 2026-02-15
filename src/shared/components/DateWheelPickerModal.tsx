@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import WheelPicker from './WheelPicker';
+import { timeService } from '../../core/timeService';
+
+const getToday = () => new Date(timeService.now());
 
 interface DateWheelPickerModalProps {
   isOpen: boolean;
@@ -42,7 +45,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
   }, [localDate]);
 
   const years = useMemo(() => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = getToday().getFullYear();
     const startYear = minDate
       ? new Date(minDate).getFullYear()
       : currentYear - 10;
