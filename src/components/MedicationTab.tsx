@@ -145,6 +145,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     });
     const totalCurrentDose = currentDoses.reduce((sum, d) => sum + d.dose, 0);
     
+    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const sortedAsc = [...medicationEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     const nextDose = sortedAsc.find(d => {
@@ -155,14 +156,34 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     
     let nextDueDays = 0;
     let nextDueDateStr = 'N/A';
-    if (nextDose) {
+    let lastDoseDate: Date | null = null;
+    let lastDoseDateStr = 'N/A';
+    let daysSinceLastDose = 0;
+    let intervalDays = 7; // default weekly
+    
+    if (sorted.length > 0) {
+      lastDoseDate = new Date(sorted[0].date);
+      lastDoseDate.setHours(0, 0, 0, 0);
+      daysSinceLastDose = Math.floor((today.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
+      lastDoseDateStr = lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      // Calculate interval from protocol frequency
+      const firstEntry = sorted[0];
+      const protocol = protocols.find(p => p.medication === firstEntry.medication);
+      if (protocol) {
+        intervalDays = Math.round(7 / protocol.frequencyPerWeek);
+      }
+    }
+    
+    if (nextDose && lastDoseDate) {
       const nextDoseDate = new Date(nextDose.date);
       nextDoseDate.setHours(0, 0, 0, 0);
       nextDueDays = Math.ceil((nextDoseDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const calculatedInterval = Math.ceil((nextDoseDate.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (calculatedInterval > 0) intervalDays = calculatedInterval;
     }
     
-    const sorted = [...medicationEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const halfLife = sorted[0]?.halfLifeHours || 168;
     
     const medications = Array.from(new Set(sorted.map(e => e.medication)));
@@ -192,7 +213,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       return doseDate > today;
     }).length;
 
-    return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, thisMonth, plannedDoses };
+    return { totalDoses, currentDoses, totalCurrentDose, nextDueDays, nextDueDateStr, currentLevel, thisMonth, plannedDoses, lastDoseDateStr, daysSinceLastDose, intervalDays };
   }, [medicationEntries]);
 
   return (
@@ -202,6 +223,49 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <div className="space-y-3 mb-6">
+          {/* Progress Bar - Next Dose Countdown */}
+          {stats.lastDoseDateStr !== 'N/A' && (
+            <div className="mb-4">
+              <div className="relative overflow-hidden h-10 rounded-full bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-[#B19CD9]/30 shadow-[0_0_15px_rgba(177,156,217,0.3)]">
+                {/* Progress Fill */}
+                <div 
+                  className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#B19CD9] via-[#D4B8E8] to-[#B19CD9] transition-all duration-500"
+                  style={{ 
+                    width: `${Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100))}%`,
+                    boxShadow: stats.nextDueDays <= 0 
+                      ? '0 0 20px rgba(255,100,100,0.6)' 
+                      : '0 0 15px rgba(177,156,217,0.6)'
+                  }}
+                />
+                {/* Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                {/* Center Text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold text-white drop-shadow-lg">
+                    {stats.nextDueDays > 0 
+                      ? `${stats.nextDueDays} Day${stats.nextDueDays > 1 ? 's' : ''} until next dose`
+                      : stats.nextDueDays === 0 
+                        ? 'Dose Due Today!'
+                        : `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) > 1 ? 's' : ''}`
+                    }
+                  </span>
+                </div>
+              </div>
+              <div className="flex justify-between mt-1 text-xs text-[#B19CD9]/70">
+                <span>Last: {stats.lastDoseDateStr}</span>
+                <span>Next: {stats.nextDueDateStr}</span>
+              </div>
+              {(stats.nextDueDays <= 0) && (
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-semibold text-sm shadow-[0_0_20px_rgba(177,156,217,0.5)] hover:shadow-[0_0_30px_rgba(177,156,217,0.7)] transition-all duration-300 hover:scale-[1.02]"
+                >
+                  {stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now'}
+                </button>
+              )}
+            </div>
+          )}
+          
           <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Total Doses</p>
