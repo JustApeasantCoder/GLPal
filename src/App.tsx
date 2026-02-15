@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import SettingsMenu from './components/SettingsMenu';
-import Dashboard from './components/Dashboard';
-import MedicationTab from './components/MedicationTab';
-import DosageCalculatorTab from './components/DosageCalculatorTab';
-import Navigation from './components/Navigation';
+import SettingsMenu from './features/dashboard/components/SettingsMenu';
+import Dashboard from './features/dashboard/Dashboard';
+import MedicationTab from './features/medication/MedicationTab';
+import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
+import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
-import { ChartPeriod } from './hooks';
+import { ChartPeriod } from './shared/hooks';
 import { 
   initializeDatabase, 
   getWeightEntries, 
@@ -16,8 +16,8 @@ import {
   addGLP1ManualEntry,
   saveUserProfile,
   clearAllData
-} from './utils/database';
-import { initializeSampleWeightData } from './utils/sampleData';
+} from './shared/utils/database';
+import { initializeSampleWeightData } from './shared/utils/sampleData';
 
 type TabType = 'dashboard' | 'doses' | 'dosage';
 

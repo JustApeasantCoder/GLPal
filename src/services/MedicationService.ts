@@ -1,5 +1,5 @@
 import { GLP1Entry, GLP1Protocol } from '../types';
-import { saveMedicationProtocols, getMedicationProtocols, deleteMedicationProtocol, getArchivedProtocols, setMedicationEntries } from '../utils/database';
+import { saveMedicationProtocols, getMedicationProtocols, deleteMedicationProtocol, getArchivedProtocols, setMedicationEntries } from '../shared/utils/database';
 
 export const generateDosesFromProtocols = (
   protocols: GLP1Protocol[],
