@@ -45,6 +45,20 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [doseLoggedToday, setDoseLoggedToday] = useState(false);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const [showProgressDebug, setShowProgressDebug] = useState(false);
+  const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
+  const [latestDoseDone, setLatestDoseDone] = useState<Date | null>(() => {
+    const saved = localStorage.getItem('latestDoseDone');
+    return saved ? new Date(saved) : null;
+  });
+  
+  // Sync latestDoseDone from localStorage when timeService changes (for time travel)
+  useEffect(() => {
+    const saved = localStorage.getItem('latestDoseDone');
+    if (saved) {
+      setLatestDoseDone(new Date(saved));
+    }
+  }, [timeService.nowDate().getTime()]);
+  
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
@@ -155,7 +169,35 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   };
 
 const handleLogDoseNow = () => {
+    // Check if overdue - show disclaimer modal first
+    const statsOverdue = latestDoseDone !== null && ((new Date(now).getTime() - latestDoseDone.getTime()) > (7 * 24 * 60 * 60 * 1000));
+    if (statsOverdue) {
+      setShowOverdueDisclaimer(true);
+      return;
+    }
+    
     // Use string comparison to avoid timezone issues
+    const today = timeService.nowDate();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const activeProtocol = protocols?.find(p => {
+      if (p.isArchived) return false;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
+    });
+
+    if (activeProtocol) {
+      setIsLogging(true);
+      setActiveProtocolForModal(activeProtocol);
+      setShowLogDoseModal(true);
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleConfirmOverdueDose = () => {
+    setShowOverdueDisclaimer(false);
     const today = timeService.nowDate();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
@@ -390,7 +432,11 @@ const handleLogDoseNow = () => {
       daysSinceLastDose, 
       intervalDays,
       isScheduleStartDay,
-      isDueToday
+      isDueToday,
+      latestDoseDone,
+      isOverdue: latestDoseDone !== null 
+        ? (currentTime.getTime() - latestDoseDone.getTime()) > (7 * 24 * 60 * 60 * 1000)
+        : false
     };
   })();
 
@@ -424,7 +470,7 @@ const handleLogDoseNow = () => {
                       : Math.min(80, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
                   const progressPercent = doseLoggedToday ? 100 : rawProgress;
                   const isDueToday = stats.isDueToday;
-                  const isOverdue = !isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0));
+                  const isOverdue = stats.isOverdue || (!isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0)));
                   
                   return (
                     <>
@@ -500,17 +546,22 @@ const handleLogDoseNow = () => {
                   <span className="text-sm font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                     {doseLoggedToday 
                       ? 'Dose Logged for Today'
-                      : stats.isScheduleStartDay
-                        ? 'New Schedule - Log First Dose'
-                        : stats.isDueToday
-                          ? 'Dose Due Today - Log Now'
-                          : stats.nextDueDays > 0 
-                            ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
-                            : stats.nextDueDays < 0
-                              ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
-                              : stats.nextDueDays === 0
-                                ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
-                                : `DEBUG: ${stats.nextDueDays}d ${stats.nextDueHours}h isDueToday=${stats.isDueToday}`
+                      : stats.isOverdue && stats.latestDoseDone
+                        ? (() => {
+                            const daysOverdue = Math.floor((new Date(now).getTime() - stats.latestDoseDone.getTime()) / (1000 * 60 * 60 * 24)) - 7;
+                            return `Overdue by ${daysOverdue} Day${daysOverdue !== 1 ? 's' : ''}`;
+                          })()
+                        : stats.isScheduleStartDay
+                          ? 'New Schedule - Log First Dose'
+                          : stats.isDueToday
+                            ? 'Dose Due Today - Log Now'
+                            : stats.nextDueDays > 0
+                              ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                              : stats.nextDueDays < 0
+                                ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                                : stats.nextDueDays === 0
+                                  ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                                  : `DEBUG: ${stats.nextDueDays}d ${stats.nextDueHours}h isDueToday=${stats.isDueToday}`
                     }
                   </span>
                 </div>
@@ -526,18 +577,27 @@ const handleLogDoseNow = () => {
                   <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
                 </span>
               </div>
-{(stats.isDueToday || stats.nextDueDays < 0 || (activeProtocol && stats.lastDoseDateStr === 'N/A') || stats.isScheduleStartDay) && !doseLoggedToday && (
+{(stats.isDueToday || stats.nextDueDays < 0 || (activeProtocol && stats.lastDoseDateStr === 'N/A') || stats.isScheduleStartDay || stats.isOverdue) && !doseLoggedToday && (
                 <button
-                  onClick={handleLogDoseNow}
-                  className={`mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm transition-all duration-300 hover:scale-[1.02] ${!showLoggingButton ? 'opacity-0 scale-95' : ''} ${!stats.isDueToday && stats.nextDueDays < 0 ? 'animate-pulse' : ''}`}
+                  onClick={stats.isOverdue && !stats.isDueToday ? undefined : handleLogDoseNow}
+                  disabled={stats.isOverdue && !stats.isDueToday}
+                  className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${!showLoggingButton ? 'opacity-0 scale-95' : ''} ${
+                    stats.isOverdue && !stats.isDueToday
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : stats.isOverdue
+                        ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
+                        : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
+                  }`}
                   style={{ 
                     transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
-                    boxShadow: !stats.isDueToday && stats.nextDueDays < 0
-                      ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
-                      : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
+                    boxShadow: (stats.isOverdue && !stats.isDueToday)
+                      ? 'none'
+                      : stats.isOverdue
+                        ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
+                        : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
                   }}
                 >
-                  {isLogging ? 'Logging...' : (!stats.isDueToday && stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now')}
+                  {isLogging ? 'Logging...' : (stats.isOverdue && !stats.isDueToday ? 'Consult Your Healthcare Provider About The Missed Dose.' : (stats.isOverdue ? 'Log Overdue Dose' : 'Log Dose Now'))}
                 </button>
               )}
             </div>
@@ -629,6 +689,14 @@ const handleLogDoseNow = () => {
                 
                 <span className="text-gray-400">nextDueDateStr:</span>
                 <span className="text-yellow-400">{stats.nextDueDateStr}</span>
+                
+                <span className="text-gray-400">latestDoseDone:</span>
+                <span className="text-yellow-400">{stats.latestDoseDone ? stats.latestDoseDone.toISOString() : 'NULL'}</span>
+                
+                <span className="text-gray-400">daysSinceLastDoseLogged:</span>
+                <span className="text-white">{stats.latestDoseDone 
+                  ? ((new Date(now).getTime() - stats.latestDoseDone.getTime()) / (1000 * 60 * 60 * 24)).toFixed(2)
+                  : 'N/A'}</span>
               </div>
               
               <div className="border-t border-red-500/20 my-2"></div>
@@ -659,10 +727,8 @@ const handleLogDoseNow = () => {
                 <span className="text-gray-400">doseLoggedToday:</span>
                 <span className={doseLoggedToday ? 'text-green-400' : 'text-white'}>{doseLoggedToday ? 'TRUE' : 'FALSE'}</span>
                 
-                <span className="text-gray-400">isOverdue:</span>
-                <span className={!stats.isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0)) ? 'text-red-400' : 'text-white'}>
-                  {!stats.isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0)) ? 'TRUE' : 'FALSE'}
-                </span>
+                <span className="text-gray-400">isOverdue (7+ days since last):</span>
+                <span className={stats.isOverdue ? 'text-red-400' : 'text-white'}>{stats.isOverdue ? 'TRUE' : 'FALSE'}</span>
                 
                 <span className="text-gray-400">rawProgress (days/interval*100):</span>
                 <span className="text-yellow-400">{stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
@@ -1095,6 +1161,9 @@ const handleLogDoseNow = () => {
           setIsLogging(false);
         }}
         onSave={() => {
+          const now = timeService.nowDate();
+          setLatestDoseDone(now);
+          localStorage.setItem('latestDoseDone', now.toISOString());
           onRefreshMedications();
           onLogDose();
           setIsLogging(false);
@@ -1103,6 +1172,43 @@ const handleLogDoseNow = () => {
         }}
         protocol={activeProtocol || null}
       />
+
+      {showOverdueDisclaimer && (
+        <div 
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+          style={{ animation: 'fadeIn 0.2s ease-out' }}
+        >
+          <div 
+            className="fixed inset-0 bg-black/60" 
+            style={{ backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease-out' }} 
+            onClick={() => setShowOverdueDisclaimer(false)} 
+          />
+          <div 
+            className="relative bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6"
+            style={{ animation: 'slideUp 0.2s ease-out' }}
+          >
+            <h3 className="text-lg font-bold text-white mb-3">Disclaimer</h3>
+            <p className="text-sm text-gray-300 mb-4">
+              By proceeding, you confirm that you have consulted your healthcare provider regarding any missed doses and understand this app does not provide medical advice.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowOverdueDisclaimer(false)}
+                className="flex-1 py-2 px-4 rounded-lg bg-gray-600 text-white font-semibold text-sm hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmOverdueDose}
+                className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white font-semibold text-sm hover:scale-[1.02] transition-all"
+                style={{ boxShadow: '0 0 20px rgba(239,68,68,0.5)' }}
+              >
+                I Understand, Proceed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {deleteConfirmMed && (
         <div 
