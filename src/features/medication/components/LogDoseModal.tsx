@@ -21,7 +21,14 @@ const ISR_SEVERITY = [
   'Severe',
 ];
 
-const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
+  const getPainLevelColor = (level: number) => {
+    if (level === 0) return 'text-green-400';
+    if (level <= 3) return 'text-yellow-400';
+    if (level <= 6) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
   const [painLevel, setPainLevel] = useState<number>(0);
   const [injectionArea, setInjectionArea] = useState<string>('');
   const [injectionSide, setInjectionSide] = useState<string>('');
@@ -157,24 +164,68 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
-              Pain Level (optional)
-            </label>
-            <div className="flex gap-1">
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => setPainLevel(level)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-[1.02] ${
-                    painLevel === level
-                      ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                      : 'bg-black/20 border border-[#EF4444]/30 text-text-muted hover:bg-[#EF4444]/20 hover:border-[#EF4444]/50'
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium text-text-secondary">
+                Pain Level (optional)
+              </label>
+              <span className={`text-sm font-medium ${getPainLevelColor(painLevel)}`}>
+                {painLevel}/10
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <input
+                type="range"
+                min="0"
+                max="10"
+                step="1"
+                value={painLevel}
+                onChange={(e) => setPainLevel(parseInt(e.target.value))}
+                className="w-full h-10 appearance-none cursor-pointer"
+              />
+              <style>{`
+                input[type="range"] {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  background: transparent;
+                  cursor: pointer;
+                }
+                input[type="range"]::-webkit-slider-runnable-track {
+                  height: 8px;
+                  border-radius: 6px;
+                  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
+                }
+                input[type="range"]::-moz-range-track {
+                  height: 8px;
+                  border-radius: 6px;
+                  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
+                }
+                input[type="range"]::-webkit-slider-thumb {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  background: #9C7BD3;
+                  border: 2px solid white;
+                  box-shadow: 0 0 15px rgba(177, 156, 217, 0.3);
+                  cursor: pointer;
+                  margin-top: -8px;
+                }
+                input[type="range"]::-moz-range-thumb {
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  background: #9C7BD3;
+                  border: 2px solid white;
+                  box-shadow: 0 0 15px rgba(177, 156, 217, 0.3);
+                  cursor: pointer;
+                }
+              `}</style>
+              <div className="flex justify-between gap-1 mt-1">
+                <span className="text-xs text-green-400">None</span>
+                <span className="text-xs text-orange-400">Moderate</span>
+                <span className="text-xs text-red-400">Severe</span>
+              </div>
             </div>
           </div>
 
