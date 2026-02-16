@@ -29,7 +29,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showLogDoseModal, setShowLogDoseModal] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
   const [activeProtocolForModal, setActiveProtocolForModal] = useState<GLP1Protocol | null>(null);
-  const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
+  const [protocols, setProtocols] = useState<GLP1Protocol[]>(() => getActiveProtocols());
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
@@ -45,17 +45,6 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [doseLoggedToday, setDoseLoggedToday] = useState(false);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
-
-  useEffect(() => {
-    const savedProtocols = getActiveProtocols();
-    setProtocols(savedProtocols);
-    if (savedProtocols.length > 0) {
-      const medNames = new Set(savedProtocols.map(p => {
-        const med = MEDICATIONS.find(m => m.id === p.medication);
-        return med?.name || p.medication;
-      }));
-    }
-  }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
     clearMedicationEntries();
@@ -165,10 +154,11 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   };
 
 const handleLogDoseNow = () => {
+    const today = new Date(timeService.nowDate().getTime());
+    today.setHours(0, 0, 0, 0);
+    
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
-      const today = timeService.nowDate();
-      today.setHours(0, 0, 0, 0);
       const start = new Date(p.startDate);
       const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
       return today >= start && today <= end;
@@ -186,29 +176,47 @@ const handleLogDoseNow = () => {
 // Use time hook for live updates (every 100ms) - uses timeService internally
   const now = useTime(100);
 
-  // Reset doseLoggedToday when the day changes
+  // Find active protocol for today
+  const today = new Date(timeService.nowDate().getTime());
+  today.setHours(0, 0, 0, 0);
+  
+  const activeProtocol = protocols?.find(p => {
+    if (p.isArchived) return false;
+    const start = new Date(p.startDate);
+    const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
+    return today >= start && today <= end;
+  });
+
+  // Reset doseLoggedToday when the day changes or when active protocol changes
   useEffect(() => {
     const currentDate = timeService.nowDate().toDateString();
     const savedDate = localStorage.getItem('lastLoggedDate');
+    const savedProtocolId = localStorage.getItem('lastLoggedProtocolId');
     
-    if (savedDate && savedDate !== currentDate) {
+    // Reset if day changed or protocol changed
+    if (savedDate !== currentDate || savedProtocolId !== (activeProtocol?.id || '')) {
       setDoseLoggedToday(false);
       setShowLoggingButton(true);
     }
     localStorage.setItem('lastLoggedDate', currentDate);
-  }, [now]);
+    if (activeProtocol) {
+      localStorage.setItem('lastLoggedProtocolId', activeProtocol.id);
+    }
+  }, [now, activeProtocol?.id]);
 
-  // Calculate stats based on real dates + simulated time
+// Calculate stats based on real dates + simulated time
   const stats = (() => {
-    const currentTime = new Date(now);
-    currentTime.setHours(0, 0, 0, 0);
+    const currentTimeDate = new Date(now);
+    const currentTime = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
     
-    // Find active protocol (the one that covers today's date)
+    // Find active protocol (the one that covers today's date) - compare as date strings to avoid timezone issues
+    const todayStr = `${currentTimeDate.getFullYear()}-${String(currentTimeDate.getMonth() + 1).padStart(2, '0')}-${String(currentTimeDate.getDate()).padStart(2, '0')}`;
+    
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
-      const start = new Date(p.startDate);
-      const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-      return currentTime >= start && currentTime <= end;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
     });
     
     // Get interval from active protocol (default 7 days)
@@ -336,6 +344,33 @@ const handleLogDoseNow = () => {
       return count;
     })();
     
+const isScheduleStartDay = activeProtocol && new Date(activeProtocol.startDate).toDateString() === currentTime.toDateString();
+    console.log('DEBUG isScheduleStartDay:', {
+      protocolsCount: protocols?.length,
+      currentTimeStr: currentTime.toDateString(),
+      currentTimeISO: currentTime.toISOString(),
+      currentTimeRaw: now,
+      activeProtocolId: activeProtocol?.id,
+      // Debug the find logic for each protocol
+      protocolCheck: protocols?.map(p => {
+        const start = new Date(p.startDate);
+        const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
+        return {
+          id: p.id,
+          startDate: p.startDate,
+          startDateParsed: start.toDateString(),
+          endDate: p.stopDate,
+          endDateParsed: end.toDateString(),
+          currentTimeParsed: currentTime.toDateString(),
+          isArchived: p.isArchived,
+          checkStart: currentTime >= start,
+          checkEnd: currentTime <= end,
+          shouldBeActive: !p.isArchived && currentTime >= start && currentTime <= end
+        };
+      }),
+      isScheduleStartDay,
+    });
+    
     return { 
       totalDoses, 
       currentDoses: [], 
@@ -350,7 +385,8 @@ const handleLogDoseNow = () => {
       plannedDoses: upcomingDoses, 
       lastDoseDateStr, 
       daysSinceLastDose, 
-      intervalDays 
+      intervalDays,
+      isScheduleStartDay
     };
   })();
 
@@ -360,9 +396,9 @@ const handleLogDoseNow = () => {
         <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Doses</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        <div className="space-y-3 mb-6">
+<div className="space-y-3 mb-6">
           {/* Progress Bar - Next Dose Countdown */}
-          {stats.lastDoseDateStr !== 'N/A' && (
+          {(stats.lastDoseDateStr !== 'N/A' || activeProtocol || stats.isScheduleStartDay) && (
             <div className="mb-4">
               {/* Outer container with glow - rounded */}
               <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_30px_rgba(177,156,217,0.2)]">
@@ -375,7 +411,13 @@ const handleLogDoseNow = () => {
                 />
 {/* Progress Fill with segmented colors */}
                 {(() => {
-                  const progressPercent = doseLoggedToday ? 100 : Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
+                  const progressPercent = doseLoggedToday 
+                    ? 100 
+                    : stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                      ? 0 
+                      : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
+                        ? 0
+                        : Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
                   const greenThreshold = (6 / 7) * 100; // Green starts at ~86% (6 days passed, 1 day left)
                   const isOverdue = stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0);
                   
@@ -402,7 +444,7 @@ const handleLogDoseNow = () => {
                         />
                       )}
                       {/* Green overlay (last day portion) */}
-                      {!isOverdue && !doseLoggedToday && progressPercent > greenThreshold && (
+                      {!isOverdue && !doseLoggedToday && stats.lastDoseDateStr !== 'N/A' && progressPercent > greenThreshold && (
                         <div 
                           className="absolute top-0 h-full transition-all duration-300"
                           style={{ 
@@ -423,13 +465,15 @@ const handleLogDoseNow = () => {
                   <span className="text-sm font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                     {doseLoggedToday 
                       ? 'Dose Logged for Today'
-                      : (stats.nextDueDays > 0 
-                        ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
-                        : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
-                          ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
-                          : stats.nextDueDays < 0
-                            ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
-                            : `${Math.abs(stats.nextDueHours)} Hour${Math.abs(stats.nextDueHours) !== 1 ? 's' : ''} Overdue`)
+                      : stats.isScheduleStartDay
+                        ? 'New Schedule - Log First Dose'
+                        : stats.nextDueDays > 0 
+                          ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                          : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
+                            ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
+                            : stats.nextDueDays < 0
+                              ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                              : `${Math.abs(stats.nextDueHours)} Hour${Math.abs(stats.nextDueHours) !== 1 ? 's' : ''} Overdue`
                     }
                   </span>
                 </div>
@@ -445,7 +489,7 @@ const handleLogDoseNow = () => {
                   <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
                 </span>
               </div>
-{(stats.nextDueDays <= 0) && !doseLoggedToday && (
+{(stats.nextDueDays <= 0 || (activeProtocol && stats.lastDoseDateStr === 'N/A') || stats.isScheduleStartDay) && !doseLoggedToday && (
                 <button
                   onClick={handleLogDoseNow}
                   className={`mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm shadow-[0_0_10px_rgba(74,222,168,0.5)] hover:shadow-[0_0_30px_rgba(74,222,168,0.7)] transition-all duration-300 hover:scale-[1.02] ${!showLoggingButton ? 'opacity-0 scale-95' : ''}`}
@@ -795,7 +839,7 @@ const handleLogDoseNow = () => {
           setDoseLoggedToday(true);
           setShowLoggingButton(false);
         }}
-        protocol={activeProtocolForModal}
+        protocol={activeProtocol || null}
       />
 
       {deleteConfirmMed && (
