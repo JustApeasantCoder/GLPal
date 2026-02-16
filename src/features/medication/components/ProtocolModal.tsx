@@ -351,7 +351,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
+              <label className="block text-sm font-medium text-white mb-2">Medication</label>
             <div className="grid grid-cols-2 gap-2">
               {MAIN_MEDICATIONS.map((med) => (
                 <button
@@ -364,13 +364,13 @@ const [showOtherModal, setShowOtherModal] = useState(false);
                       handleMedicationSelect(med.id);
                     }
                   }}
-                  className={`text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                  className={`text-left px-3 py-2 rounded-lg transition-all text-sm ${
                     selectedMedication === med.id
                       ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
                       : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
                   }`}
                 >
-                  {med.name}
+                  <span className="text-text-primary">{med.name}</span>
                 </button>
               ))}
             </div>
@@ -380,21 +380,21 @@ const [showOtherModal, setShowOtherModal] = useState(false);
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dose (mg)</label>
+              <label className="block text-sm font-medium text-white mb-2">Dose (mg)</label>
               <button
                 type="button"
                 onClick={() => setShowDosePicker(true)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
               >
                 {dose ? `${dose} mg` : 'Select dose'}
               </button>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Dosing Schedule</label>
+              <label className="block text-sm font-medium text-white mb-2">Dosing Schedule</label>
               <button
                 type="button"
                 onClick={() => setShowSchedulePicker(true)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
               >
                 {frequencyOptions.find(f => f.value === frequency)?.label || 'Select schedule'}
               </button>
@@ -405,11 +405,11 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
+            <label className="block text-sm font-medium text-white mb-2">Start Date</label>
             <button
               type="button"
               onClick={() => setShowStartDatePicker(true)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
             >
               {startDate ? new Date(startDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -448,11 +448,11 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#B19CD9] mb-2">End Date</label>
+            <label className="block text-sm font-medium text-white mb-2">End Date</label>
             <button
               type="button"
               onClick={() => setShowStopDatePicker(true)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
             >
               {stopDate ? new Date(stopDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -535,13 +535,13 @@ const [showOtherModal, setShowOtherModal] = useState(false);
                       handleMedicationSelect(med.id);
                       setShowOtherModal(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
                       selectedMedication === med.id
                         ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
                         : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
                     }`}
                   >
-                    {med.name}
+                    <span className="text-text-primary">{med.name}</span>
                   </button>
                 ))}
               </div>

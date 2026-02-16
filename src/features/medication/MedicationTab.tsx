@@ -634,27 +634,27 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Medication</label>
+                <label className="block text-sm font-medium text-white mb-2">Medication</label>
                 <div className="grid grid-cols-1 gap-2">
                   {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0 && ['semaglutide', 'tirzepatide', 'retatrutide', 'cagrilintide'].includes(m.id)).map(med => (
                     <button
                       key={med.id}
                       type="button"
                       onClick={() => setOfficialScheduleMedication(med.id)}
-                      className={`text-left px-3 py-2 rounded-lg transition-all text-sm text-white ${
+                      className={`text-left px-3 py-2 rounded-lg transition-all text-sm ${
                         officialScheduleMedication === med.id
                           ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
                           : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
                       }`}
                     >
-                      {med.name}
+                      <span className="text-text-primary">{med.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Split Dosing</label>
+                <label className="block text-sm font-medium text-white mb-2">Split Dosing</label>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -685,11 +685,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#B19CD9] mb-2">Start Date</label>
+                <label className="block text-sm font-medium text-white mb-2">Start Date</label>
                 <button
                   type="button"
                   onClick={() => setShowOfficialScheduleDatePicker(true)}
-                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm text-left"
+                  className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
                 >
                   {new Date(officialScheduleStartDate).toLocaleDateString()}
                 </button>

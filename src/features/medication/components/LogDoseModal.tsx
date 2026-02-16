@@ -101,7 +101,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
     cols: number = 4
   ) => (
     <div>
-      <label className="block text-sm font-medium text-text-secondary mb-2">{label}</label>
+      <label className="block text-sm font-medium text-text-primary mb-2">{label}</label>
       <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {options.map((opt) => (
           <button
