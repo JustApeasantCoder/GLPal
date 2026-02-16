@@ -533,18 +533,9 @@ const handleLogDoseNow = () => {
                     transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
                     boxShadow: !stats.isDueToday && stats.nextDueDays < 0
                       ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
-                      : stats.isDueToday
-                        ? '0 0 15px rgba(74,222,168,0.6), 0 0 30px rgba(74,222,168,0.4), 0 0 45px rgba(74,222,168,0.2)'
-                        : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
-                    animation: stats.isDueToday ? 'glow 2s ease-in-out infinite' : 'none',
+                      : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
                   }}
                 >
-                  <style>{`
-                    @keyframes glow {
-                      0%, 100% { box-shadow: 0 0 15px rgba(74,222,168,0.6), 0 0 30px rgba(74,222,168,0.4), 0 0 45px rgba(74,222,168,0.2); }
-                      50% { box-shadow: 0 0 25px rgba(74,222,168,0.8), 0 0 50px rgba(74,222,168,0.5), 0 0 70px rgba(74,222,168,0.3); }
-                    }
-                  `}</style>
                   {isLogging ? 'Logging...' : (!stats.isDueToday && stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now')}
                 </button>
               )}
