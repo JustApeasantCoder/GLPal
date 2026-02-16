@@ -177,15 +177,15 @@ const handleLogDoseNow = () => {
 // Use time hook for live updates (every 100ms) - uses timeService internally
   const now = useTime(100);
 
-  // Find active protocol for today
-  const today = new Date(timeService.nowDate().getTime());
-  today.setHours(0, 0, 0, 0);
+  // Find active protocol for today - use string comparison to avoid timezone issues
+  const todayForActive = timeService.nowDate();
+  const todayStrForActive = `${todayForActive.getFullYear()}-${String(todayForActive.getMonth() + 1).padStart(2, '0')}-${String(todayForActive.getDate()).padStart(2, '0')}`;
   
   const activeProtocol = protocols?.find(p => {
     if (p.isArchived) return false;
-    const start = new Date(p.startDate);
-    const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-    return today >= start && today <= end;
+    const start = p.startDate;
+    const end = p.stopDate || '2099-12-31';
+    return todayStrForActive >= start && todayStrForActive <= end;
   });
 
   // Reset doseLoggedToday when the day changes or when active protocol changes
