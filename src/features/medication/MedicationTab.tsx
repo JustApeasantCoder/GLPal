@@ -13,6 +13,7 @@ import { calculateMedicationConcentration } from '../../shared/utils/calculation
 import { addMedicationGeneratedEntry, addMedicationManualEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols, getMedicationManualEntries } from '../../shared/utils/database';
 import { MEDICATIONS, formatDateShort, formatFrequency, generateId } from '../../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../../services/MedicationService';
+import { timeService } from '../../core/timeService';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
@@ -36,7 +37,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false);
   const [officialScheduleMedication, setOfficialScheduleMedication] = useState<string>('semaglutide');
-  const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(timeService.nowDate().toISOString().split('T')[0]);
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
