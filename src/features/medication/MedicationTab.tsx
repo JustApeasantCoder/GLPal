@@ -328,8 +328,8 @@ const handleLogDoseNow = () => {
       lastScheduledDate = new Date(lastDoseTimestamp);
       nextDoseDate = new Date(nextDoseTimestamp);
       
-      // Days since last dose
-      daysSinceLastDose = (todayTimestampMidnight - lastDoseTimestamp) / (24 * 60 * 60 * 1000);
+      // Days since last dose (using current time for smooth progression)
+      daysSinceLastDose = (currentTimeDate.getTime() - lastDoseTimestamp) / (24 * 60 * 60 * 1000);
       
       // Time until next dose
       const diffMs = nextDoseTimestamp - todayTimestamp;
@@ -505,17 +505,16 @@ const handleLogDoseNow = () => {
                               }}
                             />
                           )}
-                          {/* Green extending from purple edge - fills in 4 discrete steps over 24 hours */}
+                          {/* Green extending from purple edge - smooth fill over 24 hours */}
                           {(() => {
                             const hoursSinceMidnight = new Date(now).getHours();
-                            const greenSteps = Math.floor(hoursSinceMidnight / 6) + 1;
-                            const greenPercent = (greenSteps / 4) * (100 - progressPercent);
+                            const greenPercentSmooth = (hoursSinceMidnight / 24) * (100 - progressPercent);
                             return (
                               <div 
                                 className="absolute top-0 h-full transition-all duration-300"
                                 style={{ 
                                   left: `${progressPercent}%`,
-                                  width: `${greenPercent}%`,
+                                  width: `${greenPercentSmooth}%`,
                                   background: 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)',
                                   boxShadow: '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)',
                                 }}
@@ -749,11 +748,11 @@ const handleLogDoseNow = () => {
                     <span className="text-gray-400">hoursSinceMidnight:</span>
                     <span className="text-white">{new Date(now).getHours()}</span>
                     
-                    <span className="text-gray-400">greenSteps (floor(hours/6)+1):</span>
-                    <span className="text-green-400">{Math.floor(new Date(now).getHours() / 6) + 1}/4</span>
+                    <span className="text-gray-400">greenPercentSmooth (hours/24):</span>
+                    <span className="text-green-400">{((new Date(now).getHours() / 24) * 100).toFixed(2)}%</span>
                     
                     <span className="text-gray-400">greenPercent:</span>
-                    <span className="text-green-400">{((Math.floor(new Date(now).getHours() / 6) + 1) / 4 * (100 - (stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                    <span className="text-green-400">{((new Date(now).getHours() / 24) * (100 - (stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
                       ? 0
                       : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
                         ? 0
