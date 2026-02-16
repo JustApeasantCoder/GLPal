@@ -343,7 +343,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className="text-xl font-semibold text-white mb-6">
           {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
         </h2>
@@ -524,7 +524,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
 {showOtherModal && (
           <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
             <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
-            <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 modal-content-fade-in">
+            <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto modal-content-fade-in">
               <h3 className="text-lg font-semibold text-white mb-4">Select Medication</h3>
               <div className="space-y-2 mb-4">
                 {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (

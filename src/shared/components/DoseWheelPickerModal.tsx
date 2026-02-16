@@ -96,7 +96,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border border-[#B19CD9]/30 shadow-2xl bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 p-6 transition-all ${
+          className={`relative isolate rounded-2xl border border-[#B19CD9]/30 shadow-2xl bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 p-6 max-h-[90vh] overflow-y-auto transition-all ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'

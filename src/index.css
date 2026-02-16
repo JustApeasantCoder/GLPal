@@ -268,7 +268,7 @@ body.modal-open {
   border-radius: 50%;
   background: #9C7BD3;
   border: 2px solid white;
-  box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);
+  /*box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);*/
   cursor: pointer;
   margin-top: -8px;
 }
@@ -279,7 +279,7 @@ body.modal-open {
   border-radius: 50%;
   background: #9C7BD3;
   border: 2px solid white;
-  box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);
+  /*box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);*/
   cursor: pointer;
 }
 

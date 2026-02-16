@@ -94,7 +94,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className="text-xl font-semibold text-white mb-6">Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
