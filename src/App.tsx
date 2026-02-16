@@ -3,6 +3,7 @@ import SettingsMenu from './features/dashboard/components/SettingsMenu';
 import Dashboard from './features/dashboard/Dashboard';
 import MedicationTab from './features/medication/MedicationTab';
 import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
+import PeptidesTab from './features/peptides/PeptidesTab';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
@@ -22,7 +23,7 @@ import { initializeSampleWeightData } from './shared/utils/sampleData';
 import { timeService } from './core/timeService';
 import LogTab from './features/medication/LogTab';
 
-type TabType = 'dashboard' | 'doses' | 'dosage' | 'log';
+type TabType = 'dashboard' | 'doses' | 'dosage' | 'log' | 'peptides';
 
 interface TabContentProps {
   children: React.ReactNode;
@@ -329,6 +330,11 @@ return (
             </div>
           </TabContent>
 
+          <TabContent isActive={activeTab === 'peptides'}>
+            <div className="max-w-md mx-auto">
+              <PeptidesTab />
+            </div>
+          </TabContent>
 
           <TabContent isActive={activeTab === 'dosage'}>
             <div className="max-w-md mx-auto">

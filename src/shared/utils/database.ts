@@ -1,4 +1,4 @@
-import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile } from '../../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry } from '../../types';
 
 // localStorage-based database simulation for browser environment
 const STORAGE_KEYS = {
@@ -14,6 +14,8 @@ const STORAGE_KEYS = {
   USER_PROFILE: 'glpal_user_profile',
   LAST_DOSES: 'glpal_last_doses',
   LAST_MEDICATION: 'glpal_last_medication',
+  PEPTIDES: 'glpal_peptides',
+  PEPTIDE_LOGS: 'glpal_peptide_logs',
 };
 
 const isLocalStorageAvailable = (): boolean => {
@@ -293,4 +295,85 @@ export const getLastMedication = (): string => {
 
 export const saveLastMedication = (medicationId: string): void => {
   localStorage.setItem(STORAGE_KEYS.LAST_MEDICATION, medicationId);
+};
+
+// ============================================
+// PEPTIDE DATABASE FUNCTIONS
+// ============================================
+
+export const getPeptides = (): Peptide[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.PEPTIDES);
+  return data ? JSON.parse(data) : [];
+};
+
+export const savePeptides = (peptides: Peptide[]): void => {
+  localStorage.setItem(STORAGE_KEYS.PEPTIDES, JSON.stringify(peptides));
+};
+
+export const addPeptide = (peptide: Peptide): void => {
+  const peptides = getPeptides();
+  peptides.push(peptide);
+  savePeptides(peptides);
+};
+
+export const updatePeptide = (updatedPeptide: Peptide): void => {
+  const peptides = getPeptides();
+  const index = peptides.findIndex(p => p.id === updatedPeptide.id);
+  if (index !== -1) {
+    peptides[index] = { ...updatedPeptide, updatedAt: new Date().toISOString() };
+    savePeptides(peptides);
+  }
+};
+
+export const deletePeptide = (id: string): void => {
+  const peptides = getPeptides().filter(p => p.id !== id);
+  savePeptides(peptides);
+  // Also delete all logs for this peptide
+  const logs = getPeptideLogs().filter(l => l.peptideId !== id);
+  savePeptideLogs(logs);
+};
+
+export const getActivePeptides = (): Peptide[] => {
+  return getPeptides().filter(p => p.isActive && !p.isArchived);
+};
+
+export const getArchivedPeptides = (): Peptide[] => {
+  return getPeptides().filter(p => p.isArchived);
+};
+
+// Peptide Log Entries
+export const getPeptideLogs = (): PeptideLogEntry[] => {
+  const data = localStorage.getItem(STORAGE_KEYS.PEPTIDE_LOGS);
+  return data ? JSON.parse(data) : [];
+};
+
+export const savePeptideLogs = (logs: PeptideLogEntry[]): void => {
+  localStorage.setItem(STORAGE_KEYS.PEPTIDE_LOGS, JSON.stringify(logs));
+};
+
+export const addPeptideLog = (log: PeptideLogEntry): void => {
+  const logs = getPeptideLogs();
+  logs.push(log);
+  savePeptideLogs(logs);
+};
+
+export const deletePeptideLog = (id: string): void => {
+  const logs = getPeptideLogs().filter(l => l.id !== id);
+  savePeptideLogs(logs);
+};
+
+export const getPeptideLogsById = (peptideId: string): PeptideLogEntry[] => {
+  return getPeptideLogs()
+    .filter(l => l.peptideId === peptideId)
+    .sort((a, b) => new Date(b.date + ' ' + b.time).getTime() - new Date(a.date + ' ' + a.time).getTime());
+};
+
+export const getLatestPeptideLog = (peptideId: string): PeptideLogEntry | null => {
+  const logs = getPeptideLogsById(peptideId);
+  return logs.length > 0 ? logs[0] : null;
+};
+
+export const clearPeptideData = (): void => {
+  localStorage.setItem(STORAGE_KEYS.PEPTIDES, JSON.stringify([]));
+  localStorage.setItem(STORAGE_KEYS.PEPTIDE_LOGS, JSON.stringify([]));
 };
