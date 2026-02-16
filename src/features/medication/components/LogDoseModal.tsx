@@ -135,19 +135,19 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         <div className="space-y-3 mb-4">
           <div className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-muted">Medication</span>
-              <span className="text-sm font-medium text-white">{protocol?.medication || 'N/A'}</span>
+              <span className="text-sm text-text-secondary">Medication</span>
+              <span className="text-sm font-medium text-text-primary">{protocol?.medication || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-muted">Date</span>
-              <span className="text-sm text-white">{today}</span>
+              <span className="text-sm text-text-secondary">Date</span>
+              <span className="text-sm text-text-primary">{today}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-muted">Time</span>
-              <span className="text-sm text-white">{currentTime}</span>
+              <span className="text-sm text-text-secondary">Time</span>
+              <span className="text-sm text-text-primary">{currentTime}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-text-muted">Dose</span>
+              <span className="text-sm text-text-secondary">Dose</span>
               <span className="text-sm font-medium text-[#4ADEA8]">{protocol?.dose || 0}mg</span>
             </div>
           </div>
