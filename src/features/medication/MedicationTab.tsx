@@ -40,8 +40,10 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(timeService.nowDate().toISOString().split('T')[0]);
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
-  const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
+const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
+  const [doseLoggedToday, setDoseLoggedToday] = useState(false);
+  const [showLoggingButton, setShowLoggingButton] = useState(true);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   useEffect(() => {
@@ -162,10 +164,10 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
-  const handleLogDoseNow = () => {
+const handleLogDoseNow = () => {
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
-      const today = new Date();
+      const today = timeService.nowDate();
       today.setHours(0, 0, 0, 0);
       const start = new Date(p.startDate);
       const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
@@ -181,8 +183,20 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
-  // Use time hook for live updates (every 100ms) - uses timeService internally
+// Use time hook for live updates (every 100ms) - uses timeService internally
   const now = useTime(100);
+
+  // Reset doseLoggedToday when the day changes
+  useEffect(() => {
+    const currentDate = timeService.nowDate().toDateString();
+    const savedDate = localStorage.getItem('lastLoggedDate');
+    
+    if (savedDate && savedDate !== currentDate) {
+      setDoseLoggedToday(false);
+      setShowLoggingButton(true);
+    }
+    localStorage.setItem('lastLoggedDate', currentDate);
+  }, [now]);
 
   // Calculate stats based on real dates + simulated time
   const stats = (() => {
@@ -359,9 +373,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                     animation: 'stripeMove 2s linear infinite'
                   }}
                 />
-                {/* Progress Fill with segmented colors */}
+{/* Progress Fill with segmented colors */}
                 {(() => {
-                  const progressPercent = Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
+                  const progressPercent = doseLoggedToday ? 100 : Math.min(100, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
                   const greenThreshold = (6 / 7) * 100; // Green starts at ~86% (6 days passed, 1 day left)
                   const isOverdue = stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0);
                   
@@ -374,17 +388,21 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                           style={{ 
                             left: 0,
                             width: `${progressPercent}%`,
-                            background: isOverdue 
-                              ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
+                            background: doseLoggedToday || isOverdue 
+                              ? doseLoggedToday
+                                ? 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)'
+                                : 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
                               : 'linear-gradient(90deg, #B19CD9, #D4B8E8, #B19CD9)',
-                            boxShadow: isOverdue
-                              ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
-                              : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
+                            boxShadow: doseLoggedToday
+                              ? '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
+                              : isOverdue
+                                ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
+                                : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
                           }}
                         />
                       )}
                       {/* Green overlay (last day portion) */}
-                      {!isOverdue && progressPercent > greenThreshold && (
+                      {!isOverdue && !doseLoggedToday && progressPercent > greenThreshold && (
                         <div 
                           className="absolute top-0 h-full transition-all duration-300"
                           style={{ 
@@ -400,16 +418,18 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                 })()}
                 {/* Shine Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                {/* Center Text */}
+{/* Center Text */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-sm font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                    {stats.nextDueDays > 0 
-                      ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
-                      : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
-                        ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
-                        : stats.nextDueDays < 0
-                          ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
-                          : `${Math.abs(stats.nextDueHours)} Hour${Math.abs(stats.nextDueHours) !== 1 ? 's' : ''} Overdue`
+                    {doseLoggedToday 
+                      ? 'Dose Logged for Today'
+                      : (stats.nextDueDays > 0 
+                        ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                        : (stats.nextDueDays === 0 && stats.nextDueHours >= 0)
+                          ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} ${stats.nextDueMinutes} Minute${stats.nextDueMinutes !== 1 ? 's' : ''} Remaining`
+                          : stats.nextDueDays < 0
+                            ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                            : `${Math.abs(stats.nextDueHours)} Hour${Math.abs(stats.nextDueHours) !== 1 ? 's' : ''} Overdue`)
                     }
                   </span>
                 </div>
@@ -425,10 +445,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                   <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
                 </span>
               </div>
-              {(stats.nextDueDays <= 0) && (
+{(stats.nextDueDays <= 0) && !doseLoggedToday && (
                 <button
                   onClick={handleLogDoseNow}
-                  className="mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm shadow-[0_0_10px_rgba(74,222,168,0.5)] hover:shadow-[0_0_30px_rgba(74,222,168,0.7)] transition-all duration-300 hover:scale-[1.02]"
+                  className={`mt-2 w-full py-2 px-4 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold text-sm shadow-[0_0_10px_rgba(74,222,168,0.5)] hover:shadow-[0_0_30px_rgba(74,222,168,0.7)] transition-all duration-300 hover:scale-[1.02] ${!showLoggingButton ? 'opacity-0 scale-95' : ''}`}
+                  style={{ transition: 'opacity 0.3s ease-out, transform 0.3s ease-out' }}
                 >
                   {isLogging ? 'Logging...' : (stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now')}
                 </button>
@@ -761,7 +782,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onAddMedication={onAddMedication}
       />
 
-      <LogDoseModal
+<LogDoseModal
         isOpen={showLogDoseModal}
         onClose={() => {
           setShowLogDoseModal(false);
@@ -771,6 +792,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           onRefreshMedications();
           onLogDose();
           setIsLogging(false);
+          setDoseLoggedToday(true);
+          setShowLoggingButton(false);
         }}
         protocol={activeProtocolForModal}
       />
