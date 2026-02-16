@@ -154,14 +154,15 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   };
 
 const handleLogDoseNow = () => {
-    const today = new Date(timeService.nowDate().getTime());
-    today.setHours(0, 0, 0, 0);
+    // Use string comparison to avoid timezone issues
+    const today = timeService.nowDate();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
     const activeProtocol = protocols?.find(p => {
       if (p.isArchived) return false;
-      const start = new Date(p.startDate);
-      const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-      return today >= start && today <= end;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
     });
 
     if (activeProtocol) {
@@ -345,31 +346,6 @@ const handleLogDoseNow = () => {
     })();
     
 const isScheduleStartDay = activeProtocol && new Date(activeProtocol.startDate).toDateString() === currentTime.toDateString();
-    console.log('DEBUG isScheduleStartDay:', {
-      protocolsCount: protocols?.length,
-      currentTimeStr: currentTime.toDateString(),
-      currentTimeISO: currentTime.toISOString(),
-      currentTimeRaw: now,
-      activeProtocolId: activeProtocol?.id,
-      // Debug the find logic for each protocol
-      protocolCheck: protocols?.map(p => {
-        const start = new Date(p.startDate);
-        const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-        return {
-          id: p.id,
-          startDate: p.startDate,
-          startDateParsed: start.toDateString(),
-          endDate: p.stopDate,
-          endDateParsed: end.toDateString(),
-          currentTimeParsed: currentTime.toDateString(),
-          isArchived: p.isArchived,
-          checkStart: currentTime >= start,
-          checkEnd: currentTime <= end,
-          shouldBeActive: !p.isArchived && currentTime >= start && currentTime <= end
-        };
-      }),
-      isScheduleStartDay,
-    });
     
     return { 
       totalDoses, 

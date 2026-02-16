@@ -157,7 +157,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Time</span>
-              <span className="text-sm text-text-primary">{currentTime}</span>
+              <span className="text-sm font-medium text-text-primary">{currentTime}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary">Dose</span>
