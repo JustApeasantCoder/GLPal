@@ -44,6 +44,7 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
   const [doseLoggedToday, setDoseLoggedToday] = useState(false);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
+  const [showProgressDebug, setShowProgressDebug] = useState(false);
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
@@ -539,6 +540,226 @@ const handleLogDoseNow = () => {
                   {isLogging ? 'Logging...' : (!stats.isDueToday && stats.nextDueDays < 0 ? 'Log Overdue Dose' : 'Log Dose Now')}
                 </button>
               )}
+            </div>
+          )}
+          
+          <button
+            onClick={() => setShowProgressDebug(!showProgressDebug)}
+            className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
+          >
+            {showProgressDebug ? '▼ Hide' : '▶ Show'} Progress Bar Debug
+          </button>
+          
+          {showProgressDebug && (
+            <div className="mb-4 p-3 rounded-lg bg-black/40 border border-red-500/30 text-xs font-mono">
+              <div className="text-red-400 font-bold mb-2">Progress Bar Debug Panel</div>
+              
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">now:</span>
+                <span className="text-white">{now.toString()}</span>
+                
+                <span className="text-gray-400">Current Time:</span>
+                <span className="text-white">{new Date(now).toLocaleTimeString()}</span>
+                
+                <span className="text-gray-400">todayStr:</span>
+                <span className="text-yellow-400">{(() => {
+                  const ct = new Date(now);
+                  const y = ct.getFullYear();
+                  const m = String(ct.getMonth() + 1).padStart(2, '0');
+                  const d = String(ct.getDate()).padStart(2, '0');
+                  return `${y}-${m}-${d}`;
+                })()}</span>
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Active Protocol:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">activeProtocol:</span>
+                <span className="text-white">{activeProtocol ? 'EXISTS' : 'NULL'}</span>
+                
+                {activeProtocol && (
+                  <>
+                    <span className="text-gray-400">protocol.id:</span>
+                    <span className="text-cyan-400">{activeProtocol.id}</span>
+                    
+                    <span className="text-gray-400">protocol.medication:</span>
+                    <span className="text-white">{activeProtocol.medication}</span>
+                    
+                    <span className="text-gray-400">protocol.startDate:</span>
+                    <span className="text-yellow-400">{activeProtocol.startDate}</span>
+                    
+                    <span className="text-gray-400">protocol.stopDate:</span>
+                    <span className="text-yellow-400">{activeProtocol.stopDate || 'none'}</span>
+                    
+                    <span className="text-gray-400">protocol.frequencyPerWeek:</span>
+                    <span className="text-white">{activeProtocol.frequencyPerWeek}</span>
+                    
+                    <span className="text-gray-400">protocol.dose:</span>
+                    <span className="text-white">{activeProtocol.dose}mg</span>
+                    
+                    <span className="text-gray-400">protocol.halfLifeHours:</span>
+                    <span className="text-white">{activeProtocol.halfLifeHours}h</span>
+                  </>
+                )}
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Stats Object:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">totalDoses:</span>
+                <span className="text-white">{stats.totalDoses}</span>
+                
+                <span className="text-gray-400">totalCurrentDose:</span>
+                <span className="text-white">{stats.totalCurrentDose}mg</span>
+                
+                <span className="text-gray-400">thisMonth:</span>
+                <span className="text-white">{stats.thisMonth}</span>
+                
+                <span className="text-gray-400">plannedDoses:</span>
+                <span className="text-white">{stats.plannedDoses}</span>
+                
+                <span className="text-gray-400">intervalDays:</span>
+                <span className="text-white">{stats.intervalDays}</span>
+                
+                <span className="text-gray-400">daysSinceLastDose:</span>
+                <span className="text-white">{stats.daysSinceLastDose?.toFixed(2) || 'N/A'}</span>
+                
+                <span className="text-gray-400">lastDoseDateStr:</span>
+                <span className="text-yellow-400">{stats.lastDoseDateStr}</span>
+                
+                <span className="text-gray-400">nextDueDateStr:</span>
+                <span className="text-yellow-400">{stats.nextDueDateStr}</span>
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Time Until Next Dose:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">nextDueDays:</span>
+                <span className="text-white">{stats.nextDueDays}</span>
+                
+                <span className="text-gray-400">nextDueHours:</span>
+                <span className="text-white">{stats.nextDueHours}</span>
+                
+                <span className="text-gray-400">nextDueMinutes:</span>
+                <span className="text-white">{stats.nextDueMinutes}</span>
+                
+                <span className="text-gray-400">nextDueSeconds:</span>
+                <span className="text-white">{stats.nextDueSeconds}</span>
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Progress Bar Calculations:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">isScheduleStartDay:</span>
+                <span className={stats.isScheduleStartDay ? 'text-green-400' : 'text-white'}>{stats.isScheduleStartDay ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">isDueToday:</span>
+                <span className={stats.isDueToday ? 'text-green-400' : 'text-white'}>{stats.isDueToday ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">doseLoggedToday:</span>
+                <span className={doseLoggedToday ? 'text-green-400' : 'text-white'}>{doseLoggedToday ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">isOverdue:</span>
+                <span className={!stats.isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0)) ? 'text-red-400' : 'text-white'}>
+                  {!stats.isDueToday && !stats.isScheduleStartDay && (stats.nextDueDays < 0 || (stats.nextDueDays === 0 && stats.nextDueHours < 0)) ? 'TRUE' : 'FALSE'}
+                </span>
+                
+                <span className="text-gray-400">rawProgress (days/interval*100):</span>
+                <span className="text-yellow-400">{stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                  ? '0'
+                  : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
+                    ? '0'
+                    : Math.min(80, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100)).toFixed(2) + '%'}</span>
+                
+                <span className="text-gray-400">progressPercent:</span>
+                <span className="text-yellow-400">{doseLoggedToday ? '100%' : (stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                  ? '0'
+                  : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
+                    ? '0'
+                    : Math.min(80, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100)).toFixed(2) + '%')}</span>
+                
+                {stats.isDueToday && !doseLoggedToday && (
+                  <>
+                    <span className="text-gray-400">hoursSinceMidnight:</span>
+                    <span className="text-white">{new Date(now).getHours()}</span>
+                    
+                    <span className="text-gray-400">greenSteps (floor(hours/6)+1):</span>
+                    <span className="text-green-400">{Math.floor(new Date(now).getHours() / 6) + 1}/4</span>
+                    
+                    <span className="text-gray-400">greenPercent:</span>
+                    <span className="text-green-400">{((Math.floor(new Date(now).getHours() / 6) + 1) / 4 * (100 - (stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                      ? 0
+                      : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
+                        ? 0
+                        : Math.min(80, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100))))).toFixed(2)}%</span>
+                  </>
+                )}
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Derived Values:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">displayText:</span>
+                <span className="text-white text-xs">
+                  {doseLoggedToday 
+                    ? 'Dose Logged for Today'
+                    : stats.isScheduleStartDay
+                      ? 'New Schedule - Log First Dose'
+                      : stats.isDueToday
+                        ? 'Dose Due Today - Log Now'
+                        : stats.nextDueDays > 0 
+                          ? `${stats.nextDueDays} Day${stats.nextDueDays !== 1 ? 's' : ''} ${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                          : stats.nextDueDays < 0
+                            ? `Overdue by ${Math.abs(stats.nextDueDays)} Day${Math.abs(stats.nextDueDays) !== 1 ? 's' : ''}`
+                            : stats.nextDueDays === 0
+                              ? `${stats.nextDueHours} Hour${stats.nextDueHours !== 1 ? 's' : ''} Until Next Dose`
+                              : `DEBUG: ${stats.nextDueDays}d ${stats.nextDueHours}h isDueToday=${stats.isDueToday}`}
+                </span>
+                
+                {(() => {
+                  const rawProgress = stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
+                    ? 0 
+                    : stats.lastDoseDateStr === 'N/A' && stats.isScheduleStartDay
+                      ? 0
+                      : Math.min(80, Math.max(0, (stats.daysSinceLastDose / stats.intervalDays) * 100));
+                  const debugProgressPercent = doseLoggedToday ? 100 : rawProgress;
+                  return (
+                <>
+                <span className="text-gray-400">showPurpleBar:</span>
+                <span className={debugProgressPercent > 0 && !stats.isDueToday && !doseLoggedToday ? 'text-green-400' : 'text-gray-500'}>
+                  {debugProgressPercent > 0 && !stats.isDueToday && !doseLoggedToday ? 'TRUE' : 'FALSE'}
+                </span>
+                
+                <span className="text-gray-400">showGreenBar:</span>
+                <span className={stats.isDueToday && !doseLoggedToday ? 'text-green-400' : 'text-gray-500'}>
+                  {stats.isDueToday && !doseLoggedToday ? 'TRUE' : 'FALSE'}
+                </span>
+                
+                <span className="text-gray-400">showFullGreen:</span>
+                <span className={doseLoggedToday ? 'text-green-400' : 'text-gray-500'}>
+                  {doseLoggedToday ? 'TRUE' : 'FALSE'}
+                </span>
+                </>
+                  );
+                })()}
+              </div>
+              
+              <div className="border-t border-red-500/20 my-2"></div>
+              <div className="text-red-300 mb-1">Medication Entries:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-gray-400">total entries:</span>
+                <span className="text-white">{medicationEntries.length}</span>
+                
+                {medicationEntries.length > 0 && (
+                  <>
+                    <span className="text-gray-400">latest entry:</span>
+                    <span className="text-yellow-400">{medicationEntries[0]?.date} ({medicationEntries[0]?.medication})</span>
+                    
+                    <span className="text-gray-400">oldest entry:</span>
+                    <span className="text-yellow-400">{medicationEntries[medicationEntries.length - 1]?.date}</span>
+                  </>
+                )}
+              </div>
             </div>
           )}
           
