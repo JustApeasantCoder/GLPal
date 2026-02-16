@@ -238,3 +238,51 @@ body.modal-open {
   0%, 100% { box-shadow: 0 0 20px rgba(177,156,217,0.5); }
   50% { box-shadow: 0 0 35px rgba(177,156,217,0.8); }
 }
+
+/* Range Slider Styles */
+.pain-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.pain-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
+}
+
+.pain-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
+}
+
+.pain-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #9C7BD3;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);
+  cursor: pointer;
+  margin-top: -8px;
+}
+
+.pain-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #9C7BD3;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(177, 156, 217, 0.3);
+  cursor: pointer;
+}
+
+.pain-level-indicator {
+  transition: color 150ms ease;
+}

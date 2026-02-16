@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { addMedicationManualEntry } from '../../../shared/utils/database';
@@ -21,14 +21,14 @@ const ISR_SEVERITY = [
   'Severe',
 ];
 
-  const getPainLevelColor = (level: number) => {
-    if (level === 0) return 'text-green-400';
-    if (level <= 3) return 'text-yellow-400';
-    if (level <= 6) return 'text-orange-400';
-    return 'text-red-400';
-  };
+const getPainLevelColor = (level: number): string => {
+  if (level === 0) return '#4ade80';
+  if (level <= 3) return '#facc15';
+  if (level <= 6) return '#fb923c';
+  return '#f87171';
+};
 
-  const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
+const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
   const [painLevel, setPainLevel] = useState<number>(0);
   const [injectionArea, setInjectionArea] = useState<string>('');
   const [injectionSide, setInjectionSide] = useState<string>('');
@@ -37,6 +37,10 @@ const ISR_SEVERITY = [
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
+
+  const handlePainLevelChange = useCallback((value: number) => {
+    setPainLevel(value);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +62,9 @@ const ISR_SEVERITY = [
         document.body.classList.remove('modal-open');
       }, 200);
     }
-  }, [isOpen]);
+  }, [isOpen, isVisible, isClosing]);
+
+  const painLevelColor = useMemo(() => getPainLevelColor(painLevel), [painLevel]);
 
   if (!isVisible) return null;
 
@@ -168,7 +174,7 @@ const ISR_SEVERITY = [
               <label className="text-sm font-medium text-text-secondary">
                 Pain Level (optional)
               </label>
-              <span className={`text-sm font-medium ${getPainLevelColor(painLevel)}`}>
+              <span className="pain-level-indicator text-sm font-medium" style={{ color: painLevelColor }}>
                 {painLevel}/10
               </span>
             </div>
@@ -179,48 +185,9 @@ const ISR_SEVERITY = [
                 max="10"
                 step="1"
                 value={painLevel}
-                onChange={(e) => setPainLevel(parseInt(e.target.value))}
-                className="w-full h-10 appearance-none cursor-pointer"
+                onChange={(e) => handlePainLevelChange(parseInt(e.target.value))}
+                className="pain-slider w-full h-10 appearance-none cursor-pointer"
               />
-              <style>{`
-                input[type="range"] {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  background: transparent;
-                  cursor: pointer;
-                }
-                input[type="range"]::-webkit-slider-runnable-track {
-                  height: 8px;
-                  border-radius: 6px;
-                  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
-                }
-                input[type="range"]::-moz-range-track {
-                  height: 8px;
-                  border-radius: 6px;
-                  background: linear-gradient(to right, #B19CD9 0%, #9C7BD3 100%);
-                }
-                input[type="range"]::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 50%;
-                  background: #9C7BD3;
-                  border: 2px solid white;
-                  box-shadow: 0 0 15px rgba(177, 156, 217, 0.3);
-                  cursor: pointer;
-                  margin-top: -8px;
-                }
-                input[type="range"]::-moz-range-thumb {
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 50%;
-                  background: #9C7BD3;
-                  border: 2px solid white;
-                  box-shadow: 0 0 15px rgba(177, 156, 217, 0.3);
-                  cursor: pointer;
-                }
-              `}</style>
               <div className="flex justify-between gap-1 mt-1">
                 <span className="text-xs text-green-400">None</span>
                 <span className="text-xs text-orange-400">Moderate</span>
