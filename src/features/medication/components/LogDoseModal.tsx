@@ -151,7 +151,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className="text-xl font-semibold text-white mb-2">Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
@@ -268,13 +268,11 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional notes..."
-              className="w-full px-3 py-2 bg-black/20 border border-[#B19CD9]/30 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#B19CD9]/60 resize-none"
+              className="w-full px-3 py-2 bg-black/30 border border-[#B19CD9]/30 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#B19CD9]/60 resize-y"
               rows={2}
             />
           </div>
         </div>
-
-        <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
         <div className="border-t border-[#B19CD9]/20 my-4"></div>
 

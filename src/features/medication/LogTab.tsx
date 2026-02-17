@@ -29,6 +29,9 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingEntry, setEditingEntry] = useState<GLP1Entry | null>(null);
+  const [isDoseLogCollapsed, setIsDoseLogCollapsed] = useState(false);
+  const [sortBy, setSortBy] = useState<'date' | 'medication' | 'dose'>('date');
+  const [sortAsc, setSortAsc] = useState(false);
 
   const allMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -36,6 +39,19 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
     protocols.forEach(p => medSet.add(p.medication));
     return Array.from(medSet);
   }, [manualEntries, protocols]);
+
+  const sortedEntries = useMemo(() => {
+    return [...manualEntries].sort((a, b) => {
+      if (sortBy === 'date') {
+        return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+      } else if (sortBy === 'medication') {
+        return sortAsc ? a.medication.localeCompare(b.medication) : b.medication.localeCompare(a.medication);
+      } else if (sortBy === 'dose') {
+        return sortAsc ? a.dose - b.dose : b.dose - a.dose;
+      }
+      return 0;
+    });
+  }, [manualEntries, sortBy, sortAsc]);
 
   const getMedColor = (medicationName: string) => {
     return getMedicationColorByName(medicationName, allMedications).stroke;
@@ -95,26 +111,48 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const activeProtocol = protocols.find(p => {
-    if (p.isArchived) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const start = new Date(p.startDate);
-    const end = p.stopDate ? new Date(p.stopDate) : new Date('2099-12-31');
-    return today >= start && today <= end;
-  });
-
   return (
     <div className="space-y-3 pb-20">
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dose Log</h1>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dose Log</h1>
+          <button
+            onClick={() => setIsDoseLogCollapsed(!isDoseLogCollapsed)}
+            className="text-text-muted hover:text-white transition-colors"
+          >
+            {isDoseLogCollapsed ? '▼' : '▲'}
+          </button>
+        </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {manualEntries.length === 0 ? (
+        {isDoseLogCollapsed ? (
+          <p className="text-text-muted text-center py-2">{manualEntries.length} entries</p>
+        ) : manualEntries.length === 0 ? (
           <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
         ) : (
-          <div className="space-y-2">
-            {manualEntries.map((entry) => (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex gap-1">
+                {(['date', 'medication', 'dose'] as const).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => { if (sortBy === key) setSortAsc(!sortAsc); else { setSortBy(key); setSortAsc(false); } }}
+                    className={`px-2 py-1 text-xs rounded transition-all ${
+                      sortBy === key 
+                        ? 'bg-[#B19CD9] text-white' 
+                        : 'bg-black/20 text-text-muted hover:text-white'
+                    }`}
+                  >
+                    {key === 'date' ? 'Date' : key === 'medication' ? 'Med' : 'Dose'}
+                    {sortBy === key && (
+                      <span className="ml-1">{sortAsc ? '↑' : '↓'}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {sortedEntries.map((entry) => (
               <div 
                 key={entry.date}
                 className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
@@ -192,23 +230,9 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               </div>
             ))}
           </div>
+          </>
         )}
       </div>
-
-      {activeProtocol && (
-        <div className={bigCard}>
-          <h2 className="text-sm font-medium text-text-muted mb-2">Current Protocol</h2>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="font-medium" style={{ color: getMedColor(activeProtocol.medication) }}>{activeProtocol.medication}</p>
-              <p className="text-text-muted text-sm">
-                {activeProtocol.dose}mg • {activeProtocol.frequencyPerWeek}x per week
-              </p>
-            </div>
-            <p className="text-[#4ADEA8] font-bold">{activeProtocol.dose}mg</p>
-          </div>
-        </div>
-      )}
 
       {editingEntry && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
