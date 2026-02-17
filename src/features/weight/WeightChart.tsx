@@ -509,10 +509,10 @@ const WeightChart: React.FC<WeightChartProps> = ({
           data: trendLineData,
           symbol: 'none',
           lineStyle: {
-            width: 3,
+            width: 2,
             color: '#4ADEA8',
             type: 'solid',
-            shadowBlur: 10,
+            shadowBlur: 8,
             shadowColor: '#4ADEA8',
           },
           areaStyle: {
