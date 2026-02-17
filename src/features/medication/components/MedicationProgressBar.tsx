@@ -8,6 +8,7 @@ interface MedicationProgressBarProps {
   currentTime: Date;
   onLogDose: () => void;
   isLogging: boolean;
+  medicationName: string;
   activeProtocol?: GLP1Protocol;
 }
 
@@ -17,6 +18,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   currentTime,
   onLogDose,
   isLogging,
+  medicationName,
   activeProtocol,
 }) => {
   const { 
@@ -169,9 +171,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
           <span className="w-2 h-2 rounded-full bg-[#4ADEA8]"></span>
           Last: {lastDoseDateStr}
         </span>
-        {activeProtocol && (
-          <span className="text-[#B19CD9] font-medium">{activeProtocol.medication}</span>
-        )}
+        <span className="text-[#B19CD9] font-medium">{medicationName}</span>
         <span className="flex items-center gap-1">
           Next: {nextDueDateStr}
           <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>

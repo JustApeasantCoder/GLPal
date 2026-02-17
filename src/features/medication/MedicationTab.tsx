@@ -6,6 +6,7 @@ import PeriodSelector from '../../shared/components/PeriodSelector';
 import ProtocolModal from './components/ProtocolModal';
 import Button from '../../shared/components/Button';
 import MedicationProgressBar from './components/MedicationProgressBar';
+import MedicationProgressBarContainer from './components/MedicationProgressBarContainer';
 import ProtocolList from './components/ProtocolList';
 import DisclaimerModal from './components/DisclaimerModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
@@ -42,10 +43,10 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
-  const [doseLoggedToday, setDoseLoggedToday] = useState<boolean>(false);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
+  const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
   const [latestDoseDone, setLatestDoseDone] = useState<number | null>(() => {
     const saved = localStorage.getItem('latestDoseDone');
     return saved ? parseInt(saved, 10) : null;
@@ -55,6 +56,16 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const now = new Date(nowTimestamp);
   const activeProtocol = useActiveProtocol(protocols);
   const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone);
+
+  const uniqueMedications = useMemo(() => {
+    const medSet = new Set<string>();
+    protocols.forEach(p => {
+      if (!p.isArchived) {
+        medSet.add(p.medication);
+      }
+    });
+    return Array.from(medSet);
+  }, [protocols]);
 
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
@@ -183,9 +194,23 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     }
   };
 
-  const handleLogDoseNow = () => {
-    const statsOverdue = stats.isOverdue;
+  const getActiveProtocolForMedication = (medicationName: string) => {
+    return protocols.find(p => {
+      if (p.isArchived || p.medication !== medicationName) return false;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      const todayStr = timeService.todayString();
+      return todayStr >= start && todayStr <= end;
+    });
+  };
+
+  const handleLogDoseNow = (medicationName?: string) => {
+    const targetMed = medicationName || activeProtocol?.medication;
+    const targetProtocol = targetMed ? getActiveProtocolForMedication(targetMed) : activeProtocol;
+    const statsOverdue = activeProtocol?.medication ? stats.isOverdue : false;
+    
     if (statsOverdue) {
+      setLoggingMedicationName(targetMed || '');
       setShowOverdueDisclaimer(true);
       return;
     }
@@ -193,23 +218,25 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const today = timeService.nowDate();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    if (activeProtocol) {
+    if (targetProtocol) {
       setIsLogging(true);
-      setActiveProtocolForModal(activeProtocol);
+      setActiveProtocolForModal(targetProtocol);
       setShowLogDoseModal(true);
     } else {
       setIsModalOpen(true);
     }
   };
-
+  
   const handleConfirmOverdueDose = () => {
     setShowOverdueDisclaimer(false);
     const today = timeService.nowDate();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    if (activeProtocol) {
+    const targetMed = loggingMedicationName || activeProtocol?.medication;
+    const targetProtocol = targetMed ? getActiveProtocolForMedication(targetMed) : activeProtocol;
+    if (targetProtocol) {
       setIsLogging(true);
-      setActiveProtocolForModal(activeProtocol);
+      setActiveProtocolForModal(targetProtocol);
       setShowLogDoseModal(true);
     } else {
       setIsModalOpen(true);
@@ -233,7 +260,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       localStorage.setItem('lastLoggedProtocolId', activeProtocol.id);
     }
     
-    setDoseLoggedToday(hasManualEntryToday);
     setShowLoggingButton(!hasManualEntryToday);
   }, [now, activeProtocol?.id, medicationEntries]);
 
@@ -258,7 +284,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     onRefreshMedications();
     onLogDose();
     setIsLogging(false);
-    setDoseLoggedToday(true);
     setShowLoggingButton(false);
   };
 
@@ -301,29 +326,35 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
           
-          <MedicationProgressBar
-            stats={stats}
-            doseLoggedToday={doseLoggedToday}
-            currentTime={now}
-            onLogDose={handleLogDoseNow}
-            isLogging={isLogging}
-            activeProtocol={activeProtocol}
-          />
+          {uniqueMedications.map(medicationName => (
+            <MedicationProgressBarContainer
+              key={medicationName}
+              medicationEntries={medicationEntries}
+              protocols={protocols}
+              currentTime={now}
+              latestDoseDone={latestDoseDone}
+              medicationName={medicationName}
+              onLogDose={() => handleLogDoseNow(medicationName)}
+              isLogging={isLogging}
+            />
+          ))}
           
-          <button
-            onClick={() => setShowProgressDebug(!showProgressDebug)}
-            className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
-          >
-            {showProgressDebug ? '▼ Hide' : '▶ Show'} Progress Bar Debug
-          </button>
+          {process.env.NODE_ENV === 'development' && (
+            <button
+              onClick={() => setShowProgressDebug(!showProgressDebug)}
+              className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
+            >
+              {showProgressDebug ? '▼ Hide' : '▶ Show'} Progress Bar Debug
+            </button>
+          )}
           
-          {showProgressDebug && (
+          {process.env.NODE_ENV === 'development' && showProgressDebug && uniqueMedications.length > 0 && (
             <ProgressDebugPanel 
               stats={stats} 
               now={now} 
               activeProtocol={activeProtocol} 
               medicationEntries={medicationEntries}
-              doseLoggedToday={doseLoggedToday}
+              doseLoggedToday={medicationEntries.some(e => e.date === timeService.todayString() && e.isManual)}
             />
           )}
           

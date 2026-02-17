@@ -39,15 +39,23 @@ export const useMedicationStats = (
   medicationEntries: GLP1Entry[],
   protocols: GLP1Protocol[],
   currentTime: Date,
-  latestDoseDone: number | null
+  latestDoseDone: number | null,
+  medicationName?: string
 ): MedicationStats => {
   return useMemo(() => {
     const currentTimeDate = new Date(currentTime);
     const currentTimeMidnight = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate(), 0, 0, 0, 0);
     const todayStr = toLocalDateStr(currentTimeDate);
     
-    const activeProtocol = protocols?.find(p => {
-      if (p.isArchived) return false;
+    const filteredProtocols = medicationName
+      ? protocols?.filter(p => p.medication === medicationName && !p.isArchived)
+      : protocols?.filter(p => !p.isArchived);
+    
+    const filteredEntries = medicationName
+      ? medicationEntries.filter(e => e.medication === medicationName)
+      : medicationEntries;
+    
+    const activeProtocol = filteredProtocols?.find(p => {
       const start = p.startDate;
       const end = p.stopDate || '2099-12-31';
       return todayStr >= start && todayStr <= end;
@@ -58,7 +66,7 @@ export const useMedicationStats = (
       intervalDays = Math.round(7 / activeProtocol.frequencyPerWeek);
     }
     
-    const sortedEntries = [...medicationEntries].sort((a, b) => 
+    const sortedEntries = [...filteredEntries].sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     
@@ -127,25 +135,23 @@ export const useMedicationStats = (
       }
     }
     
-    const totalDoses = medicationEntries.length;
-    const totalCurrentDose = medicationEntries.length > 0 ? medicationEntries[0].dose : 0;
+    const totalDoses = filteredEntries.length;
+    const totalCurrentDose = filteredEntries.length > 0 ? filteredEntries[0].dose : 0;
     
-    const thisMonthDoses = medicationEntries.filter(entry => {
+    const thisMonthDoses = filteredEntries.filter(entry => {
       const entryDate = new Date(entry.date);
       return entryDate.getMonth() === currentTimeDate.getMonth() && 
              entryDate.getFullYear() === currentTimeDate.getFullYear();
     }).length;
     
     const upcomingDoses = (() => {
-      if (!protocols || protocols.length === 0) return 0;
-      const activeProtocols = protocols.filter(p => !p.isArchived);
-      if (activeProtocols.length === 0) return 0;
+      if (!filteredProtocols || filteredProtocols.length === 0) return 0;
       
       const nextMonth = new Date(currentTimeDate);
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       
       let count = 0;
-      activeProtocols.forEach(protocol => {
+      filteredProtocols!.forEach(protocol => {
         const start = new Date(protocol.startDate);
         const end = protocol.stopDate ? new Date(protocol.stopDate) : nextMonth;
         const interval = 7 / protocol.frequencyPerWeek;
@@ -191,7 +197,7 @@ export const useMedicationStats = (
         return daysDiff >= 8;
       })()
     };
-  }, [medicationEntries, protocols, currentTime, latestDoseDone]);
+  }, [medicationEntries, protocols, currentTime, latestDoseDone, medicationName]);
 };
 
 export const useActiveProtocol = (protocols: GLP1Protocol[]): GLP1Protocol | undefined => {
