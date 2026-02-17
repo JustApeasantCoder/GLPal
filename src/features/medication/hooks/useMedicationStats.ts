@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { GLP1Protocol, GLP1Entry } from '../../../types';
 import { timeService } from '../../../core/timeService';
+import { normalizeMedName, MedicationKey, MEDICATION_KEYS } from '../../../shared/utils/medicationUtils';
 
 export interface MedicationStats {
   totalDoses: number;
@@ -46,6 +47,50 @@ const toLocalDateStr = (d: Date): string => {
 const parseYmd = (ymd: string) => {
   const [y, m, d] = ymd.split('-').map(Number);
   return new Date(y, m - 1, d).getTime();
+};
+
+const computePerMedStats = (
+  medicationEntries: GLP1Entry[],
+  currentTimeDate: Date
+) => {
+  const stats: Record<MedicationKey, { isOverdue: boolean; daysSinceLastDose: number; entryToday: boolean }> = {
+    semaglutide: { isOverdue: false, daysSinceLastDose: 0, entryToday: false },
+    tirzepatide: { isOverdue: false, daysSinceLastDose: 0, entryToday: false },
+    retatrutide: { isOverdue: false, daysSinceLastDose: 0, entryToday: false },
+    cagrilintide: { isOverdue: false, daysSinceLastDose: 0, entryToday: false },
+  };
+
+  const todayStr = toLocalDateStr(currentTimeDate);
+  const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
+
+  for (const key of MEDICATION_KEYS) {
+    const medEntries = medicationEntries.filter(
+      e => normalizeMedName(e.medication) === key && e.isManual
+    );
+
+    if (medEntries.length === 0) {
+      stats[key] = { isOverdue: false, daysSinceLastDose: 0, entryToday: false };
+      continue;
+    }
+
+    const sorted = [...medEntries].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    const lastEntry = sorted[0];
+    if (!lastEntry) continue;
+
+    const [y, m, d] = lastEntry.date.split('-').map(Number);
+    const lastDateLocal = new Date(y, m - 1, d);
+    const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
+
+    stats[key] = {
+      isOverdue: daysDiff >= 8,
+      daysSinceLastDose: daysDiff,
+      entryToday: medEntries.some(e => e.date === todayStr),
+    };
+  }
+
+  return stats;
 };
 
 export const useMedicationStats = (
@@ -183,6 +228,8 @@ export const useMedicationStats = (
     const nextDoseDateAtMidnight = nextDoseDate ? toLocalDateStr(nextDoseDate) : null;
     const isDueToday = nextDoseDateAtMidnight === todayStr;
     
+    const perMedStats = computePerMedStats(medicationEntries, currentTimeDate);
+    
     return { 
       totalDoses, 
       currentDoses: [], 
@@ -226,102 +273,18 @@ export const useMedicationStats = (
         const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
         return Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
       })(),
-      semaglutideIsOverdue: (() => {
-        const semaglutideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('semaglutide') && e.isManual);
-        if (semaglutideEntries.length === 0) return false;
-        const sorted = [...semaglutideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return false;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-        return daysDiff >= 8;
-      })(),
-      tirzepatideIsOverdue: (() => {
-        const tirzepatideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('tirzepatide') && e.isManual);
-        if (tirzepatideEntries.length === 0) return false;
-        const sorted = [...tirzepatideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return false;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-        return daysDiff >= 8;
-      })(),
-      retatrutideIsOverdue: (() => {
-        const retatrutideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('retatrutide') && e.isManual);
-        if (retatrutideEntries.length === 0) return false;
-        const sorted = [...retatrutideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return false;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-        return daysDiff >= 8;
-      })(),
-      cagrilintideIsOverdue: (() => {
-        const cagrilintideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('cagrilintide') && e.isManual);
-        if (cagrilintideEntries.length === 0) return false;
-        const sorted = [...cagrilintideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return false;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-        return daysDiff >= 8;
-      })(),
-      semaglutideEntryToday: medicationEntries.some(e => e.medication.toLowerCase().includes('semaglutide') && e.date === todayStr && e.isManual),
-      tirzepatideEntryToday: medicationEntries.some(e => e.medication.toLowerCase().includes('tirzepatide') && e.date === todayStr && e.isManual),
-      retatrutideEntryToday: medicationEntries.some(e => e.medication.toLowerCase().includes('retatrutide') && e.date === todayStr && e.isManual),
-      cagrilintideEntryToday: medicationEntries.some(e => e.medication.toLowerCase().includes('cagrilintide') && e.date === todayStr && e.isManual),
-      semaglutideDaysSinceLastDose: (() => {
-        const semaglutideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('semaglutide') && e.isManual);
-        if (semaglutideEntries.length === 0) return 0;
-        const sorted = [...semaglutideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return 0;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        return Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-      })(),
-      tirzepatideDaysSinceLastDose: (() => {
-        const tirzepatideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('tirzepatide') && e.isManual);
-        if (tirzepatideEntries.length === 0) return 0;
-        const sorted = [...tirzepatideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return 0;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        return Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-      })(),
-      retatrutideDaysSinceLastDose: (() => {
-        const retatrutideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('retatrutide') && e.isManual);
-        if (retatrutideEntries.length === 0) return 0;
-        const sorted = [...retatrutideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return 0;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        return Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-      })(),
-      cagrilintideDaysSinceLastDose: (() => {
-        const cagrilintideEntries = medicationEntries.filter(e => e.medication.toLowerCase().includes('cagrilintide') && e.isManual);
-        if (cagrilintideEntries.length === 0) return 0;
-        const sorted = [...cagrilintideEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        const lastEntry = sorted[0];
-        if (!lastEntry) return 0;
-        const [y, m, d] = lastEntry.date.split('-').map(Number);
-        const lastDateLocal = new Date(y, m - 1, d);
-        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
-        return Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
-      })(),
+      semaglutideIsOverdue: perMedStats.semaglutide.isOverdue,
+      tirzepatideIsOverdue: perMedStats.tirzepatide.isOverdue,
+      retatrutideIsOverdue: perMedStats.retatrutide.isOverdue,
+      cagrilintideIsOverdue: perMedStats.cagrilintide.isOverdue,
+      semaglutideEntryToday: perMedStats.semaglutide.entryToday,
+      tirzepatideEntryToday: perMedStats.tirzepatide.entryToday,
+      retatrutideEntryToday: perMedStats.retatrutide.entryToday,
+      cagrilintideEntryToday: perMedStats.cagrilintide.entryToday,
+      semaglutideDaysSinceLastDose: perMedStats.semaglutide.daysSinceLastDose,
+      tirzepatideDaysSinceLastDose: perMedStats.tirzepatide.daysSinceLastDose,
+      retatrutideDaysSinceLastDose: perMedStats.retatrutide.daysSinceLastDose,
+      cagrilintideDaysSinceLastDose: perMedStats.cagrilintide.daysSinceLastDose,
     };
   }, [medicationEntries, protocols, currentTime, latestDoseDone, medicationName]);
 };

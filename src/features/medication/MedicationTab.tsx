@@ -691,6 +691,19 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
         {Array.from(new Set(medicationEntries.map(e => e.medication))).join(', ')}
       </div>
       
+      <div className="border-t border-red-500/20 my-2"></div>
+      <div className="text-red-300 mb-1">Per-Med Status (Canonical Keys):</div>
+      <div className="grid grid-cols-2 gap-1 text-xs">
+        <span className="text-gray-400">semaglutide isOverdue:</span>
+        <span className={stats.semaglutideIsOverdue ? 'text-red-400' : 'text-green-400'}>{stats.semaglutideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        <span className="text-gray-400">tirzepatide isOverdue:</span>
+        <span className={stats.tirzepatideIsOverdue ? 'text-red-400' : 'text-green-400'}>{stats.tirzepatideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        <span className="text-gray-400">retatrutide isOverdue:</span>
+        <span className={stats.retatrutideIsOverdue ? 'text-red-400' : 'text-green-400'}>{stats.retatrutideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        <span className="text-gray-400">cagrilintide isOverdue:</span>
+        <span className={stats.cagrilintideIsOverdue ? 'text-red-400' : 'text-green-400'}>{stats.cagrilintideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+      </div>
+      
       <div className="text-red-300 mb-1">All Medication Entries ({medicationEntries.length} total):</div>
       <div className="grid grid-cols-1 gap-y-1 max-h-40 overflow-y-auto">
         {medicationEntries.slice(0, 20).map((entry, idx) => (
