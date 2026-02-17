@@ -47,6 +47,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
   const [selectedPeptide, setSelectedPeptide] = useState<Peptide | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleteClosing, setIsDeleteClosing] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
 
   // Load peptides on mount
@@ -54,6 +55,22 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
     const loaded = getPeptides();
     setPeptides(loaded);
   }, []);
+
+  useEffect(() => {
+    if (deleteConfirm) {
+      document.body.classList.add('modal-open');
+    } else if (document.body.classList.contains('modal-open')) {
+      document.body.classList.remove('modal-open');
+    }
+  }, [deleteConfirm]);
+
+  const handleCloseDeleteConfirm = () => {
+    setIsDeleteClosing(true);
+    setTimeout(() => {
+      setDeleteConfirm(null);
+      setIsDeleteClosing(false);
+    }, 200);
+  };
 
   const filteredPeptides = useMemo(() => {
     let filtered = peptides;
@@ -260,21 +277,21 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6">
+          <div className={`fixed inset-0 bg-black/60 ${isDeleteClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} onClick={() => setDeleteConfirm(null)} />
+          <div className={`relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6 ${isDeleteClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <h3 className="text-lg font-bold text-white mb-2">Delete Peptide?</h3>
             <p className="text-sm text-gray-400 mb-4">
               This will permanently delete this peptide and all its injection logs. This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setDeleteConfirm(null)}
+                onClick={handleCloseDeleteConfirm}
                 className="flex-1 py-2 rounded-lg bg-gray-600 text-white font-medium hover:bg-gray-500 transition-colors"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleDeletePeptide(deleteConfirm)}
+                onClick={() => { handleCloseDeleteConfirm(); handleDeletePeptide(deleteConfirm); }}
                 className="flex-1 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
               >
                 Delete

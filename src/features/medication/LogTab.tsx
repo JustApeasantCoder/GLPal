@@ -32,6 +32,8 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [isDoseLogCollapsed, setIsDoseLogCollapsed] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'medication' | 'dose'>('date');
   const [sortAsc, setSortAsc] = useState(false);
+  const [isSideEffectsVisible, setIsSideEffectsVisible] = useState(false);
+  const [isSideEffectsClosing, setIsSideEffectsClosing] = useState(false);
 
   const allMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -69,6 +71,21 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
     };
     loadData();
   }, [refreshKey]);
+
+  useEffect(() => {
+    if (editingEntry) {
+      setIsSideEffectsVisible(true);
+      setIsSideEffectsClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isSideEffectsVisible && !isSideEffectsClosing) {
+      setIsSideEffectsClosing(true);
+      setTimeout(() => {
+        setIsSideEffectsVisible(false);
+        setIsSideEffectsClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [editingEntry, isSideEffectsVisible, isSideEffectsClosing]);
 
   const addSideEffect = (name: string) => {
     setActiveSideEffect(name);
@@ -234,10 +251,16 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         )}
       </div>
 
-      {editingEntry && (
+      {!isSideEffectsVisible ? null : (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setEditingEntry(null)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+          <div 
+            className={`fixed inset-0 bg-black/60 ${isSideEffectsClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
+            style={{ backdropFilter: 'blur(8px)' }} 
+            onClick={() => setEditingEntry(null)} 
+          />
+          <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+            {!editingEntry ? null : (
+            <>
             <h3 className="text-lg font-semibold text-white mb-2">Side Effects & Notes</h3>
             <p className="text-sm text-text-muted mb-4">{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
             
@@ -334,6 +357,8 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                 Save
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}
