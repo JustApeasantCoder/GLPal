@@ -171,7 +171,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
             <div className="space-y-2">
               {sortedEntries.map((entry) => (
               <div 
-                key={entry.date}
+                key={`${entry.date}-${entry.medication}-${entry.time || ''}`}
                 className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
               >
                 <div className="flex justify-between items-start mb-2">
