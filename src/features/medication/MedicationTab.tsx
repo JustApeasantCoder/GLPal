@@ -348,7 +348,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </button>
           )}
           
-          {process.env.NODE_ENV === 'development' && showProgressDebug && uniqueMedications.length > 0 && (
+          {process.env.NODE_ENV === 'development' && showProgressDebug && (
             <ProgressDebugPanel 
               stats={stats} 
               now={now} 
@@ -641,6 +641,42 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
         <span className="text-gray-400">isOverdue (8+ days since last):</span>
         <span className={stats.isOverdue ? 'text-red-400' : 'text-white'}>{stats.isOverdue ? 'TRUE' : 'FALSE'}</span>
         
+        <span className="text-gray-400">semaglutideIsOverdue:</span>
+        <span className={stats.semaglutideIsOverdue ? 'text-red-400' : 'text-white'}>{stats.semaglutideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">tirzepatideIsOverdue:</span>
+        <span className={stats.tirzepatideIsOverdue ? 'text-red-400' : 'text-white'}>{stats.tirzepatideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">retatrutideIsOverdue:</span>
+        <span className={stats.retatrutideIsOverdue ? 'text-red-400' : 'text-white'}>{stats.retatrutideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">cagrilintideIsOverdue:</span>
+        <span className={stats.cagrilintideIsOverdue ? 'text-red-400' : 'text-white'}>{stats.cagrilintideIsOverdue ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">semaglutideEntryToday:</span>
+        <span className={stats.semaglutideEntryToday ? 'text-green-400' : 'text-white'}>{stats.semaglutideEntryToday ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">tirzepatideEntryToday:</span>
+        <span className={stats.tirzepatideEntryToday ? 'text-green-400' : 'text-white'}>{stats.tirzepatideEntryToday ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">retatrutideEntryToday:</span>
+        <span className={stats.retatrutideEntryToday ? 'text-green-400' : 'text-white'}>{stats.retatrutideEntryToday ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">cagrilintideEntryToday:</span>
+        <span className={stats.cagrilintideEntryToday ? 'text-green-400' : 'text-white'}>{stats.cagrilintideEntryToday ? 'TRUE' : 'FALSE'}</span>
+        
+        <span className="text-gray-400">semaglutideDaysSinceLastDose:</span>
+        <span className={stats.semaglutideDaysSinceLastDose >= 8 ? 'text-red-400' : 'text-yellow-400'}>{stats.semaglutideDaysSinceLastDose}</span>
+        
+        <span className="text-gray-400">tirzepatideDaysSinceLastDose:</span>
+        <span className={stats.tirzepatideDaysSinceLastDose >= 8 ? 'text-red-400' : 'text-yellow-400'}>{stats.tirzepatideDaysSinceLastDose}</span>
+        
+        <span className="text-gray-400">retatrutideDaysSinceLastDose:</span>
+        <span className={stats.retatrutideDaysSinceLastDose >= 8 ? 'text-red-400' : 'text-yellow-400'}>{stats.retatrutideDaysSinceLastDose}</span>
+        
+        <span className="text-gray-400">cagrilintideDaysSinceLastDose:</span>
+        <span className={stats.cagrilintideDaysSinceLastDose >= 8 ? 'text-red-400' : 'text-yellow-400'}>{stats.cagrilintideDaysSinceLastDose}</span>
+        
         <span className="text-gray-400">rawProgress (days/interval*100):</span>
         <span className="text-yellow-400">{stats.lastDoseDateStr === 'N/A' && !stats.isScheduleStartDay
           ? '0'
@@ -650,6 +686,11 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
       </div>
       
       <div className="border-t border-red-500/20 my-2"></div>
+      <div className="text-red-300 mb-1">Unique Meds in Entries:</div>
+      <div className="text-yellow-400 text-xs mb-1">
+        {Array.from(new Set(medicationEntries.map(e => e.medication))).join(', ')}
+      </div>
+      
       <div className="text-red-300 mb-1">All Medication Entries ({medicationEntries.length} total):</div>
       <div className="grid grid-cols-1 gap-y-1 max-h-40 overflow-y-auto">
         {medicationEntries.slice(0, 20).map((entry, idx) => (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MedicationStats } from '../hooks/useMedicationStats';
 import { GLP1Protocol } from '../../../types';
 
@@ -27,13 +27,47 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
     lastDoseDateStr, 
     isScheduleStartDay, 
     isDueToday, 
-    isOverdue, 
+    isOverdue,
     nextDueDays, 
     nextDueHours,
     nextDueDateStr,
     daysSinceLastDose,
+    actualDaysSinceLastDose,
     intervalDays,
+    semaglutideIsOverdue,
+    tirzepatideIsOverdue,
+    retatrutideIsOverdue,
+    cagrilintideIsOverdue,
+    semaglutideEntryToday,
+    tirzepatideEntryToday,
+    retatrutideEntryToday,
+    cagrilintideEntryToday,
+    semaglutideDaysSinceLastDose,
+    tirzepatideDaysSinceLastDose,
+    retatrutideDaysSinceLastDose,
+    cagrilintideDaysSinceLastDose,
   } = stats;
+
+  const medicationIsOverdue = 
+    medicationName.toLowerCase().includes('semaglutide') ? semaglutideIsOverdue :
+    medicationName.toLowerCase().includes('tirzepatide') ? tirzepatideIsOverdue :
+    medicationName.toLowerCase().includes('retatrutide') ? retatrutideIsOverdue :
+    medicationName.toLowerCase().includes('cagrilintide') ? cagrilintideIsOverdue :
+    isOverdue;
+
+  const medicationEntryToday = 
+    medicationName.toLowerCase().includes('semaglutide') ? semaglutideEntryToday :
+    medicationName.toLowerCase().includes('tirzepatide') ? tirzepatideEntryToday :
+    medicationName.toLowerCase().includes('retatrutide') ? retatrutideEntryToday :
+    medicationName.toLowerCase().includes('cagrilintide') ? cagrilintideEntryToday :
+    doseLoggedToday;
+
+  const medicationDaysSinceLastDose = 
+    medicationName.toLowerCase().includes('semaglutide') ? semaglutideDaysSinceLastDose :
+    medicationName.toLowerCase().includes('tirzepatide') ? tirzepatideDaysSinceLastDose :
+    medicationName.toLowerCase().includes('retatrutide') ? retatrutideDaysSinceLastDose :
+    medicationName.toLowerCase().includes('cagrilintide') ? cagrilintideDaysSinceLastDose :
+    actualDaysSinceLastDose;
 
   const shouldShowProgress = lastDoseDateStr !== 'N/A' || stats.isScheduleStartDay;
 
@@ -43,26 +77,26 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
       : lastDoseDateStr === 'N/A' && isScheduleStartDay
         ? 0
         : Math.min(80, Math.max(0, (daysSinceLastDose / intervalDays) * 100));
-    const progressPercent = doseLoggedToday ? 100 : rawProgress;
+    const progressPercent = medicationEntryToday ? 100 : rawProgress;
 
     return (
       <>
-        {progressPercent > 0 && !isDueToday && !doseLoggedToday && (
+        {progressPercent > 0 && !isDueToday && !medicationEntryToday && (
           <div 
             className="absolute top-0 h-full transition-all duration-300"
             style={{ 
               left: 0,
               width: `${progressPercent}%`,
-              background: isOverdue
+              background: medicationIsOverdue
                 ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
                 : 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)',
-              boxShadow: isOverdue
+              boxShadow: medicationIsOverdue
                 ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
                 : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
             }}
           />
         )}
-        {isDueToday && !doseLoggedToday && (
+        {isDueToday && !medicationEntryToday && (
           <>
             {progressPercent > 0 && (
               <div 
@@ -92,7 +126,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
             })()}
           </>
         )}
-        {doseLoggedToday && (
+        {medicationEntryToday && (
           <div 
             className="absolute top-0 h-full transition-all duration-300"
             style={{ 
@@ -108,11 +142,11 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   };
 
   const getDisplayText = () => {
-    if (doseLoggedToday) {
+    if (medicationEntryToday) {
       return 'Dose Logged for Today';
     }
-    if (isOverdue && daysSinceLastDose > 0) {
-      const daysOverdue = Math.floor(daysSinceLastDose) - intervalDays;
+    if (medicationIsOverdue && medicationDaysSinceLastDose > 0) {
+      const daysOverdue = medicationDaysSinceLastDose - intervalDays;
       return `Overdue by ${daysOverdue} Day${daysOverdue !== 1 ? 's' : ''}`;
     }
     if (isScheduleStartDay) {
@@ -134,12 +168,12 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   };
 
   const getButtonConfig = () => {
-    const isDisabled = isOverdue && !isDueToday;
+    const isDisabled = medicationIsOverdue && !isDueToday;
     const buttonText = isLogging 
       ? 'Logging...' 
       : isDisabled 
         ? 'Consult Your Healthcare Provider About The Missed Dose.'
-        : isOverdue 
+        : medicationIsOverdue 
           ? 'Log Overdue Dose' 
           : 'Log Dose Now';
     
@@ -178,14 +212,14 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
           <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
         </span>
       </div>
-      {(isDueToday || nextDueDays < 0 || (stats.isScheduleStartDay) || isOverdue) && !doseLoggedToday && (
+      {(isDueToday || nextDueDays < 0 || (stats.isScheduleStartDay) || medicationIsOverdue) && !medicationEntryToday && (
         <button
           onClick={isDisabled ? undefined : onLogDose}
           disabled={isDisabled}
-          className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${stats.isOverdue ? 'opacity-0 scale-95' : ''} ${
+          className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${
             isDisabled
               ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              : isOverdue
+              : medicationIsOverdue
                 ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
                 : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
           }`}
@@ -193,7 +227,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
             transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
             boxShadow: isDisabled
               ? 'none'
-              : isOverdue
+              : medicationIsOverdue
                 ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
                 : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
           }}

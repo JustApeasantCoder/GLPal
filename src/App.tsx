@@ -72,7 +72,7 @@ try {
         
         // Load existing data
         const existingWeights = getWeightEntries();
-        const existingGLP1 = getMedicationEntries();
+        const existingGLP1 = getAllGLP1Entries();
         const existingProfile = getUserProfile();
         
         // If no data exists, generate sample data
@@ -81,7 +81,7 @@ try {
           
           // Reload after generation
           const generatedWeights = getWeightEntries();
-          const generatedGLP1 = getMedicationEntries();
+          const generatedGLP1 = getAllGLP1Entries();
           setWeights(generatedWeights);
           setDosesEntries(generatedGLP1);
         } else {

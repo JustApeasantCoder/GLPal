@@ -145,12 +145,13 @@ export const addMedicationGeneratedEntry = (entry: GLP1Entry): void => {
 
 export const addMedicationManualEntry = (entry: GLP1Entry): void => {
   const entries = getMedicationManualEntries();
+  const entryWithManualFlag = { ...entry, isManual: true };
   const existingIndex = entries.findIndex(e => e.date === entry.date && e.medication === entry.medication);
   
   if (existingIndex >= 0) {
-    entries[existingIndex] = entry;
+    entries[existingIndex] = entryWithManualFlag;
   } else {
-    entries.push(entry);
+    entries.push(entryWithManualFlag);
   }
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
@@ -159,7 +160,9 @@ export const addMedicationManualEntry = (entry: GLP1Entry): void => {
 
 export const getMedicationManualEntries = (): GLP1Entry[] => {
   const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  const entries = JSON.parse(data);
+  return entries.map((e: GLP1Entry) => ({ ...e, isManual: true }));
 };
 
 export const saveMedicationManualEntries = (entries: GLP1Entry[]): void => {
