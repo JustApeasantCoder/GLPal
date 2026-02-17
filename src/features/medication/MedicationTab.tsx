@@ -42,11 +42,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
 const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
-  const [doseLoggedToday, setDoseLoggedToday] = useState<boolean>(() => {
-    const savedDate = localStorage.getItem('lastLoggedDate');
-    const currentDate = timeService.nowDate().toDateString();
-    return savedDate === currentDate;
-  });
+  const [doseLoggedToday, setDoseLoggedToday] = useState<boolean>(false);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
@@ -242,22 +238,30 @@ const handleLogDoseNow = () => {
     return todayStrForActive >= start && todayStrForActive <= end;
   });
 
-  // Reset doseLoggedToday when the day changes or when active protocol changes
+  // Reset doseLoggedToday when the day changes or when active protocol changes or when entries change
   useEffect(() => {
-    const currentDate = timeService.nowDate().toDateString();
+    const todayStr = timeService.todayString();
     const savedDate = localStorage.getItem('lastLoggedDate');
     const savedProtocolId = localStorage.getItem('lastLoggedProtocolId');
     
-    // Reset if day changed or protocol changed
-    if (savedDate !== currentDate || savedProtocolId !== (activeProtocol?.id || '')) {
-      setDoseLoggedToday(false);
-      setShowLoggingButton(true);
+    // Check if there's actually a MANUAL entry for today in medicationEntries
+    const hasManualEntryToday = medicationEntries.some(entry => entry.date === todayStr && entry.isManual);
+    
+    // Only update localStorage if it's a new day or protocol changed, not when just adding entries
+    const isNewDay = savedDate !== todayStr;
+    const isNewProtocol = savedProtocolId !== (activeProtocol?.id || '');
+    
+    if (isNewDay) {
+      localStorage.setItem('lastLoggedDate', todayStr);
     }
-    localStorage.setItem('lastLoggedDate', currentDate);
-    if (activeProtocol) {
+    if (isNewProtocol && activeProtocol) {
       localStorage.setItem('lastLoggedProtocolId', activeProtocol.id);
     }
-  }, [now, activeProtocol?.id]);
+    
+    // Update state based on whether there's a manual entry for today
+    setDoseLoggedToday(hasManualEntryToday);
+    setShowLoggingButton(!hasManualEntryToday);
+  }, [now, activeProtocol?.id, medicationEntries]);
 
 // Calculate stats based on real dates + simulated time
   const stats = (() => {
@@ -743,6 +747,15 @@ const handleLogDoseNow = () => {
                 
                 <span className="text-gray-400">doseLoggedToday:</span>
                 <span className={doseLoggedToday ? 'text-green-400' : 'text-white'}>{doseLoggedToday ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">hasEntryToday:</span>
+                <span className={medicationEntries.some(e => e.date === timeService.todayString()) ? 'text-green-400' : 'text-white'}>{medicationEntries.some(e => e.date === timeService.todayString()) ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">hasManualEntryToday:</span>
+                <span className={medicationEntries.some(e => e.date === timeService.todayString() && e.isManual) ? 'text-green-400' : 'text-white'}>{medicationEntries.some(e => e.date === timeService.todayString() && e.isManual) ? 'TRUE' : 'FALSE'}</span>
+                
+                <span className="text-gray-400">lastLoggedDate:</span>
+                <span className="text-yellow-400">{localStorage.getItem('lastLoggedDate') || 'NULL'}</span>
                 
                 <span className="text-gray-400">isOverdue (8+ days since last):</span>
                 <span className={stats.isOverdue ? 'text-red-400' : 'text-white'}>{stats.isOverdue ? 'TRUE' : 'FALSE'}</span>
