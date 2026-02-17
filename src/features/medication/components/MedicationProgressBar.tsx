@@ -1,5 +1,6 @@
 import React from 'react';
 import { MedicationStats } from '../hooks/useMedicationStats';
+import { GLP1Protocol } from '../../../types';
 
 interface MedicationProgressBarProps {
   stats: MedicationStats;
@@ -7,6 +8,7 @@ interface MedicationProgressBarProps {
   currentTime: Date;
   onLogDose: () => void;
   isLogging: boolean;
+  activeProtocol?: GLP1Protocol;
 }
 
 const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
@@ -15,6 +17,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   currentTime,
   onLogDose,
   isLogging,
+  activeProtocol,
 }) => {
   const { 
     lastDoseDateStr, 
@@ -166,6 +169,9 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
           <span className="w-2 h-2 rounded-full bg-[#4ADEA8]"></span>
           Last: {lastDoseDateStr}
         </span>
+        {activeProtocol && (
+          <span className="text-[#B19CD9] font-medium">{activeProtocol.medication}</span>
+        )}
         <span className="flex items-center gap-1">
           Next: {nextDueDateStr}
           <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>

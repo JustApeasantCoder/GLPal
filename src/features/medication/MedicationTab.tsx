@@ -269,31 +269,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <div className="space-y-3 mb-6">
-          <MedicationProgressBar
-            stats={stats}
-            doseLoggedToday={doseLoggedToday}
-            currentTime={now}
-            onLogDose={handleLogDoseNow}
-            isLogging={isLogging}
-          />
-          
-          <button
-            onClick={() => setShowProgressDebug(!showProgressDebug)}
-            className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
-          >
-            {showProgressDebug ? '▼ Hide' : '▶ Show'} Progress Bar Debug
-          </button>
-          
-          {showProgressDebug && (
-            <ProgressDebugPanel 
-              stats={stats} 
-              now={now} 
-              activeProtocol={activeProtocol} 
-              medicationEntries={medicationEntries}
-              doseLoggedToday={doseLoggedToday}
-            />
-          )}
-          
           <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Total Doses</p>
@@ -323,6 +298,34 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               <p className={text.value}>{stats.thisMonth}</p>
             </div>
           </div>
+          
+          <div className="border-t border-[#B19CD9]/20 my-3"></div>
+          
+          <MedicationProgressBar
+            stats={stats}
+            doseLoggedToday={doseLoggedToday}
+            currentTime={now}
+            onLogDose={handleLogDoseNow}
+            isLogging={isLogging}
+            activeProtocol={activeProtocol}
+          />
+          
+          <button
+            onClick={() => setShowProgressDebug(!showProgressDebug)}
+            className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
+          >
+            {showProgressDebug ? '▼ Hide' : '▶ Show'} Progress Bar Debug
+          </button>
+          
+          {showProgressDebug && (
+            <ProgressDebugPanel 
+              stats={stats} 
+              now={now} 
+              activeProtocol={activeProtocol} 
+              medicationEntries={medicationEntries}
+              doseLoggedToday={doseLoggedToday}
+            />
+          )}
           
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
