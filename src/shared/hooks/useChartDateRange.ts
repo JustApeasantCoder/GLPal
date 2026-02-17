@@ -100,11 +100,13 @@ export const useWeightChartDateRange = (
   firstDataDate: Date,
   lastDataDate: Date,
   period: ChartPeriod,
-  currentDate?: Date
+  currentDate?: Date,
+  todayPositionPercent: number = 0.7
 ): {
   firstDate: Date;
   lastDate: Date;
   zoomStart: number;
+  zoomEnd: number;
   visibleStartIndex: number;
   visibleEndIndex: number;
   totalPoints: number;
@@ -146,8 +148,15 @@ export const useWeightChartDateRange = (
     const totalPoints = Math.ceil(actualDataDays);
 
     let zoomStart = 0;
-    const zoomEnd = 100;
-    if (actualDataDays > daysToShow) {
+    let zoomEnd = 100;
+
+    if (period !== 'all' && totalPoints >= daysToShow) {
+      const todayPercent = Math.min(100, todayPositionPercent * 100);
+      const windowPercent = (daysToShow / totalPoints) * 100;
+      const targetPosition = todayPositionPercent;
+      zoomEnd = Math.min(100, todayPercent + windowPercent * (1 - targetPosition));
+      zoomStart = Math.max(0, zoomEnd - windowPercent);
+    } else if (actualDataDays > daysToShow) {
       zoomStart = ((actualDataDays - daysToShow) / actualDataDays) * 100;
     }
     zoomStart = Math.max(0, Math.min(100, zoomStart));
@@ -159,9 +168,10 @@ export const useWeightChartDateRange = (
       firstDate: new Date(firstDataDate),
       lastDate,
       zoomStart,
+      zoomEnd,
       visibleStartIndex,
       visibleEndIndex,
       totalPoints,
     };
-  }, [firstDataDate, lastDataDate, period, now.getTime()]);
+  }, [firstDataDate, lastDataDate, period, now.getTime(), todayPositionPercent]);
 };

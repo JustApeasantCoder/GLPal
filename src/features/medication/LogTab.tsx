@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GLP1Entry, GLP1Protocol, SideEffect } from '../../types';
-import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries } from '../../shared/utils/database';
+import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry } from '../../types';
+import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 
 const bigCard = "bg-black/30 backdrop-blur-lg rounded-2xl p-4 border border-[#9C7BD3]/20";
@@ -34,6 +34,8 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [sortAsc, setSortAsc] = useState(false);
   const [isSideEffectsVisible, setIsSideEffectsVisible] = useState(false);
   const [isSideEffectsClosing, setIsSideEffectsClosing] = useState(false);
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
+  const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(false);
 
   const allMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -68,6 +70,18 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
       const prots = getMedicationProtocols();
       setManualEntries(entries.sort((a, b) => b.date.localeCompare(a.date)));
       setProtocols(prots);
+
+      const simulatedWeightData: WeightEntry[] = [];
+      const today = new Date();
+      let currentWeight = 85;
+      for (let i = 90; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        currentWeight = currentWeight - (Math.random() * 0.3 - 0.05);
+        simulatedWeightData.push({ date: dateStr, weight: parseFloat(currentWeight.toFixed(1)) });
+      }
+      setWeightEntries(simulatedWeightData);
     };
     loadData();
   }, [refreshKey]);
@@ -248,6 +262,43 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
             ))}
           </div>
           </>
+        )}
+      </div>
+
+      <div className={bigCard}>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Weight Log</h1>
+          <button
+            onClick={() => setIsWeightLogCollapsed(!isWeightLogCollapsed)}
+            className="text-text-muted hover:text-white transition-colors"
+          >
+            {isWeightLogCollapsed ? '▼' : '▲'}
+          </button>
+        </div>
+        <div className="border-t border-[#B19CD9]/20 mb-3"></div>
+        
+        {isWeightLogCollapsed ? (
+          <p className="text-text-muted text-center py-2">{weightEntries.length} entries</p>
+        ) : weightEntries.length === 0 ? (
+          <p className="text-text-muted text-center py-8">No weight entries yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {weightEntries.slice().reverse().map((entry, idx) => (
+              <div 
+                key={`${entry.date}-${idx}`}
+                className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-text-primary font-medium">{formatDate(entry.date)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[#4ADEA8] font-bold">{entry.weight}kg</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

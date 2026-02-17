@@ -54,8 +54,36 @@ const WeightChart: React.FC<WeightChartProps> = ({
     [sortedData]
   );
 
-  const { zoomStart, visibleStartIndex, visibleEndIndex, totalPoints } =
-    useWeightChartDateRange(firstDataDate, lastDataDate, period, getToday());
+  const { zoomStart, zoomEnd, visibleStartIndex, visibleEndIndex, totalPoints } =
+    useWeightChartDateRange(firstDataDate, lastDataDate, period, getToday(), 0.7);
+
+  const extendedLastDate = useMemo(() => {
+    const futureDays = 60;
+    return new Date(lastDataDate.getTime() + futureDays * 24 * 60 * 60 * 1000);
+  }, [lastDataDate]);
+
+  const xAxisDates = useMemo(() => {
+    const dates: string[] = [];
+    const iter = new Date(firstDataDate);
+    while (iter <= extendedLastDate) {
+      dates.push(iter.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      iter.setDate(iter.getDate() + 1);
+    }
+    return dates;
+  }, [firstDataDate, extendedLastDate]);
+
+  const todayStr = getToday().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const todayIndex = xAxisDates.indexOf(todayStr);
+
+  const lastEntry = useMemo(() => {
+    if (sortedData.length === 0) return null;
+    return sortedData[sortedData.length - 1];
+  }, [sortedData]);
+
+  const lastEntryIndex = useMemo(() => {
+    if (!lastEntry) return -1;
+    return xAxisDates.indexOf(lastEntry.displayDate);
+  }, [lastEntry, xAxisDates]);
 
   const doseChanges = useMemo(() => {
     if (!medicationData || medicationData.length === 0) return [];
@@ -215,7 +243,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
       },
       xAxis: {
         type: 'category',
-        data: sortedData.map((d) => d.displayDate),
+        data: xAxisDates,
         boundaryGap: false,
         axisLine: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
         axisTick: { lineStyle: { color: 'rgba(156, 123, 211, 0.2)' } },
@@ -273,21 +301,49 @@ const WeightChart: React.FC<WeightChartProps> = ({
               type: 'dashed',
               width: 2,
             },
-            data: [{ yAxis: goalWeight }],
-            label: {
-              show: true,
-              position: 'insideStartTop',
-              formatter: 'Goal',
-              color: '#B19CD9',
-              fontSize: 12,
-              padding: [0, 0, 0, 20],
-              textShadowColor: 'rgba(0,0,0,1)',
-              textShadowBlur: 4,
-              textShadowOffsetX: 1,
-              textShadowOffsetY: 1,
-            },
+            data: [
+              { yAxis: goalWeight, label: { show: true, position: 'insideStartTop', formatter: 'Goal', color: '#B19CD9', fontSize: 12, padding: [0, 0, 0, 20], textShadowColor: 'rgba(0,0,0,1)', textShadowBlur: 4, textShadowOffsetX: 1, textShadowOffsetY: 1 } },
+              ...(todayIndex >= 0 ? [{ xAxis: todayStr, lineStyle: { type: 'dotted' as const, width: 2, color: '#94A3B8' }, label: { show: false } }] : []),
+            ],
           },
         },
+        ...(lastEntry && lastEntryIndex >= 0 ? [{
+          name: 'LastWeight',
+          type: 'scatter',
+          z: 20,
+          data: [{
+            value: [lastEntry.displayDate, lastEntry.weight],
+            symbolSize: 12,
+          }],
+          symbol: 'circle',
+          symbolSize: 14,
+          itemStyle: {
+            color: '#4ADEA8',
+            borderColor: '#1a3d2e',
+            borderWidth: 3,
+            shadowBlur: 12,
+            shadowColor: '#4ADEA899',
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: any) =>
+              Math.round(params.value[1]) + (unitSystem === 'imperial' ? 'lbs' : 'kg'),
+            color: '#4ADEA8',
+            fontSize: 10,
+            fontWeight: 'bold',
+            distance: 8,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            borderRadius: 4,
+            borderColor: '#4ADEA8',
+            borderWidth: 1,
+            padding: [4, 6],
+            textShadowColor: 'rgba(0,0,0,0.8)',
+            textShadowBlur: 4,
+            textShadowOffsetX: 1,
+            textShadowOffsetY: 1,
+          },
+        }] : []),
         {
           name: 'WeightDots',
           type: 'scatter',
@@ -386,7 +442,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
         {
           type: 'inside',
           start: zoomStart,
-          end: 100,
+          end: zoomEnd,
           zoomOnMouseWheel: true,
           moveOnMouseWheel: true,
         },
@@ -403,9 +459,15 @@ const WeightChart: React.FC<WeightChartProps> = ({
     goalWeight,
     unitSystem,
     zoomStart,
+    zoomEnd,
     medicationData,
     doseChanges,
     visibleMedications,
+    todayIndex,
+    todayStr,
+    xAxisDates,
+    extendedLastDate,
+    lastEntryIndex,
   ]);
 
   if (data.length === 0) {
