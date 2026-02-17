@@ -294,7 +294,10 @@ export const isMedicationOverdue = (
   medicationName: string,
   currentTime: Date
 ): boolean => {
-  const filteredEntries = medicationEntries.filter(e => e.medication === medicationName);
+  const normalizedName = normalizeMedName(medicationName);
+  if (!normalizedName) return false;
+  
+  const filteredEntries = medicationEntries.filter(e => normalizeMedName(e.medication) === normalizedName && e.isManual);
   if (filteredEntries.length === 0) return false;
   
   const sortedEntries = [...filteredEntries].sort((a, b) => 
@@ -303,8 +306,8 @@ export const isMedicationOverdue = (
   const lastEntry = sortedEntries[0];
   if (!lastEntry) return false;
   
-  const lastDate = new Date(lastEntry.date);
-  const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const [y, m, d] = lastEntry.date.split('-').map(Number);
+  const lastDateLocal = new Date(y, m - 1, d);
   const todayLocal = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
   const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
   return daysDiff >= 8;

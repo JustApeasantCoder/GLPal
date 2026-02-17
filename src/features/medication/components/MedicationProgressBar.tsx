@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MedicationStats } from '../hooks/useMedicationStats';
 import { GLP1Protocol } from '../../../types';
 
@@ -68,6 +68,8 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
     medicationName.toLowerCase().includes('retatrutide') ? retatrutideDaysSinceLastDose :
     medicationName.toLowerCase().includes('cagrilintide') ? cagrilintideDaysSinceLastDose :
     actualDaysSinceLastDose;
+
+  const [disclaimerChecked, setDisclaimerChecked] = useState(false);
 
   const shouldShowProgress = lastDoseDateStr !== 'N/A' || stats.isScheduleStartDay;
 
@@ -168,21 +170,22 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   };
 
   const getButtonConfig = () => {
-    const isDisabled = medicationIsOverdue && !isDueToday;
+    const isOverdueNotDueToday = medicationIsOverdue && !isDueToday;
+    const needsConsultation = isOverdueNotDueToday && !disclaimerChecked;
     const buttonText = isLogging 
       ? 'Logging...' 
-      : isDisabled 
+      : needsConsultation 
         ? 'Consult Your Healthcare Provider About The Missed Dose.'
         : medicationIsOverdue 
           ? 'Log Overdue Dose' 
           : 'Log Dose Now';
     
-    return { isDisabled, buttonText };
+    return { isDisabled: needsConsultation, buttonText, isOverdueNotDueToday };
   };
 
   if (!shouldShowProgress) return null;
 
-  const { isDisabled, buttonText } = getButtonConfig();
+  const { isDisabled, buttonText, isOverdueNotDueToday } = getButtonConfig();
 
   return (
     <div className="mb-4">
@@ -213,27 +216,43 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
         </span>
       </div>
       {(isDueToday || nextDueDays < 0 || (stats.isScheduleStartDay) || medicationIsOverdue) && !medicationEntryToday && (
-        <button
-          onClick={isDisabled ? undefined : onLogDose}
-          disabled={isDisabled}
-          className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${
-            isDisabled
-              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              : medicationIsOverdue
-                ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
-                : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
-          }`}
-          style={{ 
-            transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
-            boxShadow: isDisabled
-              ? 'none'
-              : medicationIsOverdue
-                ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
-                : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
-          }}
-        >
-          {buttonText}
-        </button>
+        <>
+          <button
+            onClick={isDisabled ? undefined : onLogDose}
+            disabled={isDisabled}
+            className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${
+              isDisabled
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : medicationIsOverdue
+                  ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
+                  : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
+            }`}
+            style={{ 
+              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
+              boxShadow: isDisabled
+                ? 'none'
+                : medicationIsOverdue
+                  ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' 
+                  : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
+            }}
+          >
+            {buttonText}
+          </button>
+          {isOverdueNotDueToday && (
+            <div className="mt-2 flex items-start gap-2 px-1">
+              <input
+                type="checkbox"
+                id={`disclaimer-${medicationName}`}
+                checked={disclaimerChecked}
+                onChange={(e) => setDisclaimerChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[#4ADEA8]"
+              />
+              <label htmlFor={`disclaimer-${medicationName}`} className="text-xs text-gray-300 leading-tight">
+                By checking this box, you confirm that you have consulted your healthcare provider regarding the missed dose.
+              </label>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
