@@ -8,6 +8,40 @@ const bigCardText = {
   title: "text-lg font-bold text-text-primary mb-2"
 };
 
+const getWeekStart = (date: Date): Date => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const getWeekKey = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const weekStart = getWeekStart(date);
+  return weekStart.toISOString().split('T')[0];
+};
+
+const getWeekLabel = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const weekStart = getWeekStart(date);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const formatOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  return `${weekStart.toLocaleDateString('en-US', formatOpts)} - ${weekEnd.toLocaleDateString('en-US', formatOpts)}`;
+};
+
+const getMonthKey = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+};
+
+const getMonthLabel = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
+
 interface LogTabProps {
   refreshKey?: number;
 }
@@ -36,6 +70,96 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [isSideEffectsClosing, setIsSideEffectsClosing] = useState(false);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(false);
+  const [weightViewMode, setWeightViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+
+  const weeklyAverages = useMemo(() => {
+    if (weightEntries.length === 0) return new Map<string, number>();
+    
+    const weekGroups = new Map<string, WeightEntry[]>();
+    weightEntries.forEach(entry => {
+      const key = getWeekKey(entry.date);
+      if (!weekGroups.has(key)) {
+        weekGroups.set(key, []);
+      }
+      weekGroups.get(key)!.push(entry);
+    });
+    
+    const averages = new Map<string, number>();
+    weekGroups.forEach((entries, weekKey) => {
+      const sum = entries.reduce((acc, e) => acc + e.weight, 0);
+      averages.set(weekKey, sum / entries.length);
+    });
+    
+    return averages;
+  }, [weightEntries]);
+
+  const aggregatedWeightData = useMemo(() => {
+    if (weightEntries.length === 0) return { data: [], prevChange: null };
+    
+    const sorted = [...weightEntries].sort((a, b) => a.date.localeCompare(b.date));
+    
+    if (weightViewMode === 'daily') {
+      return { data: sorted, prevChange: null };
+    }
+    
+    if (weightViewMode === 'weekly') {
+      const weekGroups = new Map<string, WeightEntry[]>();
+      sorted.forEach(entry => {
+        const key = getWeekKey(entry.date);
+        if (!weekGroups.has(key)) weekGroups.set(key, []);
+        weekGroups.get(key)!.push(entry);
+      });
+      
+      const weekly: { date: string; avgWeight: number; weekLabel: string; change: number | null }[] = [];
+      const sortedWeeks = Array.from(weekGroups.keys()).sort();
+      
+      sortedWeeks.forEach((weekKey, idx) => {
+        const entries = weekGroups.get(weekKey)!;
+        const sum = entries.reduce((acc, e) => acc + e.weight, 0);
+        const avg = sum / entries.length;
+        const prevAvg = idx > 0 ? weekly[idx - 1].avgWeight : null;
+        const change = prevAvg !== null ? prevAvg - avg : null;
+        weekly.push({ date: weekKey, avgWeight: avg, weekLabel: getWeekLabel(entries[0].date), change });
+      });
+      
+      let prevChange: number | null = null;
+      if (weekly.length >= 2) {
+        prevChange = weekly[weekly.length - 2].avgWeight - weekly[weekly.length - 1].avgWeight;
+      }
+      
+      return { data: weekly, prevChange };
+    }
+    
+    if (weightViewMode === 'monthly') {
+      const monthGroups = new Map<string, WeightEntry[]>();
+      sorted.forEach(entry => {
+        const key = getMonthKey(entry.date);
+        if (!monthGroups.has(key)) monthGroups.set(key, []);
+        monthGroups.get(key)!.push(entry);
+      });
+      
+      const monthly: { date: string; avgWeight: number; monthLabel: string; change: number | null }[] = [];
+      const sortedMonths = Array.from(monthGroups.keys()).sort();
+      
+      sortedMonths.forEach((monthKey, idx) => {
+        const entries = monthGroups.get(monthKey)!;
+        const sum = entries.reduce((acc, e) => acc + e.weight, 0);
+        const avg = sum / entries.length;
+        const prevAvg = idx > 0 ? monthly[idx - 1].avgWeight : null;
+        const change = prevAvg !== null ? prevAvg - avg : null;
+        monthly.push({ date: monthKey, avgWeight: avg, monthLabel: getMonthLabel(entries[0].date), change });
+      });
+      
+      let prevChange: number | null = null;
+      if (monthly.length >= 2) {
+        prevChange = monthly[monthly.length - 2].avgWeight - monthly[monthly.length - 1].avgWeight;
+      }
+      
+      return { data: monthly, prevChange };
+    }
+    
+    return { data: sorted, prevChange: null };
+  }, [weightEntries, weightViewMode]);
 
   const allMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -282,23 +406,74 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         ) : weightEntries.length === 0 ? (
           <p className="text-text-muted text-center py-8">No weight entries yet.</p>
         ) : (
-          <div className="space-y-2">
-            {weightEntries.slice().reverse().map((entry, idx) => (
-              <div 
-                key={`${entry.date}-${idx}`}
-                className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-text-primary font-medium">{formatDate(entry.date)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[#4ADEA8] font-bold">{entry.weight}kg</p>
+          <>
+            <div className="flex gap-1 mb-3">
+              {(['daily', 'weekly', 'monthly'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setWeightViewMode(mode)}
+                  className={`flex-1 py-1.5 text-xs rounded transition-all ${
+                    weightViewMode === mode
+                      ? 'bg-[#4ADEA8] text-black font-medium'
+                      : 'bg-black/20 text-text-muted hover:text-white'
+                  }`}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
+            </div>
+            
+            {aggregatedWeightData.prevChange !== null && (
+              <div className={`text-xs text-center mb-2 py-1 rounded ${
+                aggregatedWeightData.prevChange > 0 
+                  ? 'bg-green-500/20 text-green-400' 
+                  : aggregatedWeightData.prevChange < 0 
+                    ? 'bg-red-500/20 text-red-400'
+                    : 'bg-gray-500/20 text-gray-400'
+              }`}>
+                {aggregatedWeightData.prevChange > 0 
+                  ? `↓ ${aggregatedWeightData.prevChange.toFixed(1)}kg vs last ${weightViewMode}`
+                  : aggregatedWeightData.prevChange < 0 
+                    ? `↑ ${Math.abs(aggregatedWeightData.prevChange).toFixed(1)}kg vs last ${weightViewMode}`
+                    : `No change vs last ${weightViewMode}`
+                }
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              {(aggregatedWeightData.data as any[]).slice().reverse().map((entry: any, idx: number) => (
+                <div 
+                  key={entry.date + '-' + idx}
+                  className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-text-primary font-medium">
+                        {weightViewMode === 'daily' 
+                          ? formatDate(entry.date)
+                          : weightViewMode === 'weekly'
+                            ? entry.weekLabel
+                            : entry.monthLabel
+                        }
+                      </p>
+                      {weightViewMode !== 'daily' && entry.change !== null && (
+                        <p className={`text-xs ${
+                          entry.change > 0 ? 'text-green-400' : entry.change < 0 ? 'text-red-400' : 'text-gray-400'
+                        }`}>
+                          {entry.change > 0 ? '↓' : entry.change < 0 ? '↑' : '='} {Math.abs(entry.change).toFixed(1)}kg
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[#4ADEA8] font-bold">
+                        {weightViewMode === 'daily' ? `${entry.weight}kg` : `${entry.avgWeight.toFixed(1)}kg`}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
