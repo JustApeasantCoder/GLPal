@@ -174,8 +174,13 @@ const calculateMedicationStats = (
     isDueToday,
     latestDoseDone,
     isOverdue: (() => {
-      if (!latestDoseDone) return false;
-      const lastDate = new Date(latestDoseDone);
+      if (filteredEntries.length === 0) return false;
+      const sortedEntries = [...filteredEntries].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      const lastEntry = sortedEntries[0];
+      if (!lastEntry) return false;
+      const lastDate = new Date(lastEntry.date);
       const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
       const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
       const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));

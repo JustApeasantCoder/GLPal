@@ -33,7 +33,6 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
     nextDueDateStr,
     daysSinceLastDose,
     intervalDays,
-    latestDoseDone,
   } = stats;
 
   const shouldShowProgress = lastDoseDateStr !== 'N/A' || stats.isScheduleStartDay;
@@ -112,8 +111,8 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
     if (doseLoggedToday) {
       return 'Dose Logged for Today';
     }
-    if (isOverdue && latestDoseDone) {
-      const daysOverdue = Math.floor((currentTime.getTime() - latestDoseDone) / (1000 * 60 * 60 * 24)) - 8;
+    if (isOverdue && daysSinceLastDose > 0) {
+      const daysOverdue = Math.floor(daysSinceLastDose) - intervalDays;
       return `Overdue by ${daysOverdue} Day${daysOverdue !== 1 ? 's' : ''}`;
     }
     if (isScheduleStartDay) {
