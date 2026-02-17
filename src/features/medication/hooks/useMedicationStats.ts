@@ -1,0 +1,207 @@
+import { useMemo } from 'react';
+import { GLP1Protocol, GLP1Entry } from '../../../types';
+import { timeService } from '../../../core/timeService';
+
+export interface MedicationStats {
+  totalDoses: number;
+  currentDoses: never[];
+  totalCurrentDose: number;
+  nextDueDays: number;
+  nextDueHours: number;
+  nextDueMinutes: number;
+  nextDueSeconds: number;
+  nextDueDateStr: string;
+  currentLevel: number;
+  thisMonth: number;
+  plannedDoses: number;
+  lastDoseDateStr: string;
+  daysSinceLastDose: number;
+  intervalDays: number;
+  isScheduleStartDay: boolean;
+  isDueToday: boolean;
+  latestDoseDone: number | null;
+  isOverdue: boolean;
+}
+
+const toLocalDateStr = (d: Date): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const parseYmd = (ymd: string) => {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).getTime();
+};
+
+export const useMedicationStats = (
+  medicationEntries: GLP1Entry[],
+  protocols: GLP1Protocol[],
+  currentTime: Date,
+  latestDoseDone: number | null
+): MedicationStats => {
+  return useMemo(() => {
+    const currentTimeDate = new Date(currentTime);
+    const currentTimeMidnight = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate(), 0, 0, 0, 0);
+    const todayStr = toLocalDateStr(currentTimeDate);
+    
+    const activeProtocol = protocols?.find(p => {
+      if (p.isArchived) return false;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
+    });
+    
+    let intervalDays = 7;
+    if (activeProtocol) {
+      intervalDays = Math.round(7 / activeProtocol.frequencyPerWeek);
+    }
+    
+    const sortedEntries = [...medicationEntries].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    let lastScheduledDate: Date | null = null;
+    let nextDueDays = 0;
+    let nextDueHours = 0;
+    let nextDueMinutes = 0;
+    let nextDueSeconds = 0;
+    let daysSinceLastDose = 0;
+    let nextDueDateStr = 'N/A';
+    let nextDoseDate: Date | null = null;
+    
+    const protocolStartDate = activeProtocol?.startDate || '';
+    const todayTimestamp = currentTimeDate.getTime();
+    
+    if (activeProtocol && protocolStartDate) {
+      const startTimestamp = parseYmd(protocolStartDate);
+      const todayTimestampMidnight = parseYmd(todayStr);
+      const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
+      
+      const daysSinceStart = Math.floor((todayTimestampMidnight - startTimestamp) / (24 * 60 * 60 * 1000));
+      
+      const fullIntervalsPassed = Math.floor(daysSinceStart / intervalDays);
+      const dayWithinInterval = daysSinceStart % intervalDays;
+      
+      const nextDoseTimestamp = startTimestamp + (fullIntervalsPassed + (dayWithinInterval === 0 ? 0 : 1)) * intervalMs;
+      const lastDoseTimestamp = nextDoseTimestamp - intervalMs;
+      
+      lastScheduledDate = new Date(lastDoseTimestamp);
+      nextDoseDate = new Date(nextDoseTimestamp);
+      
+      daysSinceLastDose = (currentTimeDate.getTime() - lastDoseTimestamp) / (24 * 60 * 60 * 1000);
+      
+      const diffMs = nextDoseTimestamp - todayTimestamp;
+      nextDueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      nextDueHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      nextDueMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      nextDueSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
+      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    const lastDoseDate = lastScheduledDate;
+    const lastDoseDateStr = lastDoseDate 
+      ? lastDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'N/A';
+      
+    if (!activeProtocol && lastDoseDate) {
+      daysSinceLastDose = (currentTimeDate.getTime() - lastDoseDate.getTime()) / (1000 * 60 * 60 * 24);
+      
+      nextDoseDate = new Date(lastDoseDate.getTime() + (intervalDays * 24 * 60 * 60 * 1000));
+      nextDueDateStr = nextDoseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const diffMs = nextDoseDate.getTime() - currentTimeDate.getTime();
+      nextDueDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      nextDueHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      nextDueMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      nextDueSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
+      if (diffMs < 0 && nextDueDays === 0) {
+        nextDueHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        if (nextDueHours < 0) {
+          nextDueDays = -1;
+          nextDueHours = 24 + nextDueHours;
+        }
+      }
+    }
+    
+    const totalDoses = medicationEntries.length;
+    const totalCurrentDose = medicationEntries.length > 0 ? medicationEntries[0].dose : 0;
+    
+    const thisMonthDoses = medicationEntries.filter(entry => {
+      const entryDate = new Date(entry.date);
+      return entryDate.getMonth() === currentTimeDate.getMonth() && 
+             entryDate.getFullYear() === currentTimeDate.getFullYear();
+    }).length;
+    
+    const upcomingDoses = (() => {
+      if (!protocols || protocols.length === 0) return 0;
+      const activeProtocols = protocols.filter(p => !p.isArchived);
+      if (activeProtocols.length === 0) return 0;
+      
+      const nextMonth = new Date(currentTimeDate);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      let count = 0;
+      activeProtocols.forEach(protocol => {
+        const start = new Date(protocol.startDate);
+        const end = protocol.stopDate ? new Date(protocol.stopDate) : nextMonth;
+        const interval = 7 / protocol.frequencyPerWeek;
+        
+        let d = new Date(start);
+        while (d <= end && d <= nextMonth) {
+          if (d > currentTimeDate) count++;
+          d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+        }
+      });
+      return count;
+    })();
+    
+    const isScheduleStartDay = !!(activeProtocol && activeProtocol.startDate === todayStr);
+    
+    const nextDoseDateAtMidnight = nextDoseDate ? toLocalDateStr(nextDoseDate) : null;
+    const isDueToday = nextDoseDateAtMidnight === todayStr;
+    
+    return { 
+      totalDoses, 
+      currentDoses: [], 
+      totalCurrentDose, 
+      nextDueDays, 
+      nextDueHours, 
+      nextDueMinutes, 
+      nextDueSeconds, 
+      nextDueDateStr, 
+      currentLevel: 0, 
+      thisMonth: thisMonthDoses, 
+      plannedDoses: upcomingDoses, 
+      lastDoseDateStr, 
+      daysSinceLastDose, 
+      intervalDays,
+      isScheduleStartDay,
+      isDueToday,
+      latestDoseDone,
+      isOverdue: (() => {
+        if (!latestDoseDone) return false;
+        const lastDate = new Date(latestDoseDone);
+        const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
+        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
+        return daysDiff >= 8;
+      })()
+    };
+  }, [medicationEntries, protocols, currentTime, latestDoseDone]);
+};
+
+export const useActiveProtocol = (protocols: GLP1Protocol[]): GLP1Protocol | undefined => {
+  return useMemo(() => {
+    const todayStr = timeService.todayString();
+    return protocols?.find(p => {
+      if (p.isArchived) return false;
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
+    });
+  }, [protocols]);
+};
