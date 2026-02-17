@@ -158,13 +158,16 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                           {se.name} ({se.severity})
                         </span>
                       ))}
-                      {entry.notes && (
-                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
-                          Notes
-                        </span>
-                      )}
                     </div>
                   </div>
+                  
+                  {entry.notes && (
+                    <div className="mt-2 pt-2 border-t border-[#B19CD9]/10">
+                      <p className="text-xs text-text-muted">
+                        <span className="text-text-primary">Notes:</span> {entry.notes}
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="flex justify-end mt-2">
                     <button
