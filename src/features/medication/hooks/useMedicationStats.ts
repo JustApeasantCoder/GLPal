@@ -189,8 +189,13 @@ export const useMedicationStats = (
       isDueToday,
       latestDoseDone,
       isOverdue: (() => {
-        if (!latestDoseDone) return false;
-        const lastDate = new Date(latestDoseDone);
+        if (filteredEntries.length === 0) return false;
+        const sortedEntries = [...filteredEntries].sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        const lastEntry = sortedEntries[0];
+        if (!lastEntry) return false;
+        const lastDate = new Date(lastEntry.date);
         const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
         const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
         const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
@@ -198,6 +203,27 @@ export const useMedicationStats = (
       })()
     };
   }, [medicationEntries, protocols, currentTime, latestDoseDone, medicationName]);
+};
+
+export const isMedicationOverdue = (
+  medicationEntries: GLP1Entry[],
+  medicationName: string,
+  currentTime: Date
+): boolean => {
+  const filteredEntries = medicationEntries.filter(e => e.medication === medicationName);
+  if (filteredEntries.length === 0) return false;
+  
+  const sortedEntries = [...filteredEntries].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  const lastEntry = sortedEntries[0];
+  if (!lastEntry) return false;
+  
+  const lastDate = new Date(lastEntry.date);
+  const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const todayLocal = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
+  const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
+  return daysDiff >= 8;
 };
 
 export const useActiveProtocol = (protocols: GLP1Protocol[]): GLP1Protocol | undefined => {

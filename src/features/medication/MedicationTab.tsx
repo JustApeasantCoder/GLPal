@@ -19,7 +19,7 @@ import { addMedicationGeneratedEntry, addMedicationManualEntry, clearMedicationE
 import { MEDICATIONS, generateId } from '../../constants/medications';
 import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../../services/MedicationService';
 import { timeService } from '../../core/timeService';
-import { useMedicationStats, useActiveProtocol } from './hooks/useMedicationStats';
+import { useMedicationStats, useActiveProtocol, isMedicationOverdue } from './hooks/useMedicationStats';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
@@ -43,7 +43,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
-  const [showLoggingButton, setShowLoggingButton] = useState(true);
+
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
@@ -207,7 +207,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const handleLogDoseNow = (medicationName?: string) => {
     const targetMed = medicationName || activeProtocol?.medication;
     const targetProtocol = targetMed ? getActiveProtocolForMedication(targetMed) : activeProtocol;
-    const statsOverdue = activeProtocol?.medication ? stats.isOverdue : false;
+    
+    // Check overdue per medication
+    const statsOverdue = targetMed ? isMedicationOverdue(medicationEntries, targetMed, now) : false;
     
     if (statsOverdue) {
       setLoggingMedicationName(targetMed || '');
@@ -248,8 +250,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const savedDate = localStorage.getItem('lastLoggedDate');
     const savedProtocolId = localStorage.getItem('lastLoggedProtocolId');
     
-    const hasManualEntryToday = medicationEntries.some(entry => entry.date === todayStr && entry.isManual);
-    
     const isNewDay = savedDate !== todayStr;
     const isNewProtocol = savedProtocolId !== (activeProtocol?.id || '');
     
@@ -259,8 +259,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     if (isNewProtocol && activeProtocol) {
       localStorage.setItem('lastLoggedProtocolId', activeProtocol.id);
     }
-    
-    setShowLoggingButton(!hasManualEntryToday);
   }, [now, activeProtocol?.id, medicationEntries]);
 
   const handleDisclaimerAcknowledged = () => {
@@ -284,7 +282,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     onRefreshMedications();
     onLogDose();
     setIsLogging(false);
-    setShowLoggingButton(false);
   };
 
   return (
@@ -358,6 +355,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               activeProtocol={activeProtocol} 
               medicationEntries={medicationEntries}
               doseLoggedToday={medicationEntries.some(e => e.date === timeService.todayString() && e.isManual)}
+              protocols={protocols}
+              uniqueMedications={uniqueMedications}
             />
           )}
           
@@ -448,7 +447,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           setIsLogging(false);
         }}
         onSave={handleLogDoseSave}
-        protocol={activeProtocol || null}
+        protocol={activeProtocolForModal || activeProtocol || null}
         allMedications={uniqueMedications}
       />
 
@@ -480,13 +479,21 @@ interface ProgressDebugPanelProps {
   activeProtocol: GLP1Protocol | undefined;
   medicationEntries: GLP1Entry[];
   doseLoggedToday: boolean;
+  protocols: GLP1Protocol[];
+  uniqueMedications: string[];
 }
 
-const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, activeProtocol, medicationEntries, doseLoggedToday }) => {
+const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, activeProtocol, medicationEntries, doseLoggedToday, protocols, uniqueMedications }) => {
   const todayStr = timeService.todayString();
 
+  const getMedStats = (medName: string) => {
+    const filteredEntries = medicationEntries.filter(e => e.medication === medName);
+    const filteredProtocols = protocols.filter(p => p.medication === medName && !p.isArchived);
+    return { filteredEntries, filteredProtocols };
+  };
+
   return (
-    <div className="mb-4 p-3 rounded-lg bg-black/40 border border-red-500/30 text-xs font-mono">
+    <div className="mb-4 p-3 rounded-lg bg-black/40 border border-red-500/30 text-xs font-mono max-h-96 overflow-y-auto">
       <div className="text-red-400 font-bold mb-2">Progress Bar Debug Panel</div>
       
       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -507,7 +514,32 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
       </div>
       
       <div className="border-t border-red-500/20 my-2"></div>
-      <div className="text-red-300 mb-1">Active Protocol:</div>
+      <div className="text-red-300 mb-1">All Medications: {uniqueMedications.length}</div>
+      <div className="grid grid-cols-1 gap-y-1 mb-2">
+        {uniqueMedications.map(med => {
+          const { filteredEntries, filteredProtocols } = getMedStats(med);
+          const medHasEntryToday = filteredEntries.some(e => e.date === todayStr && e.isManual);
+          const medHasProtocol = filteredProtocols.length > 0;
+          const activeForMed = filteredProtocols.find(p => {
+            const start = p.startDate;
+            const end = p.stopDate || '2099-12-31';
+            return todayStr >= start && todayStr <= end;
+          });
+          return (
+            <div key={med} className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs">
+              <span className="text-cyan-400">{med}:</span>
+              <span className={medHasEntryToday ? 'text-green-400' : 'text-gray-400'}>
+                {medHasEntryToday ? 'LOGGED' : 'not logged'} | 
+                {medHasProtocol ? ` ${filteredProtocols.length} prot` : ' no prot'} |
+                {activeForMed ? ` active: ${activeForMed.dose}mg` : ' no active'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="border-t border-red-500/20 my-2"></div>
+      <div className="text-red-300 mb-1">Active Protocol (Global):</div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
         <span className="text-gray-400">activeProtocol:</span>
         <span className="text-white">{activeProtocol ? 'EXISTS' : 'NULL'}</span>
@@ -539,7 +571,7 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
       </div>
       
       <div className="border-t border-red-500/20 my-2"></div>
-      <div className="text-red-300 mb-1">Stats Object:</div>
+      <div className="text-red-300 mb-1">Stats Object (First Medication):</div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
         <span className="text-gray-400">totalDoses:</span>
         <span className="text-white">{stats.totalDoses}</span>
@@ -594,13 +626,13 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
         <span className="text-gray-400">isDueToday:</span>
         <span className={stats.isDueToday ? 'text-green-400' : 'text-white'}>{stats.isDueToday ? 'TRUE' : 'FALSE'}</span>
         
-        <span className="text-gray-400">doseLoggedToday:</span>
+        <span className="text-gray-400">doseLoggedToday (global):</span>
         <span className={doseLoggedToday ? 'text-green-400' : 'text-white'}>{doseLoggedToday ? 'TRUE' : 'FALSE'}</span>
         
-        <span className="text-gray-400">hasEntryToday:</span>
+        <span className="text-gray-400">hasEntryToday (any):</span>
         <span className={medicationEntries.some(e => e.date === todayStr) ? 'text-green-400' : 'text-white'}>{medicationEntries.some(e => e.date === todayStr) ? 'TRUE' : 'FALSE'}</span>
         
-        <span className="text-gray-400">hasManualEntryToday:</span>
+        <span className="text-gray-400">hasManualEntryToday (any):</span>
         <span className={medicationEntries.some(e => e.date === todayStr && e.isManual) ? 'text-green-400' : 'text-white'}>{medicationEntries.some(e => e.date === todayStr && e.isManual) ? 'TRUE' : 'FALSE'}</span>
         
         <span className="text-gray-400">lastLoggedDate:</span>
@@ -618,20 +650,34 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
       </div>
       
       <div className="border-t border-red-500/20 my-2"></div>
-      <div className="text-red-300 mb-1">Medication Entries:</div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-        <span className="text-gray-400">total entries:</span>
-        <span className="text-white">{medicationEntries.length}</span>
-        
-        {medicationEntries.length > 0 && (
-          <>
-            <span className="text-gray-400">latest entry:</span>
-            <span className="text-yellow-400">{medicationEntries[0]?.date} ({medicationEntries[0]?.medication})</span>
-            
-            <span className="text-gray-400">oldest entry:</span>
-            <span className="text-yellow-400">{medicationEntries[medicationEntries.length - 1]?.date}</span>
-          </>
+      <div className="text-red-300 mb-1">All Medication Entries ({medicationEntries.length} total):</div>
+      <div className="grid grid-cols-1 gap-y-1 max-h-40 overflow-y-auto">
+        {medicationEntries.slice(0, 20).map((entry, idx) => (
+          <div key={idx} className="grid grid-cols-3 gap-x-2 text-xs">
+            <span className="text-yellow-400">{entry.date}</span>
+            <span className="text-cyan-400">{entry.medication}</span>
+            <span className={entry.isManual ? 'text-green-400' : 'text-gray-400'}>{entry.dose}mg {entry.isManual ? '(M)' : '(A)'}</span>
+          </div>
+        ))}
+        {medicationEntries.length > 20 && (
+          <span className="text-gray-400">...and {medicationEntries.length - 20} more</span>
         )}
+      </div>
+      
+      <div className="border-t border-red-500/20 my-2"></div>
+      <div className="text-red-300 mb-1">All Protocols ({protocols.length} total):</div>
+      <div className="grid grid-cols-1 gap-y-1 max-h-40 overflow-y-auto">
+        {protocols.map((p, idx) => {
+          const isActive = todayStr >= p.startDate && todayStr <= (p.stopDate || '2099-12-31');
+          return (
+            <div key={idx} className="grid grid-cols-4 gap-x-1 text-xs">
+              <span className={isActive ? 'text-green-400' : 'text-gray-400'}>{p.medication.substring(0, 8)}</span>
+              <span className="text-yellow-400">{p.dose}mg</span>
+              <span className="text-gray-400">{p.startDate}</span>
+              <span className={p.isArchived ? 'text-red-400' : 'text-white'}>{p.isArchived ? 'archived' : 'active'}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
