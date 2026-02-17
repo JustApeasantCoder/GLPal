@@ -195,17 +195,22 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
       setManualEntries(entries.sort((a, b) => b.date.localeCompare(a.date)));
       setProtocols(prots);
 
-      const simulatedWeightData: WeightEntry[] = [];
-      const today = new Date();
-      let currentWeight = 85;
-      for (let i = 90; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
-        currentWeight = currentWeight - (Math.random() * 0.3 - 0.05);
-        simulatedWeightData.push({ date: dateStr, weight: parseFloat(currentWeight.toFixed(1)) });
+      const realWeightEntries = getWeightEntries();
+      if (realWeightEntries.length > 0) {
+        setWeightEntries(realWeightEntries);
+      } else {
+        const simulatedWeightData: WeightEntry[] = [];
+        const today = new Date();
+        let currentWeight = 85;
+        for (let i = 365; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().split('T')[0];
+          currentWeight = currentWeight - (Math.random() * 0.3 - 0.05);
+          simulatedWeightData.push({ date: dateStr, weight: parseFloat(currentWeight.toFixed(1)) });
+        }
+        setWeightEntries(simulatedWeightData);
       }
-      setWeightEntries(simulatedWeightData);
     };
     loadData();
   }, [refreshKey]);
@@ -407,15 +412,15 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
           <p className="text-text-muted text-center py-8">No weight entries yet.</p>
         ) : (
           <>
-            <div className="flex gap-1 mb-3">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {(['daily', 'weekly', 'monthly'] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setWeightViewMode(mode)}
-                  className={`flex-1 py-1.5 text-xs rounded transition-all ${
+                  className={`px-2 py-2 text-sm rounded-lg transition-all duration-300 ${
                     weightViewMode === mode
-                      ? 'bg-[#4ADEA8] text-black font-medium'
-                      : 'bg-black/20 text-text-muted hover:text-white'
+                      ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                      : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
                   }`}
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}

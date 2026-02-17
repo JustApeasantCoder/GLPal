@@ -37,20 +37,20 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   ] as const;
  
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-t border-card-border px-4 py-2 z-50 shadow-[0_-4px_20px_var(--shadow-color)]">
-      <div className="flex justify-between items-center max-w-md mx-auto gap-1">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-t border-card-border px-2 py-1.5 z-50 shadow-[0_-4px_20px_var(--shadow-color)]">
+      <div className="flex justify-between items-center max-w-md mx-auto">
         {tabs.map((tab) => (
-<button
+          <button
             key={tab.id}
             onClick={() => onTabChange(tab.id as TabType)}
-            className={`flex-1 flex flex-col items-center px-2 py-1.5 rounded-lg transition-all duration-300 ${
+            className={`flex-1 flex flex-col items-center py-1 rounded-lg transition-all duration-300 ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white shadow-theme'
                 : 'text-text-muted hover:text-text-primary hover:bg-accent-purple-light/20'
             }`}
           >
             {tab.icon}
-            <span className="text-xs font-medium mt-1">{tab.label}</span>
+            <span className="text-[10px] font-medium mt-0.5 truncate max-w-[60px]">{tab.label}</span>
           </button>
         ))}
       </div>
