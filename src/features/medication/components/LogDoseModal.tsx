@@ -34,6 +34,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
   const [injectionSide, setInjectionSide] = useState<string>('');
   const [injectionPosition, setInjectionPosition] = useState<string>('');
   const [isr, setIsr] = useState<string>('None');
+  const [notes, setNotes] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -52,6 +53,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
       setInjectionSide('');
       setInjectionPosition('');
       setIsr('None');
+      setNotes('');
       setIsVisible(true);
       setIsClosing(false);
       document.body.classList.add('modal-open');
@@ -100,6 +102,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
       painLevel: painLevel > 0 ? painLevel : undefined,
       injectionSite: injectionSite || undefined,
       isr: isr !== 'None' ? isr : undefined,
+      notes: notes || undefined,
     };
 
     addMedicationManualEntry(newEntry);
@@ -248,7 +251,24 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
               ))}
             </div>
           </div>
+
+          <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Notes (optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any additional notes..."
+              className="w-full px-3 py-2 bg-black/20 border border-[#B19CD9]/30 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#B19CD9]/60 resize-none"
+              rows={2}
+            />
+          </div>
         </div>
+
+        <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
         <div className="border-t border-[#B19CD9]/20 my-4"></div>
 

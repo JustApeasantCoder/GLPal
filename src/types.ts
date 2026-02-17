@@ -5,6 +5,11 @@ export interface WeightEntry {
   weight: number;
 }
 
+export interface SideEffect {
+  name: string;
+  severity: number; // 1-10
+}
+
 export interface MedicationEntry {
   date: string;
   medication: string;
@@ -15,6 +20,8 @@ export interface MedicationEntry {
   painLevel?: number;
   injectionSite?: string;
   isr?: string;
+  notes?: string;
+  sideEffects?: SideEffect[];
 }
 
 export interface MedicationProtocol {

@@ -162,6 +162,10 @@ export const getMedicationManualEntries = (): GLP1Entry[] => {
   return data ? JSON.parse(data) : [];
 };
 
+export const saveMedicationManualEntries = (entries: GLP1Entry[]): void => {
+  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(entries));
+};
+
 export const deleteMedicationManualEntry = (date: string): void => {
   const entries = getMedicationManualEntries();
   const filtered = entries.filter(entry => entry.date !== date);
