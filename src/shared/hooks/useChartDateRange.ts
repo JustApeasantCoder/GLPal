@@ -93,7 +93,7 @@ export const useChartDateRange = (
       visibleEndIndex,
       totalPoints,
     };
-  }, [firstDataDate, lastDataDate, period, minDays, now.getTime()]);
+  }, [firstDataDate, lastDataDate, period, minDays]);
 };
 
 export const useWeightChartDateRange = (
