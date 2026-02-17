@@ -37,12 +37,16 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false);
   const [officialScheduleMedication, setOfficialScheduleMedication] = useState<string>('semaglutide');
-  const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(timeService.nowDate().toISOString().split('T')[0]);
+  const [officialScheduleStartDate, setOfficialScheduleStartDate] = useState<string>(timeService.todayString());
   const [officialScheduleSplitDosing, setOfficialScheduleSplitDosing] = useState(false);
   const [showOfficialScheduleDatePicker, setShowOfficialScheduleDatePicker] = useState(false);
 const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
-  const [doseLoggedToday, setDoseLoggedToday] = useState(false);
+  const [doseLoggedToday, setDoseLoggedToday] = useState<boolean>(() => {
+    const savedDate = localStorage.getItem('lastLoggedDate');
+    const currentDate = timeService.nowDate().toDateString();
+    return savedDate === currentDate;
+  });
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
@@ -1060,6 +1064,8 @@ const handleLogDoseNow = () => {
                 </div>
               </div>
 
+              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Split Dosing</label>
                 <div className="flex gap-2">
@@ -1091,6 +1097,8 @@ const handleLogDoseNow = () => {
                 )}
               </div>
 
+              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Start Date</label>
                 <button
@@ -1101,6 +1109,8 @@ const handleLogDoseNow = () => {
                   {new Date(officialScheduleStartDate).toLocaleDateString()}
                 </button>
               </div>
+
+              <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
               <div className="flex gap-3 pt-2">
                 <button

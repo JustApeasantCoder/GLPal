@@ -8,6 +8,13 @@ import { timeService } from '../../../core/timeService';
 
 const getTodayString = () => timeService.todayString();
 
+const toLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface ProtocolModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -126,17 +133,17 @@ const [showOtherModal, setShowOtherModal] = useState(false);
               
               if (lastProtocol.stopDate) {
                 const lastEndDate = new Date(lastProtocol.stopDate);
-                newStartDate = lastEndDate.toISOString().split('T')[0];
+                newStartDate = toLocalDateString(lastEndDate);
                 continuation = `Continues from ${medData.name} protocol (ended ${lastProtocol.stopDate})`;
                 
                 const endDate = new Date(newStartDate);
                 endDate.setDate(endDate.getDate() + durationDays);
-                setStopDate(endDate.toISOString().split('T')[0]);
+                setStopDate(toLocalDateString(endDate));
               } else {
                 continuation = `Continues from ${medData.name} protocol (ongoing)`;
                 const endDate = new Date(newStartDate);
                 endDate.setDate(endDate.getDate() + durationDays);
-                setStopDate(endDate.toISOString().split('T')[0]);
+                setStopDate(toLocalDateString(endDate));
               }
 
               if (medData.titrationDoses) {
@@ -161,7 +168,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
             const today = getTodayString();
             setStartDate(today);
             const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
-            setStopDate(defaultEndDate.toISOString().split('T')[0]);
+            setStopDate(toLocalDateString(defaultEndDate));
             setContinuationInfo(null);
             setPhase(undefined);
           }
@@ -172,7 +179,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
           const today = getTodayString();
           setStartDate(today);
           const defaultEndDate = new Date(new Date(today).getTime() + durationDays * 24 * 60 * 60 * 1000);
-          setStopDate(defaultEndDate.toISOString().split('T')[0]);
+          setStopDate(toLocalDateString(defaultEndDate));
           setContinuationInfo(null);
           setPhase(undefined);
         }
@@ -235,19 +242,19 @@ const [showOtherModal, setShowOtherModal] = useState(false);
         
         if (lastProtocol.stopDate) {
           const lastEndDate = new Date(lastProtocol.stopDate);
-          newStartDate = lastEndDate.toISOString().split('T')[0];
+          newStartDate = toLocalDateString(lastEndDate);
           setContinuationInfo(`Continues from ${med.name} protocol (ended ${lastProtocol.stopDate})`);
           
           const endDate = new Date(newStartDate);
           endDate.setDate(endDate.getDate() + selectedDurationDays);
-          setStopDate(endDate.toISOString().split('T')[0]);
+          setStopDate(toLocalDateString(endDate));
         } else {
           newStartDate = getTodayString();
           setContinuationInfo(`Continues from ${med.name} protocol (ongoing)`);
           
           const endDate = new Date(newStartDate);
           endDate.setDate(endDate.getDate() + selectedDurationDays);
-          setStopDate(endDate.toISOString().split('T')[0]);
+          setStopDate(toLocalDateString(endDate));
         }
 
         if (med.titrationDoses) {
@@ -303,7 +310,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
 
     const stopDateValue = stopDate 
       ? stopDate 
-      : new Date(new Date(startDate).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      : toLocalDateString(new Date(new Date(startDate).getTime() + 365 * 24 * 60 * 60 * 1000));
 
     const newProtocol: GLP1Protocol = {
       id: protocol?.id || generateId(),
@@ -432,7 +439,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
                     setSelectedDurationDays(preset.days);
                     if (startDate) {
                       const endDate = new Date(new Date(startDate).getTime() + preset.days * 24 * 60 * 60 * 1000);
-                      setStopDate(endDate.toISOString().split('T')[0]);
+                      setStopDate(toLocalDateString(endDate));
                     }
                   }}
                   className={`flex-1 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
@@ -581,7 +588,7 @@ const [showOtherModal, setShowOtherModal] = useState(false);
               setContinuationInfo(null);
               if (selectedDurationDays && date) {
                 const endDate = new Date(new Date(date).getTime() + selectedDurationDays * 24 * 60 * 60 * 1000);
-                setStopDate(endDate.toISOString().split('T')[0]);
+                setStopDate(toLocalDateString(endDate));
               }
             }}
             onClose={() => setShowStartDatePicker(false)}

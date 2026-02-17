@@ -87,7 +87,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
   const handleSave = () => {
     if (!protocol) return;
 
-    const todayStr = timeService.nowDate().toISOString().split('T')[0];
+    const todayStr = timeService.todayString();
     const injectionSite = getInjectionSiteString();
     
     const newEntry: GLP1Entry = {
