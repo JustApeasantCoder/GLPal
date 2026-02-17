@@ -6,7 +6,7 @@ import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModa
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { timeService } from '../../../core/timeService';
 
-const getTodayString = () => new Date(timeService.now()).toISOString().split('T')[0];
+const getTodayString = () => timeService.todayString();
 
 interface ProtocolModalProps {
   isOpen: boolean;

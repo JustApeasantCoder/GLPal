@@ -271,6 +271,7 @@ export const clearAllData = (): void => {
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
   localStorage.removeItem('usedMedications');
   localStorage.removeItem('protocolDurationDays');
+  localStorage.removeItem('latestDoseDone');
   initializeDatabase();
 };
 

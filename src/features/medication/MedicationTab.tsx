@@ -46,16 +46,16 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   const [showLoggingButton, setShowLoggingButton] = useState(true);
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
-  const [latestDoseDone, setLatestDoseDone] = useState<Date | null>(() => {
+  const [latestDoseDone, setLatestDoseDone] = useState<number | null>(() => {
     const saved = localStorage.getItem('latestDoseDone');
-    return saved ? new Date(saved) : null;
+    return saved ? parseInt(saved, 10) : null;
   });
   
   // Sync latestDoseDone from localStorage when timeService changes (for time travel)
   useEffect(() => {
     const saved = localStorage.getItem('latestDoseDone');
     if (saved) {
-      setLatestDoseDone(new Date(saved));
+      setLatestDoseDone(parseInt(saved, 10));
     }
   }, [timeService.nowDate().getTime()]);
   
@@ -169,8 +169,15 @@ const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
   };
 
 const handleLogDoseNow = () => {
-    // Check if overdue - show disclaimer modal first
-    const statsOverdue = latestDoseDone !== null && ((new Date(now).getTime() - latestDoseDone.getTime()) > (7 * 24 * 60 * 60 * 1000));
+    const statsOverdue = (() => {
+      if (!latestDoseDone) return false;
+      const nowDate = new Date(now);
+      const lastDate = new Date(latestDoseDone);
+      const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+      const todayLocal = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate());
+      const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
+      return daysDiff >= 8;
+    })();
     if (statsOverdue) {
       setShowOverdueDisclaimer(true);
       return;
@@ -434,9 +441,14 @@ const handleLogDoseNow = () => {
       isScheduleStartDay,
       isDueToday,
       latestDoseDone,
-      isOverdue: latestDoseDone !== null 
-        ? (currentTime.getTime() - latestDoseDone.getTime()) > (7 * 24 * 60 * 60 * 1000)
-        : false
+      isOverdue: (() => {
+        if (!latestDoseDone) return false;
+        const lastDate = new Date(latestDoseDone);
+        const lastDateLocal = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+        const todayLocal = new Date(currentTimeDate.getFullYear(), currentTimeDate.getMonth(), currentTimeDate.getDate());
+        const daysDiff = Math.floor((todayLocal.getTime() - lastDateLocal.getTime()) / (24 * 60 * 60 * 1000));
+        return daysDiff >= 8;
+      })()
     };
   })();
 
@@ -547,7 +559,7 @@ const handleLogDoseNow = () => {
                       ? 'Dose Logged for Today'
                       : stats.isOverdue && stats.latestDoseDone
                         ? (() => {
-                            const daysOverdue = Math.floor((new Date(now).getTime() - stats.latestDoseDone.getTime()) / (1000 * 60 * 60 * 24)) - 7;
+                            const daysOverdue = Math.floor((new Date(now).getTime() - stats.latestDoseDone) / (1000 * 60 * 60 * 24)) - 8;
                             return `Overdue by ${daysOverdue} Day${daysOverdue !== 1 ? 's' : ''}`;
                           })()
                         : stats.isScheduleStartDay
@@ -690,11 +702,13 @@ const handleLogDoseNow = () => {
                 <span className="text-yellow-400">{stats.nextDueDateStr}</span>
                 
                 <span className="text-gray-400">latestDoseDone:</span>
-                <span className="text-yellow-400">{stats.latestDoseDone ? stats.latestDoseDone.toISOString() : 'NULL'}</span>
+                <span className="text-yellow-400">{stats.latestDoseDone ? stats.latestDoseDone + ' (' + new Date(stats.latestDoseDone).toLocaleDateString() + ')' : 'NULL'}</span>
+                
+                <span className="text-gray-400">daysSinceLastDoseLogged:</span>
                 
                 <span className="text-gray-400">daysSinceLastDoseLogged:</span>
                 <span className="text-white">{stats.latestDoseDone 
-                  ? ((new Date(now).getTime() - stats.latestDoseDone.getTime()) / (1000 * 60 * 60 * 24)).toFixed(2)
+                  ? ((new Date(now).getTime() - stats.latestDoseDone) / (1000 * 60 * 60 * 24)).toFixed(2)
                   : 'N/A'}</span>
               </div>
               
@@ -726,7 +740,7 @@ const handleLogDoseNow = () => {
                 <span className="text-gray-400">doseLoggedToday:</span>
                 <span className={doseLoggedToday ? 'text-green-400' : 'text-white'}>{doseLoggedToday ? 'TRUE' : 'FALSE'}</span>
                 
-                <span className="text-gray-400">isOverdue (7+ days since last):</span>
+                <span className="text-gray-400">isOverdue (8+ days since last):</span>
                 <span className={stats.isOverdue ? 'text-red-400' : 'text-white'}>{stats.isOverdue ? 'TRUE' : 'FALSE'}</span>
                 
                 <span className="text-gray-400">rawProgress (days/interval*100):</span>
@@ -1161,8 +1175,8 @@ const handleLogDoseNow = () => {
         }}
         onSave={() => {
           const now = timeService.nowDate();
-          setLatestDoseDone(now);
-          localStorage.setItem('latestDoseDone', now.toISOString());
+          setLatestDoseDone(now.getTime());
+          localStorage.setItem('latestDoseDone', now.getTime().toString());
           onRefreshMedications();
           onLogDose();
           setIsLogging(false);

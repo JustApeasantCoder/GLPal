@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Peptide, PEPTIDE_PRESETS, PeptideCategory, PeptideFrequency, InjectionRoute, DoseUnit, PeptideCycle } from '../../../types';
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import { timeService } from '../../../core/timeService';
 
 interface PeptideModalProps {
   isOpen: boolean;
@@ -56,7 +57,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
   sublingual: 'Sublingual',
 };
 
-const getTodayString = () => new Date().toISOString().split('T')[0];
+const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide }) => {
   const [name, setName] = useState('');

@@ -5,7 +5,7 @@ import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModa
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import { timeService } from '../../../core/timeService';
 
-const getTodayString = () => new Date(timeService.now()).toISOString().split('T')[0];
+const getTodayString = () => timeService.todayString();
 
 interface MedicationModalProps {
   isOpen: boolean;

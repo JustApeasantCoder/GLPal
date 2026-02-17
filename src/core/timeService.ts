@@ -11,6 +11,19 @@ class TimeService {
     return new Date(this.now());
   }
 
+  // Get local date string (YYYY-MM-DD) - avoids UTC issues
+  toLocalDateString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Get today's date string in local time
+  todayString(): string {
+    return this.toLocalDateString(this.nowDate());
+  }
+
   // Travel to a specific date (positive = future, negative = past)
   travelToDate(date: Date): void {
     this.offset = date.getTime() - Date.now();

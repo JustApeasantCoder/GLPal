@@ -33,7 +33,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
   sublingual: 'Sublingual',
 };
 
-const getTodayString = () => timeService.nowDate().toISOString().split('T')[0];
+const getTodayString = () => timeService.todayString();
 
 const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide }) => {
   const [date, setDate] = useState(getTodayString());
