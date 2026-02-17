@@ -85,6 +85,56 @@ const WeightChart: React.FC<WeightChartProps> = ({
     return xAxisDates.indexOf(lastEntry.displayDate);
   }, [lastEntry, xAxisDates]);
 
+  const projectionData = useMemo(() => {
+    if (sortedData.length < 7) return null;
+    
+    const windowSize = 7;
+    const recentWeights: number[] = [];
+    for (let i = sortedData.length - windowSize; i < sortedData.length; i++) {
+      const start = Math.max(0, i - Math.floor(windowSize / 2));
+      const end = Math.min(sortedData.length, i + Math.ceil(windowSize / 2));
+      const window = sortedData.slice(start, end);
+      recentWeights.push(window.reduce((sum, d) => sum + d.weight, 0) / window.length);
+    }
+    
+    if (recentWeights.length < 2) return null;
+    
+    const avgChangePerDay = (recentWeights[recentWeights.length - 1] - recentWeights[0]) / recentWeights.length;
+    
+    const lastMA = recentWeights[recentWeights.length - 1];
+    const lastIndex = xAxisDates.indexOf(sortedData[sortedData.length - 1].displayDate);
+    
+    const projectionDays = 30;
+    const projectionPoints: [string, number][] = [];
+    
+    for (let i = 1; i <= projectionDays; i++) {
+      const futureIndex = lastIndex + i;
+      if (futureIndex < xAxisDates.length) {
+        const futureWeight = lastMA + avgChangePerDay * i;
+        projectionPoints.push([xAxisDates[futureIndex], futureWeight]);
+      }
+    }
+    
+    return projectionPoints;
+  }, [sortedData, xAxisDates]);
+
+  const trendLineData = useMemo(() => {
+    if (sortedData.length < 7) return null;
+    
+    const windowSize = 7;
+    const trendPoints: [string, number][] = [];
+    
+    for (let i = 0; i < sortedData.length; i++) {
+      const start = Math.max(0, i - Math.floor(windowSize / 2));
+      const end = Math.min(sortedData.length, i + Math.ceil(windowSize / 2));
+      const window = sortedData.slice(start, end);
+      const avg = window.reduce((sum, d) => sum + d.weight, 0) / window.length;
+      trendPoints.push([sortedData[i].displayDate, avg]);
+    }
+    
+    return trendPoints;
+  }, [sortedData]);
+
   const doseChanges = useMemo(() => {
     if (!medicationData || medicationData.length === 0) return [];
     
@@ -214,12 +264,25 @@ const WeightChart: React.FC<WeightChartProps> = ({
           const dateIndex = sortedData.findIndex(d => d.displayDate === item.axisValue);
           const actualDate = dateIndex >= 0 ? new Date(firstDataDate.getTime() + dateIndex * 24 * 60 * 60 * 1000) : new Date();
           const dateWithYear = `${item.axisValue} ${actualDate.getFullYear()}`;
+          
+          let trendHtml = '';
+          if (trendLineData && dateIndex >= 0 && dateIndex < trendLineData.length) {
+            const trendWeight = trendLineData[dateIndex][1];
+            const formattedTrend = formatWeight(trendWeight, unitSystem);
+            trendHtml = `
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #4ADEA8; box-shadow: 0 0 6px #4ADEA880;"></span>
+                <span style="color: #94a3b8;">Trend:</span>
+                <span style="font-weight: 600; color: #4ADEA8;">${formattedTrend}</span>
+              </div>`;
+          }
+          
           return `<div style="font-weight: 600; margin-bottom: 4px;">${dateWithYear}</div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="width: 8px; height: 8px; border-radius: 50%; background: #9C7BD3; box-shadow: 0 0 6px #9C7BD380;"></span>
               <span style="color: #94a3b8;">Weight:</span>
               <span style="font-weight: 600; color: #fff;">${formattedWeight}</span>
-            </div>`;
+            </div>${trendHtml}`;
         },
       },
       legend: {
@@ -437,6 +500,31 @@ const WeightChart: React.FC<WeightChartProps> = ({
             };
           });
         })(),
+        ...(trendLineData && trendLineData.length > 0 ? [{
+          name: 'Trend',
+          type: 'line',
+          z: 5,
+          data: trendLineData,
+          symbol: 'none',
+          lineStyle: {
+            width: 2,
+            color: '#4ADEA8',
+            type: 'solid',
+            opacity: 0.6,
+          },
+        }] : []),
+        ...(projectionData && projectionData.length > 0 ? [{
+          name: 'Projection',
+          type: 'line',
+          z: 5,
+          data: projectionData,
+          symbol: 'none',
+          lineStyle: {
+            width: 2,
+            color: '#4ADEA8',
+            type: 'dashed',
+          },
+        }] : []),
       ],
       dataZoom: [
         {
@@ -468,6 +556,8 @@ const WeightChart: React.FC<WeightChartProps> = ({
     xAxisDates,
     extendedLastDate,
     lastEntryIndex,
+    projectionData,
+    trendLineData,
   ]);
 
   if (data.length === 0) {
