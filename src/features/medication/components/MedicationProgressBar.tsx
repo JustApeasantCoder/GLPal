@@ -56,7 +56,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
               width: `${progressPercent}%`,
               background: isOverdue
                 ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
-                : 'linear-gradient(90deg, #B19CD9, #D4B8E8, #B19CD9)',
+                : 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)',
               boxShadow: isOverdue
                 ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
                 : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
@@ -71,7 +71,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
                 style={{ 
                   left: 0,
                   width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, #B19CD9, #D4B8E8, #B19CD9)',
+                  background: 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)',
                   boxShadow: '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
                 }}
               />
@@ -153,7 +153,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
 
   return (
     <div className="mb-4">
-      <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_30px_rgba(177,156,217,0.2)]">
+      <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_15px_rgba(177,156,217,0.2)]">
         <div className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177,156,217,0.1) 10px, rgba(177,156,217,0.1) 20px)',
@@ -163,7 +163,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
         {getProgressBarContent()}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+          <span className="text-sm font-bold text-white" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
             {getDisplayText()}
           </span>
         </div>
