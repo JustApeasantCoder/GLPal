@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol, SideEffect } from '../../types';
 import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries } from '../../shared/utils/database';
+import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 
 const bigCard = "bg-black/30 backdrop-blur-lg rounded-2xl p-4 border border-[#9C7BD3]/20";
 const bigCardText = {
@@ -28,6 +29,17 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingEntry, setEditingEntry] = useState<GLP1Entry | null>(null);
+
+  const allMedications = useMemo(() => {
+    const medSet = new Set<string>();
+    manualEntries.forEach(e => medSet.add(e.medication));
+    protocols.forEach(p => medSet.add(p.medication));
+    return Array.from(medSet);
+  }, [manualEntries, protocols]);
+
+  const getMedColor = (medicationName: string) => {
+    return getMedicationColorByName(medicationName, allMedications).stroke;
+  };
   const [editSideEffects, setEditSideEffects] = useState<SideEffect[]>([]);
   const [editNotes, setEditNotes] = useState('');
   const [activeSideEffect, setActiveSideEffect] = useState<string | null>(null);
@@ -110,7 +122,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-text-primary font-medium">{formatDate(entry.date)}</p>
-                    <p className="text-text-muted text-sm">{entry.medication}</p>
+                    <p className="text-sm" style={{ color: getMedColor(entry.medication) }}>{entry.medication}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[#4ADEA8] font-bold">{entry.dose}mg</p>
@@ -188,7 +200,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
           <h2 className="text-sm font-medium text-text-muted mb-2">Current Protocol</h2>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-text-primary font-medium">{activeProtocol.medication}</p>
+              <p className="font-medium" style={{ color: getMedColor(activeProtocol.medication) }}>{activeProtocol.medication}</p>
               <p className="text-text-muted text-sm">
                 {activeProtocol.dose}mg • {activeProtocol.frequencyPerWeek}x per week
               </p>
@@ -203,7 +215,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
           <div className="fixed inset-0 bg-black/60" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setEditingEntry(null)} />
           <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-white mb-2">Side Effects & Notes</h3>
-            <p className="text-sm text-text-muted mb-4">{formatDate(editingEntry.date)} - {editingEntry.medication}</p>
+            <p className="text-sm text-text-muted mb-4">{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
             
             <div className="border-t border-[#B19CD9]/20 my-4"></div>
             
