@@ -3,6 +3,7 @@ import { UserProfile } from '../../../types';
 import { convertHeightFromCm, convertHeightToCm, feetInchesToCm } from '../../../shared/utils/unitConversion';
 import NumberPickerModal from '../../../shared/components/NumberPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface TDEECalculatorProps {
   profile: UserProfile;
@@ -10,6 +11,7 @@ interface TDEECalculatorProps {
 }
 
 const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate }) => {
+  const { isDarkMode } = useTheme();
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const [showAgePicker, setShowAgePicker] = useState(false);
   const [showHeightPicker, setShowHeightPicker] = useState(false);
@@ -46,20 +48,24 @@ return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
             Age
           </label>
           <button
             type="button"
             onClick={() => setShowAgePicker(true)}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+            className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
+              isDarkMode
+                ? 'border-[#B19CD9]/30 bg-black/20 text-white'
+                : 'border-gray-300 bg-white text-gray-900'
+            }`}
           >
             {profile.age || 'Select age'}
           </button>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
             Gender
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -69,7 +75,9 @@ return (
               className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                 profile.gender === 'male'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                  : isDarkMode
+                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
               Male
@@ -80,7 +88,9 @@ return (
               className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                 profile.gender === 'female'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                  : isDarkMode
+                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
               Female
@@ -89,13 +99,17 @@ return (
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
             Height ({unitSystem === 'imperial' ? 'ft/in' : 'cm'})
           </label>
           <button
             type="button"
             onClick={() => setShowHeightPicker(true)}
-            className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+            className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
+              isDarkMode
+                ? 'border-[#B19CD9]/30 bg-black/20 text-white'
+                : 'border-gray-300 bg-white text-gray-900'
+            }`}
           >
             {unitSystem === 'imperial' 
               ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
@@ -105,7 +119,7 @@ return (
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-accent-purple-light mb-1">
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
             Units
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -115,7 +129,9 @@ return (
               className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                 (profile.unitSystem || 'metric') === 'metric'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                  : isDarkMode
+                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
               Metric
@@ -126,7 +142,9 @@ return (
               className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                 profile.unitSystem === 'imperial'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                  : isDarkMode
+                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
               Imperial
@@ -136,13 +154,17 @@ return (
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-accent-purple-light mb-1">
+        <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
           Activity Level
         </label>
         <button
           type="button"
           onClick={() => setShowActivityPicker(true)}
-          className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-left"
+          className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
+            isDarkMode
+              ? 'border-[#B19CD9]/30 bg-black/20 text-white'
+              : 'border-gray-300 bg-white text-gray-900'
+          }`}
         >
           {activityLevels.find(l => l.value === profile.activityLevel)?.label || 'Select activity level'}
         </button>

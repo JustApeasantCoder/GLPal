@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface WheelPickerProps {
   value: string;
@@ -18,6 +19,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
   label,
   format = (v) => v,
 }) => {
+  const { isDarkMode } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -120,10 +122,15 @@ useEffect(() => {
     
     const isSelected = index === currentIndex;
     
+    const selectedColor = isDarkMode ? '#fff' : '#1a1625';
+    const unselectedColor = isDarkMode 
+      ? `rgba(177, 156, 217, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`
+      : `rgba(107, 114, 128, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`;
+    
     return {
       transform: `scale(${scale}) translateZ(${translateZ}px)`,
       opacity,
-      color: isSelected ? '#fff' : `rgba(177, 156, 217, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`,
+      color: isSelected ? selectedColor : unselectedColor,
       fontWeight: isSelected ? 700 : 400,
     };
   };
@@ -131,14 +138,18 @@ useEffect(() => {
   return (
     <div className="flex flex-col items-center">
       {label && (
-        <span className="text-xs text-[#B19CD9] mb-2 font-medium tracking-wider uppercase">{label}</span>
+        <span className={`text-xs mb-2 font-medium tracking-wider uppercase ${isDarkMode ? 'text-[#B19CD9]' : 'text-gray-500'}`}>{label}</span>
       )}
 
       <div
         ref={containerRef}
         draggable={false}
         onDragStart={(e) => e.preventDefault()}
-        className={`relative h-[132px] w-20 rounded-2xl border border-[#B19CD9]/40 bg-gradient-to-b from-[#1a1625]/80 to-[#0d0a15]/90 select-none shadow-lg shadow-purple-900/20 ${
+        className={`relative h-[132px] w-20 rounded-2xl border select-none shadow-lg ${
+          isDarkMode
+            ? 'border-[#B19CD9]/40 bg-gradient-to-b from-[#1a1625]/80 to-[#0d0a15]/90 shadow-purple-900/20'
+            : 'border-gray-300 bg-gradient-to-b from-gray-50 to-white shadow-gray-200/50'
+        } ${
           !isTouchDevice
             ? 'cursor-grab active:cursor-grabbing overflow-hidden'
             : 'overflow-y-scroll snap-y snap-mandatory'
@@ -196,6 +207,11 @@ useEffect(() => {
             const opacity = 1 - Math.min(distance, 2) * 0.05;
             const isSelected = index === currentIndex;
             
+            const selectedColor = isDarkMode ? '#fff' : '#1a1625';
+            const unselectedColor = isDarkMode 
+              ? `rgba(177, 156, 217, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`
+              : `rgba(107, 114, 128, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`;
+            
             return (
               <div
                 key={option}
@@ -204,7 +220,7 @@ useEffect(() => {
                 style={{
                   transform: `scale(${scale})`,
                   opacity,
-                  color: isSelected ? '#fff' : `rgba(177, 156, 217, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`,
+                  color: isSelected ? selectedColor : unselectedColor,
                   fontWeight: isSelected ? 700 : 400,
                 }}
               >
