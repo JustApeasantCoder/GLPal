@@ -85,39 +85,6 @@ const WeightChart: React.FC<WeightChartProps> = ({
     return xAxisDates.indexOf(lastEntry.displayDate);
   }, [lastEntry, xAxisDates]);
 
-  const projectionData = useMemo(() => {
-    if (sortedData.length < 7) return null;
-    
-    const windowSize = 7;
-    const recentWeights: number[] = [];
-    for (let i = sortedData.length - windowSize; i < sortedData.length; i++) {
-      const start = Math.max(0, i - Math.floor(windowSize / 2));
-      const end = Math.min(sortedData.length, i + Math.ceil(windowSize / 2));
-      const window = sortedData.slice(start, end);
-      recentWeights.push(window.reduce((sum, d) => sum + d.weight, 0) / window.length);
-    }
-    
-    if (recentWeights.length < 2) return null;
-    
-    const avgChangePerDay = (recentWeights[recentWeights.length - 1] - recentWeights[0]) / recentWeights.length;
-    
-    const lastMA = recentWeights[recentWeights.length - 1];
-    const lastIndex = xAxisDates.indexOf(sortedData[sortedData.length - 1].displayDate);
-    
-    const projectionDays = 30;
-    const projectionPoints: [string, number][] = [];
-    
-    for (let i = 1; i <= projectionDays; i++) {
-      const futureIndex = lastIndex + i;
-      if (futureIndex < xAxisDates.length) {
-        const futureWeight = lastMA + avgChangePerDay * i;
-        projectionPoints.push([xAxisDates[futureIndex], futureWeight]);
-      }
-    }
-    
-    return projectionPoints;
-  }, [sortedData, xAxisDates]);
-
   const trendLineData = useMemo(() => {
     if (sortedData.length < 7) return null;
     
@@ -134,6 +101,39 @@ const WeightChart: React.FC<WeightChartProps> = ({
     
     return trendPoints;
   }, [sortedData]);
+
+  const projectionData = useMemo(() => {
+    if (sortedData.length < 7 || !trendLineData) return null;
+    
+    const windowSize = 7;
+    const recentWeights: number[] = [];
+    for (let i = sortedData.length - windowSize; i < sortedData.length; i++) {
+      const start = Math.max(0, i - Math.floor(windowSize / 2));
+      const end = Math.min(sortedData.length, i + Math.ceil(windowSize / 2));
+      const window = sortedData.slice(start, end);
+      recentWeights.push(window.reduce((sum, d) => sum + d.weight, 0) / window.length);
+    }
+    
+    if (recentWeights.length < 2) return null;
+    
+    const avgChangePerDay = (recentWeights[recentWeights.length - 1] - recentWeights[0]) / recentWeights.length;
+    
+    const lastTrendValue = trendLineData[trendLineData.length - 1][1];
+    const lastIndex = xAxisDates.indexOf(sortedData[sortedData.length - 1].displayDate);
+    
+    const projectionDays = 60;
+    const projectionPoints: [string, number][] = [];
+    
+    for (let i = 1; i <= projectionDays; i++) {
+      const futureIndex = lastIndex + i;
+      if (futureIndex < xAxisDates.length) {
+        const futureWeight = lastTrendValue + avgChangePerDay * i;
+        projectionPoints.push([xAxisDates[futureIndex], futureWeight]);
+      }
+    }
+    
+    return projectionPoints;
+  }, [sortedData, xAxisDates, trendLineData]);
 
   const doseChanges = useMemo(() => {
     if (!medicationData || medicationData.length === 0) return [];
@@ -333,6 +333,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
         {
           name: 'Weight',
           type: 'line',
+          z: 10,
           smooth: true,
           showSymbol: false,
           symbol: 'none',
@@ -503,26 +504,52 @@ const WeightChart: React.FC<WeightChartProps> = ({
         ...(trendLineData && trendLineData.length > 0 ? [{
           name: 'Trend',
           type: 'line',
-          z: 5,
+          z: 3,
+          smooth: 0.4,
           data: trendLineData,
           symbol: 'none',
           lineStyle: {
-            width: 2,
+            width: 3,
             color: '#4ADEA8',
             type: 'solid',
-            opacity: 0.6,
+            shadowBlur: 10,
+            shadowColor: '#4ADEA8',
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(74, 222, 168, 0.12)' },
+                { offset: 1, color: 'rgba(74, 222, 168, 0.01)' },
+              ],
+            },
           },
         }] : []),
         ...(projectionData && projectionData.length > 0 ? [{
           name: 'Projection',
           type: 'line',
-          z: 5,
+          z: 2,
+          smooth: 0.4,
           data: projectionData,
           symbol: 'none',
           lineStyle: {
             width: 2,
-            color: '#4ADEA8',
             type: 'dashed',
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 1,
+              y2: 0,
+              colorStops: [
+                { offset: 0, color: 'rgba(74, 222, 168, 0.6)' },
+                { offset: 1, color: 'rgba(74, 222, 168, 0.05)' },
+              ],
+            },
           },
         }] : []),
       ],
