@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { addMedicationManualEntry } from '../../../shared/utils/database';
+import { getMedicationColorByName } from '../../../shared/utils/chartUtils';
 
 interface LogDoseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
   protocol: GLP1Protocol | null;
+  allMedications?: string[];
 }
 
 const INJECTION_AREAS = ['Abdomen', 'Thigh', 'Arm', 'Buttock'];
@@ -28,7 +30,11 @@ const getPainLevelColor = (level: number): string => {
   return '#f87171';
 };
 
-const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol }) => {
+const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [] }) => {
+  const medicationColor = useMemo(() => {
+    if (!protocol?.medication || allMedications.length === 0) return '#B19CD9';
+    return getMedicationColorByName(protocol.medication, allMedications).stroke;
+  }, [protocol?.medication, allMedications]);
   const [painLevel, setPainLevel] = useState<number>(0);
   const [injectionArea, setInjectionArea] = useState<string>('');
   const [injectionSide, setInjectionSide] = useState<string>('');
@@ -153,7 +159,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <div className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Medication</span>
-              <span className="text-sm font-medium text-text-primary">{protocol?.medication || 'N/A'}</span>
+              <span className="text-sm font-medium" style={{ color: medicationColor }}>{protocol?.medication || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Date</span>

@@ -20,6 +20,11 @@ export const CHART_COLORS = {
 
 export const getMedicationColor = (index: number) => 
   CHART_COLORS.medications[index % CHART_COLORS.medications.length];
+
+export const getMedicationColorByName = (medicationName: string, allMedications: string[]): { stroke: string; fill: string } => {
+  const index = allMedications.indexOf(medicationName);
+  return getMedicationColor(index >= 0 ? index : 0);
+};
 export const CHART_DATE_FORMATS = {
   short: (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
   medium: (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),

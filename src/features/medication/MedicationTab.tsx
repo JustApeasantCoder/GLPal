@@ -326,17 +326,20 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
           
-          {uniqueMedications.map(medicationName => (
-            <MedicationProgressBarContainer
-              key={medicationName}
-              medicationEntries={medicationEntries}
-              protocols={protocols}
-              currentTime={now}
-              latestDoseDone={latestDoseDone}
-              medicationName={medicationName}
-              onLogDose={() => handleLogDoseNow(medicationName)}
-              isLogging={isLogging}
-            />
+          {uniqueMedications.map((medicationName, index) => (
+            <div key={medicationName}>
+              {index > 0 && <div className="border-t border-[#B19CD9]/20 my-3"></div>}
+              <MedicationProgressBarContainer
+                medicationEntries={medicationEntries}
+                protocols={protocols}
+                currentTime={now}
+                latestDoseDone={latestDoseDone}
+                medicationName={medicationName}
+                onLogDose={() => handleLogDoseNow(medicationName)}
+                isLogging={isLogging}
+                allMedications={uniqueMedications}
+              />
+            </div>
           ))}
           
           {process.env.NODE_ENV === 'development' && (
@@ -446,6 +449,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         }}
         onSave={handleLogDoseSave}
         protocol={activeProtocol || null}
+        allMedications={uniqueMedications}
       />
 
       <OverdueDisclaimerModal

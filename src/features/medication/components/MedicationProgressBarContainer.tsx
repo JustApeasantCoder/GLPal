@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol } from '../../../types';
 import { MedicationStats } from '../hooks/useMedicationStats';
 import { timeService } from '../../../core/timeService';
+import { getMedicationColorByName } from '../../../shared/utils/chartUtils';
 
 interface MedicationProgressBarContainerProps {
   medicationEntries: GLP1Entry[];
@@ -11,6 +12,7 @@ interface MedicationProgressBarContainerProps {
   medicationName: string;
   onLogDose: () => void;
   isLogging: boolean;
+  allMedications: string[];
 }
 
 const calculateMedicationStats = (
@@ -197,10 +199,16 @@ export const MedicationProgressBarContainer: React.FC<MedicationProgressBarConta
   medicationName,
   onLogDose,
   isLogging,
+  allMedications,
 }) => {
   const { stats, activeProtocol, doseLoggedToday } = useMemo(
     () => calculateMedicationStats(medicationEntries, protocols, currentTime, latestDoseDone, medicationName),
     [medicationEntries, protocols, currentTime, latestDoseDone, medicationName]
+  );
+
+  const medicationColor = useMemo(
+    () => getMedicationColorByName(medicationName, allMedications),
+    [medicationName, allMedications]
   );
 
   return (
@@ -212,6 +220,7 @@ export const MedicationProgressBarContainer: React.FC<MedicationProgressBarConta
         onLogDose={onLogDose}
         isLogging={isLogging}
         medicationName={medicationName}
+        medicationColor={medicationColor}
         activeProtocol={activeProtocol}
       />
     </React.Suspense>
