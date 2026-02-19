@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { DayPicker } from 'react-day-picker';
 import { format, addMonths, subMonths } from 'date-fns';
-import 'react-day-picker/dist/style.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import DatePicker from './DatePicker';
 
 interface CalendarPickerModalProps {
   isOpen: boolean;
@@ -22,9 +21,15 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     value ? new Date(value) : undefined
   );
-  const [currentMonth, setCurrentMonth] = useState<Date>(
-    value ? new Date(value) : new Date()
-  );
+  const getInitialMonth = () => {
+    if (value) {
+      const parsed = new Date(value);
+      return new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+    }
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  };
+  const [currentMonth, setCurrentMonth] = useState<Date>(getInitialMonth());
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -41,7 +46,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
       setIsVisible(true);
       setIsClosing(false);
       setSelectedDate(value ? new Date(value) : undefined);
-      setCurrentMonth(value ? new Date(value) : new Date());
+      setCurrentMonth(getInitialMonth());
     } else if (isVisible && !isClosing) {
       setIsClosing(true);
       setTimeout(() => {
@@ -175,75 +180,18 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
             </button>
           </div>
 
-          <style>{`
-            .rdp-root {
-              --rdp-accent-color: ${isDarkMode ? '#B19CD9' : '#9C7BD3'};
-              --rdp-accent-background-color: ${isDarkMode ? 'rgba(177, 156, 217, 0.3)' : 'rgba(156, 123, 211, 0.2)'};
-              --rdp-selected-color: #ffffff;
-              --rdp-selected-background-color: #B19CD9;
-              --rdp-today-color: ${isDarkMode ? '#4ADEA8' : '#4ADEA8'};
-              --rdp-today-background-color: ${isDarkMode ? 'rgba(74, 222, 168, 0.2)' : 'rgba(74, 222, 168, 0.15)'};
-              --rdp-color: ${isDarkMode ? '#ffffff' : '#374151'};
-              --rdp-background-color: transparent;
-              --rdp-outline: none;
-              --rdp-cell-size: 40px;
-              --rdp-font-size: 14px;
-              margin: 0;
-              width: 100%;
-            }
-            .rdp-caption {
-              display: none;
-            }
-            .rdp-nav {
-              display: none;
-            }
-            .rdp-head_cell {
-              color: ${isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} !important;
-              font-weight: 500;
-              font-size: 12px;
-              text-transform: uppercase;
-            }
-            .rdp-day {
-              color: ${isDarkMode ? '#ffffff' : '#374151'};
-              border-radius: 8px;
-            }
-            .rdp-day:hover:not(.rdp-day_selected) {
-              background-color: ${isDarkMode ? 'rgba(177, 156, 217, 0.2)' : 'rgba(156, 123, 211, 0.1)'};
-            }
-            .rdp-day_selected {
-              background-color: #B19CD9 !important;
-              color: #ffffff !important;
-              font-weight: 600;
-            }
-            .rdp-day_selected:hover {
-              background-color: #9C7BD3 !important;
-            }
-            .rdp-day_today:not(.rdp-day_selected) {
-              border: 2px solid #4ADEA8;
-              font-weight: 600;
-            }
-            .rdp-day_outside {
-              color: ${isDarkMode ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.15)'} !important;
-            }
-            .rdp-month {
-              width: 100%;
-            }
-          `}</style>
-
-          <DayPicker
-            mode="single"
+          <DatePicker
+            key={currentMonth.toISOString()}
             selected={selectedDate}
             onSelect={handleSelect}
             month={currentMonth}
-            fromDate={new Date(2000, 0, 1)}
-            toDate={new Date(2100, 11, 31)}
-            modifiers={{
-              today: new Date(),
-            }}
-            modifiersStyles={{
-              today: { 
-                fontWeight: 'bold',
-              }
+            isDarkMode={isDarkMode}
+            onTodayClick={(date) => {
+              // Jump to today and reflect selection in the picker view
+              // Use the first day of the month to ensure the view centers on the correct month
+              const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+              setCurrentMonth(firstOfMonth);
+              setSelectedDate(date);
             }}
           />
 
