@@ -118,7 +118,7 @@ return (
 
         <div>
           <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-            Height ({unitSystem === 'imperial' ? 'ft/in' : 'cm'})
+            Height ({unitSystem === 'imperial' ? 'ft / in' : 'cm'})
           </label>
           {useWheelForNumbers ? (
             <button
@@ -136,28 +136,65 @@ return (
               }
             </button>
           ) : (
-            <input
-              type="number"
-              value={unitSystem === 'imperial' ? Math.round(heightDisplayValue) : Math.round(profile.height || 170)}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value) || 0;
-                let heightCm: number;
-                if (unitSystem === 'imperial') {
-                  heightCm = feetInchesToCm(Math.floor(value / 12), value % 12);
-                } else {
-                  heightCm = value;
-                }
-                if (heightCm && heightCm > 0) {
-                  handleChange({ ...profile, height: heightCm });
-                }
-              }}
-              className={`w-full px-3 py-2 border rounded-lg transition-all ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-              }`}
-              placeholder={unitSystem === 'imperial' ? 'Enter height (inches)' : 'Enter height (cm)'}
-            />
+            unitSystem === 'imperial' ? (
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={feet}
+                  onChange={(e) => {
+                    const feetVal = parseInt(e.target.value) || 0;
+                    const heightCm = feetInchesToCm(feetVal, inches);
+                    if (heightCm && heightCm > 0) {
+                      handleChange({ ...profile, height: heightCm });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg transition-all ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+                  }`}
+                  placeholder="ft"
+                  min={0}
+                  max={8}
+                />
+                <input
+                  type="number"
+                  value={inches}
+                  onChange={(e) => {
+                    const inchesVal = parseInt(e.target.value) || 0;
+                    const heightCm = feetInchesToCm(feet, inchesVal);
+                    if (heightCm && heightCm > 0) {
+                      handleChange({ ...profile, height: heightCm });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg transition-all ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+                  }`}
+                  placeholder="in"
+                  min={0}
+                  max={11}
+                />
+              </div>
+            ) : (
+              <input
+                type="number"
+                value={Math.round(profile.height || 170)}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value) || 0;
+                  if (value && value > 0) {
+                    handleChange({ ...profile, height: value });
+                  }
+                }}
+                className={`w-full px-3 py-2 border rounded-lg transition-all ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+                }`}
+                placeholder="Enter height (cm)"
+              />
+            )
           )}
         </div>
 

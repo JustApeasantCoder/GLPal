@@ -198,25 +198,32 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
           <div className="flex gap-2 mt-4">
             <button
               onClick={onClose}
-              className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-white hover:bg-gray-600' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
               }`}
             >
               Cancel
             </button>
-            {selectedDate && (
-              <button
-                onClick={() => {
+            <button
+              onClick={() => {
+                if (selectedDate) {
                   onChange(format(selectedDate, 'yyyy-MM-dd'));
                   onClose();
-                }}
-                className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all"
-              >
-                Confirm
-              </button>
-            )}
+                }
+              }}
+              disabled={!selectedDate}
+              className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                selectedDate
+                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white hover:shadow-[0_0_20px_rgba(177,156,217,0.5)]'
+                  : isDarkMode
+                    ? 'bg-[#B19CD9]/30 text-white/50 cursor-not-allowed'
+                    : 'bg-[#B19CD9]/30 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Confirm
+            </button>
           </div>
         </div>
       </div>
