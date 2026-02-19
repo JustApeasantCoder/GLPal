@@ -18,6 +18,64 @@ const formatNumber = (num: number): string => {
   return num.toFixed(2).replace(/\.?0+$/, '');
 };
 
+interface SyringeIndicatorProps {
+  value: number;
+  maxValue?: number;
+  isDarkMode: boolean;
+}
+
+const SyringeIndicator: React.FC<SyringeIndicatorProps> = ({ value, maxValue = 100, isDarkMode }) => {
+  const percentage = Math.min((value / maxValue) * 100, 100);
+  const isOverMax = value > maxValue;
+
+  const tickMarks = [];
+  for (let i = 0; i <= 20; i++) {
+    if (i === 0 || i === 20) continue;
+    const tickValue = i * 5;
+    const isMajor = i % 2 === 0;
+    const showLabel = isMajor;
+    tickMarks.push(
+      <div
+        key={i}
+        className="absolute flex flex-col items-center"
+        style={{ left: `${(i / 20) * 100}%`, top: isMajor ? '0' : '2px', transform: 'translateX(-50%)' }}
+      >
+        <div className={`w-0.5 ${isMajor ? 'h-3' : 'h-1.5'} bg-[#495057]`} />
+        {showLabel && (
+          <span className="text-xs font-bold mt-0.5 text-[#495057]">
+            {tickValue}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 p-3 rounded-lg border border-[#B19CD9]/20 bg-black/20">
+      <div className="relative h-8">
+        {/* Fill bar */}
+        <div
+          className="absolute inset-y-0 left-0 rounded transition-all duration-300"
+          style={{
+            width: `${percentage}%`,
+            background: 'linear-gradient(to right, #9C7BD3, #B19CD9, #cdbcec)',
+            opacity: isOverMax ? 0.6 : 1,
+          }}
+        />
+
+        {/* Tick marks */}
+        <div className="absolute inset-x-0 top-0 h-full">
+          {tickMarks}
+        </div>
+      </div>
+
+      {isOverMax && (
+        <p className="text-xs text-red-400 mt-1 text-center">Value Exceeds 100 IU</p>
+      )}
+    </div>
+  );
+};
+
 const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
   const { isDarkMode } = useTheme();
   const [vialStrength, setVialStrength] = useState<string>('');
@@ -145,7 +203,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             htmlFor="vialStrength" 
             className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}
           >
-            Vial Strength (mg)
+            Strength (mg)
           </label>
           <input
             type="number"
@@ -165,7 +223,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             htmlFor="waterAmount" 
             className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}
           >
-            Bacteriostatic Water (ml)
+            Water (ml)
           </label>
           <input
             type="number"
@@ -237,7 +295,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             </div>
             <div className="border-t border-[#B19CD9]/20 my-2"></div>
             <div className="flex justify-between">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Vial Strength:</span>
+              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Strength:</span>
               <span className={`text-sm font-bold ${isCalculated('vialStrength') ? 'text-[#4ADEA8]' : 'text-[#B19CD9]'}`}>
                 {formatNumber(result.vialStrength)} mg
               </span>
@@ -260,6 +318,8 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
                 {formatNumber(result.syringeDraw)} IU
               </span>
             </div>
+            
+            <SyringeIndicator value={result.syringeDraw} isDarkMode={isDarkMode} />
           </div>
         </div>
       )}
