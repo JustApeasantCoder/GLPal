@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { getDosageCalculatorData, saveDosageCalculatorData, clearDosageCalculatorData } from '../../../shared/utils/database';
+import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 
 interface DosageCalculatorProps {
   onClose?: () => void;
@@ -86,6 +87,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
   const [result, setResult] = useState<DosageResult | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [activePicker, setActivePicker] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = getDosageCalculatorData();
@@ -197,15 +199,17 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             onChange={(e) => setVialStrength(e.target.value)}
             onFocus={() => handleFocus('vialStrength')}
             onBlur={() => handleBlur('vialStrength', vialStrength)}
-            className={getInputClass('vialStrength')}
-            placeholder="e.g., 10"
+            onClick={() => setActivePicker('vialStrength')}
+            className={`${getInputClass('vialStrength')} cursor-pointer`}
+            placeholder="Tap to select"
+            readOnly
           />
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-0.5">
             {[10, 20, 30].map(val => (
               <button
                 key={val}
                 onClick={() => setVialStrength(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   vialStrength === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -215,12 +219,12 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               </button>
             ))}
           </div>
-          <div className="flex gap-1 mt-1">
+          <div className="flex gap-1 mt-0.5">
             {[40, 50, 60].map(val => (
               <button
                 key={val}
                 onClick={() => setVialStrength(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   vialStrength === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -247,15 +251,17 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             onChange={(e) => setWaterAmount(e.target.value)}
             onFocus={() => handleFocus('waterAmount')}
             onBlur={() => handleBlur('waterAmount', waterAmount)}
-            className={getInputClass('waterAmount')}
-            placeholder="e.g., 2"
+            onClick={() => setActivePicker('waterAmount')}
+            className={`${getInputClass('waterAmount')} cursor-pointer`}
+            placeholder="Tap to select"
+            readOnly
           />
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-0.5">
             {[1, 1.5, 2].map(val => (
               <button
                 key={val}
                 onClick={() => setWaterAmount(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   waterAmount === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -265,12 +271,12 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               </button>
             ))}
           </div>
-          <div className="flex gap-1 mt-1">
+          <div className="flex gap-1 mt-0.5">
             {[2.5, 3, 3.5].map(val => (
               <button
                 key={val}
                 onClick={() => setWaterAmount(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   waterAmount === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -297,15 +303,32 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             onChange={(e) => setDesiredDose(e.target.value)}
             onFocus={() => handleFocus('desiredDose')}
             onBlur={() => handleBlur('desiredDose', desiredDose)}
-            className={getInputClass('desiredDose')}
-            placeholder="e.g., 2.5"
+            onClick={() => setActivePicker('desiredDose')}
+            className={`${getInputClass('desiredDose')} cursor-pointer`}
+            placeholder="Tap to select"
+            readOnly
           />
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-0.5">
             {[0.25, 0.5, 1].map(val => (
               <button
                 key={val}
                 onClick={() => setDesiredDose(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
+                  desiredDose === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}mg
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 mt-0.5">
+            {[2, 4, 6].map(val => (
+              <button
+                key={val}
+                onClick={() => setDesiredDose(val.toString())}
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   desiredDose === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -332,15 +355,32 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             onChange={(e) => setSyringeDraw(e.target.value)}
             onFocus={() => handleFocus('syringeDraw')}
             onBlur={() => handleBlur('syringeDraw', syringeDraw)}
-            className={getInputClass('syringeDraw')}
-            placeholder="e.g., 25"
+            onClick={() => setActivePicker('syringeDraw')}
+            className={`${getInputClass('syringeDraw')} cursor-pointer`}
+            placeholder="Tap to select"
+            readOnly
           />
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-0.5">
             {[10, 20, 30].map(val => (
               <button
                 key={val}
                 onClick={() => setSyringeDraw(val.toString())}
-                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
+                  syringeDraw === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}iu
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 mt-0.5">
+            {[40, 50, 60].map(val => (
+              <button
+                key={val}
+                onClick={() => setSyringeDraw(val.toString())}
+                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
                   syringeDraw === val.toString()
                     ? 'bg-[#B19CD9] text-white'
                     : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -374,6 +414,14 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
                 {formatNumber(result.concentration)} mg/ml
               </span>
             </div>
+            {result.dose > 0 && (
+              <div className="flex justify-between">
+                <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Doses per Vial:</span>
+                <span className={`text-sm font-bold text-[#B19CD9]`}>
+                  {formatNumber(result.vialStrength / result.dose)} doses
+                </span>
+              </div>
+            )}
             <div className="border-t border-[#B19CD9]/20 my-2"></div>
             <div className="flex justify-between">
               <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Strength:</span>
@@ -404,6 +452,50 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
           </div>
         </div>
       )}
+
+      <DoseWheelPickerModal
+        isOpen={activePicker === 'vialStrength'}
+        onSave={(val) => { setVialStrength(val); setActivePicker(null); }}
+        onClose={() => setActivePicker(null)}
+        min={0}
+        max={100}
+        label="Vial Strength (mg)"
+        decimals={1}
+        defaultValue={vialStrength}
+      />
+
+      <DoseWheelPickerModal
+        isOpen={activePicker === 'waterAmount'}
+        onSave={(val) => { setWaterAmount(val); setActivePicker(null); }}
+        onClose={() => setActivePicker(null)}
+        min={0}
+        max={20}
+        label="Water (ml)"
+        decimals={1}
+        defaultValue={waterAmount}
+      />
+
+      <DoseWheelPickerModal
+        isOpen={activePicker === 'desiredDose'}
+        onSave={(val) => { setDesiredDose(val); setActivePicker(null); }}
+        onClose={() => setActivePicker(null)}
+        min={0}
+        max={20}
+        label="Desired Dose (mg)"
+        decimals={2}
+        defaultValue={desiredDose}
+      />
+
+      <DoseWheelPickerModal
+        isOpen={activePicker === 'syringeDraw'}
+        onSave={(val) => { setSyringeDraw(val); setActivePicker(null); }}
+        onClose={() => setActivePicker(null)}
+        min={0}
+        max={100}
+        label="Syringe Draw (IU)"
+        decimals={1}
+        defaultValue={syringeDraw}
+      />
     </div>
   );
 };

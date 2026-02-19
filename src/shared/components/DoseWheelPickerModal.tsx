@@ -115,29 +115,6 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
           </div>
           <div className={`border-t mb-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
-          {/* Preset buttons */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {['0.25', '0.5', '1.0', '2.0'].map((val) => {
-              const isSelected = localValue === val;
-              return (
-                <button
-                  key={`preset-${val}`}
-                  type="button"
-                  onClick={() => setLocalValue(val)}
-                  className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                      : isDarkMode
-                        ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
-                        : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300'
-                  }`}
-                >
-                  {val}mg
-                </button>
-              );
-            })}
-          </div>
-
           <div className="flex items-center justify-center gap-3 mb-4 px-2">
             <WheelPicker
               value={String(parsedValue.whole)}
