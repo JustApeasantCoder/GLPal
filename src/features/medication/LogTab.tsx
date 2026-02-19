@@ -127,7 +127,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         weekGroups.get(key)!.push(entry);
       });
       
-      const weekly: { date: string; avgWeight: number; weekLabel: string; change: number | null }[] = [];
+      const weekly: { date: string; avgWeight: number; weekLabel: string; change: number | null; macros: { calories: number; protein: number; carbs: number; fat: number } | null; hasNotes: boolean }[] = [];
       const sortedWeeks = Array.from(weekGroups.keys()).sort();
       
       sortedWeeks.forEach((weekKey, idx) => {
@@ -136,7 +136,24 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         const avg = sum / entries.length;
         const prevAvg = idx > 0 ? weekly[idx - 1].avgWeight : null;
         const change = prevAvg !== null ? prevAvg - avg : null;
-        weekly.push({ date: weekKey, avgWeight: avg, weekLabel: getWeekLabel(entries[0].date), change });
+        
+        const macrosSum = entries.reduce((acc, e) => ({
+          calories: acc.calories + (e.macros?.calories || 0),
+          protein: acc.protein + (e.macros?.protein || 0),
+          carbs: acc.carbs + (e.macros?.carbs || 0),
+          fat: acc.fat + (e.macros?.fat || 0),
+        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        const hasNotes = entries.some(e => e.notes);
+        
+        weekly.push({ 
+          date: weekKey, 
+          avgWeight: avg, 
+          weekLabel: getWeekLabel(entries[0].date), 
+          change,
+          macros: macrosSum.calories > 0 || macrosSum.protein > 0 || macrosSum.carbs > 0 || macrosSum.fat > 0 ? macrosSum : null,
+          hasNotes
+        });
       });
       
       let prevChange: number | null = null;
@@ -155,7 +172,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         monthGroups.get(key)!.push(entry);
       });
       
-      const monthly: { date: string; avgWeight: number; monthLabel: string; change: number | null }[] = [];
+      const monthly: { date: string; avgWeight: number; monthLabel: string; change: number | null; macros: { calories: number; protein: number; carbs: number; fat: number } | null; hasNotes: boolean }[] = [];
       const sortedMonths = Array.from(monthGroups.keys()).sort();
       
       sortedMonths.forEach((monthKey, idx) => {
@@ -164,7 +181,24 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
         const avg = sum / entries.length;
         const prevAvg = idx > 0 ? monthly[idx - 1].avgWeight : null;
         const change = prevAvg !== null ? prevAvg - avg : null;
-        monthly.push({ date: monthKey, avgWeight: avg, monthLabel: getMonthLabel(entries[0].date), change });
+        
+        const macrosSum = entries.reduce((acc, e) => ({
+          calories: acc.calories + (e.macros?.calories || 0),
+          protein: acc.protein + (e.macros?.protein || 0),
+          carbs: acc.carbs + (e.macros?.carbs || 0),
+          fat: acc.fat + (e.macros?.fat || 0),
+        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        const hasNotes = entries.some(e => e.notes);
+        
+        monthly.push({ 
+          date: monthKey, 
+          avgWeight: avg, 
+          monthLabel: getMonthLabel(entries[0].date), 
+          change,
+          macros: macrosSum.calories > 0 || macrosSum.protein > 0 || macrosSum.carbs > 0 || macrosSum.fat > 0 ? macrosSum : null,
+          hasNotes
+        });
       });
       
       let prevChange: number | null = null;
@@ -528,7 +562,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                       </p>
                     </div>
                   </div>
-                  {(entry as any).macros || (entry as any).notes ? (
+                  {(entry as any).macros || (entry as any).notes || (entry as any).hasNotes ? (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {(entry as any).macros && (
                         <>
@@ -554,21 +588,23 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                           )}
                         </>
                       )}
-                      {(entry as any).notes && (
+                      {((entry as any).notes || (entry as any).hasNotes) && (
                         <span className="text-xs bg-[#B19CD9]/20 text-[#B19CD9] px-2 py-1 rounded">
                           📝
                         </span>
                       )}
                     </div>
                   ) : null}
-                  <div className="flex justify-end mt-2">
-                    <button
-                      onClick={() => openWeightEditor(entry)}
-                      className="px-3 py-1 text-xs rounded-lg transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]"
-                    >
-                      + Add Macros / Notes
-                    </button>
-                  </div>
+                  {weightViewMode === 'daily' && (
+                    <div className="flex justify-end mt-2">
+                      <button
+                        onClick={() => openWeightEditor(entry)}
+                        className="px-3 py-1 text-xs rounded-lg transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]"
+                      >
+                        + Macros / Notes
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
