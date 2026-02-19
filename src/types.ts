@@ -57,6 +57,8 @@ export interface UserProfile {
   activityLevel: number; // multiplier
   goalWeight?: number; // kg (stored as metric internally)
   unitSystem?: UnitSystem; // preferred display units
+  useWheelForNumbers?: boolean;
+  useCalendarPicker?: boolean;
 }
 
 // ============================================

@@ -50,12 +50,14 @@ const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   const [logRefreshKey, setLogRefreshKey] = useState(0);
   
-  const [profile, setProfile] = useState<UserProfile>({
+const [profile, setProfile] = useState<UserProfile>({
     age: 35,
     gender: 'male',
     height: 180,
     activityLevel: 1.2,
     unitSystem: 'metric',
+    useWheelForNumbers: false,
+    useCalendarPicker: true,
   });
 
   // Save profile immediately for responsive input experience
@@ -315,6 +317,7 @@ return (
                 onAddWeight={handleAddWeight}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
+                useWheelForNumbers={profile.useWheelForNumbers ?? true}
               />
             </div>
           </TabContent>
@@ -330,6 +333,7 @@ return (
                 onLogDose={() => setLogRefreshKey(k => k + 1)}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
+                useWheelForNumbers={profile.useWheelForNumbers ?? true}
               />
             </div>
           </TabContent>
@@ -342,12 +346,12 @@ return (
 
           <TabContent isActive={activeTab === 'dosage'}>
             <div className="max-w-md mx-auto">
-              <DosageCalculatorTab />
+              <DosageCalculatorTab useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
             <div className="max-w-md mx-auto">
-              <LogTab refreshKey={logRefreshKey} profile={profile} />
+              <LogTab refreshKey={logRefreshKey} profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>
         </div>

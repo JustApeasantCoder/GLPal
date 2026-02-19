@@ -2,7 +2,11 @@ import React from 'react';
 import DosageCalculator from './components/DosageCalculator';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 
-const DosageCalculatorTab: React.FC = () => {
+interface DosageCalculatorTabProps {
+  useWheelForNumbers?: boolean;
+}
+
+const DosageCalculatorTab: React.FC<DosageCalculatorTabProps> = ({ useWheelForNumbers = true }) => {
   const { bigCard, bigCardText } = useThemeStyles();
   return (
     <div className="space-y-4">
@@ -11,7 +15,7 @@ const DosageCalculatorTab: React.FC = () => {
           Peptide Calculator
         </h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
-        <DosageCalculator />
+        <DosageCalculator useWheelForNumbers={useWheelForNumbers} />
       </div>
     </div>
   );

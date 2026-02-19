@@ -28,9 +28,10 @@ interface MedicationTabProps {
   onLogDose: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
+  useWheelForNumbers?: boolean;
 }
 
-const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, onLogDose, chartPeriod, onChartPeriodChange }) => {
+const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, onLogDose, chartPeriod, onChartPeriodChange, useWheelForNumbers = true }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLogDoseModal, setShowLogDoseModal] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
@@ -426,6 +427,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         protocol={editingProtocol}
         mode={protocolModalMode}
         existingProtocols={protocols}
+        useWheelForNumbers={useWheelForNumbers}
       />
 
       <OfficialScheduleModal

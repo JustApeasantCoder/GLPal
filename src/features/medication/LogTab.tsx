@@ -4,10 +4,13 @@ import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManua
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
+import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
+import DateWheelPickerModal from '../../shared/components/DateWheelPickerModal';
 
 interface LogTabProps {
   refreshKey?: number;
   profile?: UserProfile;
+  useWheelForNumbers?: boolean;
 }
 
 const getWeekStart = (date: Date): Date => {
@@ -57,7 +60,7 @@ const COMMON_SIDE_EFFECTS = [
   'Heartburn',
 ];
 
-const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile }) => {
+const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers = true }) => {
   const { bigCard, isDarkMode } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
@@ -79,6 +82,12 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile }) => {
   const [editWeightNotes, setEditWeightNotes] = useState('');
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
+
+  // Picker states
+  const [showCaloriePicker, setShowCaloriePicker] = useState(false);
+  const [showProteinPicker, setShowProteinPicker] = useState(false);
+  const [showCarbsPicker, setShowCarbsPicker] = useState(false);
+  const [showFatPicker, setShowFatPicker] = useState(false);
 
   const weeklyAverages = useMemo(() => {
     if (weightEntries.length === 0) return new Map<string, number>();
@@ -776,63 +785,119 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile }) => {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs text-orange-400 mb-1">Calories</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editWeightMacros.calories || ''}
-                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, calories: parseInt(e.target.value) || 0 })}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="0"
-                    />
+                    {useWheelForNumbers ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowCaloriePicker(true)}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                          isDarkMode
+                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                            : 'border-gray-300 bg-white text-gray-900'
+                        }`}
+                      >
+                        {editWeightMacros.calories || 'Tap to select'}
+                      </button>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        value={editWeightMacros.calories || ''}
+                        onChange={(e) => setEditWeightMacros({ ...editWeightMacros, calories: parseInt(e.target.value) || 0 })}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                          isDarkMode
+                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                        placeholder="0"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-blue-400 mb-1">Protein (g)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editWeightMacros.protein || ''}
-                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, protein: parseInt(e.target.value) || 0 })}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="0"
-                    />
+                    {useWheelForNumbers ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowProteinPicker(true)}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                          isDarkMode
+                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                            : 'border-gray-300 bg-white text-gray-900'
+                        }`}
+                      >
+                        {editWeightMacros.protein || 'Tap to select'}
+                      </button>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        value={editWeightMacros.protein || ''}
+                        onChange={(e) => setEditWeightMacros({ ...editWeightMacros, protein: parseInt(e.target.value) || 0 })}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                          isDarkMode
+                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                        placeholder="0"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-yellow-400 mb-1">Carbs (g)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editWeightMacros.carbs || ''}
-                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, carbs: parseInt(e.target.value) || 0 })}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="0"
-                    />
+                    {useWheelForNumbers ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowCarbsPicker(true)}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                          isDarkMode
+                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                            : 'border-gray-300 bg-white text-gray-900'
+                        }`}
+                      >
+                        {editWeightMacros.carbs || 'Tap to select'}
+                      </button>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        value={editWeightMacros.carbs || ''}
+                        onChange={(e) => setEditWeightMacros({ ...editWeightMacros, carbs: parseInt(e.target.value) || 0 })}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                          isDarkMode
+                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                        placeholder="0"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-pink-400 mb-1">Fat (g)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editWeightMacros.fat || ''}
-                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, fat: parseInt(e.target.value) || 0 })}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="0"
-                    />
+                    {useWheelForNumbers ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowFatPicker(true)}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                          isDarkMode
+                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                            : 'border-gray-300 bg-white text-gray-900'
+                        }`}
+                      >
+                        {editWeightMacros.fat || 'Tap to select'}
+                      </button>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        value={editWeightMacros.fat || ''}
+                        onChange={(e) => setEditWeightMacros({ ...editWeightMacros, fat: parseInt(e.target.value) || 0 })}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                          isDarkMode
+                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                        placeholder="0"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -880,6 +945,65 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile }) => {
           </div>
         </div>
       ) : null}
+
+      {/* Wheel Pickers for Macros */}
+      <DoseWheelPickerModal
+        isOpen={showCaloriePicker}
+        onSave={(value) => {
+          setEditWeightMacros({ ...editWeightMacros, calories: parseInt(value) || 0 });
+          setShowCaloriePicker(false);
+        }}
+        onClose={() => setShowCaloriePicker(false)}
+        min={0}
+        max={3000}
+        step={10}
+        label="Calories"
+        decimals={0}
+        defaultValue={String(editWeightMacros.calories)}
+        presets={['500', '1000', '1500', '2000']}
+      />
+      <DoseWheelPickerModal
+        isOpen={showProteinPicker}
+        onSave={(value) => {
+          setEditWeightMacros({ ...editWeightMacros, protein: parseInt(value) || 0 });
+          setShowProteinPicker(false);
+        }}
+        onClose={() => setShowProteinPicker(false)}
+        min={0}
+        max={500}
+        label="Protein (g)"
+        decimals={0}
+        defaultValue={String(editWeightMacros.protein)}
+        presets={['20', '40', '80', '150']}
+      />
+      <DoseWheelPickerModal
+        isOpen={showCarbsPicker}
+        onSave={(value) => {
+          setEditWeightMacros({ ...editWeightMacros, carbs: parseInt(value) || 0 });
+          setShowCarbsPicker(false);
+        }}
+        onClose={() => setShowCarbsPicker(false)}
+        min={0}
+        max={1000}
+        label="Carbs (g)"
+        decimals={0}
+        defaultValue={String(editWeightMacros.carbs)}
+        presets={['20', '40', '80', '150']}
+      />
+      <DoseWheelPickerModal
+        isOpen={showFatPicker}
+        onSave={(value) => {
+          setEditWeightMacros({ ...editWeightMacros, fat: parseInt(value) || 0 });
+          setShowFatPicker(false);
+        }}
+        onClose={() => setShowFatPicker(false)}
+        min={0}
+        max={500}
+        label="Fat (g)"
+        decimals={0}
+        defaultValue={String(editWeightMacros.fat)}
+        presets={['20', '40', '80', '150']}
+      />
     </div>
   );
 };

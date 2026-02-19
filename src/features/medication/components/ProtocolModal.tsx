@@ -16,9 +16,10 @@ interface ProtocolModalProps {
   protocol?: GLP1Protocol | null;
   mode: 'add' | 'edit';
   existingProtocols?: GLP1Protocol[];
+  useWheelForNumbers?: boolean;
 }
 
-const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols }) => {
+const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -157,17 +158,32 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dose (mg)</label>
-              <button
-                type="button"
-                onClick={() => setShowDosePicker(true)}
-                className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                    : 'border-gray-300 bg-white text-gray-700'
-                }`}
-              >
-                {dose ? `${dose} mg` : 'Select dose'}
-              </button>
+              {useWheelForNumbers ? (
+                <button
+                  type="button"
+                  onClick={() => setShowDosePicker(true)}
+                  className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                      : 'border-gray-300 bg-white text-gray-700'
+                  }`}
+                >
+                  {dose ? `${dose} mg` : 'Select dose'}
+                </button>
+              ) : (
+                <input
+                  type="number"
+                  step="0.25"
+                  value={dose || ''}
+                  onChange={(e) => setDose(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                      : 'border-gray-300 bg-white text-gray-700'
+                  }`}
+                  placeholder="Enter dose"
+                />
+              )}
             </div>
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dosing Schedule</label>

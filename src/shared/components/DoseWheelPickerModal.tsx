@@ -9,9 +9,11 @@ interface DoseWheelPickerModalProps {
   onClose: () => void;
   min?: number;
   max?: number;
+  step?: number;
   label?: string;
   decimals?: number;
   defaultValue?: string;
+  presets?: string[];
 }
 
 const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
@@ -20,9 +22,11 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
   onClose,
   min = 0,
   max = 100,
+  step = 1,
   label = 'Select Dose',
   decimals = 2,
   defaultValue,
+  presets,
 }) => {
   const { isDarkMode } = useTheme();
   const [localValue, setLocalValue] = useState(defaultValue || '0.25');
@@ -51,8 +55,8 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
   }, [localValue, decimals]);
 
   const wholeNumbers = useMemo(() => {
-    return Array.from({ length: max - min + 1 }, (_, i) => String(min + i));
-  }, [min, max]);
+    return Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => String(min + i * step));
+  }, [min, max, step]);
 
   const decimalOptions = useMemo(() => {
     const options: string[] = [];
@@ -114,6 +118,30 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
             </h3>
           </div>
           <div className={`border-t mb-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
+
+          {presets && presets.length > 0 && (
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {presets.map((val) => {
+                const isSelected = localValue === val;
+                return (
+                  <button
+                    key={`preset-${val}`}
+                    type="button"
+                    onClick={() => setLocalValue(val)}
+                    className={`px-2 py-1.5 text-xs rounded-lg transition-all duration-300 ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                    }`}
+                  >
+                    {val}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex items-center justify-center gap-3 mb-4 px-2">
             <WheelPicker

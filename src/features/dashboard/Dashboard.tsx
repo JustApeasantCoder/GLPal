@@ -19,6 +19,7 @@ interface DashboardProps {
   onAddWeight: (weight: number) => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
+  useWheelForNumbers?: boolean;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -29,6 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onAddWeight,
   chartPeriod,
   onChartPeriodChange,
+  useWheelForNumbers = true,
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
@@ -133,7 +135,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 {/* Weight Input Section */}
           <div className="mb-6">
-            <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} lastWeight={lastWeightDisplay} />
+            <WeightInput onAddWeight={onAddWeight} unitSystem={unitSystem} lastWeight={lastWeightDisplay} useWheelForNumbers={useWheelForNumbers} />
           </div>
         </div>
       </div>

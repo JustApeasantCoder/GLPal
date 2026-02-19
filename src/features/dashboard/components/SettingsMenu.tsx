@@ -25,10 +25,29 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
-  const [useWheelForNumbers, setUseWheelForNumbers] = useState(true);
+  const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
   const [useCalendarPicker, setUseCalendarPicker] = useState(true);
 
   const unitSystem = localProfile.unitSystem || 'metric';
+
+  // Load settings from profile on mount
+  useEffect(() => {
+    setUseWheelForNumbers(profile.useWheelForNumbers ?? false);
+    setUseCalendarPicker(profile.useCalendarPicker ?? true);
+  }, [profile]);
+
+  // Save settings to profile when they change
+  useEffect(() => {
+    if (profile.useWheelForNumbers === useWheelForNumbers && profile.useCalendarPicker === useCalendarPicker) {
+      return; // Don't save if values haven't changed
+    }
+    const updatedProfile = {
+      ...profile,
+      useWheelForNumbers,
+      useCalendarPicker,
+    };
+    onProfileUpdate(updatedProfile);
+  }, [useWheelForNumbers, useCalendarPicker]);
 
   // Update local profile when parent profile changes
   useEffect(() => {

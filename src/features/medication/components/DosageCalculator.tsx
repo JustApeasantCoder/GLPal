@@ -5,6 +5,7 @@ import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModa
 
 interface DosageCalculatorProps {
   onClose?: () => void;
+  useWheelForNumbers?: boolean;
 }
 
 interface DosageResult {
@@ -78,7 +79,7 @@ const SyringeIndicator: React.FC<SyringeIndicatorProps> = ({ value, maxValue = 1
   );
 };
 
-const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
+const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
   const [vialStrength, setVialStrength] = useState<string>('');
   const [waterAmount, setWaterAmount] = useState<string>('');
@@ -191,19 +192,31 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
           >
             Strength (mg)
           </label>
-          <input
-            type="number"
-            id="vialStrength"
-            step="0.1"
-            value={vialStrength}
-            onChange={(e) => setVialStrength(e.target.value)}
-            onFocus={() => handleFocus('vialStrength')}
-            onBlur={() => handleBlur('vialStrength', vialStrength)}
-            onClick={() => setActivePicker('vialStrength')}
-            className={`${getInputClass('vialStrength')} cursor-pointer`}
-            placeholder="Tap to select"
-            readOnly
-          />
+          {useWheelForNumbers ? (
+            <input
+              type="text"
+              id="vialStrength"
+              value={vialStrength}
+              onFocus={() => handleFocus('vialStrength')}
+              onBlur={() => handleBlur('vialStrength', vialStrength)}
+              onClick={() => setActivePicker('vialStrength')}
+              className={`${getInputClass('vialStrength')} cursor-pointer`}
+              placeholder="Tap to select"
+              readOnly
+            />
+          ) : (
+            <input
+              type="number"
+              id="vialStrength"
+              step="0.1"
+              value={vialStrength}
+              onChange={(e) => setVialStrength(e.target.value)}
+              onFocus={() => handleFocus('vialStrength')}
+              onBlur={() => handleBlur('vialStrength', vialStrength)}
+              className={getInputClass('vialStrength')}
+              placeholder="Enter strength"
+            />
+          )}
           <div className="flex gap-1 mt-0.5">
             {[10, 20, 30].map(val => (
               <button
@@ -243,19 +256,31 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
           >
             Water (ml)
           </label>
-          <input
-            type="number"
-            id="waterAmount"
-            step="0.1"
-            value={waterAmount}
-            onChange={(e) => setWaterAmount(e.target.value)}
-            onFocus={() => handleFocus('waterAmount')}
-            onBlur={() => handleBlur('waterAmount', waterAmount)}
-            onClick={() => setActivePicker('waterAmount')}
-            className={`${getInputClass('waterAmount')} cursor-pointer`}
-            placeholder="Tap to select"
-            readOnly
-          />
+          {useWheelForNumbers ? (
+            <input
+              type="text"
+              id="waterAmount"
+              value={waterAmount}
+              onFocus={() => handleFocus('waterAmount')}
+              onBlur={() => handleBlur('waterAmount', waterAmount)}
+              onClick={() => setActivePicker('waterAmount')}
+              className={`${getInputClass('waterAmount')} cursor-pointer`}
+              placeholder="Tap to select"
+              readOnly
+            />
+          ) : (
+            <input
+              type="number"
+              id="waterAmount"
+              step="0.1"
+              value={waterAmount}
+              onChange={(e) => setWaterAmount(e.target.value)}
+              onFocus={() => handleFocus('waterAmount')}
+              onBlur={() => handleBlur('waterAmount', waterAmount)}
+              className={getInputClass('waterAmount')}
+              placeholder="Enter water amount"
+            />
+          )}
           <div className="flex gap-1 mt-0.5">
             {[1, 1.5, 2].map(val => (
               <button
@@ -295,19 +320,31 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
           >
             Desired Dose (mg)
           </label>
-          <input
-            type="number"
-            id="desiredDose"
-            step="0.1"
-            value={desiredDose}
-            onChange={(e) => setDesiredDose(e.target.value)}
-            onFocus={() => handleFocus('desiredDose')}
-            onBlur={() => handleBlur('desiredDose', desiredDose)}
-            onClick={() => setActivePicker('desiredDose')}
-            className={`${getInputClass('desiredDose')} cursor-pointer`}
-            placeholder="Tap to select"
-            readOnly
-          />
+          {useWheelForNumbers ? (
+            <input
+              type="text"
+              id="desiredDose"
+              value={desiredDose}
+              onFocus={() => handleFocus('desiredDose')}
+              onBlur={() => handleBlur('desiredDose', desiredDose)}
+              onClick={() => setActivePicker('desiredDose')}
+              className={`${getInputClass('desiredDose')} cursor-pointer`}
+              placeholder="Tap to select"
+              readOnly
+            />
+          ) : (
+            <input
+              type="number"
+              id="desiredDose"
+              step="0.1"
+              value={desiredDose}
+              onChange={(e) => setDesiredDose(e.target.value)}
+              onFocus={() => handleFocus('desiredDose')}
+              onBlur={() => handleBlur('desiredDose', desiredDose)}
+              className={getInputClass('desiredDose')}
+              placeholder="Enter dose"
+            />
+          )}
           <div className="flex gap-1 mt-0.5">
             {[0.25, 0.5, 1].map(val => (
               <button
@@ -347,19 +384,31 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
           >
             Syringe Draw (IU)
           </label>
-          <input
-            type="number"
-            id="syringeDraw"
-            step="0.1"
-            value={syringeDraw}
-            onChange={(e) => setSyringeDraw(e.target.value)}
-            onFocus={() => handleFocus('syringeDraw')}
-            onBlur={() => handleBlur('syringeDraw', syringeDraw)}
-            onClick={() => setActivePicker('syringeDraw')}
-            className={`${getInputClass('syringeDraw')} cursor-pointer`}
-            placeholder="Tap to select"
-            readOnly
-          />
+          {useWheelForNumbers ? (
+            <input
+              type="text"
+              id="syringeDraw"
+              value={syringeDraw}
+              onFocus={() => handleFocus('syringeDraw')}
+              onBlur={() => handleBlur('syringeDraw', syringeDraw)}
+              onClick={() => setActivePicker('syringeDraw')}
+              className={`${getInputClass('syringeDraw')} cursor-pointer`}
+              placeholder="Tap to select"
+              readOnly
+            />
+          ) : (
+            <input
+              type="number"
+              id="syringeDraw"
+              step="0.1"
+              value={syringeDraw}
+              onChange={(e) => setSyringeDraw(e.target.value)}
+              onFocus={() => handleFocus('syringeDraw')}
+              onBlur={() => handleBlur('syringeDraw', syringeDraw)}
+              className={getInputClass('syringeDraw')}
+              placeholder="Enter syringe draw"
+            />
+          )}
           <div className="flex gap-1 mt-0.5">
             {[10, 20, 30].map(val => (
               <button
