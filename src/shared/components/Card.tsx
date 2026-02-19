@@ -1,4 +1,5 @@
 import React from 'react';
+import { useThemeStyles } from '../../contexts/ThemeContext';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: 'sm' | 'md' | 'lg';
@@ -10,7 +11,7 @@ const Card: React.FC<CardProps> = ({
   children,
   ...props 
 }) => {
-  const baseClasses = "bg-black/30 backdrop-blur-lg rounded-2xl shadow-[0_8px_32px_rgba(156,123,211,0.2)] border border-[#9C7BD3]/20";
+  const { card } = useThemeStyles();
   
   const paddingClasses = {
     sm: "p-3",
@@ -20,7 +21,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div 
-      className={`${baseClasses} ${paddingClasses[padding]} ${className}`}
+      className={`${card} ${paddingClasses[padding]} ${className}`}
       {...props}
     >
       {children}

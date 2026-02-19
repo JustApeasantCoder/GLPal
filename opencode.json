@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      ".pnp",
+      "pnp.js",
+      ".pnp.js",
+      "coverage/**",
+      "build/**",
+      "dist/**",
+      ".git/**",
+      "*.log",
+      "npm-debug.log*",
+      "yarn-debug.log*",
+      "yarn-error.log*"
+    ]
+  }
+}

@@ -153,7 +153,11 @@ const handleAddWeight = (newWeight: number) => {
 return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end animate-gradient-shift hide-scrollbar">
       {/* Fixed top navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-b border-card-border px-4 py-3 z-50 shadow-theme">
+      <nav className={`fixed top-0 left-0 right-0 backdrop-blur-xl border-b px-4 py-3 z-50 shadow-theme ${
+        isDarkMode 
+          ? 'bg-card-bg border-card-border' 
+          : 'bg-white/90 border-gray-200'
+      }`}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>
             GLPal

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface OfficialScheduleModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface OfficialScheduleModalProps {
 }
 
 const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave }) => {
+  const { isDarkMode } = useTheme();
   const [selectedMedication, setSelectedMedication] = useState<string>('semaglutide');
   const [startDate, setStartDate] = useState<string>(() => {
     const today = new Date();

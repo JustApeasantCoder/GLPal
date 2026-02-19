@@ -5,6 +5,7 @@ import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModa
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { useProtocolForm, frequencyOptions, durationPresets, toLocalDateString } from '../hooks/useProtocolForm';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface ProtocolModalProps {
 }
 
 const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols }) => {
+  const { isDarkMode } = useTheme();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);

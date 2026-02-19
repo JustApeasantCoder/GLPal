@@ -4,6 +4,7 @@ import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } fro
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import { timeService } from '../../../core/timeService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const getTodayString = () => timeService.todayString();
 
@@ -14,6 +15,7 @@ interface MedicationModalProps {
 }
 
 const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication }) => {
+  const { isDarkMode } = useTheme();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -109,7 +111,11 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                 value={selectedDate}
                 readOnly
                 onClick={() => setShowDatePicker(true)}
-                className="w-full px-3 py-2 pr-10 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg cursor-pointer"
+                className={`w-full px-3 py-2 pr-10 border rounded-lg cursor-pointer ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                    : 'border-gray-300 bg-white text-gray-900'
+                }`}
                 placeholder="Select date"
               />
               <svg
@@ -164,7 +170,9 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
                     selectedMedication === med.id
                       ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                      : isDarkMode
+                        ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                        : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
                   <span className="text-sm text-text-primary">{med.name}</span>
@@ -181,7 +189,11 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             <button
               type="button"
               onClick={() => setShowDosePicker(true)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-text-primary rounded-lg text-left"
+              className={`w-full px-3 py-2 border rounded-lg text-left ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
+                  : 'border-gray-300 bg-white text-gray-900'
+              }`}
             >
               {dose ? `${dose} mg` : 'Select dose'}
             </button>

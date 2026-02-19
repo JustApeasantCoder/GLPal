@@ -1,6 +1,7 @@
 import React from 'react';
 import { Peptide, PeptideLogEntry, PeptideCategory } from '../../../types';
 import PeptideProgressBar from './PeptideProgressBar';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface PeptideCardProps {
   peptide: Peptide;
@@ -45,6 +46,8 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
   onDelete,
   onToggleActive,
 }) => {
+  const { isDarkMode } = useTheme();
+  
   if (!peptide.isActive && peptide.isArchived) {
     return null;
   }
@@ -53,8 +56,12 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
     <div 
       className={`rounded-2xl p-4 border transition-all duration-300 ${
         peptide.isActive 
-          ? 'bg-black/30 border-[#B19CD9]/20 hover:border-[#B19CD9]/40' 
-          : 'bg-black/20 border-gray-700/50 opacity-60'
+          ? isDarkMode
+            ? 'bg-black/30 border-[#B19CD9]/20 hover:border-[#B19CD9]/40'
+            : 'bg-white border-gray-200 hover:border-gray-300'
+          : isDarkMode
+            ? 'bg-black/20 border-gray-700/50 opacity-60'
+            : 'bg-gray-50 border-gray-200 opacity-60'
       }`}
     >
       {/* Header */}

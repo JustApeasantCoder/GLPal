@@ -3,6 +3,7 @@ import { GLP1Entry, GLP1Protocol } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { addMedicationManualEntry } from '../../../shared/utils/database';
 import { getMedicationColorByName } from '../../../shared/utils/chartUtils';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface LogDoseModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const getPainLevelColor = (level: number): string => {
 };
 
 const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [] }) => {
+  const { isDarkMode } = useTheme();
   const medicationColor = useMemo(() => {
     if (!protocol?.medication || allMedications.length === 0) return '#B19CD9';
     return getMedicationColorByName(protocol.medication, allMedications).stroke;

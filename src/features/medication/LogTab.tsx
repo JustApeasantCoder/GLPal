@@ -2,11 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry } from '../../types';
 import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
+import { useThemeStyles } from '../../contexts/ThemeContext';
 
-const bigCard = "bg-black/30 backdrop-blur-lg rounded-2xl p-4 border border-[#9C7BD3]/20";
-const bigCardText = {
-  title: "text-lg font-bold text-text-primary mb-2"
-};
+interface LogTabProps {
+  refreshKey?: number;
+}
 
 const getWeekStart = (date: Date): Date => {
   const d = new Date(date);
@@ -42,10 +42,6 @@ const getMonthLabel = (dateStr: string): string => {
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 };
 
-interface LogTabProps {
-  refreshKey?: number;
-}
-
 const COMMON_SIDE_EFFECTS = [
   'Nausea',
   'Vomiting',
@@ -60,6 +56,10 @@ const COMMON_SIDE_EFFECTS = [
 ];
 
 const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
+  const { bigCard, isDarkMode } = useThemeStyles();
+  const bigCardText = {
+    title: "text-lg font-bold text-text-primary mb-2"
+  };
   const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingEntry, setEditingEntry] = useState<GLP1Entry | null>(null);
@@ -300,7 +300,9 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                     className={`px-2 py-1 text-xs rounded transition-all ${
                       sortBy === key 
                         ? 'bg-[#B19CD9] text-white' 
-                        : 'bg-black/20 text-text-muted hover:text-white'
+                        : isDarkMode
+                          ? 'bg-black/20 text-text-muted hover:text-white'
+                          : 'bg-gray-100 text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     {key === 'date' ? 'Date' : key === 'medication' ? 'Med' : 'Dose'}
@@ -315,7 +317,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               {sortedEntries.map((entry) => (
               <div 
                 key={`${entry.date}-${entry.medication}-${entry.time || ''}`}
-                className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+                className={`rounded-lg p-3 border ${
+                  isDarkMode 
+                    ? 'bg-black/20 border-[#B19CD9]/20' 
+                    : 'bg-gray-50 border-gray-200'
+                }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -449,7 +455,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               {(aggregatedWeightData.data as any[]).slice().reverse().map((entry: any, idx: number) => (
                 <div 
                   key={entry.date + '-' + idx}
-                  className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+                  className={`rounded-lg p-3 border ${
+                    isDarkMode 
+                      ? 'bg-black/20 border-[#B19CD9]/20' 
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -508,7 +518,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                       key={se}
                       type="button"
                       onClick={() => addSideEffect(se)}
-                      className="text-xs bg-black/20 border border-[#B19CD9]/30 text-[#B19CD9] px-2 py-1 rounded hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50 transition-all"
+                      className={`text-xs border px-2 py-1 rounded transition-all ${
+                        isDarkMode
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                          : 'bg-white border-gray-300 text-[#9C7BD3] hover:bg-gray-100'
+                      }`}
                     >
                       + {se}
                     </button>
@@ -518,7 +532,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                 {editSideEffects.length > 0 && (
                   <div className="space-y-3">
                     {editSideEffects.map((se) => (
-                      <div key={se.name} className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20">
+                      <div key={se.name} className={`rounded-lg p-3 border ${
+                        isDarkMode 
+                          ? 'bg-black/20 border-[#B19CD9]/20' 
+                          : 'bg-gray-50 border-gray-200'
+                      }`}>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-text-primary font-medium">{se.name}</span>
                           <button
@@ -566,7 +584,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
                   placeholder="Additional notes..."
-                  className="w-full px-3 py-2 bg-black/20 border border-[#B19CD9]/30 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#B19CD9]/60 resize-none"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none resize-none ${
+                    isDarkMode
+                      ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary placeholder-text-muted focus:border-[#B19CD9]/60'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#9C7BD3]'
+                  }`}
                   rows={3}
                 />
               </div>

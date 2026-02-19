@@ -35,7 +35,7 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
 ];
 
 const PeptidesTab: React.FC<PeptidesTabProps> = () => {
-  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
   const now = useTime(100);
   const currentTime = useMemo(() => new Date(now), [now]);
   
@@ -208,7 +208,11 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
                   
                   {/* Expanded Chart View */}
                   {isExpanded && logs.length > 0 && (
-                    <div className="mt-2 p-3 rounded-xl bg-black/20 border border-[#B19CD9]/10">
+                    <div className={`mt-2 p-3 rounded-xl border ${
+                      isDarkMode 
+                        ? 'bg-black/20 border-[#B19CD9]/10' 
+                        : 'bg-gray-50 border-gray-200'
+                    }`}>
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium text-white">{peptide.name} - Injection History</h4>
                         <button

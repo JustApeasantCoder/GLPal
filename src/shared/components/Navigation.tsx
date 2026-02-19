@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type TabType = 'dashboard' | 'doses' | 'dosage' | 'log' | 'peptides';
 
@@ -8,6 +9,7 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+  const { isDarkMode } = useTheme();
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +39,11 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   ] as const;
  
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card-bg backdrop-blur-xl border-t border-card-border px-2 py-1.5 z-50 shadow-[0_-4px_20px_var(--shadow-color)]">
+    <nav className={`fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t px-2 py-1.5 z-50 shadow-[0_-4px_20px_var(--shadow-color)] ${
+      isDarkMode 
+        ? 'bg-card-bg border-card-border' 
+        : 'bg-white/90 border-gray-200'
+    }`}>
       <div className="flex justify-between items-center max-w-md mx-auto">
         {tabs.map((tab) => (
           <button
@@ -46,7 +52,9 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
             className={`flex-1 flex flex-col items-center py-1 rounded-lg transition-all duration-300 ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white shadow-theme'
-                : 'text-text-muted hover:text-text-primary hover:bg-accent-purple-light/20'
+                : isDarkMode
+                  ? 'text-text-muted hover:text-text-primary hover:bg-accent-purple-light/20'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             {tab.icon}
