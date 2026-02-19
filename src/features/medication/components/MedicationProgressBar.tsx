@@ -187,9 +187,16 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
 
   const { isDisabled, buttonText, isOverdueNotDueToday } = getButtonConfig();
 
+  const borderColor = medicationEntryToday 
+    ? 'border-[#4ADEA8]/60' 
+    : 'border-[#B19CD9]/40';
+  const shadowColor = medicationEntryToday
+    ? 'shadow-[0_0_15px_rgba(74,222,168,0.3)]'
+    : 'shadow-[0_0_15px_rgba(177,156,217,0.2)]';
+
   return (
     <div className="mb-4">
-      <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_15px_rgba(177,156,217,0.2)]">
+      <div className={`relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border ${borderColor} ${shadowColor}`}>
         <div className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177,156,217,0.1) 10px, rgba(177,156,217,0.1) 20px)',
