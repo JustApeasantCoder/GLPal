@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import WeightChart from '../weight/WeightChart';
 import MedicationChart from '../medication/components/MedicationChart';
 import PerformanceOverview from './components/PerformanceOverview';
@@ -39,6 +39,11 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const lastWeight = weights.length > 0 ? weights[weights.length - 1].weight : null;
   const lastWeightDisplay = lastWeight ? convertWeightFromKg(lastWeight, unitSystem) : null;
+
+  const generatedEntries = useMemo(
+    () => dosesEntries.filter(e => !e.isManual),
+    [dosesEntries]
+  );
 
   return (
     <>
@@ -120,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           {/* Medication Status */}
           <div>
             <div className="h-64 sm:h-72">
-              <MedicationChart data={dosesEntries} period={chartPeriod} />
+              <MedicationChart data={generatedEntries} period={chartPeriod} />
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { WeightEntry, GLP1Entry } from '../../types';
-import { formatWeight } from '../../shared/utils/unitConversion';
+import { formatWeight, convertWeightFromKg } from '../../shared/utils/unitConversion';
 import { useWeightChartData } from '../../shared/hooks/useChartDataProcessor';
 import { useWeightChartDateRange } from '../../shared/hooks/useChartDateRange';
 import ChartEmptyState from '../../shared/components/ChartEmptyState';
@@ -361,12 +361,12 @@ const WeightChart: React.FC<WeightChartProps> = ({
             silent: true,
             symbol: 'none',
             lineStyle: {
-              color: 'rgba(177, 156, 217, 0.6)',
+              color: 'rgba(74, 222, 168, 0.6)',
               type: 'dashed',
               width: 2,
             },
             data: [
-              { yAxis: goalWeight, label: { show: true, position: 'insideStartTop', formatter: 'Goal', color: '#B19CD9', fontSize: 12, padding: [0, 0, 0, 20], textShadowColor: 'rgba(0,0,0,1)', textShadowBlur: 4, textShadowOffsetX: 1, textShadowOffsetY: 1 } },
+              { yAxis: goalWeight, label: { show: true, position: 'insideStartTop', formatter: 'Goal', color: '#4ADEA8', fontSize: 12, padding: [0, 0, 0, 20] } },
               ...(todayIndex >= 0 ? [{ xAxis: todayStr, lineStyle: { type: 'dotted' as const, width: 2, color: '#94A3B8' }, label: { show: false } }] : []),
             ],
           },
@@ -392,7 +392,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             show: true,
             position: 'top',
             formatter: (params: any) =>
-              Math.round(params.value[1]) + (unitSystem === 'imperial' ? 'lbs' : 'kg'),
+              Math.round(convertWeightFromKg(params.value[1], unitSystem)) + (unitSystem === 'imperial' ? 'lbs' : 'kg'),
             color: '#4ADEA8',
             fontSize: 10,
             fontWeight: 'bold',
@@ -431,7 +431,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             show: true,
             position: 'top',
             formatter: (params: any) =>
-              Math.round(params.value[1]) + (unitSystem === 'imperial' ? 'lbs' : 'kg'),
+              Math.round(convertWeightFromKg(params.value[1], unitSystem)) + (unitSystem === 'imperial' ? 'lbs' : 'kg'),
             color: '#E2E8F0',
             fontSize: 10,
             distance: 8,
