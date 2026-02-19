@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros } from '../../types';
+import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile } from '../../types';
 import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries, saveWeightEntries } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
+import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
 
 interface LogTabProps {
   refreshKey?: number;
+  profile?: UserProfile;
 }
 
 const getWeekStart = (date: Date): Date => {
@@ -55,8 +57,10 @@ const COMMON_SIDE_EFFECTS = [
   'Heartburn',
 ];
 
-const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
+const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile }) => {
   const { bigCard, isDarkMode } = useThemeStyles();
+  const unitSystem = profile?.unitSystem || 'metric';
+  const weightUnit = getWeightUnit(unitSystem);
   const bigCardText = {
     title: "text-lg font-bold text-text-primary mb-2"
   };
@@ -520,9 +524,9 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                     : 'bg-gray-500/20 text-gray-400'
               }`}>
                 {aggregatedWeightData.prevChange > 0 
-                  ? `${aggregatedWeightData.prevChange.toFixed(1)}kg VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
+                  ? `${convertWeightFromKg(aggregatedWeightData.prevChange, unitSystem).toFixed(1)}${weightUnit} VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
                   : aggregatedWeightData.prevChange < 0 
-                    ? `${Math.abs(aggregatedWeightData.prevChange).toFixed(1)}kg VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
+                    ? `${Math.abs(convertWeightFromKg(aggregatedWeightData.prevChange, unitSystem)).toFixed(1)}${weightUnit} VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
                     : `No Change VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
                 }
               </div>
@@ -552,13 +556,16 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                         <p className={`text-xs ${
                           entry.change > 0 ? 'text-green-400' : entry.change < 0 ? 'text-red-400' : 'text-gray-400'
                         }`}>
-                          {entry.change > 0 ? '↓' : entry.change < 0 ? '↑' : '='} {Math.abs(entry.change).toFixed(1)}kg
+                          {entry.change > 0 ? '↓' : entry.change < 0 ? '↑' : '='} {Math.abs(convertWeightFromKg(entry.change, unitSystem)).toFixed(1)}{weightUnit}
                         </p>
                       )}
                     </div>
                     <div className="text-right">
                       <p className="text-[#4ADEA8] font-bold">
-                        {weightViewMode === 'daily' ? `${entry.weight}kg` : `${entry.avgWeight.toFixed(1)}kg`}
+                        {weightViewMode === 'daily' 
+                          ? `${convertWeightFromKg(entry.weight, unitSystem).toFixed(1)}${weightUnit}` 
+                          : `${convertWeightFromKg(entry.avgWeight, unitSystem).toFixed(1)}${weightUnit}`
+                        }
                       </p>
                     </div>
                   </div>
@@ -757,7 +764,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               : 'bg-white/95'
           }`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
-            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight}kg</p>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}{weightUnit}</p>
             
             <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             

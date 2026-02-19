@@ -347,7 +347,7 @@ return (
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
             <div className="max-w-md mx-auto">
-              <LogTab refreshKey={logRefreshKey} />
+              <LogTab refreshKey={logRefreshKey} profile={profile} />
             </div>
           </TabContent>
         </div>
