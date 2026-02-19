@@ -57,7 +57,7 @@ const [profile, setProfile] = useState<UserProfile>({
     activityLevel: 1.2,
     unitSystem: 'metric',
     useWheelForNumbers: false,
-    useCalendarPicker: true,
+    useWheelForDate: true,
   });
 
   // Save profile immediately for responsive input experience
@@ -333,7 +333,8 @@ return (
                 onLogDose={() => setLogRefreshKey(k => k + 1)}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
-                useWheelForNumbers={profile.useWheelForNumbers ?? true}
+                useWheelForNumbers={profile.useWheelForNumbers ?? false}
+                useWheelForDate={profile.useWheelForDate ?? true}
               />
             </div>
           </TabContent>

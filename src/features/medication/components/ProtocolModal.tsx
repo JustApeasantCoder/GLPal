@@ -3,6 +3,7 @@ import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, Medication } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { useProtocolForm, frequencyOptions, durationPresets, toLocalDateString } from '../hooks/useProtocolForm';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -17,9 +18,10 @@ interface ProtocolModalProps {
   mode: 'add' | 'edit';
   existingProtocols?: GLP1Protocol[];
   useWheelForNumbers?: boolean;
+  useWheelForDate?: boolean;
 }
 
-const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true }) => {
+const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -389,21 +391,39 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       )}
 
       {showStartDatePicker && (
-        <DateWheelPickerModal
-          isOpen={showStartDatePicker}
-          value={startDate}
-          onChange={handleStartDateChange}
-          onClose={() => setShowStartDatePicker(false)}
-        />
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showStartDatePicker}
+            value={startDate}
+            onChange={handleStartDateChange}
+            onClose={() => setShowStartDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showStartDatePicker}
+            value={startDate}
+            onChange={handleStartDateChange}
+            onClose={() => setShowStartDatePicker(false)}
+          />
+        )
       )}
 
       {showStopDatePicker && (
-        <DateWheelPickerModal
-          isOpen={showStopDatePicker}
-          value={stopDate}
-          onChange={(date) => setStopDate(date)}
-          onClose={() => setShowStopDatePicker(false)}
-        />
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showStopDatePicker}
+            value={stopDate}
+            onChange={(date) => setStopDate(date)}
+            onClose={() => setShowStopDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showStopDatePicker}
+            value={stopDate}
+            onChange={(date) => setStopDate(date)}
+            onClose={() => setShowStopDatePicker(false)}
+          />
+        )
       )}
 
       {showDosePicker && (

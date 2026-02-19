@@ -26,28 +26,28 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
-  const [useCalendarPicker, setUseCalendarPicker] = useState(true);
+  const [useWheelForDate, setUseCalendarPicker] = useState(true);
 
   const unitSystem = localProfile.unitSystem || 'metric';
 
   // Load settings from profile on mount
   useEffect(() => {
     setUseWheelForNumbers(profile.useWheelForNumbers ?? false);
-    setUseCalendarPicker(profile.useCalendarPicker ?? true);
+    setUseCalendarPicker(profile.useWheelForDate ?? true);
   }, [profile]);
 
   // Save settings to profile when they change
   useEffect(() => {
-    if (profile.useWheelForNumbers === useWheelForNumbers && profile.useCalendarPicker === useCalendarPicker) {
+    if (profile.useWheelForNumbers === useWheelForNumbers && profile.useWheelForDate === useWheelForDate) {
       return; // Don't save if values haven't changed
     }
     const updatedProfile = {
       ...profile,
       useWheelForNumbers,
-      useCalendarPicker,
+      useWheelForDate,
     };
     onProfileUpdate(updatedProfile);
-  }, [useWheelForNumbers, useCalendarPicker]);
+  }, [useWheelForNumbers, useWheelForDate]);
 
   // Update local profile when parent profile changes
   useEffect(() => {
@@ -252,7 +252,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                     type="button"
                     onClick={() => setUseCalendarPicker(true)}
                     className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                      useCalendarPicker
+                      useWheelForDate
                         ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                         : isDarkMode
                           ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
@@ -265,7 +265,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                     type="button"
                     onClick={() => setUseCalendarPicker(false)}
                     className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                      !useCalendarPicker
+                      !useWheelForDate
                         ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                         : isDarkMode
                           ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
