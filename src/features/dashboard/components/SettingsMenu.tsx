@@ -25,6 +25,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
+  const [useWheelForNumbers, setUseWheelForNumbers] = useState(true);
+  const [useCalendarPicker, setUseCalendarPicker] = useState(true);
 
   const unitSystem = localProfile.unitSystem || 'metric';
 
@@ -114,20 +116,20 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
       <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'} ${
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] sm:max-h-[85vh] p-4 sm:p-6 overflow-hidden flex flex-col ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'} ${
         isDarkMode
           ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 border border-[#B19CD9]/30'
           : 'bg-gradient-to-b from-white to-gray-50 border border-gray-200'
       }`}>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             Settings
           </h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 pr-1 pb-2">
             {/* Separator */}
             <div className={`border-t ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
@@ -158,6 +160,80 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                     }`}
                   >
                     {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Separator */}
+            <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
+
+            {/* Input Method Section */}
+            <div>
+              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Input Method</h3>
+              
+              {/* Number Entry */}
+              <div className="mb-4">
+                <span className={`text-sm font-medium ${isDarkMode ? 'text-text-secondary' : 'text-gray-600'}`}>Number Entry</span>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setUseWheelForNumbers(true)}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      useWheelForNumbers
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Wheel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseWheelForNumbers(false)}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      !useWheelForNumbers
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Keyboard
+                  </button>
+                </div>
+              </div>
+
+              {/* Date Selection */}
+              <div>
+                <span className={`text-sm font-medium ${isDarkMode ? 'text-text-secondary' : 'text-gray-600'}`}>Date Selection</span>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setUseCalendarPicker(true)}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      useCalendarPicker
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Wheel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseCalendarPicker(false)}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      !useCalendarPicker
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Calendar Picker
                   </button>
                 </div>
               </div>
