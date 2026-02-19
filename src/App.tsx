@@ -274,12 +274,12 @@ return (
             </button>
             <button
               onClick={handleClearData}
-              className="p-2 rounded-xl hover:bg-red-500/20 transition-all duration-300"
+              className="p-2 rounded-xl hover:bg-red-500/20 transition-all duration-300 group"
               aria-label="Delete all data"
               title="Delete all data"
             >
               <svg
-                className="w-5 h-5 text-text-primary"
+                className="w-5 h-5 text-red-400 group-hover:text-red-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

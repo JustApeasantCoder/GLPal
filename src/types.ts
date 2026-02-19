@@ -1,8 +1,17 @@
 import React from 'react';
 
+export interface WeightMacros {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface WeightEntry {
   date: string;
   weight: number;
+  notes?: string;
+  macros?: WeightMacros;
 }
 
 export interface SideEffect {

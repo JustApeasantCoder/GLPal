@@ -94,6 +94,15 @@ export const deleteWeightEntry = (date: string): void => {
   localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(filtered));
 };
 
+export const saveWeightEntries = (entries: WeightEntry[]): void => {
+  if (!isLocalStorageAvailable()) {
+    console.warn('localStorage is not available');
+    return;
+  }
+  entries.sort((a, b) => a.date.localeCompare(b.date));
+  localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(entries));
+};
+
 // Medication entries (formerly GLP-1)
 export const addMedicationEntry = (entry: GLP1Entry): void => {
   const entries = getMedicationEntries();
@@ -268,17 +277,31 @@ export const closeDatabase = (): void => {
 };
 
 export const clearAllData = (): void => {
+  // Clear all defined storage keys
   localStorage.removeItem(STORAGE_KEYS.WEIGHT_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_MANUAL_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.GLP1_PROTOCOL);
+  localStorage.removeItem(STORAGE_KEYS.GLP1_ARCHIVED);
   localStorage.removeItem(STORAGE_KEYS.MEDICATION_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES);
   localStorage.removeItem(STORAGE_KEYS.MEDICATION_PROTOCOL);
+  localStorage.removeItem(STORAGE_KEYS.MEDICATION_ARCHIVED);
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
-  localStorage.removeItem('usedMedications');
-  localStorage.removeItem('protocolDurationDays');
+  localStorage.removeItem(STORAGE_KEYS.LAST_DOSES);
+  localStorage.removeItem(STORAGE_KEYS.LAST_MEDICATION);
+  localStorage.removeItem(STORAGE_KEYS.PEPTIDES);
+  localStorage.removeItem(STORAGE_KEYS.PEPTIDE_LOGS);
+  
+  // Clear additional app-specific keys
+  localStorage.removeItem('glpal_disclaimer_acknowledged');
+  localStorage.removeItem('lastLoggedDate');
+  localStorage.removeItem('lastLoggedProtocolId');
   localStorage.removeItem('latestDoseDone');
+  localStorage.removeItem('protocolDurationDays');
+  localStorage.removeItem('theme');
+  localStorage.removeItem('usedMedications');
+  
   initializeDatabase();
 };
 

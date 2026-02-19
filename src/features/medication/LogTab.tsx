@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry } from '../../types';
-import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries } from '../../shared/utils/database';
+import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros } from '../../types';
+import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries, saveWeightEntries } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 
@@ -71,6 +71,10 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(false);
   const [weightViewMode, setWeightViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [editingWeightEntry, setEditingWeightEntry] = useState<WeightEntry | null>(null);
+  const [editWeightNotes, setEditWeightNotes] = useState('');
+  const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+  const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
 
   const weeklyAverages = useMemo(() => {
     if (weightEntries.length === 0) return new Map<string, number>();
@@ -279,6 +283,32 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
     setActiveSideEffect(null);
   };
 
+  const openWeightEditor = (entry: WeightEntry) => {
+    setEditingWeightEntry(entry);
+    setEditWeightNotes(entry.notes || '');
+    setEditWeightMacros(entry.macros || { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  };
+
+  const handleSaveWeightMacros = () => {
+    if (!editingWeightEntry) return;
+    
+    const updatedEntries = weightEntries.map(entry => 
+      entry.date === editingWeightEntry.date 
+        ? { 
+            ...entry, 
+            notes: editWeightNotes || undefined, 
+            macros: (editWeightMacros.calories > 0 || editWeightMacros.protein > 0 || editWeightMacros.carbs > 0 || editWeightMacros.fat > 0) 
+              ? editWeightMacros 
+              : undefined 
+          }
+        : entry
+    );
+    
+    saveWeightEntries(updatedEntries);
+    setWeightEntries(updatedEntries);
+    setEditingWeightEntry(null);
+  };
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -403,7 +433,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                       onClick={() => openSideEffectsEditor(entry)}
                       className="px-3 py-1 text-xs rounded-lg transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]"
                     >
-                      + Add Side Effects / Notes
+                      + Side Effects / Notes
                     </button>
                   </div>
               </div>
@@ -497,6 +527,47 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                         {weightViewMode === 'daily' ? `${entry.weight}kg` : `${entry.avgWeight.toFixed(1)}kg`}
                       </p>
                     </div>
+                  </div>
+                  {(entry as any).macros || (entry as any).notes ? (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {(entry as any).macros && (
+                        <>
+                          {(entry as any).macros.calories > 0 && (
+                            <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
+                              {(entry as any).macros.calories} cal
+                            </span>
+                          )}
+                          {(entry as any).macros.protein > 0 && (
+                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                              P: {(entry as any).macros.protein}g
+                            </span>
+                          )}
+                          {(entry as any).macros.carbs > 0 && (
+                            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                              C: {(entry as any).macros.carbs}g
+                            </span>
+                          )}
+                          {(entry as any).macros.fat > 0 && (
+                            <span className="text-xs bg-pink-500/20 text-pink-400 px-2 py-1 rounded">
+                              F: {(entry as any).macros.fat}g
+                            </span>
+                          )}
+                        </>
+                      )}
+                      {(entry as any).notes && (
+                        <span className="text-xs bg-[#B19CD9]/20 text-[#B19CD9] px-2 py-1 rounded">
+                          📝
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={() => openWeightEditor(entry)}
+                      className="px-3 py-1 text-xs rounded-lg transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]"
+                    >
+                      + Add Macros / Notes
+                    </button>
                   </div>
                 </div>
               ))}
@@ -628,6 +699,128 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
           </div>
         </div>
       )}
+
+      {editingWeightEntry ? (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/60"
+            style={{ backdropFilter: 'blur(8px)' }} 
+            onClick={() => setEditingWeightEntry(null)} 
+          />
+          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto">
+            <h3 className="text-lg font-semibold text-white mb-2">Macros & Notes</h3>
+            <p className="text-sm text-text-muted mb-4">{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight}kg</p>
+            
+            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Macros
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs text-orange-400 mb-1">Calories</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editWeightMacros.calories || ''}
+                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, calories: parseInt(e.target.value) || 0 })}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                        isDarkMode
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-blue-400 mb-1">Protein (g)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editWeightMacros.protein || ''}
+                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, protein: parseInt(e.target.value) || 0 })}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                        isDarkMode
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-yellow-400 mb-1">Carbs (g)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editWeightMacros.carbs || ''}
+                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, carbs: parseInt(e.target.value) || 0 })}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                        isDarkMode
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-pink-400 mb-1">Fat (g)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editWeightMacros.fat || ''}
+                      onChange={(e) => setEditWeightMacros({ ...editWeightMacros, fat: parseInt(e.target.value) || 0 })}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
+                        isDarkMode
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+              
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={editWeightNotes}
+                  onChange={(e) => setEditWeightNotes(e.target.value)}
+                  placeholder="Additional notes..."
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none resize-none ${
+                    isDarkMode
+                      ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary placeholder-text-muted focus:border-[#B19CD9]/60'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#9C7BD3]'
+                  }`}
+                  rows={3}
+                />
+              </div>
+            </div>
+            
+            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingWeightEntry(null)}
+                className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveWeightMacros}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-medium hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
