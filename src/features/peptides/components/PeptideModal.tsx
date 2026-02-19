@@ -3,6 +3,7 @@ import { Peptide, PEPTIDE_PRESETS, PeptideCategory, PeptideFrequency, InjectionR
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import { timeService } from '../../../core/timeService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface PeptideModalProps {
   isOpen: boolean;
@@ -60,6 +61,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
 const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide }) => {
+  const { isDarkMode } = useTheme();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
   const [dose, setDose] = useState('');
@@ -191,12 +193,18 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           onClick={onClose} 
         />
         <div 
-          className="relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+          className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col ${
+            isDarkMode 
+              ? 'bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98' 
+              : 'bg-white/95'
+          }`}
           style={{ animation: isClosing ? 'slideDown 0.2s ease-out' : 'slideUp 0.2s ease-out' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#B19CD9]/20">
-            <h2 className="text-lg font-bold text-white">
+          <div className={`flex items-center justify-between p-4 border-b ${
+            isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'
+          }`}>
+            <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               {editPeptide ? 'Edit Peptide' : 'Add Peptide'}
             </h2>
             <button
@@ -213,29 +221,35 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {showPresets && !editPeptide ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-400">Quick select a peptide preset:</p>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quick select a peptide preset:</p>
                 <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
                   {PEPTIDE_PRESETS.map((preset) => (
                     <button
                       key={preset.name}
                       onClick={() => handlePresetSelect(preset)}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-[#B19CD9]/20 hover:border-[#B19CD9]/40 transition-all text-left"
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                        isDarkMode
+                          ? 'bg-white/5 hover:bg-white/10 border-[#B19CD9]/20 hover:border-[#B19CD9]/40'
+                          : 'bg-gray-50 hover:bg-gray-100 border-gray-200 hover:border-gray-300'
+                      }`}
                     >
                       <div 
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: CATEGORY_COLORS[preset.category] }}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{preset.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{preset.description}</p>
+                        <p className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{preset.name}</p>
+                        <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{preset.description}</p>
                       </div>
-                      <span className="text-xs text-gray-500">{preset.defaultDose}{preset.defaultDoseUnit}</span>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{preset.defaultDose}{preset.defaultDoseUnit}</span>
                     </button>
                   ))}
                 </div>
                 <button
                   onClick={() => setShowPresets(false)}
-                  className="w-full py-2 text-sm text-[#B19CD9] hover:text-white transition-colors"
+                  className={`w-full py-2 text-sm transition-colors ${
+                    isDarkMode ? 'text-[#B19CD9] hover:text-white' : 'text-[#9C7BD3] hover:text-gray-900'
+                  }`}
                 >
                   Or create custom peptide →
                 </button>
@@ -244,20 +258,24 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Peptide Name</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Peptide Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g., BPC-157"
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#B19CD9]/50"
+                    className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                      isDarkMode
+                        ? 'bg-white/10 border-[#B19CD9]/20 text-white placeholder-gray-500'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                     required
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Category</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Category</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(Object.keys(CATEGORY_COLORS) as PeptideCategory[]).map((cat) => (
                       <button
@@ -265,9 +283,11 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                         type="button"
                         onClick={() => handleCategoryChange(cat)}
                         className={`px-2 py-2 rounded-lg text-xs font-medium transition-all ${
-                          category === cat 
+                        category === cat 
                             ? 'bg-white/20 text-white border-2' 
-                            : 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10'
+                            : isDarkMode
+                              ? 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10'
+                              : 'bg-gray-100 text-gray-600 border border-transparent hover:bg-gray-200'
                         }`}
                         style={{ borderColor: category === cat ? CATEGORY_COLORS[cat] : 'transparent' }}
                       >
@@ -280,23 +300,31 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                 {/* Dose & Unit */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Dose</label>
+                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose</label>
                     <input
                       type="number"
                       value={dose}
                       onChange={(e) => setDose(e.target.value)}
                       placeholder="500"
                       step="0.1"
-                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#B19CD9]/50"
+                      className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                        isDarkMode
+                          ? 'bg-white/10 border-[#B19CD9]/20 text-white placeholder-gray-500'
+                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                      }`}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Unit</label>
+                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Unit</label>
                     <select
                       value={doseUnit}
                       onChange={(e) => setDoseUnit(e.target.value as DoseUnit)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white focus:outline-none focus:border-[#B19CD9]/50"
+                      className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                        isDarkMode
+                          ? 'bg-white/10 border-[#B19CD9]/20 text-white'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     >
                       <option value="mg">mg</option>
                       <option value="mcg">mcg</option>
@@ -308,11 +336,15 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Frequency */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Frequency</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Frequency</label>
                   <select
                     value={frequency}
                     onChange={(e) => setFrequency(e.target.value as PeptideFrequency)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white focus:outline-none focus:border-[#B19CD9]/50"
+                    className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                      isDarkMode
+                        ? 'bg-white/10 border-[#B19CD9]/20 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   >
                     {Object.entries(FREQUENCY_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
@@ -322,11 +354,15 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Route */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Injection Route</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Injection Route</label>
                   <select
                     value={route}
                     onChange={(e) => setRoute(e.target.value as InjectionRoute)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white focus:outline-none focus:border-[#B19CD9]/50"
+                    className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                      isDarkMode
+                        ? 'bg-white/10 border-[#B19CD9]/20 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   >
                     {Object.entries(ROUTE_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
@@ -337,21 +373,29 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Start Date</label>
+                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Start Date</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('start')}
-                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white text-left"
+                      className={`w-full px-3 py-2 rounded-lg border text-left ${
+                        isDarkMode
+                          ? 'bg-white/10 border-[#B19CD9]/20 text-white'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     >
                       {startDate}
                     </button>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">End Date (optional)</label>
+                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>End Date (optional)</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('end')}
-                      className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white text-left"
+                      className={`w-full px-3 py-2 rounded-lg border text-left ${
+                        isDarkMode
+                          ? 'bg-white/10 border-[#B19CD9]/20 text-white'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     >
                       {endDate || 'Ongoing'}
                     </button>
@@ -360,32 +404,40 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Half Life */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Half Life (hours)</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Half Life (hours)</label>
                   <input
                     type="number"
                     value={halfLifeHours}
                     onChange={(e) => setHalfLifeHours(e.target.value)}
                     placeholder="e.g., 4"
                     step="0.1"
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#B19CD9]/50"
+                    className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 ${
+                      isDarkMode
+                        ? 'bg-white/10 border-[#B19CD9]/20 text-white placeholder-gray-500'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                   />
                 </div>
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Notes</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Notes</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Any additional notes..."
                     rows={2}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#B19CD9]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#B19CD9]/50 resize-none"
+                    className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#B19CD9]/50 resize-none ${
+                      isDarkMode
+                        ? 'bg-white/10 border-[#B19CD9]/20 text-white placeholder-gray-500'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                    }`}
                   />
                 </div>
 
                 {/* Color */}
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Color</label>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Color</label>
                   <div className="flex gap-2">
                     {Object.values(CATEGORY_COLORS).map((c) => (
                       <button

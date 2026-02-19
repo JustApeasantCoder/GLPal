@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import WheelPicker from './WheelPicker';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DoseWheelPickerModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
   decimals = 2,
   defaultValue,
 }) => {
+  const { isDarkMode } = useTheme();
   const [localValue, setLocalValue] = useState(defaultValue || '0.25');
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -96,18 +98,22 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border border-[#B19CD9]/30 shadow-2xl bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 p-6 max-h-[90vh] overflow-y-auto transition-all ${
+          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${
+            isDarkMode 
+              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
+              : 'border-gray-200 bg-white'
+          } ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'
           }`}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               {label}
             </h3>
           </div>
-          <div className="border-t border-[#B19CD9]/20 mb-3"></div>
+          <div className={`border-t mb-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
           {/* Preset buttons */}
           <div className="grid grid-cols-4 gap-2 mb-4">
@@ -121,7 +127,9 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
                   className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                      : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                      : isDarkMode
+                        ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                        : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300'
                   }`}
                 >
                   {val}mg
@@ -137,7 +145,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
               options={wholeNumbers}
             />
 
-            <span className="text-white text-2xl font-bold mt-6">.</span>
+            <span className={`text-2xl font-bold mt-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>.</span>
 
             <WheelPicker
               value={String(parsedValue.decimal).padStart(decimals, '0')}
@@ -146,12 +154,16 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
             />
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-3"></div>
+          <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+              }`}
             >
               Cancel
             </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, formatDateShort, formatFrequency } from '../../../constants/medications';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface ProtocolListProps {
   protocols: GLP1Protocol[];
@@ -21,6 +22,7 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
   onEditProtocol,
   onDeleteClick,
 }) => {
+  const { isDarkMode } = useTheme();
   if (protocols.length === 0) return null;
 
   const groupedProtocols = protocols.reduce((acc, protocol) => {
@@ -40,15 +42,19 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
         return (
           <div 
             key={medicationName}
-            className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20"
+            className={`rounded-lg p-3 border ${
+              isDarkMode 
+                ? 'bg-black/20 border-[#B19CD9]/20' 
+                : 'bg-gray-50 border-gray-200'
+            }`}
           >
             <button 
               onClick={() => onToggleMedication(medicationName)}
               className="w-full flex items-center justify-between mb-2"
             >
               <div className="text-left">
-                <p className="text-base font-medium text-text-primary">{medicationName}</p>
-                <p className="text-sm text-text-muted">{formatFrequency(medProtocols[0].frequencyPerWeek)}</p>
+                <p className={`text-base font-medium ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`}>{medicationName}</p>
+                <p className={`text-sm ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatFrequency(medProtocols[0].frequencyPerWeek)}</p>
               </div>
               <svg 
                 className={`w-5 h-5 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
@@ -65,7 +71,7 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
                   <div key={protocol.id}>
                     <div className="flex items-start justify-between gap-2 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-text-primary whitespace-nowrap">
+                        <span className={`text-sm font-medium whitespace-nowrap ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`}>
                           {protocol.dose}mg
                         </span>
                         {protocol.phase === 'titrate' && (
@@ -77,7 +83,7 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-text-muted whitespace-nowrap">
+                        <span className={`text-sm whitespace-nowrap ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>
                           {formatDateShort(protocol.startDate)} → {protocol.stopDate ? formatDateShort(protocol.stopDate) : 'Ongoing'}
                         </span>
                         <button
@@ -89,13 +95,17 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
                       </div>
                     </div>
                     {index < medProtocols.length - 1 && (
-                      <div className="border-b border-[#B19CD9]/20"></div>
+                      <div className={`border-b ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
                     )}
                   </div>
                 ))}
                 <button
                   onClick={() => onDeleteClick(medicationName)}
-                  className="mt-2 px-2 py-1 text-xs text-red-400 hover:text-red-500 border border-red-500/30 rounded hover:bg-red-500/10 transition-all"
+                  className={`mt-2 px-2 py-1 text-xs border rounded transition-all ${
+                    isDarkMode
+                      ? 'text-red-400 hover:text-red-500 border-red-500/30 hover:bg-red-500/10'
+                      : 'text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50'
+                  }`}
                 >
                   Delete
                 </button>

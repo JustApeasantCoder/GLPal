@@ -136,7 +136,9 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
             className={`py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-[1.02] ${
               selected === opt
                 ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
-                : 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                : isDarkMode
+                  ? 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
             }`}
           >
             {opt}
@@ -153,12 +155,20 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className="text-xl font-semibold text-white mb-2">Log Dose</h2>
+      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
+        isDarkMode 
+          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+          : 'bg-white/95'
+      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+        <h2 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
         <div className="space-y-3 mb-4">
-          <div className="bg-black/20 rounded-lg p-3 border border-[#B19CD9]/20">
+          <div className={`rounded-lg p-3 border ${
+            isDarkMode 
+              ? 'bg-black/20 border-[#B19CD9]/20' 
+              : 'bg-gray-50 border-gray-200'
+          }`}>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Medication</span>
               <span className="text-sm font-medium" style={{ color: medicationColor }}>{protocol?.medication || 'N/A'}</span>
@@ -251,7 +261,9 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
                           : severity === 'Moderate'
                             ? 'bg-gradient-to-r from-[#F97316] to-[#FB923C] text-white shadow-[0_0_10px_rgba(249,115,22,0.4)]'
                             : 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                      : 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                      : isDarkMode
+                        ? 'bg-black/20 border border-[#B19CD9]/30 text-text-muted hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   {severity}
@@ -270,7 +282,11 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional notes..."
-              className="w-full px-3 py-2 bg-black/30 border border-[#B19CD9]/30 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#B19CD9]/60 resize-y"
+              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#B19CD9]/60 resize-y ${
+                isDarkMode
+                  ? 'bg-black/30 border-[#B19CD9]/30 text-text-primary placeholder-text-muted'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+              }`}
               rows={2}
             />
           </div>
@@ -282,7 +298,11 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+            className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+              isDarkMode
+                ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+            }`}
           >
             Cancel
           </button>

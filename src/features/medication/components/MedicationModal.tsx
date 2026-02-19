@@ -96,8 +96,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className="text-xl font-semibold text-white mb-6">Log Dose</h2>
+      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${
+        isDarkMode 
+          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+          : 'bg-white/95'
+      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+        <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <form onSubmit={handleSubmit}>
@@ -206,7 +210,11 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+              }`}
             >
               Cancel
             </button>

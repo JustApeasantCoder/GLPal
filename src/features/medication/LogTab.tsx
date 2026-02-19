@@ -619,13 +619,17 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingEntry(null)} 
           />
-          <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
+            isDarkMode 
+              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+              : 'bg-white/95'
+          } ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             {!editingEntry ? null : (
             <>
-            <h3 className="text-lg font-semibold text-white mb-2">Side Effects & Notes</h3>
-            <p className="text-sm text-text-muted mb-4">{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Side Effects & Notes</h3>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
             
-            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="space-y-4">
               <div>
@@ -694,10 +698,10 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                 )}
               </div>
               
-              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+              <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
               
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-text-secondary' : 'text-gray-700'}`}>
                   Notes
                 </label>
                 <textarea
@@ -714,12 +718,16 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               </div>
             </div>
             
-            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="flex gap-3">
               <button
                 onClick={() => setEditingEntry(null)}
-                className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+                className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 Cancel
               </button>
@@ -743,11 +751,15 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingWeightEntry(null)} 
           />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto">
-            <h3 className="text-lg font-semibold text-white mb-2">Macros & Notes</h3>
-            <p className="text-sm text-text-muted mb-4">{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight}kg</p>
+          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
+            isDarkMode 
+              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+              : 'bg-white/95'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight}kg</p>
             
-            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="space-y-4">
               <div>
@@ -818,10 +830,10 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                 </div>
               </div>
               
-              <div className="border-t border-[#B19CD9]/20 my-4"></div>
+              <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
               
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-text-secondary' : 'text-gray-700'}`}>
                   Notes
                 </label>
                 <textarea
@@ -838,12 +850,16 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
               </div>
             </div>
             
-            <div className="border-t border-[#B19CD9]/20 my-4"></div>
+            <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="flex gap-3">
               <button
                 onClick={() => setEditingWeightEntry(null)}
-                className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+                className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 Cancel
               </button>

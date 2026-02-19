@@ -119,15 +119,19 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className="text-xl font-semibold text-white mb-6">
+      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${
+        isDarkMode 
+          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+          : 'bg-white/95'
+      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+        <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
         </h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">Medication</label>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Medication</label>
             <div className="grid grid-cols-2 gap-2">
               {MAIN_MEDICATIONS.map((med) => (
                 <button
@@ -137,10 +141,12 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   className={`text-left px-3 py-2 rounded-lg transition-all text-sm ${
                     selectedMedication === med.id
                       ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                      : isDarkMode
+                        ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                        : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className="text-text-primary">{med.name}</span>
+                  <span className={isDarkMode ? 'text-text-primary' : 'text-gray-900'}>{med.name}</span>
                 </button>
               ))}
             </div>
@@ -150,21 +156,29 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Dose (mg)</label>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dose (mg)</label>
               <button
                 type="button"
                 onClick={() => setShowDosePicker(true)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
+                className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                    : 'border-gray-300 bg-white text-gray-700'
+                }`}
               >
                 {dose ? `${dose} mg` : 'Select dose'}
               </button>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Dosing Schedule</label>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dosing Schedule</label>
               <button
                 type="button"
                 onClick={() => setShowSchedulePicker(true)}
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
+                className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                    : 'border-gray-300 bg-white text-gray-700'
+                }`}
               >
                 {frequencyOptions.find(f => f.value === frequency)?.label || 'Select schedule'}
               </button>
@@ -175,11 +189,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">Start Date</label>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Start Date</label>
             <button
               type="button"
               onClick={() => setShowStartDatePicker(true)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
+              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                  : 'border-gray-300 bg-white text-gray-700'
+              }`}
             >
               {startDate ? new Date(startDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -197,7 +215,9 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                     className={`flex-1 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                       isSelected 
                         ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                        : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
+                          : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300'
                     }`}
                   >
                     {preset.label}
@@ -208,11 +228,15 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">End Date</label>
+            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>End Date</label>
             <button
               type="button"
               onClick={() => setShowStopDatePicker(true)}
-              className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-[#B19CD9] rounded-lg text-sm text-left"
+              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
+                  : 'border-gray-300 bg-white text-gray-700'
+              }`}
             >
               {stopDate ? new Date(stopDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -225,7 +249,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               <>
                 <button
                   onClick={() => setConfirmAction('archive')}
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
                   Archive
                 </button>
@@ -255,7 +283,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}
-                  className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
                   Cancel
                 </button>
@@ -264,7 +296,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             {mode === 'add' && (
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 Cancel
               </button>
@@ -284,8 +320,12 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       {showOtherModal && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
           <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
-          <div className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto modal-content-fade-in">
-            <h3 className="text-lg font-semibold text-white mb-4">Select Medication</h3>
+          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto ${
+            isDarkMode 
+              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+              : 'bg-white/95'
+          } modal-content-fade-in`}>
+            <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Select Medication</h3>
             <div className="space-y-2 mb-4">
               {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
                 <button
@@ -298,21 +338,27 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
                     selectedMedication === med.id
                       ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
-                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                      : isDarkMode
+                        ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                        : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className="text-text-primary">{med.name}</span>
+                  <span className={isDarkMode ? 'text-text-primary' : 'text-gray-900'}>{med.name}</span>
                 </button>
               ))}
             </div>
             <div className="border-t border-[#B19CD9]/20 pt-4">
-              <label className="block text-sm font-medium text-[#B19CD9] mb-2">Or enter custom medication</label>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-[#B19CD9]' : 'text-[#9C7BD3]'}`}>Or enter custom medication</label>
               <input
                 type="text"
                 value={customMedication}
                 onChange={(e) => setCustomMedication(e.target.value)}
                 placeholder="Custom medication name"
-                className="w-full px-3 py-2 border border-[#B19CD9]/30 bg-black/20 text-white rounded-lg text-sm mb-2"
+                className={`w-full px-3 py-2 border rounded-lg text-sm mb-2 ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 bg-black/20 text-white'
+                    : 'border-gray-300 bg-white text-gray-900'
+                }`}
               />
               <button
                 onClick={handleCustomMedicationAdd}

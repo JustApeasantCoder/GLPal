@@ -3,6 +3,7 @@ import { Peptide, PeptideLogEntry, InjectionRoute } from '../../../types';
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import { timeService } from '../../../core/timeService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface LogPeptideModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
 const getTodayString = () => timeService.todayString();
 
 const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide }) => {
+  const { isDarkMode } = useTheme();
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(() => {
     const now = new Date();
@@ -116,17 +118,23 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
           onClick={onClose} 
         />
         <div 
-          className="relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-[#4ADEA8]/30 w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col"
+          className={`relative rounded-2xl shadow-2xl border border-[#4ADEA8]/30 w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col ${
+            isDarkMode 
+              ? 'bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98' 
+              : 'bg-white/95'
+          }`}
           style={{ animation: isClosing ? 'slideDown 0.2s ease-out' : 'slideUp 0.2s ease-out' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#4ADEA8]/20">
+          <div className={`flex items-center justify-between p-4 border-b ${
+            isDarkMode ? 'border-[#4ADEA8]/20' : 'border-gray-200'
+          }`}>
             <div className="flex items-center gap-3">
               <div 
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: peptide.color }}
               />
-              <h2 className="text-lg font-bold text-white">
+              <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 Log {peptide.name}
               </h2>
             </div>
@@ -145,22 +153,30 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Date</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Date</label>
                 <button
                   type="button"
                   onClick={() => setShowDatePicker(true)}
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white text-left"
+                  className={`w-full px-3 py-2 rounded-lg border text-left ${
+                    isDarkMode
+                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 >
                   {date}
                 </button>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Time</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Time</label>
                 <input
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white focus:outline-none focus:border-[#4ADEA8]/50"
+                  className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+                    isDarkMode
+                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 />
               </div>
             </div>
@@ -168,23 +184,31 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             {/* Dose */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Dose</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose</label>
                 <input
                   type="number"
                   value={dose}
                   onChange={(e) => setDose(e.target.value)}
                   placeholder={peptide.dose.toString()}
                   step="0.1"
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#4ADEA8]/50"
+                  className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+                    isDarkMode
+                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white placeholder-gray-500'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                  }`}
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Unit</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Unit</label>
                 <select
                   value={doseUnit}
                   onChange={(e) => setDoseUnit(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white focus:outline-none focus:border-[#4ADEA8]/50"
+                  className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+                    isDarkMode
+                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 >
                   <option value="mg">mg</option>
                   <option value="mcg">mcg</option>
@@ -196,11 +220,15 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
 
             {/* Route */}
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Route</label>
+              <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Route</label>
               <select
                 value={route}
                 onChange={(e) => setRoute(e.target.value as InjectionRoute)}
-                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white focus:outline-none focus:border-[#4ADEA8]/50"
+                className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+                  isDarkMode
+                    ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
               >
                 {Object.entries(ROUTE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
@@ -211,7 +239,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             {/* Injection Site */}
             {['subcutaneous', 'intramuscular'].includes(route) && (
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Injection Site</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Injection Site</label>
                 <div className="grid grid-cols-3 gap-2">
                   {INJECTION_SITES.map((site) => (
                     <button
@@ -221,7 +249,9 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
                       className={`px-2 py-2 rounded-lg text-xs font-medium transition-all ${
                         injectionSite === site 
                           ? 'bg-[#4ADEA8]/20 text-[#4ADEA8] border border-[#4ADEA8]/50' 
-                          : 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10'
+                          : isDarkMode
+                            ? 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10'
+                            : 'bg-gray-100 text-gray-600 border border-transparent hover:bg-gray-200'
                       }`}
                     >
                       {site}
@@ -234,7 +264,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             {/* Pain Level */}
             {['subcutaneous', 'intramuscular'].includes(route) && (
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Pain Level (optional)</label>
+                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pain Level (optional)</label>
                 <div className="flex gap-1">
                   {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
                     <button
@@ -248,7 +278,9 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
                             : level <= 6
                               ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
                               : 'bg-red-500/20 text-red-400 border border-red-500/50'
-                          : 'bg-white/5 text-gray-500 border border-transparent hover:bg-white/10'
+                          : isDarkMode
+                            ? 'bg-white/5 text-gray-500 border border-transparent hover:bg-white/10'
+                            : 'bg-gray-100 text-gray-600 border border-transparent hover:bg-gray-200'
                       }`}
                     >
                       {level}
@@ -260,19 +292,23 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
 
             {/* Notes */}
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Notes (optional)</label>
+              <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Notes (optional)</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any observations..."
                 rows={2}
-                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-[#4ADEA8]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#4ADEA8]/50 resize-none"
+                className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 resize-none ${
+                  isDarkMode
+                    ? 'bg-white/10 border-[#4ADEA8]/20 text-white placeholder-gray-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
               />
             </div>
           </form>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[#4ADEA8]/20 space-y-2">
+          <div className={`p-4 border-t space-y-2 ${isDarkMode ? 'border-[#4ADEA8]/20' : 'border-gray-200'}`}>
             <button
               onClick={handleSubmit}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#6EE7B7] text-white font-semibold hover:shadow-lg hover:shadow-[#4ADEA8]/30 transition-all"
@@ -281,7 +317,9 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             </button>
             <button
               onClick={onClose}
-              className="w-full py-2 text-sm text-gray-400 hover:text-white transition-colors"
+              className={`w-full py-2 text-sm transition-colors ${
+                isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
               Cancel
             </button>

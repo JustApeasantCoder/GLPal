@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import WheelPicker from './WheelPicker';
 import { timeService } from '../../core/timeService';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const getToday = () => new Date(timeService.now());
 
@@ -21,6 +22,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
   minDate,
   maxDate,
 }) => {
+  const { isDarkMode } = useTheme();
   const [localDate, setLocalDate] = useState(value);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -138,20 +140,24 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
       />
 
       <div className="relative w-full max-w-sm">
-<div
-          className={`relative isolate rounded-2xl border border-[#B19CD9]/30 shadow-2xl bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 p-6 max-h-[90vh] overflow-y-auto transition-all ${
+        <div
+          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${
+            isDarkMode 
+              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
+              : 'border-gray-200 bg-white'
+          } ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'
           }`}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Select Date
             </h3>
             <div className="w-8" />
           </div>
-          <div className="border-t border-[#B19CD9]/20 mb-3"></div>
+          <div className={`border-t mb-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
           <div className="flex items-center justify-center gap-3 mb-4 px-4">
             <WheelPicker
@@ -187,7 +193,11 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium"
+              className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+              }`}
             >
               Cancel
             </button>
