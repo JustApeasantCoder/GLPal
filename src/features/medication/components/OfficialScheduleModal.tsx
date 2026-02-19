@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 interface OfficialScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (protocols: GLP1Protocol[]) => void;
+  useWheelForDate?: boolean;
 }
 
-const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave }) => {
+const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const [selectedMedication, setSelectedMedication] = useState<string>('semaglutide');
   const [startDate, setStartDate] = useState<string>(() => {
@@ -171,15 +173,29 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
         </div>
       </div>
 
-      <DateWheelPickerModal
-        isOpen={showDatePicker}
-        value={startDate}
-        onChange={(date) => {
-          setStartDate(date);
-          setShowDatePicker(false);
-        }}
-        onClose={() => setShowDatePicker(false)}
-      />
+      {showDatePicker && (
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showDatePicker}
+            value={startDate}
+            onChange={(date) => {
+              setStartDate(date);
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showDatePicker}
+            value={startDate}
+            onChange={(date) => {
+              setStartDate(date);
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        )
+      )}
     </div>
   );
 };

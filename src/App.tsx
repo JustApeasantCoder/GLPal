@@ -341,7 +341,7 @@ return (
 
           <TabContent isActive={activeTab === 'peptides'}>
             <div className="max-w-md mx-auto">
-              <PeptidesTab />
+              <PeptidesTab useWheelForDate={profile.useWheelForDate ?? true} />
             </div>
           </TabContent>
 

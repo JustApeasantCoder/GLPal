@@ -19,7 +19,9 @@ import LogPeptideModal from './components/LogPeptideModal';
 import PeptideCard from './components/PeptideCard';
 import PeptideChart from './components/PeptideChart';
 
-interface PeptidesTabProps {}
+interface PeptidesTabProps {
+  useWheelForDate?: boolean;
+}
 
 const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -34,7 +36,7 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
   { id: 'other', label: 'Other' },
 ];
 
-const PeptidesTab: React.FC<PeptidesTabProps> = () => {
+const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => {
   const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
   const now = useTime(100);
   const currentTime = useMemo(() => new Date(now), [now]);
@@ -265,6 +267,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
         }}
         onSave={editingPeptide ? handleUpdatePeptide : handleAddPeptide}
         editPeptide={editingPeptide}
+        useWheelForDate={useWheelForDate}
       />
 
       {/* Log Injection Modal */}
@@ -276,6 +279,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = () => {
         }}
         onSave={handleLogInjection}
         peptide={selectedPeptide}
+        useWheelForDate={useWheelForDate}
       />
 
       {/* Delete Confirmation Modal */}

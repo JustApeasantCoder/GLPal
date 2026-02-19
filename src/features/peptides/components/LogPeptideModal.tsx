@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Peptide, PeptideLogEntry, InjectionRoute } from '../../../types';
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import { timeService } from '../../../core/timeService';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -10,6 +11,7 @@ interface LogPeptideModalProps {
   onClose: () => void;
   onSave: (log: PeptideLogEntry) => void;
   peptide: Peptide | null;
+  useWheelForDate?: boolean;
 }
 
 const INJECTION_SITES = [
@@ -36,7 +38,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
 
 const getTodayString = () => timeService.todayString();
 
-const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide }) => {
+const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(() => {
@@ -328,15 +330,27 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
       </div>
 
       {showDatePicker && (
-        <DateWheelPickerModal
-          isOpen={showDatePicker}
-          value={date}
-          onChange={(newDate) => {
-            setDate(newDate);
-            setShowDatePicker(false);
-          }}
-          onClose={() => setShowDatePicker(false)}
-        />
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showDatePicker}
+            value={date}
+            onChange={(newDate) => {
+              setDate(newDate);
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showDatePicker}
+            value={date}
+            onChange={(newDate) => {
+              setDate(newDate);
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        )
       )}
     </>
   );

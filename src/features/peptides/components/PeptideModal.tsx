@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Peptide, PEPTIDE_PRESETS, PeptideCategory, PeptideFrequency, InjectionRoute, DoseUnit, PeptideCycle } from '../../../types';
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import { timeService } from '../../../core/timeService';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -10,6 +11,7 @@ interface PeptideModalProps {
   onClose: () => void;
   onSave: (peptide: Peptide) => void;
   editPeptide?: Peptide | null;
+  useWheelForDate?: boolean;
 }
 
 const CATEGORY_COLORS: Record<PeptideCategory, string> = {
@@ -60,7 +62,7 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
 
 const getTodayString = () => timeService.todayString();
 
-const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide }) => {
+const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
@@ -469,19 +471,35 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
       </div>
 
       {showDatePicker && (
-        <DateWheelPickerModal
-          isOpen={showDatePicker}
-          value={datePickerType === 'start' ? startDate : (endDate || getTodayString())}
-          onChange={(date) => {
-            if (datePickerType === 'start') {
-              setStartDate(date);
-            } else {
-              setEndDate(date);
-            }
-            setShowDatePicker(false);
-          }}
-          onClose={() => setShowDatePicker(false)}
-        />
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showDatePicker}
+            value={datePickerType === 'start' ? startDate : (endDate || getTodayString())}
+            onChange={(date) => {
+              if (datePickerType === 'start') {
+                setStartDate(date);
+              } else {
+                setEndDate(date);
+              }
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showDatePicker}
+            value={datePickerType === 'start' ? startDate : (endDate || getTodayString())}
+            onChange={(date) => {
+              if (datePickerType === 'start') {
+                setStartDate(date);
+              } else {
+                setEndDate(date);
+              }
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        )
       )}
     </>
   );

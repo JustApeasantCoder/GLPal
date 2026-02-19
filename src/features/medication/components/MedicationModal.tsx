@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MEDICATIONS } from '../../../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../../../shared/utils/database';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import { timeService } from '../../../core/timeService';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -12,9 +13,10 @@ interface MedicationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddMedication: (dose: number, medication: string, date: string) => void;
+  useWheelForDate?: boolean;
 }
 
-const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication }) => {
+const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
@@ -138,13 +140,24 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             </div>
           </div>
 
-          <DateWheelPickerModal
-            isOpen={showDatePicker}
-            value={selectedDate}
-            onChange={setSelectedDate}
-            onClose={() => setShowDatePicker(false)}
-            maxDate={getTodayString()}
-          />
+          {showDatePicker && (
+            useWheelForDate ? (
+              <DateWheelPickerModal
+                isOpen={showDatePicker}
+                value={selectedDate}
+                onChange={setSelectedDate}
+                onClose={() => setShowDatePicker(false)}
+                maxDate={getTodayString()}
+              />
+            ) : (
+              <CalendarPickerModal
+                isOpen={showDatePicker}
+                value={selectedDate}
+                onChange={setSelectedDate}
+                onClose={() => setShowDatePicker(false)}
+              />
+            )
+          )}
 
           <DoseWheelPickerModal
             isOpen={showDosePicker}

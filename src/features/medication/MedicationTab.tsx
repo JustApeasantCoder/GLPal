@@ -436,12 +436,14 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         isOpen={showOfficialScheduleModal}
         onClose={() => setShowOfficialScheduleModal(false)}
         onSave={handleOfficialScheduleSave}
+        useWheelForDate={useWheelForDate}
       />
 
       <MedicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddMedication={onAddMedication}
+        useWheelForDate={useWheelForDate}
       />
 
       <LogDoseModal
