@@ -139,7 +139,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
               <TDEECalculator profile={localProfile} onProfileUpdate={(updatedProfile) => {
     setLocalProfile(updatedProfile);
     onProfileUpdate(updatedProfile);
-  }} />
+  }} useWheelForNumbers={useWheelForNumbers} />
               
               {/* Separator */}
               <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
@@ -147,20 +147,40 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
               {/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`} style={{ textShadow: isDarkMode ? '0 0 10px rgba(177,156,217,0.5)' : 'none' }}>
+                  <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`} style={isDarkMode ? { textShadow: '0 0 10px rgba(177,156,217,0.5)' } : {}}>
                     Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowGoalWeightPicker(true)}
-                    className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all ${
-                      isDarkMode
-                        ? 'border border-[#B19CD9]/30 bg-black/20 text-white'
-                        : 'border border-gray-300 bg-white text-gray-900'
-                    }`}
-                  >
-                    {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                  </button>
+                  {useWheelForNumbers ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowGoalWeightPicker(true)}
+                      className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all ${
+                        isDarkMode
+                          ? 'border border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
+                          : 'border border-gray-300 bg-white text-gray-900'
+                      }`}
+                    >
+                      {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                    </button>
+                  ) : (
+                    <input
+                      type="number"
+                      value={goalWeightDisplayValue || ''}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (value && value > 0) {
+                          const weightInKg = convertWeightToKg(value, unitSystem);
+                          onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
+                        }
+                      }}
+                      className={`w-full px-3 py-2 rounded-lg text-sm transition-all ${
+                        isDarkMode
+                          ? 'border border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                          : 'border border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+                      }`}
+                      placeholder={`Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
+                    />
+                  )}
                 </div>
               </div>
             </div>

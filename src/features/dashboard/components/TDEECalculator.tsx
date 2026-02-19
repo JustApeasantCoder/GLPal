@@ -8,9 +8,10 @@ import { useTheme } from '../../../contexts/ThemeContext';
 interface TDEECalculatorProps {
   profile: UserProfile;
   onProfileUpdate: (profile: UserProfile) => void;
+  useWheelForNumbers?: boolean;
 }
 
-const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate }) => {
+const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const [showAgePicker, setShowAgePicker] = useState(false);
@@ -48,24 +49,41 @@ return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
             Age
           </label>
-          <button
-            type="button"
-            onClick={() => setShowAgePicker(true)}
-            className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
-              isDarkMode
-                ? 'border-[#B19CD9]/30 bg-black/20 text-white'
-                : 'border-gray-300 bg-white text-gray-900'
-            }`}
-          >
-            {profile.age || 'Select age'}
-          </button>
+          {useWheelForNumbers ? (
+            <button
+              type="button"
+              onClick={() => setShowAgePicker(true)}
+              className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
+                  : 'border-gray-300 bg-white text-gray-900'
+              }`}
+            >
+              {profile.age || 'Select age'}
+            </button>
+          ) : (
+            <input
+              type="number"
+              value={profile.age || ''}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                handleChange({ ...profile, age: value });
+              }}
+              className={`w-full px-3 py-2 border rounded-lg transition-all ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+              }`}
+              placeholder="Enter age"
+            />
+          )}
         </div>
 
         <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
             Gender
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -76,7 +94,7 @@ return (
                 profile.gender === 'male'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                   : isDarkMode
-                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
@@ -89,7 +107,7 @@ return (
                 profile.gender === 'female'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                   : isDarkMode
-                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
@@ -99,27 +117,52 @@ return (
         </div>
 
         <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
             Height ({unitSystem === 'imperial' ? 'ft/in' : 'cm'})
           </label>
-          <button
-            type="button"
-            onClick={() => setShowHeightPicker(true)}
-            className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
-              isDarkMode
-                ? 'border-[#B19CD9]/30 bg-black/20 text-white'
-                : 'border-gray-300 bg-white text-gray-900'
-            }`}
-          >
-            {unitSystem === 'imperial' 
-              ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
-              : `${Math.round(heightDisplayValue)} cm`
-            }
-          </button>
+          {useWheelForNumbers ? (
+            <button
+              type="button"
+              onClick={() => setShowHeightPicker(true)}
+              className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
+                  : 'border-gray-300 bg-white text-gray-900'
+              }`}
+            >
+              {unitSystem === 'imperial' 
+                ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
+                : `${Math.round(heightDisplayValue)} cm`
+              }
+            </button>
+          ) : (
+            <input
+              type="number"
+              value={unitSystem === 'imperial' ? Math.round(heightDisplayValue) : Math.round(profile.height || 170)}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                let heightCm: number;
+                if (unitSystem === 'imperial') {
+                  heightCm = feetInchesToCm(Math.floor(value / 12), value % 12);
+                } else {
+                  heightCm = value;
+                }
+                if (heightCm && heightCm > 0) {
+                  handleChange({ ...profile, height: heightCm });
+                }
+              }}
+              className={`w-full px-3 py-2 border rounded-lg transition-all ${
+                isDarkMode
+                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
+              }`}
+              placeholder={unitSystem === 'imperial' ? 'Enter height (inches)' : 'Enter height (cm)'}
+            />
+          )}
         </div>
 
         <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
+          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
             Units
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -130,7 +173,7 @@ return (
                 (profile.unitSystem || 'metric') === 'metric'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                   : isDarkMode
-                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
@@ -143,7 +186,7 @@ return (
                 profile.unitSystem === 'imperial'
                   ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                   : isDarkMode
-                    ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
               }`}
             >
@@ -154,7 +197,7 @@ return (
       </div>
 
       <div>
-        <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-accent-purple-light' : 'text-gray-700'}`}>
+        <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
           Activity Level
         </label>
         <button
@@ -162,7 +205,7 @@ return (
           onClick={() => setShowActivityPicker(true)}
           className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
             isDarkMode
-              ? 'border-[#B19CD9]/30 bg-black/20 text-white'
+              ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
               : 'border-gray-300 bg-white text-gray-900'
           }`}
         >
