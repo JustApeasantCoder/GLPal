@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { getDosageCalculatorData, saveDosageCalculatorData, clearDosageCalculatorData } from '../../../shared/utils/database';
 
 interface DosageCalculatorProps {
   onClose?: () => void;
@@ -84,8 +85,35 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
   const [syringeDraw, setSyringeDraw] = useState<string>('');
   const [result, setResult] = useState<DosageResult | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const calculateAndAutoFill = () => {
+  useEffect(() => {
+    const saved = getDosageCalculatorData();
+    if (saved) {
+      setVialStrength(saved.vialStrength || '');
+      setWaterAmount(saved.waterAmount || '');
+      setDesiredDose(saved.desiredDose || '');
+      setSyringeDraw(saved.syringeDraw || '');
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveDosageCalculatorData({ vialStrength, waterAmount, desiredDose, syringeDraw });
+    }
+  }, [vialStrength, waterAmount, desiredDose, syringeDraw, isLoaded]);
+
+  const clearForm = () => {
+    setVialStrength('');
+    setWaterAmount('');
+    setDesiredDose('');
+    setSyringeDraw('');
+    setResult(null);
+    clearDosageCalculatorData();
+  };
+
+  const calculate = () => {
     const vial = parseFloat(vialStrength) || 0;
     const water = parseFloat(waterAmount) || 0;
     const dose = parseFloat(desiredDose) || 0;
@@ -103,83 +131,29 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
     if (vial > 0 && water > 0 && dose > 0) {
       const concentration = vial / water;
       const syringeUnits = (dose / concentration) * 100;
-      calculatedResult = {
-        vialStrength: vial,
-        waterAmount: water,
-        dose: dose,
-        syringeDraw: syringeUnits,
-        concentration,
-        calculatedField: 'syringeDraw'
-      };
+      calculatedResult = { vialStrength: vial, waterAmount: water, dose: dose, syringeDraw: syringeUnits, concentration, calculatedField: 'syringeDraw' };
     } else if (vial > 0 && water > 0 && syringe > 0) {
       const concentration = vial / water;
       const solutionAmount = syringe / 100;
       const calculatedDose = solutionAmount * concentration;
-      calculatedResult = {
-        vialStrength: vial,
-        waterAmount: water,
-        dose: calculatedDose,
-        syringeDraw: syringe,
-        concentration,
-        calculatedField: 'desiredDose'
-      };
+      calculatedResult = { vialStrength: vial, waterAmount: water, dose: calculatedDose, syringeDraw: syringe, concentration, calculatedField: 'desiredDose' };
     } else if (vial > 0 && dose > 0 && syringe > 0) {
       const solutionAmount = syringe / 100;
       const concentration = dose / solutionAmount;
       const calculatedWater = vial / concentration;
-      calculatedResult = {
-        vialStrength: vial,
-        waterAmount: calculatedWater,
-        dose: dose,
-        syringeDraw: syringe,
-        concentration,
-        calculatedField: 'waterAmount'
-      };
+      calculatedResult = { vialStrength: vial, waterAmount: calculatedWater, dose: dose, syringeDraw: syringe, concentration, calculatedField: 'waterAmount' };
     } else if (water > 0 && dose > 0 && syringe > 0) {
       const solutionAmount = syringe / 100;
       const concentration = dose / solutionAmount;
       const calculatedVial = concentration * water;
-      calculatedResult = {
-        vialStrength: calculatedVial,
-        waterAmount: water,
-        dose: dose,
-        syringeDraw: syringe,
-        concentration,
-        calculatedField: 'vialStrength'
-      };
+      calculatedResult = { vialStrength: calculatedVial, waterAmount: water, dose: dose, syringeDraw: syringe, concentration, calculatedField: 'vialStrength' };
     }
 
     if (calculatedResult && calculatedResult.waterAmount > 0 && calculatedResult.vialStrength > 0) {
       setResult(calculatedResult);
-      
-      // Only auto-fill if no field is currently focused
-      if (!focusedField) {
-        if (calculatedResult.calculatedField === 'vialStrength') {
-          setVialStrength(calculatedResult.vialStrength.toFixed(2));
-        } else if (calculatedResult.calculatedField === 'waterAmount') {
-          setWaterAmount(calculatedResult.waterAmount.toFixed(2));
-        } else if (calculatedResult.calculatedField === 'desiredDose') {
-          setDesiredDose(calculatedResult.dose.toFixed(2));
-        } else if (calculatedResult.calculatedField === 'syringeDraw') {
-          setSyringeDraw(calculatedResult.syringeDraw.toFixed(2));
-        }
-      }
     } else {
       setResult(null);
     }
-  };
-
-  useEffect(() => {
-    calculateAndAutoFill();
-  }, [vialStrength, waterAmount, desiredDose, syringeDraw, focusedField]);
-
-  const handleBlur = (field: string) => {
-    setFocusedField(null);
-    calculateAndAutoFill();
-  };
-
-  const handleFocus = (field: string) => {
-    setFocusedField(field);
   };
 
   const isCalculated = (field: string) => result?.calculatedField === field;
@@ -193,6 +167,16 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
         ? 'border-[#B19CD9]/30 bg-black/20 text-white placeholder-gray-400'
         : 'border-gray-300 bg-white text-gray-700 placeholder-gray-400'
     }`;
+  };
+
+  const handleFocus = (field: string) => {
+    setFocusedField(field);
+  };
+
+  const handleBlur = (field: string, currentValue: string) => {
+    if (currentValue === '' || currentValue === null) {
+      setFocusedField(null);
+    }
   };
 
   return (
@@ -212,10 +196,40 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             value={vialStrength}
             onChange={(e) => setVialStrength(e.target.value)}
             onFocus={() => handleFocus('vialStrength')}
-            onBlur={() => handleBlur('vialStrength')}
+            onBlur={() => handleBlur('vialStrength', vialStrength)}
             className={getInputClass('vialStrength')}
             placeholder="e.g., 10"
           />
+          <div className="flex gap-1 mt-2">
+            {[10, 20, 30].map(val => (
+              <button
+                key={val}
+                onClick={() => setVialStrength(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  vialStrength === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}mg
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 mt-1">
+            {[40, 50, 60].map(val => (
+              <button
+                key={val}
+                onClick={() => setVialStrength(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  vialStrength === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}mg
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -232,10 +246,40 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             value={waterAmount}
             onChange={(e) => setWaterAmount(e.target.value)}
             onFocus={() => handleFocus('waterAmount')}
-            onBlur={() => handleBlur('waterAmount')}
+            onBlur={() => handleBlur('waterAmount', waterAmount)}
             className={getInputClass('waterAmount')}
             placeholder="e.g., 2"
           />
+          <div className="flex gap-1 mt-2">
+            {[1, 1.5, 2].map(val => (
+              <button
+                key={val}
+                onClick={() => setWaterAmount(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  waterAmount === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}ml
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 mt-1">
+            {[2.5, 3, 3.5].map(val => (
+              <button
+                key={val}
+                onClick={() => setWaterAmount(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  waterAmount === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}ml
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -252,10 +296,25 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             value={desiredDose}
             onChange={(e) => setDesiredDose(e.target.value)}
             onFocus={() => handleFocus('desiredDose')}
-            onBlur={() => handleBlur('desiredDose')}
+            onBlur={() => handleBlur('desiredDose', desiredDose)}
             className={getInputClass('desiredDose')}
             placeholder="e.g., 2.5"
           />
+          <div className="flex gap-1 mt-2">
+            {[0.25, 0.5, 1].map(val => (
+              <button
+                key={val}
+                onClick={() => setDesiredDose(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  desiredDose === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}mg
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -272,12 +331,34 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
             value={syringeDraw}
             onChange={(e) => setSyringeDraw(e.target.value)}
             onFocus={() => handleFocus('syringeDraw')}
-            onBlur={() => handleBlur('syringeDraw')}
+            onBlur={() => handleBlur('syringeDraw', syringeDraw)}
             className={getInputClass('syringeDraw')}
             placeholder="e.g., 25"
           />
+          <div className="flex gap-1 mt-2">
+            {[10, 20, 30].map(val => (
+              <button
+                key={val}
+                onClick={() => setSyringeDraw(val.toString())}
+                className={`flex-1 py-1.5 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  syringeDraw === val.toString()
+                    ? 'bg-[#B19CD9] text-white'
+                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                }`}
+              >
+                {val}iu
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      <button
+        onClick={calculate}
+        className="w-full bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium py-2 px-4 rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all"
+      >
+        Calculate
+      </button>
 
       {result && (
         <div className={`p-4 rounded-xl border border-[#B19CD9]/30 ${
@@ -307,7 +388,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose }) => {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose:</span>
+              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Desired Dose:</span>
               <span className={`text-sm font-bold ${isCalculated('desiredDose') ? 'text-[#4ADEA8]' : 'text-[#B19CD9]'}`}>
                 {formatNumber(result.dose)} mg
               </span>

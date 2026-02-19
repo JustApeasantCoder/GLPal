@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
   LAST_MEDICATION: 'glpal_last_medication',
   PEPTIDES: 'glpal_peptides',
   PEPTIDE_LOGS: 'glpal_peptide_logs',
+  DOSAGE_CALCULATOR: 'glpal_dosage_calculator',
 };
 
 const isLocalStorageAvailable = (): boolean => {
@@ -407,4 +408,28 @@ export const getLatestPeptideLog = (peptideId: string): PeptideLogEntry | null =
 export const clearPeptideData = (): void => {
   localStorage.setItem(STORAGE_KEYS.PEPTIDES, JSON.stringify([]));
   localStorage.setItem(STORAGE_KEYS.PEPTIDE_LOGS, JSON.stringify([]));
+};
+
+// ============================================
+// DOSAGE CALCULATOR FUNCTIONS
+// ============================================
+
+export interface DosageCalculatorData {
+  vialStrength: string;
+  waterAmount: string;
+  desiredDose: string;
+  syringeDraw: string;
+}
+
+export const getDosageCalculatorData = (): DosageCalculatorData | null => {
+  const data = localStorage.getItem(STORAGE_KEYS.DOSAGE_CALCULATOR);
+  return data ? JSON.parse(data) : null;
+};
+
+export const saveDosageCalculatorData = (data: DosageCalculatorData): void => {
+  localStorage.setItem(STORAGE_KEYS.DOSAGE_CALCULATOR, JSON.stringify(data));
+};
+
+export const clearDosageCalculatorData = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.DOSAGE_CALCULATOR);
 };
