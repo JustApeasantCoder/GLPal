@@ -99,7 +99,20 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
     const sorted = [...weightEntries].sort((a, b) => a.date.localeCompare(b.date));
     
     if (weightViewMode === 'daily') {
-      return { data: sorted, prevChange: null };
+      const dailyWithChange = sorted.map((entry, idx) => {
+        let change: number | null = null;
+        if (idx > 0) {
+          change = sorted[idx - 1].weight - entry.weight;
+        }
+        return { ...entry, change };
+      });
+      
+      let prevChange: number | null = null;
+      if (sorted.length >= 2) {
+        prevChange = sorted[sorted.length - 2].weight - sorted[sorted.length - 1].weight;
+      }
+      
+      return { data: dailyWithChange, prevChange };
     }
     
     if (weightViewMode === 'weekly') {
@@ -443,10 +456,10 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                     : 'bg-gray-500/20 text-gray-400'
               }`}>
                 {aggregatedWeightData.prevChange > 0 
-                  ? `↓ ${aggregatedWeightData.prevChange.toFixed(1)}kg vs last ${weightViewMode}`
+                  ? `${aggregatedWeightData.prevChange.toFixed(1)}kg VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
                   : aggregatedWeightData.prevChange < 0 
-                    ? `↑ ${Math.abs(aggregatedWeightData.prevChange).toFixed(1)}kg vs last ${weightViewMode}`
-                    : `No change vs last ${weightViewMode}`
+                    ? `${Math.abs(aggregatedWeightData.prevChange).toFixed(1)}kg VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
+                    : `No Change VS Last ${weightViewMode.charAt(0).toUpperCase() + weightViewMode.slice(1)}`
                 }
               </div>
             )}
@@ -471,7 +484,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey }) => {
                             : entry.monthLabel
                         }
                       </p>
-                      {weightViewMode !== 'daily' && entry.change !== null && (
+                      {entry.change !== null && (
                         <p className={`text-xs ${
                           entry.change > 0 ? 'text-green-400' : entry.change < 0 ? 'text-red-400' : 'text-gray-400'
                         }`}>
