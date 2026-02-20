@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { timeService } from '../../core/timeService';
 
-export const useTime = (intervalMs = 1000) => {
+export const useTime = (intervalMs = 1000, resetKey?: number) => {
   const [time, setTime] = useState(timeService.now());
 
   useEffect(() => {
@@ -12,7 +12,7 @@ export const useTime = (intervalMs = 1000) => {
     }, intervalMs);
     
     return () => clearInterval(timer);
-  }, [intervalMs]);
+  }, [intervalMs, resetKey]);
 
   return time;
 };

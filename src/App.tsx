@@ -42,8 +42,9 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
-  const now = useTime(1000);
-const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [timeResetKey, setTimeResetKey] = useState(0);
+  const now = useTime(1000, timeResetKey);
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
   const [weights, setWeights] = useState<WeightEntry[]>([]);
@@ -66,7 +67,6 @@ const [profile, setProfile] = useState<UserProfile>({
   }, []);
 
   // Initialize database and load data
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const initializeApp = () => {
 try {
@@ -103,8 +103,7 @@ try {
     };
     
     initializeApp();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - run only once
+  }, []);
 
 const handleAddWeight = (newWeight: number) => {
     const today = timeService.nowDate().toISOString().split('T')[0];
@@ -141,9 +140,25 @@ const handleAddWeight = (newWeight: number) => {
   const handleClearData = () => {
     if (window.confirm('Are you sure you want to delete all data? This cannot be undone.')) {
       clearAllData();
-      setWeights([]);
-      setDosesEntries([]);
-      window.location.reload();
+      initializeDatabase();
+      initializeSampleWeightData();
+      
+      const newWeights = getWeightEntries();
+      const newGLP1 = getAllGLP1Entries();
+      setWeights(newWeights);
+      setDosesEntries(newGLP1);
+      
+      const defaultProfile: UserProfile = {
+        age: 35,
+        gender: 'male',
+        height: 180,
+        activityLevel: 1.2,
+        unitSystem: 'metric',
+        useWheelForNumbers: false,
+        useWheelForDate: true,
+      };
+      setProfile(defaultProfile);
+      saveUserProfile(defaultProfile);
     }
   };
 
@@ -254,7 +269,7 @@ return (
             <button
               onClick={() => {
                 timeService.reset();
-                window.location.reload();
+                setTimeResetKey(k => k + 1);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Reset dose simulation"

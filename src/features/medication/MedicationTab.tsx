@@ -81,7 +81,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     if (saved) {
       setLatestDoseDone(parseInt(saved, 10));
     }
-  }, [timeService.nowDate().getTime()]);
+  }, []);
 
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
     clearMedicationEntries();

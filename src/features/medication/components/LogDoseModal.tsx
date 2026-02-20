@@ -53,7 +53,6 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
 
   useEffect(() => {
     if (isOpen) {
-      console.log('DEBUG LogDoseModal - protocol prop:', protocol);
       const now = timeService.nowDate();
       setCurrentTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
       setPainLevel(0);
