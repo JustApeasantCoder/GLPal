@@ -19,6 +19,7 @@ import {
   setMedicationEntries,
   getMedicationEntries,
   getMedicationManualEntries,
+  saveMedicationManualEntries,
   saveMedicationProtocols,
   getMedicationProtocols,
   saveUserProfile,
@@ -27,73 +28,19 @@ import {
 
 class DataImportExportService {
   private currentParsedRows: CsvRow[] = [];
+  private currentRawContent: string = '';
   
-   exportData(includeProtocols: boolean = false): void {
-    console.log('Starting export, includeProtocols:', includeProtocols);
+   exportData(): void {
+    console.log('Starting CSV export with embedded protocols...');
     const csvContent = exportAllToCsv();
     const filename = generateExportFilename();
     downloadCsv(csvContent, filename);
-    
-    if (includeProtocols) {
-      console.log('Calling exportProtocols...');
-      // Use setTimeout to ensure this happens after CSV download
-      setTimeout(() => {
-        console.log('Executing protocol export...');
-        this.exportProtocols();
-      }, 100);
-    } else {
-      console.log('Skipping protocol export');
-    }
   }
   
-  exportProtocols(): void {
-    try {
-      console.log('Starting protocol export...');
-      const protocols = getMedicationProtocols();
-      console.log(`Found ${protocols.length} protocols to export`);
-      
-      const jsonContent = JSON.stringify(protocols, null, 2);
-      const filename = `glpal_protocols_${new Date().toISOString().split('T')[0]}.json`;
-      
-      console.log('Creating download...');
-      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      
-      // Ensure link is properly set up
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      
-      // Trigger click
-      link.click();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        console.log('Protocol export completed successfully');
-      }, 100);
-      
-    } catch (error) {
-      console.error('Protocol export failed:', error);
-    }
-  }
-  
-  parseImportFile(content: string): ImportPreview {
-    this.currentParsedRows = parseCsv(content);
+  parseImportFile(content: string, importWeightUnit: 'auto' | 'kg' | 'lbs' = 'auto'): ImportPreview {
+    this.currentRawContent = content;
+    this.currentParsedRows = parseCsv(content, importWeightUnit);
     return generateImportPreview(this.currentParsedRows);
-  }
-  
-  parseProtocolFile(content: string): GLP1Protocol[] {
-    try {
-      const protocols = JSON.parse(content);
-      return Array.isArray(protocols) ? protocols : [];
-    } catch (error) {
-      console.error('Failed to parse protocol file:', error);
-      return [];
-    }
   }
   
   importData(
@@ -101,13 +48,16 @@ class DataImportExportService {
     options?: {
       includeData?: boolean;
       includeUserSettings?: boolean;
-      includeProtocols?: boolean;
-      protocolData?: string;
+      importWeightUnit?: 'auto' | 'kg' | 'lbs';
     }
   ): ImportResult {
     const includeData = options?.includeData ?? true;
     const includeUserSettings = options?.includeUserSettings ?? true;
-    const includeProtocols = options?.includeProtocols ?? false;
+    const importWeightUnit = options?.importWeightUnit ?? 'auto';
+    
+    if (this.currentRawContent) {
+      this.currentParsedRows = parseCsv(this.currentRawContent, importWeightUnit);
+    }
     
     if (mode === 'replace') {
       clearAllData();
@@ -158,6 +108,46 @@ class DataImportExportService {
             saveUserProfile(profile);
             imported++;
           }
+        }
+      }
+      
+      const protocolRows = validRows.filter(row => row.Pid || row.Pmedication);
+      if (protocolRows.length > 0) {
+        const protocols: GLP1Protocol[] = protocolRows.map(row => ({
+          id: row.Pid || '',
+          medication: row.Pmedication || '',
+          dose: row.Pdose || 0,
+          frequencyPerWeek: row.PfrequencyPerWeek || 0,
+          startDate: row.PstartDate || '',
+          stopDate: row.PstopDate || null,
+          halfLifeHours: row.PhalfLifeHours || 168,
+          phase: row.Pphase as any || 'titrate',
+        }));
+        
+        if (protocols.length > 0) {
+          saveMedicationProtocols(protocols);
+          imported += protocols.length;
+        }
+      }
+      
+      const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);
+      if (manualRows.length > 0) {
+        const manualEntries: GLP1Entry[] = manualRows.map(row => ({
+          date: row.Mdate || '',
+          medication: row.Mmedication || '',
+          dose: row.Mdose || 0,
+          halfLifeHours: row.MhalfLifeHours || 168,
+          time: row.Mtime,
+          injectionSite: row.MinjectionSite,
+          isr: row.Misr,
+          notes: row.Mnotes,
+          painLevel: row.MpainLevel,
+          isManual: true,
+        }));
+        
+        if (manualEntries.length > 0) {
+          saveMedicationManualEntries(manualEntries);
+          imported += manualEntries.length;
         }
       }
     } else {
@@ -220,12 +210,59 @@ class DataImportExportService {
         }
       }
       
-      // Import protocols if provided
-      if (includeProtocols && options?.protocolData) {
-        const protocols = this.parseProtocolFile(options.protocolData);
+      // Import protocols from CSV (P-prefixed columns)
+      const protocolRows = validRows.filter(row => row.Pid || row.Pmedication);
+      if (protocolRows.length > 0) {
+        const protocols: GLP1Protocol[] = protocolRows.map(row => ({
+          id: row.Pid || '',
+          medication: row.Pmedication || '',
+          dose: row.Pdose || 0,
+          frequencyPerWeek: row.PfrequencyPerWeek || 0,
+          startDate: row.PstartDate || '',
+          stopDate: row.PstopDate || null,
+          halfLifeHours: row.PhalfLifeHours || 168,
+          phase: row.Pphase as any || 'titrate',
+        }));
+        
         if (protocols.length > 0) {
           saveMedicationProtocols(protocols);
           imported += protocols.length;
+          console.log(`Imported ${protocols.length} protocols from CSV`);
+        }
+      }
+      
+      // Import manual medication entries from CSV (M-prefixed columns)
+      const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);
+      if (manualRows.length > 0) {
+        const existingManual = getMedicationManualEntries();
+        const manualEntries: GLP1Entry[] = [];
+        
+        manualRows.forEach(row => {
+          const entry: GLP1Entry = {
+            date: row.Mdate || '',
+            medication: row.Mmedication || '',
+            dose: row.Mdose || 0,
+            halfLifeHours: row.MhalfLifeHours || 168,
+            time: row.Mtime,
+            injectionSite: row.MinjectionSite,
+            isr: row.Misr,
+            notes: row.Mnotes,
+            painLevel: row.MpainLevel,
+            isManual: true,
+          };
+          
+          const exists = existingManual.some(
+            e => e.date === entry.date && e.medication === entry.medication
+          );
+          if (!exists) {
+            manualEntries.push(entry);
+          }
+        });
+        
+        if (manualEntries.length > 0) {
+          const merged = [...existingManual, ...manualEntries].sort((a, b) => a.date.localeCompare(b.date));
+          saveMedicationManualEntries(merged);
+          imported += manualEntries.length;
         }
       }
     }
@@ -240,6 +277,7 @@ class DataImportExportService {
   
   clearParsedData(): void {
     this.currentParsedRows = [];
+    this.currentRawContent = '';
   }
 }
 

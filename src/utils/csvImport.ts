@@ -129,7 +129,7 @@ const parseCsvLine = (line: string): string[] => {
   return result;
 };
 
-export const parseCsv = (content: string): CsvRow[] => {
+export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs' = 'auto'): CsvRow[] => {
   const lines = content.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
   
@@ -166,6 +166,17 @@ export const parseCsv = (content: string): CsvRow[] => {
         case 'notes':
         case 'unitSystem':
         case 'gender':
+        case 'Pmedication':
+        case 'PstartDate':
+        case 'PstopDate':
+        case 'Pphase':
+        case 'Pid':
+        case 'Mdate':
+        case 'Mtime':
+        case 'Mmedication':
+        case 'MinjectionSite':
+        case 'Misr':
+        case 'Mnotes':
           row[standardName] = value || undefined;
           break;
         case 'weight':
@@ -179,6 +190,22 @@ export const parseCsv = (content: string): CsvRow[] => {
         case 'height':
         case 'activityLevel':
         case 'goalWeight':
+        case 'Pdose':
+        case 'PfrequencyPerWeek':
+        case 'PhalfLifeHours':
+        case 'Mdose':
+        case 'MhalfLifeHours':
+        case 'MpainLevel':
+        case 'nausea':
+        case 'vomiting':
+        case 'diarrhea':
+        case 'constipation':
+        case 'abdominalPain':
+        case 'headache':
+        case 'fatigue':
+        case 'dizziness':
+        case 'lossOfAppetite':
+        case 'heartburn':
           row[standardName] = parseNumberWithUnit(value);
           break;
         case 'useWheelForNumbers':
@@ -189,17 +216,26 @@ export const parseCsv = (content: string): CsvRow[] => {
     });
     
     if (row.weight !== undefined) {
-      // Smart weight unit conversion
-      // If unitSystem is specified in the row and it's 'metric', assume KG (no conversion)
-      // If unitSystem is 'imperial' or not specified, convert from LBS to KG
-      // Heuristic: if weight > 200, it's likely in LBS and needs conversion
-      const shouldConvert = !row.unitSystem || row.unitSystem === 'imperial' || row.weight > 200;
+      let shouldConvert = false;
+      
+      if (importWeightUnit === 'kg') {
+        shouldConvert = false;
+      } else if (importWeightUnit === 'lbs') {
+        shouldConvert = true;
+      } else {
+        shouldConvert = !row.unitSystem || row.unitSystem === 'imperial' || row.weight > 200;
+      }
+      
       row.weight = shouldConvert ? row.weight * LBS_TO_KG : row.weight;
     }
     
     if (row.date) {
       rows.push(row as CsvRow);
     } else if (row.age !== undefined || row.gender || row.height || row.unitSystem) {
+      rows.push(row as CsvRow);
+    } else if (row.Pmedication || row.Pid) {
+      rows.push(row as CsvRow);
+    } else if (row.Mmedication || row.Mdate) {
       rows.push(row as CsvRow);
     }
   }
@@ -218,6 +254,10 @@ export const generateImportPreview = (rows: CsvRow[]): ImportPreview => {
       preview.entries++;
     } else if (row.age !== undefined || row.gender || row.height || row.unitSystem) {
       preview.userSettings++;
+    } else if (row.Pmedication || row.Pid) {
+      preview.entries++;
+    } else if (row.Mmedication || row.Mdate) {
+      preview.entries++;
     }
   });
   
@@ -304,5 +344,5 @@ export const convertToUserProfile = (row: CsvRow): UserProfile | null => {
 };
 
 export const hasData = (row: CsvRow): boolean => {
-  return !!(row.date || row.age || row.gender || row.height || row.unitSystem);
+  return !!(row.date || row.age || row.gender || row.height || row.unitSystem || row.Pmedication || row.Pid || row.Mmedication || row.Mdate);
 };

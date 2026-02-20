@@ -23,6 +23,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [includeData, setIncludeData] = useState(true);
   const [includeUserSettings, setIncludeUserSettings] = useState(true);
+  const [importWeightUnit, setImportWeightUnit] = useState<'auto' | 'kg' | 'lbs'>('auto');
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,7 +59,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      const preview = dataImportExportService.parseImportFile(content);
+      const preview = dataImportExportService.parseImportFile(content, importWeightUnit);
       setPreview(preview);
     };
     reader.readAsText(file);
@@ -72,6 +73,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
       const result = dataImportExportService.importData(importMode, {
         includeData,
         includeUserSettings,
+        importWeightUnit,
       });
       setImportResult(result);
       setIsLoading(false);
@@ -261,6 +263,50 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                       />
                       <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>User settings</span>
                     </label>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Weight Unit
+                  </h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setImportWeightUnit('auto')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        importWeightUnit === 'auto'
+                          ? 'bg-[#B19CD9] text-white'
+                          : isDarkMode
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Auto Detect
+                    </button>
+                    <button
+                      onClick={() => setImportWeightUnit('kg')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        importWeightUnit === 'kg'
+                          ? 'bg-[#B19CD9] text-white'
+                          : isDarkMode
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      KG
+                    </button>
+                    <button
+                      onClick={() => setImportWeightUnit('lbs')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        importWeightUnit === 'lbs'
+                          ? 'bg-[#B19CD9] text-white'
+                          : isDarkMode
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      LBS
+                    </button>
                   </div>
                 </div>
 

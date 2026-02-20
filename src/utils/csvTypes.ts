@@ -34,6 +34,25 @@ export const ALL_COLUMNS = [
   'goalWeight',
   'useWheelForNumbers',
   'useWheelForDate',
+  // Protocol columns with P prefix
+  'Pid',
+  'Pmedication',
+  'Pdose',
+  'PfrequencyPerWeek',
+  'PstartDate',
+  'PstopDate',
+  'PhalfLifeHours',
+  'Pphase',
+  // Manual medication entries with M prefix
+  'Mdate',
+  'Mtime',
+  'Mmedication',
+  'Mdose',
+  'MhalfLifeHours',
+  'MinjectionSite',
+  'Misr',
+  'Mnotes',
+  'MpainLevel',
 ] as const;
 
 export type AllColumns = typeof ALL_COLUMNS[number];
@@ -70,6 +89,25 @@ export interface CsvRow {
   goalWeight?: number;
   useWheelForNumbers?: boolean;
   useWheelForDate?: boolean;
+  // Protocol fields with P prefix
+  Pid?: string;
+  Pmedication?: string;
+  Pdose?: number;
+  PfrequencyPerWeek?: number;
+  PstartDate?: string;
+  PstopDate?: string;
+  PhalfLifeHours?: number;
+  Pphase?: string;
+  // Manual medication entries with M prefix
+  Mdate?: string;
+  Mtime?: string;
+  Mmedication?: string;
+  Mdose?: number;
+  MhalfLifeHours?: number;
+  MinjectionSite?: string;
+  Misr?: string;
+  Mnotes?: string;
+  MpainLevel?: number;
 }
 
 export interface ImportPreview {
