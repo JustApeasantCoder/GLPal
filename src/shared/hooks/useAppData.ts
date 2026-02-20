@@ -7,9 +7,10 @@ import {
   getUserProfile, 
   addWeightEntry, 
   addGLP1ManualEntry,
-  saveUserProfile 
+  saveUserProfile,
+  clearAllData
 } from '../utils/database';
-import { initializeSampleData, initializeSampleWeightData } from '../utils/sampleData';
+import { initializeSampleData } from '../utils/sampleData';
 
 interface AppDataContextType {
   weights: WeightEntry[];
@@ -18,6 +19,7 @@ interface AppDataContextType {
   addWeight: (weight: number) => void;
   addGLP1Entry: (entry: Omit<GLP1Entry, 'date'>) => void;
   updateProfile: (profile: UserProfile) => void;
+  generateSampleData: () => void;
   isLoading: boolean;
 }
 
@@ -53,20 +55,9 @@ export const useAppData = (): AppDataContextType => {
         const weightData = await getWeightEntries();
         const glp1Data = await getAllGLP1Entries();
         
-        // If no data exists, generate sample data
-        if (weightData.length === 0 && glp1Data.length === 0) {
-          // Generate data directly (function operates on DB)
-          initializeSampleData();
-          
-          // Reload data after generation
-          const newWeightData = await getWeightEntries();
-          const newGLP1Data = await getAllGLP1Entries();
-          setWeights(newWeightData);
-          setDosesEntries(newGLP1Data);
-        } else {
-          setWeights(weightData);
-          setDosesEntries(glp1Data);
-        }
+        // Just load the data - no automatic sample data generation
+        setWeights(weightData);
+        setDosesEntries(glp1Data);
       } catch (error) {
         console.error('Error initializing app data:', error);
       } finally {
@@ -113,6 +104,19 @@ export const useAppData = (): AppDataContextType => {
     }
   }, []);
 
+  const generateSampleData = useCallback(async () => {
+    try {
+      clearAllData();
+      initializeSampleData();
+      const newWeightData = await getWeightEntries();
+      const newGLP1Data = await getAllGLP1Entries();
+      setWeights(newWeightData);
+      setDosesEntries(newGLP1Data);
+    } catch (error) {
+      console.error('Error generating sample data:', error);
+    }
+  }, []);
+
   return {
     weights,
     dosesEntries,
@@ -120,6 +124,7 @@ export const useAppData = (): AppDataContextType => {
     addWeight,
     addGLP1Entry: addGLP1EntryFunc,
     updateProfile,
+    generateSampleData,
     isLoading
   };
 };

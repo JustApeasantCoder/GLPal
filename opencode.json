@@ -1,5 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "devstral": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Devstral (local)",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      "models": {
+        "mistralai/devstral-small-2-2512": {
+          "name": "Devstral Small 2"
+        }
+      }
+    }
+  },
   "watcher": {
     "ignore": [
       "node_modules/**",

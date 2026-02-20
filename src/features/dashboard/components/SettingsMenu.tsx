@@ -4,6 +4,7 @@ import { UserProfile, UnitSystem } from '../../../types';
 import TDEECalculator from './TDEECalculator';
 import { convertWeightFromKg, convertWeightToKg } from '../../../shared/utils/unitConversion';
 import WeightWheelPickerModal from '../../weight/components/WeightWheelPickerModal';
+import ImportExportModal from './ImportExportModal';
 
 interface SettingsMenuProps {
   profile: UserProfile;
@@ -12,6 +13,7 @@ interface SettingsMenuProps {
   onThemeToggle: () => void;
   isOpen: boolean;
   onClose: () => void;
+  onGenerateSampleData?: () => void;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({
@@ -21,12 +23,14 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onThemeToggle,
   isOpen,
   onClose,
+  onGenerateSampleData,
 }) => {
 const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
   const [useWheelForDate, setUseCalendarPicker] = useState(true);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   const unitSystem = localProfile.unitSystem || 'metric';
 
@@ -246,6 +250,49 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
             {/* Separator */}
             <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
+            {/* Data Management Section */}
+            <div>
+              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Data Management</h3>
+              
+              <button
+                onClick={() => setShowImportExport(true)}
+                className={`w-full py-3 px-4 rounded-lg border transition-all duration-300 flex items-center justify-center gap-2 mb-3 ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/50 bg-[#B19CD9]/10 text-[#B19CD9] hover:bg-[#B19CD9]/20'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Import / Export CSV
+              </button>
+
+              {onGenerateSampleData && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('This will clear all current data and generate sample data. Continue?')) {
+                      onGenerateSampleData();
+                      onClose();
+                    }
+                  }}
+                  className={`w-full py-3 px-4 rounded-lg border transition-all duration-300 flex items-center justify-center gap-2 ${
+                    isDarkMode
+                      ? 'border-[#4ADEA8]/50 bg-[#4ADEA8]/10 text-[#4ADEA8] hover:bg-[#4ADEA8]/20'
+                      : 'border-[#4ADEA8] bg-[#4ADEA8]/10 text-[#2E8B57] hover:bg-[#4ADEA8]/20'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                  </svg>
+                  Load Sample Data (Demo)
+                </button>
+              )}
+            </div>
+
+            {/* Separator */}
+            <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
+
             {/* Appearance Section */}
             <div>
               <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Appearance</h3>
@@ -304,6 +351,15 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
         label="Goal Weight"
         decimals={1}
         defaultValue={goalWeightDisplayValue || (unitSystem === 'imperial' ? '150' : '70')}
+      />
+
+      <ImportExportModal
+        isOpen={showImportExport}
+        onClose={() => setShowImportExport(false)}
+        isDarkMode={isDarkMode}
+        onImportComplete={() => {
+          // Refresh data after import
+        }}
       />
     </div>,
     document.body

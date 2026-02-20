@@ -259,21 +259,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
       setProtocols(prots);
 
       const realWeightEntries = getWeightEntries();
-      if (realWeightEntries.length > 0) {
-        setWeightEntries(realWeightEntries);
-      } else {
-        const simulatedWeightData: WeightEntry[] = [];
-        const today = new Date();
-        let currentWeight = 85;
-        for (let i = 365; i >= 0; i--) {
-          const date = new Date(today);
-          date.setDate(date.getDate() - i);
-          const dateStr = date.toISOString().split('T')[0];
-          currentWeight = currentWeight - (Math.random() * 0.3 - 0.05);
-          simulatedWeightData.push({ date: dateStr, weight: parseFloat(currentWeight.toFixed(1)) });
-        }
-        setWeightEntries(simulatedWeightData);
-      }
+      setWeightEntries(realWeightEntries);
     };
     loadData();
   }, [refreshKey]);

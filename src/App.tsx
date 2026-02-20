@@ -14,7 +14,7 @@ import {
   saveUserProfile,
   clearAllData
 } from './shared/utils/database';
-import { initializeSampleWeightData } from './shared/utils/sampleData';
+import { initializeSampleData } from './shared/utils/sampleData';
 import { timeService } from './core/timeService';
 
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
@@ -69,7 +69,7 @@ const [profile, setProfile] = useState<UserProfile>({
   // Initialize database and load data
   useEffect(() => {
     const initializeApp = () => {
-try {
+      try {
         initializeDatabase();
         
         // Load existing data
@@ -77,19 +77,9 @@ try {
         const existingGLP1 = getAllGLP1Entries();
         const existingProfile = getUserProfile();
         
-        // If no data exists, generate sample data
-        if (existingWeights.length === 0) {
-          initializeSampleWeightData();
-          
-          // Reload after generation
-          const generatedWeights = getWeightEntries();
-          const generatedGLP1 = getAllGLP1Entries();
-          setWeights(generatedWeights);
-          setDosesEntries(generatedGLP1);
-        } else {
-          setWeights(existingWeights);
-          setDosesEntries(existingGLP1);
-        }
+        // Just load data - no automatic sample generation
+        setWeights(existingWeights);
+        setDosesEntries(existingGLP1);
         
         // Load profile or use default
         if (existingProfile) {
@@ -103,6 +93,20 @@ try {
     };
     
     initializeApp();
+  }, []);
+
+  // Generate sample data on demand
+  const handleGenerateSampleData = useCallback(() => {
+    clearAllData();
+    initializeSampleData();
+    const newWeights = getWeightEntries();
+    const newDoses = getAllGLP1Entries();
+    const newProfile = getUserProfile();
+    setWeights(newWeights);
+    setDosesEntries(newDoses);
+    if (newProfile) {
+      setProfile(newProfile);
+    }
   }, []);
 
 const handleAddWeight = (newWeight: number) => {
@@ -141,12 +145,9 @@ const handleAddWeight = (newWeight: number) => {
     if (window.confirm('Are you sure you want to delete all data? This cannot be undone.')) {
       clearAllData();
       initializeDatabase();
-      initializeSampleWeightData();
       
-      const newWeights = getWeightEntries();
-      const newGLP1 = getAllGLP1Entries();
-      setWeights(newWeights);
-      setDosesEntries(newGLP1);
+      setWeights([]);
+      setDosesEntries([]);
       
       const defaultProfile: UserProfile = {
         age: 35,
@@ -388,6 +389,7 @@ return (
         onThemeToggle={toggleTheme}
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        onGenerateSampleData={handleGenerateSampleData}
       />
     </div>
   );
