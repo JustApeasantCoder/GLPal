@@ -8,6 +8,7 @@ import ChartEmptyState from '../../shared/components/ChartEmptyState';
 import { ChartPeriod } from '../../shared/hooks';
 import { getMedicationColor } from '../../shared/utils/chartUtils';
 import { timeService } from '../../core/timeService';
+import { isMobile } from '../../shared/utils/common';
 
 const getToday = () => new Date(timeService.now());
 
@@ -246,6 +247,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
 
     const option = {
       backgroundColor: 'transparent',
+      animation: !isMobile(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(20, 15, 35, 0.95)',

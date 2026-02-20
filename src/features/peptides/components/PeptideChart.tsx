@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { PeptideLogEntry } from '../../../types';
+import { isMobile } from '../../../shared/utils/common';
 
 interface PeptideChartProps {
   logs: PeptideLogEntry[];
@@ -28,6 +29,7 @@ const PeptideChart: React.FC<PeptideChartProps> = ({ logs, color, height = 200 }
 
     return {
       backgroundColor: 'transparent',
+      animation: !isMobile(),
       grid: {
         top: 10,
         right: 10,

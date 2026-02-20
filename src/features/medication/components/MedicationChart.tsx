@@ -7,6 +7,7 @@ import { generateMedicationSeries } from '../../../shared/utils/medicationChartU
 import { CHART_COLORS } from '../../../shared/utils/chartUtils';
 import ChartEmptyState from '../../../shared/components/ChartEmptyState';
 import { useTime } from '../../../shared/hooks';
+import { isMobile } from '../../../shared/utils/common';
 
 import { ChartPeriod } from '../../../shared/hooks';
 
@@ -79,6 +80,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
 
     const option = {
       backgroundColor: 'transparent',
+      animation: !isMobile(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(20, 15, 35, 0.95)',
