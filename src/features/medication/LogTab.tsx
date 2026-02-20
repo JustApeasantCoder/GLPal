@@ -80,6 +80,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [editingWeightEntry, setEditingWeightEntry] = useState<WeightEntry | null>(null);
   const [editWeightNotes, setEditWeightNotes] = useState('');
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+  const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
 
   // Picker states
@@ -278,6 +279,21 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
       }, 200);
     }
   }, [editingEntry, isSideEffectsVisible, isSideEffectsClosing]);
+
+  useEffect(() => {
+    if (editingWeightEntry) {
+      setIsWeightModalVisible(true);
+      setIsWeightModalClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isWeightModalVisible && !isWeightModalClosing) {
+      setIsWeightModalClosing(true);
+      setTimeout(() => {
+        setIsWeightModalVisible(false);
+        setIsWeightModalClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [editingWeightEntry, isWeightModalVisible, isWeightModalClosing]);
 
   const addSideEffect = (name: string) => {
     setActiveSideEffect(name);
@@ -745,18 +761,20 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
         </div>
       )}
 
-      {editingWeightEntry ? (
+      {isWeightModalVisible && editingWeightEntry ? (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div 
-            className="fixed inset-0 bg-black/60"
+            className={`fixed inset-0 bg-black/60 ${isWeightModalClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingWeightEntry(null)} 
           />
           <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
-            isDarkMode 
-              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-              : 'bg-white/95'
-          }`}>
+              isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'
+            } ${
+              isDarkMode 
+                ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
+                : 'bg-white/95'
+            }`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
             <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}{weightUnit}</p>
             

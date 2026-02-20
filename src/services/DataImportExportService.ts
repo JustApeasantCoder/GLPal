@@ -1,5 +1,5 @@
-import { CsvRow, ImportPreview, ImportResult, ImportMode } from '../utils/csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol } from '../types';
+import { CsvRow, ImportPreview, ImportResult, ImportMode, SIDE_EFFECT_KEYS } from '../utils/csvTypes';
+import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect } from '../types';
 import {
   parseCsv,
   generateImportPreview,
@@ -132,18 +132,30 @@ class DataImportExportService {
       
       const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);
       if (manualRows.length > 0) {
-        const manualEntries: GLP1Entry[] = manualRows.map(row => ({
-          date: row.Mdate || '',
-          medication: row.Mmedication || '',
-          dose: row.Mdose || 0,
-          halfLifeHours: row.MhalfLifeHours || 168,
-          time: row.Mtime,
-          injectionSite: row.MinjectionSite,
-          isr: row.Misr,
-          notes: row.Mnotes,
-          painLevel: row.MpainLevel,
-          isManual: true,
-        }));
+        const manualEntries: GLP1Entry[] = manualRows.map(row => {
+          const sideEffects: SideEffect[] = [];
+          SIDE_EFFECT_KEYS.forEach(se => {
+            const severity = (row as any)[se];
+            if (severity !== undefined && severity > 0) {
+              const name = se.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+              sideEffects.push({ name, severity });
+            }
+          });
+          
+          return {
+            date: row.Mdate || '',
+            medication: row.Mmedication || '',
+            dose: row.Mdose || 0,
+            halfLifeHours: row.MhalfLifeHours || 168,
+            time: row.Mtime,
+            injectionSite: row.MinjectionSite,
+            isr: row.Misr,
+            notes: row.Mnotes,
+            painLevel: row.MpainLevel,
+            isManual: true,
+            sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
+          };
+        });
         
         if (manualEntries.length > 0) {
           saveMedicationManualEntries(manualEntries);
@@ -238,6 +250,15 @@ class DataImportExportService {
         const manualEntries: GLP1Entry[] = [];
         
         manualRows.forEach(row => {
+          const sideEffects: SideEffect[] = [];
+          SIDE_EFFECT_KEYS.forEach(se => {
+            const severity = (row as any)[se];
+            if (severity !== undefined && severity > 0) {
+              const name = se.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+              sideEffects.push({ name, severity });
+            }
+          });
+          
           const entry: GLP1Entry = {
             date: row.Mdate || '',
             medication: row.Mmedication || '',
@@ -249,6 +270,7 @@ class DataImportExportService {
             notes: row.Mnotes,
             painLevel: row.MpainLevel,
             isManual: true,
+            sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
           };
           
           const exists = existingManual.some(

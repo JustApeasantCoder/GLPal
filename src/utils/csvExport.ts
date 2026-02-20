@@ -54,14 +54,11 @@ export const exportAllToCsv = (): string => {
       date: formatDate(entry.date),
       weight: weightToExportUnit(entry.weight, unitSystem),
       notes: entry.notes,
+      calories: entry.macros?.calories,
+      protein: entry.macros?.protein,
+      carbs: entry.macros?.carbs,
+      fat: entry.macros?.fat,
     };
-    
-    if (entry.macros) {
-      row.calories = entry.macros.calories;
-      row.protein = entry.macros.protein;
-      row.carbs = entry.macros.carbs;
-      row.fat = entry.macros.fat;
-    }
     
     dateToRowMap.set(key, row);
   });

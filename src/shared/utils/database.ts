@@ -170,7 +170,7 @@ export const saveWeightEntries = (entries: WeightEntry[]): void => {
     return;
   }
   entries.sort((a, b) => a.date.localeCompare(b.date));
-  localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.WEIGHT_ENTRIES, 'weightEntries', entries);
 };
 
 // Medication entries (formerly GLP-1)
