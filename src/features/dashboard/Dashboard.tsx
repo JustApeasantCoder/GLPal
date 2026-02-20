@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import WeightChart from '../weight/WeightChart';
 import MedicationChart from '../medication/components/MedicationChart';
 import PerformanceOverview from './components/PerformanceOverview';

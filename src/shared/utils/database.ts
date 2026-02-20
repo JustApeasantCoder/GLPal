@@ -19,6 +19,36 @@ const STORAGE_KEYS = {
   DOSAGE_CALCULATOR: 'glpal_dosage_calculator',
 };
 
+interface Cache {
+  weightEntries: WeightEntry[] | null;
+  glp1Entries: GLP1Entry[] | null;
+  glp1ManualEntries: GLP1Entry[] | null;
+  glp1Protocol: GLP1Protocol[] | null;
+  userProfile: UserProfile | null;
+  peptides: Peptide[] | null;
+  peptideLogs: PeptideLogEntry[] | null;
+  medicationEntries: GLP1Entry[] | null;
+  medicationManualEntries: GLP1Entry[] | null;
+  medicationProtocol: GLP1Protocol[] | null;
+  dosageCalculator: any | null;
+  lastDoses: Record<string, number> | null;
+}
+
+const cache: Cache = {
+  weightEntries: null,
+  glp1Entries: null,
+  glp1ManualEntries: null,
+  glp1Protocol: null,
+  userProfile: null,
+  peptides: null,
+  peptideLogs: null,
+  medicationEntries: null,
+  medicationManualEntries: null,
+  medicationProtocol: null,
+  dosageCalculator: null,
+  lastDoses: null,
+};
+
 const isLocalStorageAvailable = (): boolean => {
   try {
     const test = '__storage_test__';
@@ -30,14 +60,40 @@ const isLocalStorageAvailable = (): boolean => {
   }
 };
 
+const getFromStorage = <T>(key: string, cacheKey: keyof Cache): T | null => {
+  if (!isLocalStorageAvailable()) return null;
+  
+  if (cache[cacheKey] !== null) {
+    return cache[cacheKey] as T;
+  }
+  
+  try {
+    const data = localStorage.getItem(key);
+    const parsed = data ? JSON.parse(data) : null;
+    (cache as any)[cacheKey] = parsed;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const setToStorage = <T>(key: string, cacheKey: keyof Cache, value: T): void => {
+  if (!isLocalStorageAvailable()) return;
+  
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    (cache as any)[cacheKey] = value;
+  } catch (error) {
+    console.error('Failed to save to storage:', error);
+  }
+};
+
 export const initializeDatabase = (): void => {
-  // Check if localStorage is available
   if (!isLocalStorageAvailable()) {
     console.warn('localStorage is not available in this environment');
     return;
   }
   
-  // Initialize empty arrays if data doesn't exist
   if (!localStorage.getItem(STORAGE_KEYS.WEIGHT_ENTRIES)) {
     localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify([]));
   }
@@ -47,6 +103,33 @@ export const initializeDatabase = (): void => {
   if (!localStorage.getItem(STORAGE_KEYS.USER_PROFILE)) {
     localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(null));
   }
+  
+  cache.weightEntries = null;
+  cache.glp1Entries = null;
+  cache.glp1ManualEntries = null;
+  cache.userProfile = null;
+  cache.peptides = null;
+  cache.peptideLogs = null;
+  cache.medicationEntries = null;
+  cache.medicationManualEntries = null;
+  cache.medicationProtocol = null;
+  cache.dosageCalculator = null;
+  cache.lastDoses = null;
+};
+
+export const clearCache = (): void => {
+  cache.weightEntries = null;
+  cache.glp1Entries = null;
+  cache.glp1ManualEntries = null;
+  cache.glp1Protocol = null;
+  cache.userProfile = null;
+  cache.peptides = null;
+  cache.peptideLogs = null;
+  cache.medicationEntries = null;
+  cache.medicationManualEntries = null;
+  cache.medicationProtocol = null;
+  cache.dosageCalculator = null;
+  cache.lastDoses = null;
 };
 
 // Weight entries
@@ -68,31 +151,17 @@ export const addWeightEntry = (entry: WeightEntry): void => {
   // Sort by date
   entries.sort((a, b) => a.date.localeCompare(b.date));
   
-  try {
-    localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(entries));
-  } catch (error) {
-    console.error('Failed to save weight entry:', error);
-  }
+  setToStorage(STORAGE_KEYS.WEIGHT_ENTRIES, 'weightEntries', entries);
 };
 
 export const getWeightEntries = (): WeightEntry[] => {
-  if (!isLocalStorageAvailable()) {
-    return [];
-  }
-  
-  try {
-    const data = localStorage.getItem(STORAGE_KEYS.WEIGHT_ENTRIES);
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    console.error('Failed to load weight entries:', error);
-    return [];
-  }
+  return getFromStorage<WeightEntry[]>(STORAGE_KEYS.WEIGHT_ENTRIES, 'weightEntries') ?? [];
 };
 
 export const deleteWeightEntry = (date: string): void => {
   const entries = getWeightEntries();
   const filtered = entries.filter(entry => entry.date !== date);
-  localStorage.setItem(STORAGE_KEYS.WEIGHT_ENTRIES, JSON.stringify(filtered));
+  setToStorage(STORAGE_KEYS.WEIGHT_ENTRIES, 'weightEntries', filtered);
 };
 
 export const saveWeightEntries = (entries: WeightEntry[]): void => {
@@ -117,26 +186,25 @@ export const addMedicationEntry = (entry: GLP1Entry): void => {
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
   
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries', entries);
 };
 
 export const getMedicationEntries = (): GLP1Entry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_ENTRIES);
-  return data ? JSON.parse(data) : [];
+  return getFromStorage<GLP1Entry[]>(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries') ?? [];
 };
 
 export const deleteMedicationEntry = (date: string): void => {
   const entries = getMedicationEntries();
   const filtered = entries.filter(entry => entry.date !== date);
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(filtered));
+  setToStorage(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries', filtered);
 };
 
 export const clearMedicationEntries = (): void => {
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify([]));
+  setToStorage(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries', []);
 };
 
 export const setMedicationEntries = (entries: GLP1Entry[]): void => {
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries', entries);
 };
 
 export const addMedicationGeneratedEntry = (entry: GLP1Entry): void => {
@@ -150,7 +218,7 @@ export const addMedicationGeneratedEntry = (entry: GLP1Entry): void => {
   }
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.MEDICATION_ENTRIES, 'medicationEntries', entries);
 };
 
 export const addMedicationManualEntry = (entry: GLP1Entry): void => {
@@ -165,24 +233,23 @@ export const addMedicationManualEntry = (entry: GLP1Entry): void => {
   }
   
   entries.sort((a, b) => a.date.localeCompare(b.date));
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, 'medicationManualEntries', entries);
 };
 
 export const getMedicationManualEntries = (): GLP1Entry[] => {
-  const data = localStorage.getItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES);
-  if (!data) return [];
-  const entries = JSON.parse(data);
-  return entries.map((e: GLP1Entry) => ({ ...e, isManual: true }));
+  const cached = getFromStorage<GLP1Entry[]>(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, 'medicationManualEntries');
+  if (!cached) return [];
+  return cached.map((e: GLP1Entry) => ({ ...e, isManual: true }));
 };
 
 export const saveMedicationManualEntries = (entries: GLP1Entry[]): void => {
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(entries));
+  setToStorage(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, 'medicationManualEntries', entries);
 };
 
 export const deleteMedicationManualEntry = (date: string): void => {
   const entries = getMedicationManualEntries();
   const filtered = entries.filter(entry => entry.date !== date);
-  localStorage.setItem(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, JSON.stringify(filtered));
+  setToStorage(STORAGE_KEYS.MEDICATION_MANUAL_ENTRIES, 'medicationManualEntries', filtered);
 };
 
 export const getAllMedicationEntries = (): GLP1Entry[] => {
@@ -265,12 +332,11 @@ export const clearGLP1Protocol = clearMedicationProtocol;
 
 // User profile
 export const saveUserProfile = (profile: UserProfile): void => {
-  localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+  setToStorage(STORAGE_KEYS.USER_PROFILE, 'userProfile', profile);
 };
 
 export const getUserProfile = (): UserProfile | null => {
-  const data = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
-  return data ? JSON.parse(data) : null;
+  return getFromStorage<UserProfile>(STORAGE_KEYS.USER_PROFILE, 'userProfile');
 };
 
 export const closeDatabase = (): void => {
@@ -303,6 +369,8 @@ export const clearAllData = (): void => {
   localStorage.removeItem('theme');
   localStorage.removeItem('usedMedications');
   
+  // Clear the cache
+  clearCache();
   initializeDatabase();
 };
 

@@ -99,41 +99,6 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
       })()
     : '';
 
-  const handleUnitSystemChange = (newUnitSystem: UnitSystem) => {
-    const updatedProfile = { ...localProfile, unitSystem: newUnitSystem };
-    setLocalProfile(updatedProfile);
-    onProfileUpdate(updatedProfile);
-  };
-
-  const handleGoalWeightChange = (displayValue: string) => {
-    // Update local display immediately - instant responsive feel
-    setPendingGoalWeight(displayValue);
-    
-    if (!displayValue) {
-      setLocalProfile({ ...localProfile, goalWeight: undefined });
-      return;
-    }
-    
-    const displayWeight = parseFloat(displayValue);
-    if (displayWeight > 0 && !isNaN(displayWeight)) {
-      const weightInKg = convertWeightToKg(displayWeight, unitSystem);
-      setLocalProfile({ ...localProfile, goalWeight: weightInKg });
-    }
-  };
-
-  const handleGoalWeightBlur = () => {
-    // Only update parent when user is done typing
-    if (pendingGoalWeight !== '') {
-      const displayWeight = parseFloat(pendingGoalWeight);
-      if (displayWeight > 0 && !isNaN(displayWeight)) {
-        const weightInKg = convertWeightToKg(displayWeight, unitSystem);
-        onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
-      } else if (!displayWeight) {
-        onProfileUpdate({ ...localProfile, goalWeight: undefined });
-      }
-    }
-  };
-
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
       <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />

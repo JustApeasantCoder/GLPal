@@ -5,7 +5,6 @@ import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
-import DateWheelPickerModal from '../../shared/components/DateWheelPickerModal';
 
 interface LogTabProps {
   refreshKey?: number;

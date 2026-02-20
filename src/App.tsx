@@ -8,7 +8,6 @@ import {
   initializeDatabase, 
   getWeightEntries, 
   getAllGLP1Entries, 
-  getMedicationEntries,
   getUserProfile, 
   addWeightEntry, 
   addGLP1ManualEntry,

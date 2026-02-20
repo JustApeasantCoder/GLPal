@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../../../types';
-import { convertHeightFromCm, convertHeightToCm, feetInchesToCm } from '../../../shared/utils/unitConversion';
+import { convertHeightFromCm, feetInchesToCm } from '../../../shared/utils/unitConversion';
 import NumberPickerModal from '../../../shared/components/NumberPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { useTheme } from '../../../contexts/ThemeContext';
