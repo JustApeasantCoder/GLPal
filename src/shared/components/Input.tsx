@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -26,4 +26,4 @@ const Input: React.FC<InputProps> = ({
   );
 };
 
-export default Input;
+export default memo(Input);

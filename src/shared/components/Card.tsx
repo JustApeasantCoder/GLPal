@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -29,4 +29,4 @@ const Card: React.FC<CardProps> = ({
   );
 };
 
-export default Card;
+export default memo(Card);

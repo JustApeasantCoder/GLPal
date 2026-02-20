@@ -1,9 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import SettingsMenu from './features/dashboard/components/SettingsMenu';
-import Dashboard from './features/dashboard/Dashboard';
-import MedicationTab from './features/medication/MedicationTab';
-import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
-import PeptidesTab from './features/peptides/PeptidesTab';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
@@ -21,7 +17,12 @@ import {
 } from './shared/utils/database';
 import { initializeSampleWeightData } from './shared/utils/sampleData';
 import { timeService } from './core/timeService';
-import LogTab from './features/medication/LogTab';
+
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
+const MedicationTab = lazy(() => import('./features/medication/MedicationTab'));
+const DosageCalculatorTab = lazy(() => import('./features/medication/DosageCalculatorTab'));
+const PeptidesTab = lazy(() => import('./features/peptides/PeptidesTab'));
+const LogTab = lazy(() => import('./features/medication/LogTab'));
 
 type TabType = 'dashboard' | 'doses' | 'dosage' | 'log' | 'peptides';
 
@@ -322,6 +323,7 @@ return (
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
         <div className="w-full px-4 py-2 space-y-3 md:px-6 lg:px-8 relative">
+          <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-pulse text-text-muted">Loading...</div></div>}>
           <TabContent isActive={activeTab === 'dashboard'}>
             <div className="max-w-md mx-auto">
               <Dashboard
@@ -370,6 +372,7 @@ return (
               <LogTab refreshKey={logRefreshKey} profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>
+          </Suspense>
         </div>
       </main>
 
