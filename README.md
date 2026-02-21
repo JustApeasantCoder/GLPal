@@ -1,142 +1,199 @@
-# GLPal - Health Tracker
+# GLPal – Privacy-First GLP-1 & Weight Tracking App
 
-A modern health tracking app built with React + TypeScript, featuring weight tracking, metabolic calculations, and medication monitoring.
+GLPal is a modern, privacy-focused health tracking app designed for **weight management, GLP-1 medication monitoring, peptide logging, and metabolic health tracking** — with all data stored locally on your device.
 
-## Features
+No accounts.  
+No subscriptions.  
+No ads.  
+No tracking.  
 
-| Feature | Description |
-|---------|-------------|
-| **Weight Tracking** | Daily weight logging with interactive charts, goal progress, and historical analysis |
-| **Metabolic Calculator** | BMR (Mifflin-St Jeor), TDEE with activity multipliers, calorie targets for weight loss |
-| **Medication Tracking** | GLP-1 medication logging, concentration curves, protocol management |
-| **Dashboard** | Real-time metrics, responsive design, mobile-first layout |
+Just you and your data.
+
+---
+
+## Why GLPal?
+
+Unlike cloud-based health tracking apps, GLPal keeps **100% of your data stored locally on your device**.
+
+- No sign-ups  
+- No hidden data collection  
+- No external analytics  
+- No cloud storage  
+- No paywalls  
+
+Your health information never leaves your computer.
+
+GLPal is built for users who value **privacy, control, and simplicity** — without sacrificing powerful tracking and visualization tools.
+
+---
+
+## Core Features
+
+### 📊 Weight Tracking
+- Log daily weight entries
+- Set weight goals
+- Track macronutrients
+- Interactive progress charts
+- Long-term trend analysis
+
+A clean and efficient **weight tracking app** for consistent progress monitoring.
+
+---
+
+### 💉 GLP-1 Medication Tracking
+- Log medication doses
+- Track injection sites
+- Record pain levels
+- Monitor injection site reactions (ISR)
+- Track side effects
+- Visualize concentration curves
+- Create customizable dosing protocols
+
+Structured and organized **GLP-1 medication tracking** in one dashboard.
+
+---
+
+### 🧬 Peptide Tracking
+- Log peptide injections
+- Track dosing history
+- Manage custom protocols
+- Supports common peptides:
+  - BPC-157
+  - TB-500
+  - CJC-1295
+  - Ipamorelin
+  - And more
+
+A privacy-focused peptide logging system.
+
+---
+
+### 🧮 Peptide Calculator
+- Calculate peptide doses
+- Reconstitute solutions
+- Adjust dosage based on concentration
+- Flexible protocol adjustments
+
+A built-in **peptide calculator** for precise planning.
+
+---
+
+### 📈 Metabolic Dashboard
+- Real-time health metrics
+- Mobile-first interface
+- Fast data entry
+- Visual trend insights
+
+---
+
+### 🔄 Import & Export
+- Backup your data to a file
+- Restore anytime
+- Full ownership of your records
+
+Your data stays portable — and stays yours.
+
+---
+
+### ⚙ Protocol Management
+- Create medication protocols
+- Customize dosing schedules
+- Set frequency and duration
+- Modify active plans anytime
+
+---
+
+## Privacy & Data Storage
+
+All data is stored locally using `localStorage`.
+
+GLPal does **not** use:
+- Cloud databases  
+- External APIs  
+- Third-party analytics  
+- Tracking scripts  
+
+Your health information remains on your device at all times.
+
+Stored data keys:
+
+- `glpal_weight_entries`
+- `glpal_medication_entries`
+- `glpal_medication_manual_entries`
+- `glpal_medication_protocol`
+- `glpal_user_profile`
+
+---
 
 ## Tech Stack
 
-- React 19 + TypeScript
-- Tailwind CSS (styling)
-- ECharts (charts)
-- Electron (desktop)
-- localStorage (persistence)
-- Jest + React Testing Library (testing)
+- React 19 + TypeScript  
+- Tailwind CSS  
+- ECharts  
+- Electron (desktop support)  
+- localStorage (data persistence)  
+- Jest + React Testing Library  
+
+---
 
 ## Quick Start
 
 ```bash
 npm install
-npm start          # Dev server (localhost:3000)
-npm run electron-dev  # Desktop app
-npm test           # Run tests
-```
+npm start              # React development server
+npm run electron-dev   # Launch desktop app
+npm test               # Run tests
 
-## Commands
+
+## Available Commands
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Start React dev server |
-| `npm run electron-dev` | Electron with hot reload |
-| `npm run build` | Production build |
-| `npm run electron-pack` | Build + package Electron app |
-| `npm test` | Run tests (watch mode) |
-| `npm test -- --watchAll=false` | Single test run |
+| npm start | Start React dev server |
+| npm run electron-dev | Electron with hot reload |
+| npm run build | Production build |
+| npm run electron-pack | Build + package Electron app |
+| npm test | Run tests (watch mode) |
+| npm test -- --watchAll=false | Single test run |
 
 ## Project Structure
 
 ```
 src/
-├── components/           # React components
-│   ├── ui/              # Reusable UI (Button, Card, Input)
-│   ├── layout/          # Layout (TabManager, TabContent)
-│   ├── Dashboard.tsx    # Main dashboard
-│   ├── MedicationTab.tsx # Medication tracking
-│   ├── WeightChart.tsx  # Weight visualization
-│   ├── MedicationChart.tsx # Medication visualization
-│   └── ...
-├── contexts/            # React contexts (ThemeContext)
-├── hooks/              # Custom hooks
-│   ├── useWeightMetrics.ts
-│   ├── useFilteredWeights.ts
-│   ├── useUnitConversion.ts
-│   └── useFormValidation.ts
-├── services/            # Business logic
-│   ├── MedicationService.ts  # Protocol & dose generation
-│   └── WeightAnalytics.ts    # Weight calculations
-├── utils/              # Utilities
-│   ├── database.ts     # localStorage operations
-│   ├── calculations.ts  # BMR, TDEE, concentration
-│   ├── unitConversion.ts
-│   └── sampleData.ts   # Demo data generation
-├── constants/           # App constants
-│   └── medications.ts   # Medication definitions
-├── styles/             # Theme styles
-├── types.ts            # TypeScript interfaces
-└── App.tsx             # Root component
+├── components/
+├── contexts/
+├── hooks/
+├── services/
+├── utils/
+├── constants/
+├── styles/
+├── types.ts
+└── App.tsx
 ```
 
-## Key Types
+Structured, modular, and maintainable.
 
-```typescript
-interface WeightEntry {
-  date: string;
-  weight: number;
-}
+## Who Is GLPal For?
 
-interface MedicationEntry {
-  date: string;
-  medication: string;
-  dose: number;
-  halfLifeHours: number;
-  isManual?: boolean;
-}
+Individuals using GLP-1 medications
 
-interface MedicationProtocol {
-  id: string;
-  medication: string;
-  dose: number;
-  frequencyPerWeek: number;
-  startDate: string;
-  stopDate: string | null;
-  halfLifeHours: number;
-}
+Users managing peptide protocols
 
-interface UserProfile {
-  age: number;
-  gender: 'male' | 'female';
-  height: number;       // cm
-  activityLevel: number; // 1.2 - 1.9
-  goalWeight?: number;   // kg
-  unitSystem?: 'metric' | 'imperial';
-}
-```
+People focused on weight management
 
-## Data Storage
+Privacy-conscious users who prefer offline tools
 
-All data persists in localStorage:
-- `glpal_weight_entries` - Weight history
-- `glpal_medication_entries` - Generated medication doses
-- `glpal_medication_manual_entries` - User-logged doses
-- `glpal_medication_protocol` - Active protocols
-- `glpal_user_profile` - User settings
+Anyone wanting a simple local health tracker
 
-## Calculations
+## Support
 
-### BMR (Mifflin-St Jeor)
-- **Men**: `(10 × weight) + (6.25 × height) - (5 × age) + 5`
-- **Women**: `(10 × weight) + (6.25 × height) - (5 × age) - 161`
+GLPal is completely free and built independently.
 
-### Activity Multipliers
-| Level | Multiplier |
-|-------|------------|
-| Sedentary | 1.2 |
-| Lightly active | 1.375 |
-| Moderately active | 1.55 |
-| Very active | 1.725 |
-| Extremely active | 1.9 |
+If you find it useful, your support helps fund development and future platform distribution.
 
-### Weight Loss
-- 1kg fat = 7,700 calories
-- Daily deficit = `(7700 × kg/week) / 7`
+☕ Buy me a coffee:
+https://ko-fi.com/justapeasantcoder
 
----
+## Disclaimer
 
-GLPal - Your health tracking companion.
+GLPal is a personal health tracking tool intended for informational purposes only. The data and calculations provided by this application are not medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional before making any changes to your medication, diet, or exercise routine. Never disregard professional medical advice or delay seeking it because of something you have tracked in this app.
