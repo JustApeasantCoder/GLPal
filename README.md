@@ -143,7 +143,7 @@ npm install
 npm start              # React development server
 npm run electron-dev   # Launch desktop app
 npm test               # Run tests
-
+```
 
 ## Available Commands
 
