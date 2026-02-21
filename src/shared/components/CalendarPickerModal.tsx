@@ -47,21 +47,26 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
       setIsClosing(false);
       setSelectedDate(value ? new Date(value) : undefined);
       setCurrentMonth(getInitialMonth());
-    } else if (isVisible && !isClosing) {
-      setIsClosing(true);
-      setTimeout(() => {
-        setIsVisible(false);
-        setIsClosing(false);
-      }, 200);
     }
-  }, [isOpen, value, isClosing]);
+  }, [isOpen, value]);
 
   const handleSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
       onChange(format(date, 'yyyy-MM-dd'));
-      onClose();
+      handleClose();
     }
+  };
+
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setIsClosing(false);
+      onClose();
+    }, 200);
+    return () => clearTimeout(timer);
   };
 
   const handlePrevMonth = () => {
@@ -91,7 +96,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
           isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'
         }`}
         style={{ backdropFilter: 'blur(8px)' }}
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       <div className="relative w-full max-w-sm">
@@ -114,7 +119,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
               Select Date
             </h3>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={`p-1 rounded-lg transition-colors ${
                 isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'
               }`}
@@ -197,7 +202,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
 
           <div className="flex gap-2 mt-4">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
                 isDarkMode
                   ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
@@ -210,7 +215,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
               onClick={() => {
                 if (selectedDate) {
                   onChange(format(selectedDate, 'yyyy-MM-dd'));
-                  onClose();
+                  handleClose();
                 }
               }}
               disabled={!selectedDate}

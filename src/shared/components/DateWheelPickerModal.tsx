@@ -32,14 +32,19 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
       setIsVisible(true);
       setIsClosing(false);
       setLocalDate(value);
-    } else if (isVisible && !isClosing) {
-      setIsClosing(true);
-      setTimeout(() => {
-        setIsVisible(false);
-        setIsClosing(false);
-      }, 200);
     }
-  }, [isOpen, isClosing]);
+  }, [isOpen, value]);
+
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setIsClosing(false);
+      onClose();
+    }, 200);
+    return () => clearTimeout(timer);
+  };
 
   const { year, month, day } = useMemo(() => {
     const [y, m, d] = localDate.split('-');
@@ -124,7 +129,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
 
   const handleDone = () => {
     onChange(localDate);
-    onClose();
+    handleClose();
   };
 
   return (
@@ -136,7 +141,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
             : 'backdrop-fade-in'
         }`}
         style={{ backdropFilter: 'blur(8px)' }}
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       <div className="relative w-full max-w-sm">
@@ -192,7 +197,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
 
           <div className="flex gap-3">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
                 isDarkMode
                   ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
