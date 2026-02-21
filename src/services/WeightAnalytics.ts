@@ -39,11 +39,77 @@ export class WeightAnalytics {
       return { weeklyAverageLoss: 0, monthlyAverageLoss: 0 };
     }
 
-    const totalLoss = weights[0].weight - weights[weights.length - 1].weight;
-    const daysElapsed = weights.length - 1;
+    const getMonthKey = (dateStr: string) => {
+      const d = new Date(dateStr);
+      const firstDayOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      return String(firstDayOfMonth.getTime());
+    };
 
-    const weeklyAverageLoss = (totalLoss / daysElapsed) * 7;
-    const monthlyAverageLoss = (totalLoss / daysElapsed) * 30;
+    const getWeekKey = (dateStr: string) => {
+      const d = new Date(dateStr);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.getFullYear(), d.getMonth(), diff);
+      return String(monday.getTime());
+    };
+
+    const monthlyAverages: number[] = [];
+    const monthlyMap = new Map<string, number[]>();
+    
+    for (const entry of weights) {
+      const key = getMonthKey(entry.date);
+      if (!monthlyMap.has(key)) {
+        monthlyMap.set(key, []);
+      }
+      monthlyMap.get(key)!.push(entry.weight);
+    }
+
+    const sortedMonths = Array.from(monthlyMap.keys()).sort((a, b) => Number(a) - Number(b));
+    for (const month of sortedMonths) {
+      const values = monthlyMap.get(month)!;
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      monthlyAverages.push(avg);
+    }
+
+    let monthlyAverageLoss = 0;
+    if (monthlyAverages.length >= 2) {
+      let totalChange = 0;
+      for (let i = 1; i < monthlyAverages.length; i++) {
+        totalChange += monthlyAverages[i - 1] - monthlyAverages[i];
+      }
+      monthlyAverageLoss = totalChange / (monthlyAverages.length - 1);
+    }
+
+    const weeklyAverages: number[] = [];
+    const weeklyMap = new Map<string, number[]>();
+    
+    for (const entry of weights) {
+      const key = getWeekKey(entry.date);
+      if (!weeklyMap.has(key)) {
+        weeklyMap.set(key, []);
+      }
+      weeklyMap.get(key)!.push(entry.weight);
+    }
+
+    const sortedWeeks = Array.from(weeklyMap.keys()).sort((a, b) => {
+      const [yearA, weekA] = a.split('-').map(Number);
+      const [yearB, weekB] = b.split('-').map(Number);
+      return yearA - yearB || weekA - weekB;
+    });
+    for (const week of sortedWeeks) {
+      const values = weeklyMap.get(week)!;
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      weeklyAverages.push(avg);
+    }
+
+    let weeklyAverageLoss = 0;
+    if (weeklyAverages.length >= 2) {
+      let totalChange = 0;
+      for (let i = 1; i < weeklyAverages.length; i++) {
+        totalChange += weeklyAverages[i - 1] - weeklyAverages[i];
+      }
+      weeklyAverageLoss = totalChange / (weeklyAverages.length - 1);
+    }
 
     return { weeklyAverageLoss, monthlyAverageLoss };
   }
@@ -79,49 +145,80 @@ export class WeightAnalytics {
   static calculateBestWeek(weights: WeightEntry[]): number {
     if (weights.length < 2) return 0;
 
-    const weeklyLosses: number[] = [];
+    const getWeekKey = (dateStr: string) => {
+      const d = new Date(dateStr);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.getFullYear(), d.getMonth(), diff);
+      return String(monday.getTime());
+    };
+
+    const weeklyMap = new Map<string, number[]>();
     
-    for (let i = 0; i < weights.length; i++) {
-      const weekStart = Math.floor(i / 7);
-      
-      // Find the start of this week
-      let weekStartIndex = 0;
-      for (let j = 0; j < i; j++) {
-        if (Math.floor(j / 7) === weekStart) {
-          weekStartIndex = j;
-          break;
-        }
+    for (const entry of weights) {
+      const key = getWeekKey(entry.date);
+      if (!weeklyMap.has(key)) {
+        weeklyMap.set(key, []);
       }
-      
-      if (weekStartIndex === 0) continue;
-      
-      const weekEndIndex = Math.min(weekStartIndex + 6, weights.length - 1);
-      const weekWeights = weights.slice(weekStartIndex, weekEndIndex + 1);
-      
-      if (weekWeights.length < 2) continue;
-      
-      const weekStartWeight = weekWeights[0].weight;
-      const weekEndWeight = weekWeights[weekWeights.length - 1].weight;
-      weeklyLosses.push(weekStartWeight - weekEndWeight);
+      weeklyMap.get(key)!.push(entry.weight);
     }
 
-    return weeklyLosses.length > 0 ? Math.max(...weeklyLosses) : 0;
+    const sortedWeeks = Array.from(weeklyMap.keys()).sort((a, b) => Number(a) - Number(b));
+
+    const weeklyAverages: number[] = [];
+    for (const week of sortedWeeks) {
+      const weekWeights = weeklyMap.get(week)!;
+      const avg = weekWeights.reduce((a, b) => a + b, 0) / weekWeights.length;
+      weeklyAverages.push(avg);
+    }
+
+    let bestWeek = 0;
+    for (let i = 1; i < weeklyAverages.length; i++) {
+      const loss = weeklyAverages[i - 1] - weeklyAverages[i];
+      if (loss > bestWeek) {
+        bestWeek = loss;
+      }
+    }
+
+    return bestWeek;
   }
 
   static calculateBestMonth(weights: WeightEntry[]): number {
     if (weights.length < 2) return 0;
 
-    const monthlyLosses: number[] = [];
+    const getMonthKey = (dateStr: string) => {
+      const d = new Date(dateStr);
+      const firstDayOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      return String(firstDayOfMonth.getTime());
+    };
+
+    const monthlyMap = new Map<string, number[]>();
     
-    for (let i = 1; i < weights.length; i++) {
-      const currentMonth = new Date(weights[i].date).getMonth();
-      const prevMonth = new Date(weights[i - 1].date).getMonth();
-      
-      if (prevMonth === currentMonth) {
-        monthlyLosses.push(weights[i - 1].weight - weights[i].weight);
+    for (const entry of weights) {
+      const key = getMonthKey(entry.date);
+      if (!monthlyMap.has(key)) {
+        monthlyMap.set(key, []);
+      }
+      monthlyMap.get(key)!.push(entry.weight);
+    }
+
+    const sortedMonths = Array.from(monthlyMap.keys()).sort((a, b) => Number(a) - Number(b));
+
+    const monthlyAverages: number[] = [];
+    for (const month of sortedMonths) {
+      const monthWeights = monthlyMap.get(month)!;
+      const avg = monthWeights.reduce((a, b) => a + b, 0) / monthWeights.length;
+      monthlyAverages.push(avg);
+    }
+
+    let bestMonth = 0;
+    for (let i = 1; i < monthlyAverages.length; i++) {
+      const loss = monthlyAverages[i - 1] - monthlyAverages[i];
+      if (loss > bestMonth) {
+        bestMonth = loss;
       }
     }
 
-    return monthlyLosses.length > 0 ? Math.max(...monthlyLosses) : 0;
+    return bestMonth;
   }
 }

@@ -278,9 +278,16 @@ export const extractDoseFromMedication = (name: string): number | undefined => {
   return undefined;
 };
 
-export const convertToWeightEntry = (row: CsvRow): WeightEntry | null => {
+export const convertToWeightEntry = (row: CsvRow, dateOffset: number = 0): WeightEntry | null => {
   if (!row.date || (row.weight === undefined && row.calories === undefined && row.protein === undefined)) {
     return null;
+  }
+  
+  let adjustedDate = row.date;
+  if (dateOffset !== 0 && row.date) {
+    const dateObj = new Date(row.date);
+    dateObj.setTime(dateObj.getTime() + dateOffset);
+    adjustedDate = dateObj.toISOString().split('T')[0];
   }
   
   const macros: WeightMacros | undefined = row.calories !== undefined || row.protein !== undefined 
@@ -293,15 +300,22 @@ export const convertToWeightEntry = (row: CsvRow): WeightEntry | null => {
     : undefined;
   
   return {
-    date: row.date,
+    date: adjustedDate,
     weight: row.weight || 0,
     notes: row.notes,
     macros: macros?.calories || macros?.protein || macros?.carbs || macros?.fat ? macros : undefined,
   };
 };
 
-export const convertToDoseEntry = (row: CsvRow): GLP1Entry | null => {
+export const convertToDoseEntry = (row: CsvRow, dateOffset: number = 0): GLP1Entry | null => {
   if (!row.date || !row.medication) return null;
+  
+  let adjustedDate = row.date;
+  if (dateOffset !== 0 && row.date) {
+    const dateObj = new Date(row.date);
+    dateObj.setTime(dateObj.getTime() + dateOffset);
+    adjustedDate = dateObj.toISOString().split('T')[0];
+  }
   
   const extractedDose = row.dose ?? extractDoseFromMedication(row.medication);
   
@@ -315,7 +329,7 @@ export const convertToDoseEntry = (row: CsvRow): GLP1Entry | null => {
   });
   
   return {
-    date: row.date,
+    date: adjustedDate,
     time: row.time,
     medication: normalizeMedicationName(row.medication),
     dose: extractedDose || 0,

@@ -3,6 +3,7 @@ import { WeightAnalytics } from '../../../services';
 import { WeightEntry, UserProfile } from '../../../types';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 import { formatWeight } from '../../../shared/utils/unitConversion';
+import { timeService } from '../../../core/timeService';
 
 interface PerformanceOverviewProps {
   weights: WeightEntry[];
@@ -21,6 +22,17 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
+  
+  const getTimeActive = () => {
+    if (weights.length === 0) return 'No data';
+    const firstDate = new Date(weights[0].date);
+    const today = timeService.nowDate();
+    const days = Math.floor((today.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Today';
+    if (days === 1) return '1 Day';
+    return `${days} Days`;
+  };
+  
   return (
     <div className={bigCard}>
       <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Performance Overview</h1>
@@ -49,7 +61,7 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
             <p className={text.label}>Time Active</p>
             <div className="text-left">
               <p className={text.value}>
-                {weights.length} Days
+                {getTimeActive()}
               </p>
             </div>
           </div>

@@ -49,11 +49,16 @@ class DataImportExportService {
       includeData?: boolean;
       includeUserSettings?: boolean;
       importWeightUnit?: 'auto' | 'kg' | 'lbs';
+      offsetDays?: number;
+      offsetHours?: number;
     }
   ): ImportResult {
     const includeData = options?.includeData ?? true;
     const includeUserSettings = options?.includeUserSettings ?? true;
     const importWeightUnit = options?.importWeightUnit ?? 'auto';
+    const offsetDays = options?.offsetDays ?? 0;
+    const offsetHours = options?.offsetHours ?? 0;
+    const dateOffset = offsetDays * 24 * 60 * 60 * 1000 + offsetHours * 60 * 60 * 1000;
     
     if (this.currentRawContent) {
       this.currentParsedRows = parseCsv(this.currentRawContent, importWeightUnit);
@@ -77,8 +82,8 @@ class DataImportExportService {
         validRows.forEach(row => {
           if (!row.date) return;
           
-          const weightEntry = convertToWeightEntry(row);
-          const doseEntry = convertToDoseEntry(row);
+          const weightEntry = convertToWeightEntry(row, dateOffset);
+          const doseEntry = convertToDoseEntry(row, dateOffset);
           
           if (weightEntry && weightEntry.weight > 0) {
             weightEntries.push(weightEntry);
@@ -174,8 +179,8 @@ class DataImportExportService {
         validRows.forEach(row => {
           if (!row.date) return;
           
-          const weightEntry = convertToWeightEntry(row);
-          const doseEntry = convertToDoseEntry(row);
+          const weightEntry = convertToWeightEntry(row, dateOffset);
+          const doseEntry = convertToDoseEntry(row, dateOffset);
           
           if (weightEntry && weightEntry.weight > 0) {
             const exists = existingWeight.some(e => e.date === weightEntry.date);

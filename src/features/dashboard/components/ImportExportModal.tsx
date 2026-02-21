@@ -24,6 +24,8 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
   const [includeData, setIncludeData] = useState(true);
   const [includeUserSettings, setIncludeUserSettings] = useState(true);
   const [importWeightUnit, setImportWeightUnit] = useState<'auto' | 'kg' | 'lbs'>('auto');
+  const [offsetDays, setOffsetDays] = useState(0);
+  const [offsetHours, setOffsetHours] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,6 +76,8 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
         includeData,
         includeUserSettings,
         importWeightUnit,
+        offsetDays,
+        offsetHours,
       });
       setImportResult(result);
       setIsLoading(false);
@@ -308,6 +312,43 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                       LBS
                     </button>
                   </div>
+                </div>
+
+                <div className="mb-4">
+                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Date Offset (for timezone adjustments)
+                  </h3>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className={`text-xs block mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Days
+                      </label>
+                      <input
+                        type="number"
+                        value={offsetDays}
+                        onChange={(e) => setOffsetDays(parseInt(e.target.value) || 0)}
+                        className={`w-full p-2 rounded-lg border ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className={`text-xs block mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Hours
+                      </label>
+                      <input
+                        type="number"
+                        value={offsetHours}
+                        onChange={(e) => setOffsetHours(parseInt(e.target.value) || 0)}
+                        className={`w-full p-2 rounded-lg border ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Use this to fix date issues from timezone differences
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
