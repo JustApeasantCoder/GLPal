@@ -6,7 +6,6 @@ import { useTheme } from '../../../contexts/ThemeContext';
 interface PeptideCardProps {
   peptide: Peptide;
   latestLog: PeptideLogEntry | null;
-  totalLogs: number;
   currentTime: Date;
   onLog: () => void;
   onEdit: () => void;
@@ -39,7 +38,6 @@ const ROUTE_ICONS: Record<string, string> = {
 const PeptideCard: React.FC<PeptideCardProps> = ({
   peptide,
   latestLog,
-  totalLogs,
   currentTime,
   onLog,
   onEdit,
@@ -134,25 +132,15 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
         />
       </div>
 
-      {/* Stats & Action */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-4 text-xs text-gray-500">
-          <span>{totalLogs} logs</span>
-          {peptide.halfLifeHours > 0 && (
-            <span>½-life: {peptide.halfLifeHours}h</span>
-          )}
-          <span>{peptide.startDate}</span>
-        </div>
-        
-        {peptide.isActive && (
-          <button
-            onClick={onLog}
-            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#4ADEA8] to-[#6EE7B7] text-white text-xs font-medium hover:shadow-lg hover:shadow-[#4ADEA8]/30 transition-all"
-          >
-            Log
-          </button>
-        )}
-      </div>
+      {/* Log Button */}
+      {peptide.isActive && (
+        <button
+          onClick={onLog}
+          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all"
+        >
+          Log
+        </button>
+      )}
 
       {/* Notes Preview */}
       {peptide.notes && (

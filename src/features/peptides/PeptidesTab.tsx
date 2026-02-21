@@ -210,7 +210,6 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
                   <PeptideCard
                     peptide={peptide}
                     latestLog={latestLog}
-                    totalLogs={logs.length}
                     currentTime={currentTime}
                     onLog={() => openLogModal(peptide)}
                     onEdit={() => setEditingPeptide(peptide)}

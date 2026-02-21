@@ -5,6 +5,7 @@ import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 import reportWebVitals from './reportWebVitals';
 import ErrorBoundary from './shared/components/ErrorBoundary';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,5 +19,12 @@ root.render(
     </ErrorBoundary>
   </React.StrictMode>
 );
+
+serviceWorkerRegistration.register({
+  onUpdate: (registration) => {
+    console.log('New version available, refreshing...');
+    window.location.reload();
+  },
+});
 
 reportWebVitals();

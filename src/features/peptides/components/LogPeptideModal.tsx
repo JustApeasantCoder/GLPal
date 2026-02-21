@@ -3,6 +3,7 @@ import { Peptide, PeptideLogEntry, InjectionRoute } from '../../../types';
 import { generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
+import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { timeService } from '../../../core/timeService';
 import { useTheme } from '../../../contexts/ThemeContext';
 
@@ -46,7 +47,6 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
   const [dose, setDose] = useState('');
-  const [doseUnit, setDoseUnit] = useState<string>('mg');
   const [route, setRoute] = useState<InjectionRoute>('subcutaneous');
   const [injectionSite, setInjectionSite] = useState('Left Stomach');
   const [painLevel, setPainLevel] = useState<number | null>(null);
@@ -54,11 +54,11 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showRoutePicker, setShowRoutePicker] = useState(false);
 
   useEffect(() => {
     if (isOpen && peptide) {
       setDose(peptide.dose.toString());
-      setDoseUnit(peptide.doseUnit);
       setRoute(peptide.route);
       setDate(getTodayString());
       const now = new Date();
@@ -72,16 +72,20 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
-      document.body.classList.add('modal-open');
-    } else if (isVisible && !isClosing) {
-      setIsClosing(true);
-      setTimeout(() => {
-        setIsVisible(false);
-        setIsClosing(false);
-        document.body.classList.remove('modal-open');
-      }, 200);
     }
   }, [isOpen]);
+
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    document.body.classList.remove('modal-open');
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setIsClosing(false);
+      onClose();
+    }, 200);
+    return () => clearTimeout(timer);
+  };
 
   if (!isVisible || !peptide) return null;
 
@@ -96,7 +100,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
       date,
       time,
       dose: doseValue,
-      doseUnit: doseUnit as 'mg' | 'mcg' | 'iu' | 'ml',
+      doseUnit: 'mg',
       route,
       injectionSite,
       painLevel,
@@ -105,46 +109,49 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
     };
 
     onSave(log);
-    onClose();
+    handleClose();
   };
 
   return (
     <>
-      <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-        style={{ animation: isClosing ? 'fadeOut 0.2s ease-out' : 'fadeIn 0.2s ease-out' }}
-      >
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
         <div 
-          className="fixed inset-0 bg-black/60" 
-          style={{ backdropFilter: 'blur(8px)', animation: isClosing ? 'fadeOut 0.2s ease-out' : 'fadeIn 0.2s ease-out' }} 
-          onClick={onClose} 
+          className={`fixed inset-0 bg-black/60 ${
+            isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'
+          }`}
+          style={{ backdropFilter: 'blur(8px)' }}
+          onClick={handleClose} 
         />
         <div 
-          className={`relative rounded-2xl shadow-2xl border border-[#4ADEA8]/30 w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col ${
+          className={`relative w-full max-w-sm max-h-[98vh] sm:max-h-[95vh] rounded-2xl shadow-2xl border overflow-hidden flex flex-col ${
             isDarkMode 
-              ? 'bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98' 
-              : 'bg-white/95'
+              ? 'border-[#4ADEA8]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
+              : 'border-gray-200 bg-white'
+          } ${
+            isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
-          style={{ animation: isClosing ? 'slideDown 0.2s ease-out' : 'slideUp 0.2s ease-out' }}
+          style={isDarkMode ? { boxShadow: '0 0 30px rgba(74, 222, 168, 0.3)' } : {}}
         >
           {/* Header */}
-          <div className={`flex items-center justify-between p-4 border-b ${
+          <div className={`flex items-center justify-between p-3 sm:p-4 border-b ${
             isDarkMode ? 'border-[#4ADEA8]/20' : 'border-gray-200'
           }`}>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div 
-                className="w-3 h-3 rounded-full"
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
                 style={{ backgroundColor: peptide.color }}
               />
-              <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              <h2 className={`text-base sm:text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 Log {peptide.name}
               </h2>
             </div>
             <button
-              onClick={onClose}
-              className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+              onClick={handleClose}
+              className={`p-1.5 rounded-lg transition-colors ${
+                isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`}
             >
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 6M6 18M6 6l12 12" />
               </svg>
             </button>
@@ -184,58 +191,40 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             </div>
 
             {/* Dose */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose</label>
-                <input
-                  type="number"
-                  value={dose}
-                  onChange={(e) => setDose(e.target.value)}
-                  placeholder={peptide.dose.toString()}
-                  step="0.1"
-                  className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
-                    isDarkMode
-                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white placeholder-gray-500'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                  }`}
-                  required
-                />
-              </div>
-              <div>
-                <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Unit</label>
-                <select
-                  value={doseUnit}
-                  onChange={(e) => setDoseUnit(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
-                    isDarkMode
-                      ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
-                >
-                  <option value="mg">mg</option>
-                  <option value="mcg">mcg</option>
-                  <option value="iu">IU</option>
-                  <option value="ml">ml</option>
-                </select>
-              </div>
+            <div>
+              <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose (mg)</label>
+              <input
+                type="number"
+                value={dose}
+                onChange={(e) => setDose(e.target.value)}
+                placeholder={peptide.dose.toString()}
+                step="0.1"
+                className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+                  isDarkMode
+                    ? 'bg-white/10 border-[#4ADEA8]/20 text-white placeholder-gray-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
+                required
+              />
             </div>
 
             {/* Route */}
             <div>
               <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Route</label>
-              <select
-                value={route}
-                onChange={(e) => setRoute(e.target.value as InjectionRoute)}
-                className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 ${
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowRoutePicker(true); }}
+                className={`w-full px-3 py-2 rounded-lg border text-left flex items-center justify-between ${
                   isDarkMode
                     ? 'bg-white/10 border-[#4ADEA8]/20 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
               >
-                {Object.entries(ROUTE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+                <span>{ROUTE_LABELS[route]}</span>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
 
             {/* Injection Site */}
@@ -310,20 +299,24 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
           </form>
 
           {/* Footer */}
-          <div className={`p-4 border-t space-y-2 ${isDarkMode ? 'border-[#4ADEA8]/20' : 'border-gray-200'}`}>
+          <div className={`p-3 sm:p-4 border-t flex gap-2 ${
+            isDarkMode ? 'border-[#4ADEA8]/20' : 'border-gray-200'
+          }`}>
             <button
-              onClick={handleSubmit}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#6EE7B7] text-white font-semibold hover:shadow-lg hover:shadow-[#4ADEA8]/30 transition-all"
-            >
-              Log Injection
-            </button>
-            <button
-              onClick={onClose}
-              className={`w-full py-2 text-sm transition-colors ${
-                isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+              onClick={handleClose}
+              className={`flex-1 py-2.5 sm:py-3 rounded-xl border font-medium transition-all ${
+                isDarkMode
+                  ? 'border-[#4ADEA8]/40 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
               }`}
             >
               Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#6EE7B7] text-white font-semibold hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all"
+            >
+              Log Injection
             </button>
           </div>
         </div>
@@ -351,6 +344,20 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
             onClose={() => setShowDatePicker(false)}
           />
         )
+      )}
+
+      {showRoutePicker && (
+        <BottomSheetModal
+          isOpen={showRoutePicker}
+          title="Select Route"
+          options={Object.entries(ROUTE_LABELS).map(([value, label]) => ({ value, label }))}
+          value={route}
+          onSelect={(val) => {
+            setRoute(val as InjectionRoute);
+            setShowRoutePicker(false);
+          }}
+          onClose={() => setShowRoutePicker(false)}
+        />
       )}
     </>
   );
