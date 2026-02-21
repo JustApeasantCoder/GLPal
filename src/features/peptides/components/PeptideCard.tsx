@@ -65,12 +65,16 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
   const frequencyDays = (() => {
     switch (peptide.frequency) {
       case 'daily': return 1;
-      case 'twice_daily': return 0.5;
       case 'every_other_day': return 2;
-      case 'three_times_week': return 7 / 3;
-      case 'twice_week': return 7 / 2;
+      case 'every_3_days': return 3;
+      case 'every_35_days': return 3.5;
+      case 'every_4_days': return 4;
+      case 'every_5_days': return 5;
+      case 'every_6_days': return 6;
       case 'weekly': return 7;
+      case 'twice_week': return 3.5;
       case 'biweekly': return 14;
+      case 'triweekly': return 21;
       case 'monthly': return 30;
       case 'as_needed': return 7;
       default: return 7;
@@ -84,20 +88,19 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
   
   let isDue = false;
   let isOverdue = false;
+  
   if (!latestLog) {
     isDue = true;
-  } else {
+  } else if (isDaily) {
+    // Daily: based on preferred time
     const lastLogDate = parseLocalDateTime(latestLog.date, latestLog.time);
     const timeSinceLast = currentTime.getTime() - lastLogDate.getTime();
-    const timeUntilNext = intervalMs - timeSinceLast;
     const dueWindowMs = getDueWindowHours() * 60 * 60 * 1000;
     
-    // Parse preferred time
     const preferredParts = (peptide.preferredTime || '08:00').split(':');
     const preferredHours = parseInt(preferredParts[0], 10);
     const preferredMinutes = parseInt(preferredParts[1], 10);
     
-    // Check if we're within the due window around preferred time
     const currentHours = currentTime.getHours();
     const currentMinutes = currentTime.getMinutes();
     const currentTimeInMinutes = currentHours * 60 + currentMinutes;
@@ -108,16 +111,32 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
     
     const isWithinDueWindow = currentTimeInMinutes >= dueWindowStartMinutes && currentTimeInMinutes <= dueWindowEndMinutes;
     
-    // Overdue: for daily, past preferred time and no log today; for non-daily, past due window and past interval
-    isOverdue = isDaily 
-      ? (currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday)
-      : (currentTimeInMinutes > dueWindowEndMinutes && timeSinceLast >= intervalMs);
-    // Due: within the due window around preferred time
+    isOverdue = currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday;
     isDue = isWithinDueWindow;
+  } else {
+    // Non-daily: countdown starts at next midnight after log
+    const lastLogDate = parseLocalDateTime(latestLog.date, latestLog.time);
+    const lastLogMidnight2 = new Date(lastLogDate);
+    lastLogMidnight2.setDate(lastLogMidnight2.getDate() + 1);
+    lastLogMidnight2.setHours(0, 0, 0, 0);
+    
+    const timeSinceMidnight = currentTime.getTime() - lastLogMidnight2.getTime();
+    const daysSinceMidnight = timeSinceMidnight / (1000 * 60 * 60 * 24);
+    
+    isOverdue = daysSinceMidnight >= frequencyDays;
+    // For non-daily: isDue when today is the scheduled dose day
+    const todayMidnight = new Date(currentTime);
+    todayMidnight.setHours(0, 0, 0, 0);
+    const lastLogMidnight = new Date(lastLogDate);
+    lastLogMidnight.setHours(0, 0, 0, 0);
+    const nextDueMidnight = new Date(lastLogMidnight);
+    nextDueMidnight.setDate(nextDueMidnight.getDate() + frequencyDays);
+    const isDueDay = todayMidnight.getTime() === nextDueMidnight.getTime();
+    isDue = isDueDay;
   }
   // For daily, always show button; otherwise only show when due or overdue
   const showLogButton = peptide.isActive && (isDaily || isDue || isOverdue);
-  // For daily, don't show "Log Overdue Dose" - keep "Log Dose Now"
+  // Show "Dose Logged For Today" if logged today
   const logButtonText = isLoggedToday 
     ? 'Dose Logged For Today' 
     : (isOverdue && !isDaily)

@@ -40,14 +40,18 @@ const CATEGORY_LABELS: Record<PeptideCategory, string> = {
 };
 
 const FREQUENCY_LABELS: Record<PeptideFrequency, string> = {
-  daily: 'Daily',
-  every_other_day: 'Every Other Day',
-  twice_daily: 'Twice Daily',
-  three_times_week: '3x / Week',
+  daily: 'Everyday',
+  every_other_day: 'Every 2 Days',
+  every_3_days: 'Every 3 Days',
+  every_35_days: 'Every 3.5 Days',
+  every_4_days: 'Every 4 Days',
+  every_5_days: 'Every 5 Days',
+  every_6_days: 'Every 6 Days',
+  weekly: 'Every Week',
   twice_week: '2x / Week',
-  weekly: 'Weekly',
-  biweekly: 'Biweekly',
-  monthly: 'Monthly',
+  biweekly: 'Every 2 Weeks',
+  triweekly: 'Every 3 Weeks',
+  monthly: 'Every Month',
   as_needed: 'As Needed',
 };
 
@@ -333,7 +337,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                     />
                   </div>
                   <div>
-                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Frequency</label>
+                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dosing Schedule</label>
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setShowFrequencyPicker(true); }}
@@ -516,7 +520,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
       {showFrequencyPicker && (
         <BottomSheetModal
           isOpen={showFrequencyPicker}
-          title="Select Frequency"
+          title="Select Dosing Schedule"
           options={Object.entries(FREQUENCY_LABELS).map(([value, label]) => ({ value, label }))}
           value={frequency}
           onSelect={(val) => {

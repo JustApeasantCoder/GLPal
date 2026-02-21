@@ -79,11 +79,15 @@ export type PeptideCategory =
 export type PeptideFrequency = 
   | 'daily'
   | 'every_other_day'
-  | 'twice_daily'
-  | 'three_times_week'
-  | 'twice_week'
+  | 'every_3_days'
+  | 'every_35_days'
+  | 'every_4_days'
+  | 'every_5_days'
+  | 'every_6_days'
   | 'weekly'
+  | 'twice_week'
   | 'biweekly'
+  | 'triweekly'
   | 'monthly'
   | 'as_needed';
 
