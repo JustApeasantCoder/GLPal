@@ -180,7 +180,9 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                   type="file"
                   accept=".csv"
                   onChange={handleFileSelect}
-                  className="w-full p-3 border rounded-lg mb-4 cursor-pointer"
+                  className={`w-full p-3 border rounded-lg mb-4 cursor-pointer ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 />
 
                 <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-50'}`}>
@@ -274,39 +276,39 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                   <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Weight Unit
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => setImportWeightUnit('auto')}
-                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                         importWeightUnit === 'auto'
-                          ? 'bg-[#B19CD9] text-white'
+                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                           : isDarkMode
-                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
                       }`}
                     >
                       Auto Detect
                     </button>
                     <button
                       onClick={() => setImportWeightUnit('kg')}
-                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                         importWeightUnit === 'kg'
-                          ? 'bg-[#B19CD9] text-white'
+                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                           : isDarkMode
-                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
                       }`}
                     >
                       KG
                     </button>
                     <button
                       onClick={() => setImportWeightUnit('lbs')}
-                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
                         importWeightUnit === 'lbs'
-                          ? 'bg-[#B19CD9] text-white'
+                          ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
                           : isDarkMode
-                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
                       }`}
                     >
                       LBS
@@ -327,8 +329,10 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         type="number"
                         value={offsetDays}
                         onChange={(e) => setOffsetDays(parseInt(e.target.value) || 0)}
-                        className={`w-full p-2 rounded-lg border ${
-                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        className={`w-full p-2 rounded-lg border text-sm transition-all ${
+                          isDarkMode 
+                            ? 'border-[#B19CD9]/50 bg-black/40 text-white placeholder-[#B19CD9]/50' 
+                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                         }`}
                       />
                     </div>
@@ -340,8 +344,10 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         type="number"
                         value={offsetHours}
                         onChange={(e) => setOffsetHours(parseInt(e.target.value) || 0)}
-                        className={`w-full p-2 rounded-lg border ${
-                          isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                        className={`w-full p-2 rounded-lg border text-sm transition-all ${
+                          isDarkMode 
+                            ? 'border-[#B19CD9]/50 bg-black/40 text-white placeholder-[#B19CD9]/50' 
+                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                         }`}
                       />
                     </div>
@@ -354,7 +360,11 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={handleResetImport}
-                    className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className={`flex-1 py-2 border rounded-lg transition-colors ${
+                      isDarkMode 
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
                     Choose Different File
                   </button>
@@ -371,8 +381,12 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
             {importResult && (
               <div>
-                <div className={`p-4 rounded-lg mb-4 ${importResult.success ? 'bg-green-900/30' : 'bg-red-900/30'}`}>
-                  <h3 className={`font-medium mb-2 ${importResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                <div className={`p-4 rounded-lg mb-4 ${importResult.success 
+                  ? (isDarkMode ? 'bg-green-900/30' : 'bg-green-50') 
+                  : (isDarkMode ? 'bg-red-900/30' : 'bg-red-50')}`}>
+                  <h3 className={`font-medium mb-2 ${importResult.success 
+                    ? (isDarkMode ? 'text-green-400' : 'text-green-700') 
+                    : (isDarkMode ? 'text-red-400' : 'text-red-700')}`}>
                     Import Complete
                   </h3>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>

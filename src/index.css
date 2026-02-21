@@ -209,12 +209,25 @@ code {
   animation: modalContentIn 300ms ease-out;
 }
 
+.modal-content-fade-out {
+  animation: modalContentOut 200ms ease-in;
+}
+
 @keyframes modalContentIn {
   from {
     transform: scale(0.95);
   }
   to {
     transform: scale(1);
+  }
+}
+
+@keyframes modalContentOut {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.95);
   }
 }
 

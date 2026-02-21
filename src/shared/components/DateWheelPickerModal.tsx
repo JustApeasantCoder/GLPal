@@ -39,7 +39,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
         setIsClosing(false);
       }, 200);
     }
-  }, [isOpen]);
+  }, [isOpen, isClosing]);
 
   const { year, month, day } = useMemo(() => {
     const [y, m, d] = localDate.split('-');

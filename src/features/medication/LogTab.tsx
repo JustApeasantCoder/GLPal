@@ -69,13 +69,19 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
   const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
   const [editingEntry, setEditingEntry] = useState<GLP1Entry | null>(null);
-  const [isDoseLogCollapsed, setIsDoseLogCollapsed] = useState(false);
+  const [isDoseLogCollapsed, setIsDoseLogCollapsed] = useState(() => {
+    const saved = localStorage.getItem('glpal_dose_log_collapsed');
+    return saved === 'true';
+  });
   const [sortBy, setSortBy] = useState<'date' | 'medication' | 'dose'>('date');
   const [sortAsc, setSortAsc] = useState(false);
   const [isSideEffectsVisible, setIsSideEffectsVisible] = useState(false);
   const [isSideEffectsClosing, setIsSideEffectsClosing] = useState(false);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
-  const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(false);
+  const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(() => {
+    const saved = localStorage.getItem('glpal_weight_log_collapsed');
+    return saved === 'true';
+  });
   const [weightViewMode, setWeightViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [editingWeightEntry, setEditingWeightEntry] = useState<WeightEntry | null>(null);
   const [editWeightNotes, setEditWeightNotes] = useState('');
@@ -264,6 +270,14 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
     };
     loadData();
   }, [refreshKey]);
+
+  useEffect(() => {
+    localStorage.setItem('glpal_dose_log_collapsed', String(isDoseLogCollapsed));
+  }, [isDoseLogCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('glpal_weight_log_collapsed', String(isWeightLogCollapsed));
+  }, [isWeightLogCollapsed]);
 
   useEffect(() => {
     if (editingEntry) {

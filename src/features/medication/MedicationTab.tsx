@@ -44,7 +44,14 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
-  const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(new Set());
+  const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('glpal_collapsed_medications');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  useEffect(() => {
+    localStorage.setItem('glpal_collapsed_medications', JSON.stringify(Array.from(collapsedMedications)));
+  }, [collapsedMedications]);
 
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
@@ -99,7 +106,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       const intervalDays = 7 / protocol.frequencyPerWeek;
       
       let d = new Date(start);
-      while (d <= stop && d <= now) {
+      while (d < stop && d <= now) {
         const dateStr = d.toISOString().split('T')[0];
         
         const existingManual = getMedicationManualEntries();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, generateId } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
@@ -21,8 +21,25 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
   });
   const [splitDosing, setSplitDosing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+      document.body.classList.add('modal-open');
+    } else if (isVisible && !isClosing) {
+      setIsClosing(true);
+      setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+        document.body.classList.remove('modal-open');
+      }, 200);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   const handleCreate = () => {
     const med = MEDICATIONS.find(m => m.id === selectedMedication);
@@ -53,22 +70,14 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ animation: 'fadeIn 0.2s ease-out' }}
-    >
-      <div 
-        className="fixed inset-0 bg-black/60" 
-        style={{ backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease-out' }} 
-        onClick={onClose} 
-      />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div 
         className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${
-          isDarkMode 
+          isDarkMode
             ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
             : 'bg-white/95'
-        }`}
-        style={{ animation: 'slideUp 0.2s ease-out' }}
+        } ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
       >
         <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Add Schedule</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>

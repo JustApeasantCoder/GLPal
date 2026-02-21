@@ -47,10 +47,20 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
   const [showLogModal, setShowLogModal] = useState(false);
   const [editingPeptide, setEditingPeptide] = useState<Peptide | null>(null);
   const [selectedPeptide, setSelectedPeptide] = useState<Peptide | null>(null);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(() => {
+    return localStorage.getItem('glpal_expanded_peptide_card');
+  });
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isDeleteClosing, setIsDeleteClosing] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+
+  useEffect(() => {
+    if (expandedCard) {
+      localStorage.setItem('glpal_expanded_peptide_card', expandedCard);
+    } else {
+      localStorage.removeItem('glpal_expanded_peptide_card');
+    }
+  }, [expandedCard]);
 
   // Load peptides on mount
   useEffect(() => {

@@ -44,14 +44,28 @@ function App() {
   const { isDarkMode, toggleTheme } = useTheme();
   const [timeResetKey, setTimeResetKey] = useState(0);
   const now = useTime(1000, timeResetKey);
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const saved = localStorage.getItem('glpal_active_tab');
+    return (saved as TabType) || 'dashboard';
+  });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('90days');
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>(() => {
+    const saved = localStorage.getItem('glpal_chart_period');
+    return (saved as ChartPeriod) || '90days';
+  });
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   const [logRefreshKey, setLogRefreshKey] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem('glpal_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('glpal_chart_period', chartPeriod);
+  }, [chartPeriod]);
   
-const [profile, setProfile] = useState<UserProfile>({
+  const [profile, setProfile] = useState<UserProfile>({
     age: 35,
     gender: 'male',
     height: 180,

@@ -54,7 +54,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
         setIsClosing(false);
       }, 200);
     }
-  }, [isOpen, value]);
+  }, [isOpen, value, isClosing]);
 
   const handleSelect = (date: Date | undefined) => {
     setSelectedDate(date);
