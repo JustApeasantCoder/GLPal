@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/GLPal/static/css/main.6b89ca37.css",
+    "main.js": "/GLPal/static/js/main.76d34331.js",
+    "static/js/104.a14d586d.chunk.js": "/GLPal/static/js/104.a14d586d.chunk.js",
+    "static/js/789.379849f5.chunk.js": "/GLPal/static/js/789.379849f5.chunk.js",
+    "static/js/529.70c08712.chunk.js": "/GLPal/static/js/529.70c08712.chunk.js",
+    "static/js/688.7727da63.chunk.js": "/GLPal/static/js/688.7727da63.chunk.js",
+    "static/js/411.ea5f4319.chunk.js": "/GLPal/static/js/411.ea5f4319.chunk.js",
+    "static/js/453.360a9ff6.chunk.js": "/GLPal/static/js/453.360a9ff6.chunk.js",
+    "static/js/398.daf95615.chunk.js": "/GLPal/static/js/398.daf95615.chunk.js",
+    "static/js/490.3ded6828.chunk.js": "/GLPal/static/js/490.3ded6828.chunk.js",
+    "static/js/51.7842c14a.chunk.js": "/GLPal/static/js/51.7842c14a.chunk.js",
+    "index.html": "/GLPal/index.html",
+    "main.6b89ca37.css.map": "/GLPal/static/css/main.6b89ca37.css.map",
+    "main.76d34331.js.map": "/GLPal/static/js/main.76d34331.js.map",
+    "104.a14d586d.chunk.js.map": "/GLPal/static/js/104.a14d586d.chunk.js.map",
+    "789.379849f5.chunk.js.map": "/GLPal/static/js/789.379849f5.chunk.js.map",
+    "529.70c08712.chunk.js.map": "/GLPal/static/js/529.70c08712.chunk.js.map",
+    "688.7727da63.chunk.js.map": "/GLPal/static/js/688.7727da63.chunk.js.map",
+    "411.ea5f4319.chunk.js.map": "/GLPal/static/js/411.ea5f4319.chunk.js.map",
+    "453.360a9ff6.chunk.js.map": "/GLPal/static/js/453.360a9ff6.chunk.js.map",
+    "398.daf95615.chunk.js.map": "/GLPal/static/js/398.daf95615.chunk.js.map",
+    "490.3ded6828.chunk.js.map": "/GLPal/static/js/490.3ded6828.chunk.js.map",
+    "51.7842c14a.chunk.js.map": "/GLPal/static/js/51.7842c14a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6b89ca37.css",
+    "static/js/main.76d34331.js"
+  ]
+}
