@@ -328,6 +328,7 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
       </div>
 
       {/* Debug Panel */}
+      {process.env.NODE_ENV === 'development' && (
       <div className="mt-2 p-2 bg-black/50 rounded text-xs font-mono text-gray-400">
         <div className="grid grid-cols-2 gap-1">
           <div>currentTimeInMinutes: {debug.currentTimeInMinutes}</div>
@@ -343,6 +344,7 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
           <div>isLoggedToday: {String(isLoggedToday)}</div>
         </div>
       </div>
+      )}
     </div>
   );
 };

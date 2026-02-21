@@ -193,9 +193,11 @@ return (
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>
             GLPal
-            <span className="text-sm font-normal text-text-muted">
-              {new Date(now).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
+            {process.env.NODE_ENV === 'development' && (
+              <span className="text-sm font-normal text-text-muted">
+                {new Date(now).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </h1>
 <div className="flex items-center gap-2">
             <button
@@ -209,6 +211,8 @@ return (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </button>
+            {process.env.NODE_ENV === 'development' && (
+            <>
             <button
               onClick={() => {
                 timeService.travelDays(-1 / 60);
@@ -304,6 +308,9 @@ return (
                 />
               </svg>
             </button>
+            </>
+            )}
+            {process.env.NODE_ENV === 'development' && (
             <button
               onClick={handleClearData}
               className="p-2 rounded-xl hover:bg-red-500/20 transition-all duration-300 group"
@@ -324,6 +331,7 @@ return (
                 />
               </svg>
             </button>
+            )}
           </div>
         </div>
       </nav>
