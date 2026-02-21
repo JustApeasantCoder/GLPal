@@ -11,6 +11,44 @@ Just you and your data.
 
 ---
 
+## How to Use GLPal
+
+### 🌐 Web App
+
+Access GLPal directly in your browser:
+
+**https://justapeasantcoder.github.io/GLPal/**
+
+Simply visit the URL on any device with a web browser — desktop, tablet, or phone. Your data is stored locally in your browser.
+
+---
+
+### 📱 Install on Mobile (Add to Home Screen)
+
+GLPal works as a Progressive Web App (PWA), giving you an app-like experience on your phone.
+
+#### iPhone (Safari)
+1. Open **https://justapeasantcoder.github.io/GLPal/** in Safari
+2. Tap the **Share** button (square with arrow pointing up)
+3. Scroll down and tap **"Add to Home Screen"**
+4. Tap **Add**
+5. GLPal will appear on your home screen like a regular app
+
+#### Android (Chrome)
+1. Open **https://justapeasantcoder.github.io/GLPal/** in Chrome
+2. Tap the three dots (menu) in the top right
+3. Tap **"Add to Home Screen"** or **"Install App"**
+4. Tap **Install**
+5. GLPal will appear in your app drawer
+
+#### Benefits of Installing:
+- Launch from home screen like a native app
+- Works offline (after first load)
+- No address bar — full screen experience
+- Faster access
+
+---
+
 ## Why GLPal?
 
 Unlike cloud-based health tracking apps, GLPal keeps **100% of your data stored locally on your device**.
@@ -105,7 +143,7 @@ Your data stays portable — and stays yours.
 
 ## Privacy & Data Storage
 
-All data is stored locally using `localStorage`.
+All data is stored locally using `localStorage` — right in your browser.
 
 GLPal does **not** use:
 - Cloud databases  
@@ -115,75 +153,17 @@ GLPal does **not** use:
 
 Your health information remains on your device at all times.
 
-Stored data keys:
-
-- `glpal_weight_entries`
-- `glpal_medication_entries`
-- `glpal_medication_manual_entries`
-- `glpal_medication_protocol`
-- `glpal_user_profile`
-
 ---
-
-## Tech Stack
-
-- React 19 + TypeScript  
-- Tailwind CSS  
-- ECharts  
-- Electron (desktop support)  
-- localStorage (data persistence)  
-- Jest + React Testing Library  
-
----
-
-## Quick Start
-
-```bash
-npm install
-npm start              # React development server
-npm run electron-dev   # Launch desktop app
-npm test               # Run tests
-```
-
-## Available Commands
-
-| Command | Description |
-|---------|-------------|
-| npm start | Start React dev server |
-| npm run electron-dev | Electron with hot reload |
-| npm run build | Production build |
-| npm run electron-pack | Build + package Electron app |
-| npm test | Run tests (watch mode) |
-| npm test -- --watchAll=false | Single test run |
-
-## Project Structure
-
-```
-src/
-├── components/
-├── contexts/
-├── hooks/
-├── services/
-├── utils/
-├── constants/
-├── styles/
-├── types.ts
-└── App.tsx
-```
-
-Structured, modular, and maintainable.
 
 ## Who Is GLPal For?
 
-Individuals using GLP-1 medications
+- Individuals using GLP-1 medications
+- Users managing peptide protocols
+- People focused on weight management
+- Privacy-conscious users who prefer offline tools
+- Anyone wanting a simple local health tracker
 
-Users managing peptide protocols
-
-People focused on weight management
-
-Privacy-conscious users who prefer offline tools
-
-Anyone wanting a simple local health tracker
+---
 
 ## Support
 
@@ -193,6 +173,8 @@ If you find it useful, your support helps fund development and future platform d
 
 ☕ Buy me a coffee:
 https://ko-fi.com/justapeasantcoder
+
+---
 
 ## Disclaimer
 

@@ -4,6 +4,7 @@ import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { WeightEntry, GLP1Entry, UserProfile } from './types';
 import { ChartPeriod, useTime } from './shared/hooks';
+import { useAppHistory, ModalType } from './shared/hooks/useAppHistory';
 import { 
   initializeDatabase, 
   getWeightEntries, 
@@ -48,14 +49,44 @@ function App() {
     const saved = localStorage.getItem('glpal_active_tab');
     return (saved as TabType) || 'dashboard';
   });
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>(() => {
     const saved = localStorage.getItem('glpal_chart_period');
     return (saved as ChartPeriod) || '90days';
   });
+
+  const { openModal, closeModal } = useAppHistory(
+    activeTab,
+    setActiveTab,
+    activeModal,
+    setActiveModal
+  );
+
+  const isSettingsOpen = activeModal === 'settings';
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
   const [logRefreshKey, setLogRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const isInPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                    (window.navigator as { standalone?: boolean }).standalone === true;
+    
+    if (isInPWA) {
+      const handlePopState = (event: PopStateEvent) => {
+        if (event.state === null) {
+          event.preventDefault();
+          window.history.pushState({}, '', window.location.href);
+        }
+      };
+      
+      window.addEventListener('popstate', handlePopState, { passive: false });
+      window.history.pushState({}, '', window.location.href);
+      
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('glpal_active_tab', activeTab);
@@ -201,7 +232,7 @@ return (
           </h1>
 <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={() => openModal('settings')}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Settings"
               title="Settings"
@@ -410,7 +441,7 @@ return (
         isDarkMode={isDarkMode}
         onThemeToggle={toggleTheme}
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onClose={closeModal}
         onGenerateSampleData={handleGenerateSampleData}
       />
     </div>
