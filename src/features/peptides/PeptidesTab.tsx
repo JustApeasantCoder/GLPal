@@ -11,7 +11,8 @@ import {
   addPeptideLog,
   getPeptideLogsById,
   getLatestPeptideLog,
-  deletePeptideLog 
+  deletePeptideLog,
+  addMedicationManualEntry 
 } from '../../shared/utils/database';
 import { timeService } from '../../core/timeService';
 import PeptideModal from './components/PeptideModal';

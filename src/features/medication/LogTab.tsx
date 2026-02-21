@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile } from '../../types';
-import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries, saveWeightEntries } from '../../shared/utils/database';
+import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile, PeptideLogEntry, Peptide } from '../../types';
+import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries, saveWeightEntries, getPeptideLogs, getPeptides } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
@@ -88,6 +88,12 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
+  const [peptideLogs, setPeptideLogs] = useState<PeptideLogEntry[]>([]);
+  const [peptides, setPeptides] = useState<Peptide[]>([]);
+  const [isPeptideLogCollapsed, setIsPeptideLogCollapsed] = useState(() => {
+    const saved = localStorage.getItem('glpal_peptide_log_collapsed');
+    return saved === 'true';
+  });
 
   // Picker states
   const [showCaloriePicker, setShowCaloriePicker] = useState(false);
@@ -267,6 +273,11 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
 
       const realWeightEntries = getWeightEntries();
       setWeightEntries(realWeightEntries);
+
+      const loadedPeptides = getPeptides();
+      setPeptides(loadedPeptides);
+      const loadedPeptideLogs = getPeptideLogs();
+      setPeptideLogs(loadedPeptideLogs.sort((a, b) => b.date.localeCompare(a.date)));
     };
     loadData();
   }, [refreshKey]);
@@ -278,6 +289,10 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   useEffect(() => {
     localStorage.setItem('glpal_weight_log_collapsed', String(isWeightLogCollapsed));
   }, [isWeightLogCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('glpal_peptide_log_collapsed', String(isPeptideLogCollapsed));
+  }, [isPeptideLogCollapsed]);
 
   useEffect(() => {
     if (editingEntry) {
@@ -962,6 +977,82 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
           </div>
         </div>
       ) : null}
+
+      {/* Peptide Log Section */}
+      <div className={bigCard}>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Peptide Log</h1>
+          <button
+            onClick={() => setIsPeptideLogCollapsed(!isPeptideLogCollapsed)}
+            className="text-text-muted hover:text-white transition-colors"
+          >
+            {isPeptideLogCollapsed ? '▼' : '▲'}
+          </button>
+        </div>
+        <div className="border-t border-[#B19CD9]/20 mb-3"></div>
+        
+        {isPeptideLogCollapsed ? (
+          <p className="text-text-muted text-center py-2">{peptideLogs.length} entries</p>
+        ) : peptideLogs.length === 0 ? (
+          <p className="text-text-muted text-center py-8">No peptide logs yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {peptideLogs.map((log) => {
+              const peptide = peptides.find(p => p.id === log.peptideId);
+              return (
+                <div 
+                  key={log.id}
+                  className={`rounded-lg p-3 border ${
+                    isDarkMode 
+                      ? 'bg-black/20 border-[#B19CD9]/20' 
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="text-text-primary font-medium">{formatDate(log.date)}</p>
+                      <p className="text-sm" style={{ color: peptide?.color || '#B19CD9' }}>{peptide?.name || 'Unknown Peptide'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[#4ADEA8] font-bold">{log.dose}{log.doseUnit}</p>
+                    </div>
+                  </div>
+                  <div className="border-t border-[#B19CD9]/10 pt-2 mt-2">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {log.time && (
+                        <span className="text-xs bg-[#B19CD9]/20 text-[#B19CD9] px-2 py-1 rounded">
+                          {log.time}
+                        </span>
+                      )}
+                      {log.injectionSite && (
+                        <span className="text-xs bg-[#4ADEA8]/20 text-[#4ADEA8] px-2 py-1 rounded">
+                          {log.injectionSite}
+                        </span>
+                      )}
+                      {log.painLevel !== null && log.painLevel > 0 && (
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          log.painLevel <= 3 ? 'bg-green-500/20 text-green-400' :
+                          log.painLevel <= 6 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          Pain: {log.painLevel}/10
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {log.notes && (
+                    <div className="mt-2 pt-2 border-t border-[#B19CD9]/10">
+                      <p className="text-xs text-text-muted">
+                        <span className="text-text-primary">Notes:</span> {log.notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Wheel Pickers for Macros */}
       <DoseWheelPickerModal

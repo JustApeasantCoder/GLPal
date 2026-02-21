@@ -2,6 +2,7 @@ import React from 'react';
 import { Peptide, PeptideLogEntry, PeptideCategory } from '../../../types';
 import PeptideProgressBar from './PeptideProgressBar';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { timeService } from '../../../core/timeService';
 
 interface PeptideCardProps {
   peptide: Peptide;
@@ -12,6 +13,13 @@ interface PeptideCardProps {
   onDelete: () => void;
   onToggleActive: () => void;
 }
+
+// Parse date and time as local time (avoids UTC issues)
+const parseLocalDateTime = (dateStr: string, timeStr: string): Date => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return new Date(year, month - 1, day, hours, minutes);
+};
 
 const CATEGORY_LABELS: Record<PeptideCategory, string> = {
   healing: 'Healing',
@@ -26,13 +34,13 @@ const CATEGORY_LABELS: Record<PeptideCategory, string> = {
 };
 
 const ROUTE_ICONS: Record<string, string> = {
-  subcutaneous: '💉',
-  intramuscular: '💪',
-  intravenous: '🩺',
-  oral: '💊',
-  topical: '🧴',
-  intranasal: '👃',
-  sublingual: '👅',
+  subcutaneous: 'SQ',
+  intramuscular: 'IM',
+  intravenous: 'IV',
+  oral: 'Oral',
+  topical: 'Topical',
+  intranasal: 'IN',
+  sublingual: 'Sub',
 };
 
 const PeptideCard: React.FC<PeptideCardProps> = ({
@@ -49,6 +57,72 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
   if (!peptide.isActive && peptide.isArchived) {
     return null;
   }
+
+  // Get due window in hours (±8 from preferred time)
+  const getDueWindowHours = (): number => 8;
+
+  // Determine if the Log button should be shown based on due/overdue state.
+  const frequencyDays = (() => {
+    switch (peptide.frequency) {
+      case 'daily': return 1;
+      case 'twice_daily': return 0.5;
+      case 'every_other_day': return 2;
+      case 'three_times_week': return 7 / 3;
+      case 'twice_week': return 7 / 2;
+      case 'weekly': return 7;
+      case 'biweekly': return 14;
+      case 'monthly': return 30;
+      case 'as_needed': return 7;
+      default: return 7;
+    }
+  })();
+  const intervalMs = frequencyDays * 24 * 60 * 60 * 1000;
+  
+  const isDaily = peptide.frequency === 'daily';
+  const todayStr = timeService.toLocalDateString(currentTime);
+  const isLoggedToday = latestLog && latestLog.date === todayStr;
+  
+  let isDue = false;
+  let isOverdue = false;
+  if (!latestLog) {
+    isDue = true;
+  } else {
+    const lastLogDate = parseLocalDateTime(latestLog.date, latestLog.time);
+    const timeSinceLast = currentTime.getTime() - lastLogDate.getTime();
+    const timeUntilNext = intervalMs - timeSinceLast;
+    const dueWindowMs = getDueWindowHours() * 60 * 60 * 1000;
+    
+    // Parse preferred time
+    const preferredParts = (peptide.preferredTime || '08:00').split(':');
+    const preferredHours = parseInt(preferredParts[0], 10);
+    const preferredMinutes = parseInt(preferredParts[1], 10);
+    
+    // Check if we're within the due window around preferred time
+    const currentHours = currentTime.getHours();
+    const currentMinutes = currentTime.getMinutes();
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+    const preferredTimeInMinutes = preferredHours * 60 + preferredMinutes;
+    
+    const dueWindowStartMinutes = preferredTimeInMinutes - dueWindowMs / (60 * 1000);
+    const dueWindowEndMinutes = preferredTimeInMinutes + dueWindowMs / (60 * 1000);
+    
+    const isWithinDueWindow = currentTimeInMinutes >= dueWindowStartMinutes && currentTimeInMinutes <= dueWindowEndMinutes;
+    
+    // Overdue: for daily, past preferred time and no log today; for non-daily, past due window and past interval
+    isOverdue = isDaily 
+      ? (currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday)
+      : (currentTimeInMinutes > dueWindowEndMinutes && timeSinceLast >= intervalMs);
+    // Due: within the due window around preferred time
+    isDue = isWithinDueWindow;
+  }
+  // For daily, always show button; otherwise only show when due or overdue
+  const showLogButton = peptide.isActive && (isDaily || isDue || isOverdue);
+  // For daily, don't show "Log Overdue Dose" - keep "Log Dose Now"
+  const logButtonText = isLoggedToday 
+    ? 'Dose Logged For Today' 
+    : (isOverdue && !isDaily)
+      ? 'Log Overdue Dose' 
+      : 'Log Dose Now';
 
   return (
     <div 
@@ -132,13 +206,23 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
         />
       </div>
 
-      {/* Log Button */}
-      {peptide.isActive && (
+      {/* Log Button: shown when due or overdue (copying MedicationTab styling) */}
+      {showLogButton && (
         <button
           onClick={onLog}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-semibold hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all"
+          className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${
+            (isOverdue && !isDaily)
+              ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
+              : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
+          }`}
+          style={{
+            transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
+            boxShadow: (isOverdue && !isDaily)
+              ? '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)'
+              : '0 0 10px rgba(74,222,168,0.5), 0 0 20px rgba(74,222,168,0.3)',
+          }}
         >
-          Log
+          {logButtonText}
         </button>
       )}
 

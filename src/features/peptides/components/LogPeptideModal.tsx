@@ -43,7 +43,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
   const { isDarkMode } = useTheme();
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(() => {
-    const now = new Date();
+    const now = timeService.nowDate();
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
   const [dose, setDose] = useState('');
@@ -61,7 +61,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
       setDose(peptide.dose.toString());
       setRoute(peptide.route);
       setDate(getTodayString());
-      const now = new Date();
+      const now = timeService.nowDate();
       setTime(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
       setPainLevel(null);
       setNotes('');

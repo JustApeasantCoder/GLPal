@@ -113,6 +113,7 @@ export interface Peptide {
   dose: number;
   doseUnit: DoseUnit;
   frequency: PeptideFrequency;
+  preferredTime: string; // HH:mm format, e.g., "08:00"
   route: InjectionRoute;
   startDate: string;
   endDate: string | null;
@@ -147,6 +148,7 @@ export interface PeptidePreset {
   defaultDose: number;
   defaultDoseUnit: DoseUnit;
   defaultFrequency: PeptideFrequency;
+  defaultPreferredTime?: string; // HH:mm format
   defaultRoute: InjectionRoute;
   halfLifeHours: number;
   description: string;

@@ -29,7 +29,7 @@ const CATEGORY_COLORS: Record<PeptideCategory, string> = {
 
 const CATEGORY_LABELS: Record<PeptideCategory, string> = {
   healing: 'Healing',
-  growth_hormone: 'Growth Hormone',
+  growth_hormone: 'GH',
   fat_loss: 'Fat Loss',
   muscle: 'Muscle',
   longevity: 'Longevity',
@@ -69,6 +69,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
   const [category, setCategory] = useState<PeptideCategory>('other');
   const [dose, setDose] = useState('');
   const [frequency, setFrequency] = useState<PeptideFrequency>('daily');
+  const [preferredTime, setPreferredTime] = useState('08:00');
   const [route, setRoute] = useState<InjectionRoute>('subcutaneous');
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState<string | null>(null);
@@ -81,6 +82,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
   const [isClosing, setIsClosing] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
   const [showRoutePicker, setShowRoutePicker] = useState(false);
+  const [contentKey, setContentKey] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -89,6 +91,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
         setCategory(editPeptide.category);
         setDose(editPeptide.dose.toString());
         setFrequency(editPeptide.frequency);
+        setPreferredTime(editPeptide.preferredTime || '08:00');
         setRoute(editPeptide.route);
         setStartDate(editPeptide.startDate);
         setEndDate(editPeptide.endDate);
@@ -100,6 +103,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
         setCategory('other');
         setDose('');
         setFrequency('daily');
+        setPreferredTime('08:00');
         setRoute('subcutaneous');
         setStartDate(getTodayString());
         setEndDate(null);
@@ -136,9 +140,11 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
     setCategory(preset.category);
     setDose(preset.defaultDose.toString());
     setFrequency(preset.defaultFrequency);
+    setPreferredTime(preset.defaultPreferredTime || '08:00');
     setRoute(preset.defaultRoute);
     setColor(CATEGORY_COLORS[preset.category]);
     setShowPresets(false);
+    setContentKey(prev => prev + 1);
   };
 
   const handleCategoryChange = (cat: PeptideCategory) => {
@@ -159,6 +165,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
       dose: doseValue,
       doseUnit: 'mg',
       frequency,
+      preferredTime,
       route,
       startDate,
       endDate,
@@ -221,7 +228,8 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Use a reliable fade-in animation when content switches (presets -> form) */}
+          <div key={contentKey} className="flex-1 overflow-y-auto p-4 space-y-4 tab-fade-in">
             {showPresets && !editPeptide ? (
               <div className="space-y-3">
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quick select a peptide preset:</p>
@@ -269,7 +277,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                     placeholder="e.g., BPC-157"
                     className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
                       isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-white placeholder-gray-500'
+                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
                         : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                     }`}
                     required
@@ -279,20 +287,26 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                 {/* Category */}
                 <div>
                   <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Category</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {(Object.keys(CATEGORY_COLORS) as PeptideCategory[]).map((cat) => (
                       <button
                         key={cat}
                         type="button"
                         onClick={() => handleCategoryChange(cat)}
-                        className={`px-2 py-2 rounded-lg text-xs font-medium transition-all ${
+                        className={`flex-1 min-w-[70px] px-2 py-2 rounded-lg text-xs font-medium transition-all ${
                         category === cat 
-                            ? 'bg-white/20 text-white border-2' 
+                            ? 'text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]' 
                             : isDarkMode
-                              ? 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10'
-                              : 'bg-gray-100 text-gray-600 border border-transparent hover:bg-gray-200'
+                              ? 'bg-black/20 border border-[#B19CD9]/30 text-gray-400 hover:bg-[#B19CD9]/20 hover:border-[#B19CD9]/50'
+                              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-100'
                         }`}
-                        style={{ borderColor: category === cat ? CATEGORY_COLORS[cat] : 'transparent' }}
+                        style={{ 
+                          borderColor: category === cat ? CATEGORY_COLORS[cat] : 'transparent',
+                          borderWidth: '2px',
+                          background: category === cat 
+                            ? `linear-gradient(to right, ${CATEGORY_COLORS[cat]}, ${CATEGORY_COLORS[cat]}80)`
+                            : undefined
+                        }}
                       >
                         {CATEGORY_LABELS[cat]}
                       </button>
@@ -312,7 +326,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                       step="0.1"
                       className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
                         isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-white placeholder-gray-500'
+                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
                           : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                       }`}
                       required
@@ -335,6 +349,24 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                       </svg>
                     </button>
                   </div>
+                </div>
+
+                {/* Preferred Time */}
+                <div>
+                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Preferred Time</label>
+                  <input
+                    type="time"
+                    value={preferredTime}
+                    onChange={(e) => setPreferredTime(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
+                      isDarkMode
+                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                  />
+                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    You'll be reminded around this time
+                  </p>
                 </div>
 
                 {/* Route */}
@@ -398,7 +430,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                     rows={2}
                     className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 resize-none ${
                       isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-white placeholder-gray-500'
+                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
                         : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                     }`}
                   />
