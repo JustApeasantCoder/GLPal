@@ -108,12 +108,11 @@ export const createLineAreaStyle = (
   },
 });
 
+/* TEMPORARILY REMOVED BLUR - TODO: Restore later */
 export const createDotStyle = (color: string) => ({
   color,
   borderColor: '#2D1B4E',
   borderWidth: 2,
-  shadowBlur: 8,
-  shadowColor: color + '99',
 });
 
 export const CHART_CONSTANTS = {

@@ -88,8 +88,9 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
         borderWidth: 1,
         borderRadius: 12,
         padding: [12, 16],
+        /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
         extraCssText:
-          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);',
+          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);',
         textStyle: { color: '#E2E8F0', fontSize: 13 },
         formatter: (params: any) => {
           if (!params || !params.length) return '';

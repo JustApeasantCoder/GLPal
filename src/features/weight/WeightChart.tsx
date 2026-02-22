@@ -255,8 +255,9 @@ const WeightChart: React.FC<WeightChartProps> = ({
         borderWidth: 1,
         borderRadius: 12,
         padding: [12, 16],
+        /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
         extraCssText:
-          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);',
+          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);',
         textStyle: { color: '#E2E8F0', fontSize: 13 },
         formatter: (params: any) => {
           if (!params || !params.length) return '';
@@ -383,12 +384,11 @@ const WeightChart: React.FC<WeightChartProps> = ({
           }],
           symbol: 'circle',
           symbolSize: 14,
+          /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
           itemStyle: {
             color: '#4ADEA8',
             borderColor: '#1a3d2e',
             borderWidth: 3,
-            shadowBlur: 12,
-            shadowColor: '#4ADEA899',
           },
           label: {
             show: true,
@@ -419,12 +419,11 @@ const WeightChart: React.FC<WeightChartProps> = ({
             .filter((d) => dotIndices.has(d.index))
             .map((d) => ({
               value: [d.displayDate, d.weight],
+              /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
               itemStyle: {
                 color: '#9C7BD3',
                 borderColor: '#2D1B4E',
                 borderWidth: 2,
-                shadowBlur: 8,
-                shadowColor: '#9C7BD399',
               },
             })),
           symbol: 'circle',
@@ -454,12 +453,11 @@ const WeightChart: React.FC<WeightChartProps> = ({
           z: 20,
           data: doseChangeMarkers.map((m: any) => ({
             value: [m.value[0], m.value[1], m.dose],
+            /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
             itemStyle: {
               color: m.color,
               borderColor: '#1a3d2e',
               borderWidth: 2,
-              shadowBlur: 8,
-              shadowColor: m.color + '99',
             },
           })),
           symbol: 'pin',
@@ -510,12 +508,11 @@ const WeightChart: React.FC<WeightChartProps> = ({
           smooth: 0.4,
           data: trendLineData,
           symbol: 'none',
+          /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
           lineStyle: {
             width: 2,
             color: '#4ADEA8',
             type: 'solid',
-            shadowBlur: 8,
-            shadowColor: '#4ADEA8',
           },
           areaStyle: {
             color: {

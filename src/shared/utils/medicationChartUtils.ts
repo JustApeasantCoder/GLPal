@@ -89,12 +89,11 @@ export const generateMedicationSeries = ({
         value: [dateStr, value],
         symbol: 'circle',
         symbolSize: 10,
+        /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
         itemStyle: {
           color: combinedColor.stroke,
           borderColor: '#2D1B4E',
           borderWidth: 2,
-          shadowBlur: 8,
-          shadowColor: combinedColor.stroke + '99',
         },
       });
     }
@@ -253,12 +252,11 @@ export const generateMedicationSeries = ({
           value: [dateStr, value],
           symbol: 'circle',
           symbolSize: 10,
+          /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
           itemStyle: {
             color: color.stroke,
             borderColor: '#2D1B4E',
             borderWidth: 2,
-            shadowBlur: 8,
-            shadowColor: color.stroke + '99',
           },
         });
       }
