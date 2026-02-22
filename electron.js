@@ -1,10 +1,22 @@
 const { app, BrowserWindow } = require('electron');
-const isDev = require('electron-is-dev');
 const path = require('path');
+const fs = require('fs');
+
+const isElectronDev = process.env.ELECTRON_DEV === 'true';
+const buildPath = path.join(__dirname, '../build');
+const hasBuild = fs.existsSync(buildPath) && fs.existsSync(path.join(buildPath, 'index.html'));
+const isProduction = hasBuild && !isElectronDev;
 
 let mainWindow;
 
 function createWindow() {
+  const indexPath = path.join(__dirname, '../build/index.html');
+  const fileUrl = `file://${indexPath}`;
+  const devUrl = 'http://localhost:3000';
+  
+  console.log('isProduction:', isProduction, 'isElectronDev:', isElectronDev);
+  console.log('Loading URL:', isProduction ? fileUrl : devUrl);
+  
   mainWindow = new BrowserWindow({
     width: 500,
     height: 1120,
@@ -12,17 +24,26 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      devTools: true,
     },
     title: 'GLPal - Health Tracker',
     icon: path.join(__dirname, '../public/favicon.ico'),
-    show: false // Don't show until ready to prevent flicker
+    show: false
   });
 
   mainWindow.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
+    isProduction
+      ? fileUrl
+      : 'http://localhost:3000'
   );
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription);
+  });
+
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    console.log('Console:', message);
+  });
 
   // Hide scrollbars completely
   mainWindow.webContents.insertCSS(`
@@ -42,6 +63,7 @@ function createWindow() {
 
   mainWindow.webContents.once('did-finish-load', () => {
     mainWindow.show();
+    mainWindow.webContents.openDevTools();
   });
 
   mainWindow.on('closed', () => {
