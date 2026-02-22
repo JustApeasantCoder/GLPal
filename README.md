@@ -56,7 +56,7 @@ Unlike cloud-based health tracking apps, GLPal keeps **100% of your data stored 
 - No sign-ups  
 - No hidden data collection  
 - No external analytics  
-- No cloud storage  
+- No cloud storage by default  
 - No paywalls  
 
 Your health information never leaves your computer.
@@ -124,12 +124,22 @@ A built-in **peptide calculator** for precise planning.
 
 ---
 
-### 🔄 Import & Export
-- Backup your data to a file
+### 🔄 Import, Export & Cloud Backup
+
+- Backup your data to a file (CSV/JSON)
 - Restore anytime
 - Full ownership of your records
 
-Your data stays portable — and stays yours.
+#### Google Drive Backup (Optional)
+GLPal now supports optional **cloud backup to your Google Drive**:
+
+- Securely authorize your Google account via OAuth 2.0
+- GLPal creates a dedicated folder in your Drive for backups
+- Refresh and access tokens are stored locally and **never shared**
+- Automatic uploads and restores can be triggered from the app
+- Your data remains private and encrypted on your device
+
+> ⚠️ You remain in control — Google Drive is only used if you choose to enable it. Local storage always stays intact.
 
 ---
 
@@ -143,11 +153,11 @@ Your data stays portable — and stays yours.
 
 ## Privacy & Data Storage
 
-All data is stored locally using `localStorage` — right in your browser.
+All data is stored locally using `localStorage` or IndexedDB — right in your browser.
 
 GLPal does **not** use:
-- Cloud databases  
-- External APIs  
+- Cloud databases by default  
+- External APIs (except optional Google Drive backup)  
 - Third-party analytics  
 - Tracking scripts  
 
@@ -171,7 +181,7 @@ GLPal is completely free and built independently.
 
 If you find it useful, your support helps fund development and future platform distribution.
 
-☕ Buy me a coffee:
+☕ Buy me a coffee:  
 https://ko-fi.com/justapeasantcoder
 
 ---
