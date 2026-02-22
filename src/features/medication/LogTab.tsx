@@ -575,7 +575,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
               ))}
             </div>
             
-            {aggregatedWeightData.prevChange !== null && (
+            {aggregatedWeightData.prevChange != null && (
               <div className={`text-xs text-center mb-2 py-1 rounded ${
                 aggregatedWeightData.prevChange > 0 
                   ? 'bg-green-500/20 text-green-400' 
@@ -612,7 +612,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                             : entry.monthLabel
                         }
                       </p>
-                      {entry.change !== null && (
+                      {entry.change !== null && entry.weight !== undefined && (
                         <p className={`text-xs ${
                           entry.change > 0 ? 'text-green-400' : entry.change < 0 ? 'text-red-400' : 'text-gray-400'
                         }`}>
@@ -622,9 +622,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                     </div>
                     <div className="text-right">
                       <p className="text-[#4ADEA8] font-bold">
-                        {weightViewMode === 'daily' 
+                        {entry.weight !== undefined
                           ? `${convertWeightFromKg(entry.weight, unitSystem).toFixed(1)}${weightUnit}` 
-                          : `${convertWeightFromKg(entry.weight, unitSystem).toFixed(1)}${weightUnit}`
+                          : '-'
                         }
                       </p>
                     </div>
@@ -826,7 +826,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                 : 'bg-white/95'
             }`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
-            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}{weightUnit}</p>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight !== undefined ? `${convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}${weightUnit}` : '-'}</p>
             
             <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             

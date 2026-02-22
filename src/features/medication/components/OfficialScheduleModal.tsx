@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, generateId } from '../../../constants/medications';
+import { CHART_DATE_FORMATS } from '../../../shared/utils/chartUtils';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -58,8 +59,8 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
         medication: med.name,
         dose: splitDosing ? titrationDose / 2 : titrationDose,
         frequencyPerWeek: freqValue,
-        startDate: phaseStart.toISOString().split('T')[0],
-        stopDate: phaseEnd.toISOString().split('T')[0],
+        startDate: CHART_DATE_FORMATS.localDate(phaseStart),
+        stopDate: CHART_DATE_FORMATS.localDate(phaseEnd),
         halfLifeHours: med.halfLifeHours,
         phase: 'titrate' as const,
       };

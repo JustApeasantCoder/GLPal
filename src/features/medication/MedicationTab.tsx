@@ -14,6 +14,7 @@ import OverdueDisclaimerModal from './components/OverdueDisclaimerModal';
 import OfficialScheduleModal from './components/OfficialScheduleModal';
 import { GLP1Entry, GLP1Protocol } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
+import { CHART_DATE_FORMATS } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { useAppStore } from '../../stores/appStore';
 import { MEDICATIONS, generateId } from '../../constants/medications';
@@ -60,7 +61,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
 
-  const nowTimestamp = useTime(1000);
+  const nowTimestamp = useTime();
   const now = new Date(nowTimestamp);
   const activeProtocol = useActiveProtocol(protocols);
   const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone);
@@ -78,7 +79,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
   const generatedEntries = useMemo(
-    () => medicationEntries.filter(e => !e.isManual),
+    () => medicationEntries,
     [medicationEntries]
   );
 
@@ -103,7 +104,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       
       let d = new Date(start);
       while (d < stop && d <= now) {
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = CHART_DATE_FORMATS.localDate(d);
         
         const existingManual = getMedicationManualEntries();
         const alreadyLogged = existingManual.some(e => e.date === dateStr && e.medication === protocol.medication);
@@ -146,11 +147,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     setDeleteConfirmMed(null);
   };
 
-  const handleSaveProtocol = (protocol: GLP1Protocol) => {
-    const updatedProtocols = saveProtocol(protocol, protocols);
+  const handleSaveProtocol = async (protocol: GLP1Protocol) => {
+    const updatedProtocols = await saveProtocol(protocol, protocols);
     setProtocols(updatedProtocols);
     try {
-      handleGenerateDoses(updatedProtocols);
+      await handleGenerateDoses(updatedProtocols);
       onRefreshMedications();
     } catch (e) {
       console.error('Error generating doses:', e);
@@ -164,25 +165,25 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     setIsProtocolModalOpen(true);
   };
 
-  const handleDeleteProtocol = (id: string) => {
-    const updatedList = deleteProtocol(id, protocols);
+  const handleDeleteProtocol = async (id: string) => {
+    const updatedList = await deleteProtocol(id, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
     onRefreshMedications();
   };
 
-  const handleArchiveProtocol = (protocol: GLP1Protocol) => {
-    const updatedList = archiveProtocol(protocol, protocols);
+  const handleArchiveProtocol = async (protocol: GLP1Protocol) => {
+    const updatedList = await archiveProtocol(protocol, protocols);
     setProtocols(updatedList);
     setEditingProtocol(null);
     onRefreshMedications();
   };
 
-  const handleOfficialScheduleSave = (newProtocols: GLP1Protocol[]) => {
+  const handleOfficialScheduleSave = async (newProtocols: GLP1Protocol[]) => {
     const updatedProtocols = [...protocols, ...newProtocols];
     setProtocols(updatedProtocols);
     try {
-      handleGenerateDoses(updatedProtocols);
+      await handleGenerateDoses(updatedProtocols);
       onRefreshMedications();
     } catch (e) {
       console.error('Error generating doses:', e);

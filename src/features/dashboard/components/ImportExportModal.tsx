@@ -67,24 +67,22 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
     reader.readAsText(file);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!preview) return;
 
     setIsLoading(true);
-    setTimeout(() => {
-      const result = dataImportExportService.importData(importMode, {
-        includeData,
-        includeUserSettings,
-        importWeightUnit,
-        offsetDays,
-        offsetHours,
-      });
-      setImportResult(result);
-      setIsLoading(false);
-      if (result.success) {
-        onImportComplete();
-      }
-    }, 100);
+    const result = await dataImportExportService.importData(importMode, {
+      includeData,
+      includeUserSettings,
+      importWeightUnit,
+      offsetDays,
+      offsetHours,
+    });
+    setImportResult(result);
+    setIsLoading(false);
+    if (result.success) {
+      onImportComplete();
+    }
   };
 
   const handleResetImport = () => {
@@ -392,7 +390,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                   <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     Imported: {importResult.imported} entries<br />
                     Skipped: {importResult.skipped} entries<br />
-                    {importResult.errors.length > 0 && (
+                    {(importResult.errors?.length ?? 0) > 0 && (
                       <>
                         Errors: {importResult.errors.length}
                       </>

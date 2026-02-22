@@ -4,7 +4,7 @@ import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { ChartPeriod, useTime } from './shared/hooks';
 import { useAppStore, TabType } from './stores/appStore';
-import { timeService } from './core/timeService';
+import { useTimeStore } from './stores/timeStore';
 
 import Dashboard from './features/dashboard/Dashboard';
 import MedicationTab from './features/medication/MedicationTab';
@@ -29,8 +29,8 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [timeResetKey, setTimeResetKey] = React.useState(0);
-  const now = useTime(1000, timeResetKey);
+  const { timeResetKey, resetTime, travelDays, nowDate } = useTimeStore();
+  const { time } = useTimeStore();
   
   const {
     activeTab,
@@ -77,7 +77,7 @@ function App() {
   }, [initialize]);
 
   const handleAddWeight = useCallback((newWeight: number) => {
-    const today = timeService.nowDate().toISOString().split('T')[0];
+    const today = nowDate().toISOString().split('T')[0];
     const newEntry = { date: today, weight: newWeight };
     addWeight(newEntry);
   }, [addWeight]);
@@ -120,7 +120,7 @@ function App() {
             GLPal
             {process.env.NODE_ENV === 'development' && (
               <span className="text-sm font-normal text-text-muted">
-                {new Date(now).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(time).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </h1>
@@ -140,7 +140,7 @@ function App() {
             <>
             <button
               onClick={() => {
-                timeService.travelDays(-1 / 60);
+                travelDays(-1 / 60);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Go back 1 hour"
@@ -152,7 +152,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.travelDays(1 / 60);
+                travelDays(1 / 60);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Go forward 1 hour"
@@ -164,7 +164,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.travelDays(-2 / 1440);
+                travelDays(-2 / 1440);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Go back 2 minutes"
@@ -176,7 +176,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.travelDays(2 / 1440);
+                travelDays(2 / 1440);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Go forward 2 minutes"
@@ -188,7 +188,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.travelDays(-1);
+                travelDays(-1);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Go back 1 day"
@@ -200,7 +200,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.travelDays(1);
+                travelDays(1);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Speed up 1 day"
@@ -212,8 +212,7 @@ function App() {
             </button>
             <button
               onClick={() => {
-                timeService.reset();
-                setTimeResetKey(k => k + 1);
+                resetTime();
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Reset dose simulation"

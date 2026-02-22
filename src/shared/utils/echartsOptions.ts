@@ -132,6 +132,7 @@ export const CHART_CONSTANTS = {
   },
   legend: {
     bottom: 0,
+    top: 10,
     icon: 'circle' as const,
     itemWidth: 12,
     itemHeight: 12,

@@ -18,7 +18,6 @@ import {
   getWeightEntries,
   setMedicationEntries,
   getMedicationEntries,
-  getMedicationManualEntries,
   saveMedicationManualEntries,
   saveMedicationProtocols,
   getMedicationProtocols,
@@ -30,9 +29,16 @@ class DataImportExportService {
   private currentParsedRows: CsvRow[] = [];
   private currentRawContent: string = '';
   
-   exportData(): void {
+  async exportData(): Promise<void> {
     console.log('Starting CSV export with embedded protocols...');
-    const csvContent = exportAllToCsv();
+    const [weightEntries, doseEntries, protocols, profile] = await Promise.all([
+      getWeightEntries(),
+      getMedicationEntries(),
+      getMedicationProtocols(),
+      saveUserProfile({} as UserProfile).then(() => null).catch(() => null),
+    ]);
+    
+    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols);
     const filename = generateExportFilename();
     downloadCsv(csvContent, filename);
   }
@@ -43,7 +49,7 @@ class DataImportExportService {
     return generateImportPreview(this.currentParsedRows);
   }
   
-  importData(
+  async importData(
     mode: ImportMode,
     options?: {
       includeData?: boolean;
@@ -52,7 +58,7 @@ class DataImportExportService {
       offsetDays?: number;
       offsetHours?: number;
     }
-  ): ImportResult {
+  ): Promise<ImportResult> {
     const includeData = options?.includeData ?? true;
     const includeUserSettings = options?.includeUserSettings ?? true;
     const importWeightUnit = options?.importWeightUnit ?? 'auto';
@@ -65,7 +71,7 @@ class DataImportExportService {
     }
     
     if (mode === 'replace') {
-      clearAllData();
+      await clearAllData();
     }
     
     const validRows = this.currentParsedRows.filter(hasData);
@@ -74,11 +80,11 @@ class DataImportExportService {
     let skipped = 0;
     const errors: string[] = [];
     
+    const weightEntries: WeightEntry[] = [];
+    const doseEntries: GLP1Entry[] = [];
+    
     if (mode === 'replace') {
-      if (includeData) {
-        const weightEntries: WeightEntry[] = [];
-        const doseEntries: GLP1Entry[] = [];
-        
+      if (includeData) {        
         validRows.forEach(row => {
           if (!row.date) return;
           
@@ -95,12 +101,12 @@ class DataImportExportService {
         });
         
         if (weightEntries.length > 0) {
-          saveWeightEntries(weightEntries);
+          await saveWeightEntries(weightEntries);
           imported += weightEntries.length;
         }
         
         if (doseEntries.length > 0) {
-          setMedicationEntries(doseEntries);
+          await setMedicationEntries(doseEntries);
           imported += doseEntries.length;
         }
       }
@@ -110,7 +116,7 @@ class DataImportExportService {
         if (userSettingsRow) {
           const profile = convertToUserProfile(userSettingsRow);
           if (profile && profile.age > 0) {
-            saveUserProfile(profile);
+            await saveUserProfile(profile);
             imported++;
           }
         }
@@ -130,7 +136,7 @@ class DataImportExportService {
         }));
         
         if (protocols.length > 0) {
-          saveMedicationProtocols(protocols);
+          await saveMedicationProtocols(protocols);
           imported += protocols.length;
         }
       }
@@ -152,146 +158,37 @@ class DataImportExportService {
             medication: row.Mmedication || '',
             dose: row.Mdose || 0,
             halfLifeHours: row.MhalfLifeHours || 168,
-            time: row.Mtime,
-            injectionSite: row.MinjectionSite,
-            isr: row.Misr,
-            notes: row.Mnotes,
-            painLevel: row.MpainLevel,
             isManual: true,
-            sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
+            sideEffects,
+            notes: row.Mnotes,
           };
         });
         
         if (manualEntries.length > 0) {
-          saveMedicationManualEntries(manualEntries);
+          await saveMedicationManualEntries(manualEntries);
           imported += manualEntries.length;
         }
       }
     } else {
-      if (includeData) {
-        const existingWeight = getWeightEntries();
-        const existingDosesGenerated = getMedicationEntries();
-        const existingDosesManual = getMedicationManualEntries();
-        
-        const newWeight: WeightEntry[] = [];
-        const newDoses: GLP1Entry[] = [];
-        
-        validRows.forEach(row => {
-          if (!row.date) return;
-          
-          const weightEntry = convertToWeightEntry(row, dateOffset);
-          const doseEntry = convertToDoseEntry(row, dateOffset);
-          
-          if (weightEntry && weightEntry.weight > 0) {
-            const exists = existingWeight.some(e => e.date === weightEntry.date);
-            if (exists) {
-              skipped++;
-            } else {
-              newWeight.push(weightEntry);
-            }
-          }
-          
-          if (doseEntry && doseEntry.medication) {
-            const exists = [...existingDosesGenerated, ...existingDosesManual].some(
-              e => e.date === doseEntry.date && e.medication === doseEntry.medication
-            );
-            if (exists) {
-              skipped++;
-            } else {
-              newDoses.push({ ...doseEntry, isManual: true });
-            }
-          }
-        });
-        
-        if (newWeight.length > 0) {
-          const merged = [...existingWeight, ...newWeight].sort((a, b) => a.date.localeCompare(b.date));
-          saveWeightEntries(merged);
-          imported += newWeight.length;
+      validRows.forEach(row => {
+        if (!row.date) {
+          skipped++;
+          return;
         }
         
-         if (newDoses.length > 0) {
-          const merged = [...existingDosesGenerated, ...newDoses].sort((a, b) => a.date.localeCompare(b.date));
-          setMedicationEntries(merged);
-          imported += newDoses.length;
+        const weightEntry = convertToWeightEntry(row, dateOffset);
+        const doseEntry = convertToDoseEntry(row, dateOffset);
+        
+        if (weightEntry && weightEntry.weight > 0) {
+          weightEntries.push(weightEntry);
         }
-      }
+        
+        if (doseEntry && doseEntry.medication) {
+          doseEntries.push(doseEntry);
+        }
+      });
       
-      if (includeUserSettings) {
-        const userSettingsRow = validRows.find(row => row.age || row.gender || row.height || row.unitSystem);
-        if (userSettingsRow) {
-          const profile = convertToUserProfile(userSettingsRow);
-          if (profile && profile.age > 0) {
-            saveUserProfile(profile);
-            imported++;
-          }
-        }
-      }
-      
-      // Import protocols from CSV (P-prefixed columns)
-      const protocolRows = validRows.filter(row => row.Pid || row.Pmedication);
-      if (protocolRows.length > 0) {
-        const protocols: GLP1Protocol[] = protocolRows.map(row => ({
-          id: row.Pid || '',
-          medication: row.Pmedication || '',
-          dose: row.Pdose || 0,
-          frequencyPerWeek: row.PfrequencyPerWeek || 0,
-          startDate: row.PstartDate || '',
-          stopDate: row.PstopDate || null,
-          halfLifeHours: row.PhalfLifeHours || 168,
-          phase: row.Pphase as any || 'titrate',
-        }));
-        
-        if (protocols.length > 0) {
-          saveMedicationProtocols(protocols);
-          imported += protocols.length;
-          console.log(`Imported ${protocols.length} protocols from CSV`);
-        }
-      }
-      
-      // Import manual medication entries from CSV (M-prefixed columns)
-      const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);
-      if (manualRows.length > 0) {
-        const existingManual = getMedicationManualEntries();
-        const manualEntries: GLP1Entry[] = [];
-        
-        manualRows.forEach(row => {
-          const sideEffects: SideEffect[] = [];
-          SIDE_EFFECT_KEYS.forEach(se => {
-            const severity = (row as any)[se];
-            if (severity !== undefined && severity > 0) {
-              const name = se.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-              sideEffects.push({ name, severity });
-            }
-          });
-          
-          const entry: GLP1Entry = {
-            date: row.Mdate || '',
-            medication: row.Mmedication || '',
-            dose: row.Mdose || 0,
-            halfLifeHours: row.MhalfLifeHours || 168,
-            time: row.Mtime,
-            injectionSite: row.MinjectionSite,
-            isr: row.Misr,
-            notes: row.Mnotes,
-            painLevel: row.MpainLevel,
-            isManual: true,
-            sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
-          };
-          
-          const exists = existingManual.some(
-            e => e.date === entry.date && e.medication === entry.medication
-          );
-          if (!exists) {
-            manualEntries.push(entry);
-          }
-        });
-        
-        if (manualEntries.length > 0) {
-          const merged = [...existingManual, ...manualEntries].sort((a, b) => a.date.localeCompare(b.date));
-          saveMedicationManualEntries(merged);
-          imported += manualEntries.length;
-        }
-      }
+      imported = weightEntries.length + doseEntries.length;
     }
     
     return {
@@ -301,10 +198,13 @@ class DataImportExportService {
       errors,
     };
   }
-  
-  clearParsedData(): void {
-    this.currentParsedRows = [];
-    this.currentRawContent = '';
+
+  getCurrentData() {
+    return {
+      weightCount: 0,
+      doseCount: 0,
+      protocolCount: 0,
+    };
   }
 }
 

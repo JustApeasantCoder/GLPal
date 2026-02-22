@@ -1,18 +1,13 @@
-import { useState, useEffect } from 'react';
-import { timeService } from '../../core/timeService';
+import { useEffect } from 'react';
+import { useTimeStore } from '../../stores/timeStore';
 
-export const useTime = (intervalMs = 1000, resetKey?: number) => {
-  const [time, setTime] = useState(timeService.now());
+export const useTime = () => {
+  const { time, startTicking, stopTicking } = useTimeStore();
 
   useEffect(() => {
-    timeService.initialize();
-    
-    const timer = setInterval(() => {
-      setTime(timeService.now());
-    }, intervalMs);
-    
-    return () => clearInterval(timer);
-  }, [intervalMs, resetKey]);
+    startTicking();
+    return () => stopTicking();
+  }, []);
 
   return time;
 };

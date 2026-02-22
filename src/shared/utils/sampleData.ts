@@ -1,4 +1,5 @@
 import { addWeightEntry, addGLP1Entry, initializeDatabase, getUserProfile, saveUserProfile } from './database';
+import { CHART_DATE_FORMATS } from './chartUtils';
 
 // Generate only weight data (no GLP-1 entries)
 export const initializeSampleWeightData = (): void => {
@@ -68,7 +69,7 @@ export const initializeSampleWeightData = (): void => {
     
     const finalWeight = Math.round((baseWeight + fluctuation + weekendAdjustment + dramaticAdjustment) * 100) / 100;
     
-    const dateString = currentDate.toISOString().split('T')[0];
+    const dateString = CHART_DATE_FORMATS.localDate(currentDate);
     addWeightEntry({
       date: dateString,
       weight: finalWeight
@@ -144,7 +145,7 @@ export const initializeSampleData = (): void => {
     
     const finalWeight = Math.round((baseWeight + fluctuation + weekendAdjustment + dramaticAdjustment) * 100) / 100;
     
-    const dateString = currentDate.toISOString().split('T')[0];
+    const dateString = CHART_DATE_FORMATS.localDate(currentDate);
     addWeightEntry({
       date: dateString,
       weight: finalWeight

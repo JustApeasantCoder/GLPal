@@ -43,7 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const lastWeightDisplay = lastWeight ? convertWeightFromKg(lastWeight, unitSystem) : null;
 
   const generatedEntries = useMemo(
-    () => dosesEntries.filter(e => !e.isManual),
+    () => dosesEntries,
     [dosesEntries]
   );
 

@@ -49,36 +49,36 @@ interface AppState {
 }
 
 interface AppActions {
-  initialize: () => void;
+  initialize: () => Promise<void>;
   setActiveTab: (tab: TabType) => void;
   setActiveModal: (modal: ModalType | null) => void;
   setChartPeriod: (period: ChartPeriod) => void;
   
-  addWeight: (entry: WeightEntry) => void;
-  deleteWeight: (date: string) => void;
-  refreshWeights: () => void;
+  addWeight: (entry: WeightEntry) => Promise<void>;
+  deleteWeight: (date: string) => Promise<void>;
+  refreshWeights: () => Promise<void>;
   
-  addDose: (entry: GLP1Entry) => void;
-  deleteDose: (date: string) => void;
-  refreshDoses: () => void;
+  addDose: (entry: GLP1Entry) => Promise<void>;
+  deleteDose: (date: string) => Promise<void>;
+  refreshDoses: () => Promise<void>;
   
-  setProtocols: (protocols: GLP1Protocol[]) => void;
-  generateDosesFromProtocols: () => void;
+  setProtocols: (protocols: GLP1Protocol[]) => Promise<void>;
+  generateDosesFromProtocols: () => Promise<void>;
   
-  updateProfile: (profile: UserProfile) => void;
+  updateProfile: (profile: UserProfile) => Promise<void>;
   
-  addPeptide: (peptide: Peptide) => void;
-  updatePeptide: (peptide: Peptide) => void;
-  deletePeptide: (id: string) => void;
+  addPeptide: (peptide: Peptide) => Promise<void>;
+  updatePeptide: (peptide: Peptide) => Promise<void>;
+  deletePeptide: (id: string) => Promise<void>;
   
-  addPeptideLog: (log: PeptideLogEntry) => void;
-  deletePeptideLog: (id: string) => void;
+  addPeptideLog: (log: PeptideLogEntry) => Promise<void>;
+  deletePeptideLog: (id: string) => Promise<void>;
   
   setCollapsedMedications: (medications: string[]) => void;
   setLatestDoseDone: (timestamp: number | null) => void;
   
-  clearAllData: () => void;
-  generateSampleData: () => void;
+  clearAllData: () => Promise<void>;
+  generateSampleData: () => Promise<void>;
 }
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -109,15 +109,17 @@ export const useAppStore = create<AppState & AppActions>()(
       latestDoseDone: null,
       isInitialized: false,
 
-      initialize: () => {
-        initializeDatabase();
+      initialize: async () => {
+        await initializeDatabase();
         
-        const weights = getWeightEntries();
-        const dosesEntries = getAllMedicationEntries();
-        const protocols = getMedicationProtocols();
-        const profile = getUserProfile() || DEFAULT_PROFILE;
-        const peptides = getPeptides();
-        const peptideLogs = getPeptideLogs();
+        const [weights, dosesEntries, protocols, profile, peptides, peptideLogs] = await Promise.all([
+          getWeightEntries(),
+          getAllMedicationEntries(),
+          getMedicationProtocols(),
+          getUserProfile(),
+          getPeptides(),
+          getPeptideLogs(),
+        ]);
         
         const collapsedMedStr = localStorage.getItem('glpal_collapsed_medications');
         const collapsedMedications = collapsedMedStr ? JSON.parse(collapsedMedStr) : [];
@@ -129,12 +131,12 @@ export const useAppStore = create<AppState & AppActions>()(
         const savedPeriod = localStorage.getItem('glpal_chart_period') as ChartPeriod | null;
         
         set({
-          weights,
-          dosesEntries,
-          protocols,
-          profile,
-          peptides,
-          peptideLogs,
+          weights: weights || [],
+          dosesEntries: dosesEntries || [],
+          protocols: protocols || [],
+          profile: profile || DEFAULT_PROFILE,
+          peptides: peptides || [],
+          peptideLogs: peptideLogs || [],
           collapsedMedications,
           latestDoseDone,
           activeTab: savedTab || 'dashboard',
@@ -155,88 +157,90 @@ export const useAppStore = create<AppState & AppActions>()(
         set({ chartPeriod: period });
       },
 
-      addWeight: (entry) => {
-        dbAddWeightEntry(entry);
-        const weights = getWeightEntries();
+      addWeight: async (entry) => {
+        await dbAddWeightEntry(entry);
+        const weights = await getWeightEntries();
         set({ weights });
       },
 
-      deleteWeight: (date) => {
-        dbDeleteWeightEntry(date);
-        const weights = getWeightEntries();
+      deleteWeight: async (date) => {
+        await dbDeleteWeightEntry(date);
+        const weights = await getWeightEntries();
         set({ weights });
       },
 
-      refreshWeights: () => {
-        const weights = getWeightEntries();
+      refreshWeights: async () => {
+        const weights = await getWeightEntries();
         set({ weights });
       },
 
-      addDose: (entry) => {
-        dbAddMedicationManualEntry(entry);
-        const dosesEntries = getAllMedicationEntries();
+      addDose: async (entry) => {
+        await dbAddMedicationManualEntry(entry);
+        const dosesEntries = await getAllMedicationEntries();
         set({ dosesEntries });
       },
 
-      deleteDose: (date) => {
-        dbDeleteMedicationManualEntry(date);
-        const dosesEntries = getAllMedicationEntries();
+      deleteDose: async (date) => {
+        await dbDeleteMedicationManualEntry(date);
+        const dosesEntries = await getAllMedicationEntries();
         set({ dosesEntries });
       },
 
-      refreshDoses: () => {
-        const dosesEntries = getAllMedicationEntries();
+      refreshDoses: async () => {
+        const dosesEntries = await getAllMedicationEntries();
         set({ dosesEntries });
       },
 
-      setProtocols: (protocols) => {
-        saveMedicationProtocols(protocols);
+      setProtocols: async (protocols) => {
+        await saveMedicationProtocols(protocols);
         set({ protocols });
       },
 
-      generateDosesFromProtocols: () => {
+      generateDosesFromProtocols: async () => {
         const { protocols } = get();
-        clearMedicationEntries();
+        await clearMedicationEntries();
         const generatedDoses = generateDosesFromProtocols(protocols, []);
-        generatedDoses.forEach(entry => dbAddMedicationGeneratedEntry(entry));
+        for (const entry of generatedDoses) {
+          await dbAddMedicationGeneratedEntry(entry);
+        }
         
-        const dosesEntries = getAllMedicationEntries();
+        const dosesEntries = await getAllMedicationEntries();
         set({ dosesEntries });
       },
 
-      updateProfile: (profile) => {
-        saveUserProfile(profile);
+      updateProfile: async (profile) => {
+        await saveUserProfile(profile);
         set({ profile });
       },
 
-      addPeptide: (peptide) => {
-        dbAddPeptide(peptide);
-        const peptides = getPeptides();
+      addPeptide: async (peptide) => {
+        await dbAddPeptide(peptide);
+        const peptides = await getPeptides();
         set({ peptides });
       },
 
-      updatePeptide: (peptide) => {
-        dbUpdatePeptide(peptide);
-        const peptides = getPeptides();
+      updatePeptide: async (peptide) => {
+        await dbUpdatePeptide(peptide);
+        const peptides = await getPeptides();
         set({ peptides });
       },
 
-      deletePeptide: (id) => {
-        dbDeletePeptide(id);
-        const peptides = getPeptides();
-        const peptideLogs = getPeptideLogs();
+      deletePeptide: async (id) => {
+        await dbDeletePeptide(id);
+        const peptides = await getPeptides();
+        const peptideLogs = await getPeptideLogs();
         set({ peptides, peptideLogs });
       },
 
-      addPeptideLog: (log) => {
-        dbAddPeptideLog(log);
-        const peptideLogs = getPeptideLogs();
+      addPeptideLog: async (log) => {
+        await dbAddPeptideLog(log);
+        const peptideLogs = await getPeptideLogs();
         set({ peptideLogs });
       },
 
-      deletePeptideLog: (id) => {
-        dbDeletePeptideLog(id);
-        const peptideLogs = getPeptideLogs();
+      deletePeptideLog: async (id) => {
+        await dbDeletePeptideLog(id);
+        const peptideLogs = await getPeptideLogs();
         set({ peptideLogs });
       },
 
@@ -254,8 +258,8 @@ export const useAppStore = create<AppState & AppActions>()(
         set({ latestDoseDone: timestamp });
       },
 
-      clearAllData: () => {
-        clearAllData();
+      clearAllData: async () => {
+        await clearAllData();
         set({
           weights: [],
           dosesEntries: [],
@@ -268,20 +272,22 @@ export const useAppStore = create<AppState & AppActions>()(
         });
       },
 
-      generateSampleData: () => {
-        clearAllData();
+      generateSampleData: async () => {
+        await clearAllData();
         initializeSampleData();
         
-        const weights = getWeightEntries();
-        const dosesEntries = getAllMedicationEntries();
-        const protocols = getMedicationProtocols();
-        const profile = getUserProfile() || DEFAULT_PROFILE;
+        const [weights, dosesEntries, protocols, profile] = await Promise.all([
+          getWeightEntries(),
+          getAllMedicationEntries(),
+          getMedicationProtocols(),
+          getUserProfile(),
+        ]);
         
         set({
-          weights,
-          dosesEntries,
-          protocols,
-          profile,
+          weights: weights || [],
+          dosesEntries: dosesEntries || [],
+          protocols: protocols || [],
+          profile: profile || DEFAULT_PROFILE,
         });
       },
     }),
@@ -290,7 +296,6 @@ export const useAppStore = create<AppState & AppActions>()(
       partialize: (state) => ({
         activeTab: state.activeTab,
         chartPeriod: state.chartPeriod,
-        profile: state.profile,
         collapsedMedications: state.collapsedMedications,
         latestDoseDone: state.latestDoseDone,
       }),

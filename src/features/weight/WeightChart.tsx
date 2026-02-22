@@ -12,7 +12,8 @@ import { isMobile } from '../../shared/utils/common';
 
 const getToday = () => new Date(timeService.now());
 
-const shortenMedicationName = (name: string): string => {
+const shortenMedicationName = (name: string | undefined): string => {
+  if (!name) return '';
   return name.replace(/\s*\(.*?\)/g, '').trim();
 };
 
@@ -291,6 +292,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
       legend: {
         data: doseChanges.length > 0 ? Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication)))) : [],
         bottom: 0,
+        top: 10,
         icon: 'circle',
         itemWidth: 12,
         itemHeight: 12,

@@ -1,6 +1,5 @@
 import { CsvRow, CSV_HEADER, ALL_COLUMNS, SIDE_EFFECT_COLUMNS } from './csvTypes';
 import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol } from '../types';
-import { getWeightEntries, getAllMedicationEntries, getUserProfile, getMedicationProtocols, getMedicationManualEntries } from '../shared/utils/database';
 
 const escapeCsvValue = (value: string | number | boolean | undefined): string => {
   if (value === undefined || value === null) return '';
@@ -37,12 +36,13 @@ const getSideEffectValue = (sideEffectMap: Record<string, number>, key: string):
   return sideEffectMap[key];
 };
 
-export const exportAllToCsv = (): string => {
-  const profile = getUserProfile();
+export const exportAllToCsv = (
+  weightEntries: WeightEntry[] = [],
+  doseEntries: GLP1Entry[] = [],
+  protocols: GLP1Protocol[] = [],
+  profile?: UserProfile | null
+): string => {
   const unitSystem = profile?.unitSystem || 'metric';
-  
-  const weightEntries = getWeightEntries();
-  const doseEntries = getAllMedicationEntries();
   
   const dateToRowMap = new Map<string, CsvRow>();
   
@@ -107,7 +107,6 @@ export const exportAllToCsv = (): string => {
     }
     
     // Add protocol data with P prefix
-    const protocols = getMedicationProtocols();
     if (protocols.length > 0) {
       protocols.forEach(protocol => {
         const protocolRow: CsvRow = {
@@ -125,7 +124,7 @@ export const exportAllToCsv = (): string => {
     }
     
     // Add manual medication entries with M prefix
-    const manualEntries = getMedicationManualEntries();
+    const manualEntries = doseEntries.filter(e => e.isManual);
     if (manualEntries.length > 0) {
       manualEntries.forEach(entry => {
         const sideEffectMap = createSideEffectMap(entry.sideEffects);

@@ -3,7 +3,6 @@ import { useThemeStyles } from '../../contexts/ThemeContext';
 import { useTime } from '../../shared/hooks';
 import { Peptide, PeptideLogEntry, PeptideCategory } from '../../types';
 import { useAppStore } from '../../stores/appStore';
-import { getPeptideLogsById, getLatestPeptideLog } from '../../shared/utils/database';
 import { timeService } from '../../core/timeService';
 import PeptideModal from './components/PeptideModal';
 import LogPeptideModal from './components/LogPeptideModal';
@@ -29,7 +28,7 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
 
 const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => {
   const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
-  const now = useTime(1000);
+  const now = useTime();
   const currentTime = useMemo(() => new Date(now), [now]);
   
   const { peptides, peptideLogs, addPeptide, updatePeptide, deletePeptide, addPeptideLog, deletePeptideLog } = useAppStore();
@@ -162,7 +161,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
           <div className={smallCard}>
             <p className={text.label}>Total Logs</p>
             <p className={text.value}>
-              {peptides.reduce((sum, p) => sum + getPeptideLogsById(p.id).length, 0)}
+              {peptideLogs.length}
             </p>
           </div>
         </div>
@@ -182,8 +181,8 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
         ) : (
           <div className="space-y-3">
             {filteredPeptides.map(peptide => {
-              const latestLog = getLatestPeptideLog(peptide.id);
-              const logs = getPeptideLogsById(peptide.id);
+              const peptideSpecificLogs = peptideLogs.filter(l => l.peptideId === peptide.id);
+              const latestLog = peptideSpecificLogs[0] || null;
               const isExpanded = expandedCard === peptide.id;
               
               return (

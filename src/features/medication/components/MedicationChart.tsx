@@ -27,7 +27,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
     useMedicationChartData(data);
 
   // Use time service for simulated time
-  const now = useTime(1000);
+  const now = useTime();
   const simulatedNow = new Date(now);
 
   const firstDataDate = useMemo(
@@ -136,6 +136,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
       legend: {
         data: medications.length > 1 ? ['Combined', ...medications] : medications,
         bottom: 0,
+        top: 10,
         icon: 'circle',
         itemWidth: 12,
         itemHeight: 12,

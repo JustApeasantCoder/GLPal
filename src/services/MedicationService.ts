@@ -1,5 +1,12 @@
 import { GLP1Entry, GLP1Protocol } from '../types';
-import { saveMedicationProtocols, getMedicationProtocols, deleteMedicationProtocol, getArchivedProtocols, setMedicationEntries } from '../shared/utils/database';
+import { CHART_DATE_FORMATS } from '../shared/utils/chartUtils';
+import { 
+  saveMedicationProtocols, 
+  getMedicationProtocols, 
+  deleteMedicationProtocol, 
+  setMedicationEntries,
+  getArchivedMedicationProtocols 
+} from '../shared/utils/database';
 
 export const generateDosesFromProtocols = (
   protocols: GLP1Protocol[],
@@ -17,7 +24,7 @@ export const generateDosesFromProtocols = (
 
     let d = new Date(start);
     while (d < end) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = CHART_DATE_FORMATS.localDate(d);
       const existingEntry = existingEntries.find(e => e.date === dateStr && e.medication === prot.medication);
       if (!existingEntry) {
         generatedDoses.push({
@@ -45,7 +52,7 @@ export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
 
     let d = new Date(start);
     while (d < end) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = CHART_DATE_FORMATS.localDate(d);
       newDoses.push({
         date: dateStr,
         medication: prot.medication,
@@ -60,10 +67,10 @@ export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
   return newDoses;
 };
 
-export const saveProtocol = (
+export const saveProtocol = async (
   protocol: GLP1Protocol,
   existingProtocols: GLP1Protocol[]
-): GLP1Protocol[] => {
+): Promise<GLP1Protocol[]> => {
   const existing = Array.isArray(existingProtocols) ? existingProtocols : [];
   const exists = existing.find(p => p.id === protocol.id);
   
@@ -74,36 +81,36 @@ export const saveProtocol = (
     updatedProtocols = [...existing, protocol];
   }
   
-  saveMedicationProtocols(updatedProtocols);
+  await saveMedicationProtocols(updatedProtocols);
   return updatedProtocols;
 };
 
-export const deleteProtocol = (id: string, existingProtocols: GLP1Protocol[]): GLP1Protocol[] => {
-  deleteMedicationProtocol(id);
+export const deleteProtocol = async (id: string, existingProtocols: GLP1Protocol[]): Promise<GLP1Protocol[]> => {
+  await deleteMedicationProtocol(id);
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== id);
-  saveMedicationProtocols(updatedList);
+  await saveMedicationProtocols(updatedList);
   
   const newDoses = regenerateAllDoses(updatedList);
-  setMedicationEntries(newDoses);
+  await setMedicationEntries(newDoses);
   
   return updatedList;
 };
 
-export const archiveProtocol = (protocol: GLP1Protocol, existingProtocols: GLP1Protocol[]): GLP1Protocol[] => {
-  const archived = getArchivedProtocols();
-  archived.push({ ...protocol, isArchived: true });
-  localStorage.setItem('glpal_medication_archived', JSON.stringify(archived));
-  
+export const archiveProtocol = async (protocol: GLP1Protocol, existingProtocols: GLP1Protocol[]): Promise<GLP1Protocol[]> => {
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== protocol.id);
-  saveMedicationProtocols(updatedList);
+  await saveMedicationProtocols(updatedList);
   
   const newDoses = regenerateAllDoses(updatedList);
-  setMedicationEntries(newDoses);
+  await setMedicationEntries(newDoses);
   
   return updatedList;
 };
 
-export const getActiveProtocols = (): GLP1Protocol[] => {
-  const protocols = getMedicationProtocols();
-  return Array.isArray(protocols) ? protocols : [];
+export const getActiveProtocols = async (): Promise<GLP1Protocol[]> => {
+  try {
+    const protocols = await getMedicationProtocols();
+    return Array.isArray(protocols) ? protocols : [];
+  } catch {
+    return [];
+  }
 };
