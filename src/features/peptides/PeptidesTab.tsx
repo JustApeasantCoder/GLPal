@@ -2,18 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { useTime } from '../../shared/hooks';
 import { Peptide, PeptideLogEntry, PeptideCategory } from '../../types';
-import { 
-  getPeptides, 
-  savePeptides, 
-  addPeptide as dbAddPeptide, 
-  updatePeptide as dbUpdatePeptide, 
-  deletePeptide as dbDeletePeptide,
-  addPeptideLog,
-  getPeptideLogsById,
-  getLatestPeptideLog,
-  deletePeptideLog,
-  addMedicationManualEntry 
-} from '../../shared/utils/database';
+import { useAppStore } from '../../stores/appStore';
+import { getPeptideLogsById, getLatestPeptideLog } from '../../shared/utils/database';
 import { timeService } from '../../core/timeService';
 import PeptideModal from './components/PeptideModal';
 import LogPeptideModal from './components/LogPeptideModal';
@@ -39,10 +29,11 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
 
 const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => {
   const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
-  const now = useTime(100);
+  const now = useTime(1000);
   const currentTime = useMemo(() => new Date(now), [now]);
   
-  const [peptides, setPeptides] = useState<Peptide[]>([]);
+  const { peptides, peptideLogs, addPeptide, updatePeptide, deletePeptide, addPeptideLog, deletePeptideLog } = useAppStore();
+  
   const [selectedCategory, setSelectedCategory] = useState<PeptideCategory | 'all'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
@@ -62,12 +53,6 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
       localStorage.removeItem('glpal_expanded_peptide_card');
     }
   }, [expandedCard]);
-
-  // Load peptides on mount
-  useEffect(() => {
-    const loaded = getPeptides();
-    setPeptides(loaded);
-  }, []);
 
   useEffect(() => {
     if (deleteConfirm) {
@@ -106,32 +91,27 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
   const archivedPeptides = peptides.filter(p => p.isArchived);
 
   const handleAddPeptide = (peptide: Peptide) => {
-    dbAddPeptide(peptide);
-    setPeptides(getPeptides());
+    addPeptide(peptide);
   };
 
   const handleUpdatePeptide = (peptide: Peptide) => {
-    dbUpdatePeptide(peptide);
-    setPeptides(getPeptides());
+    updatePeptide(peptide);
     setEditingPeptide(null);
   };
 
   const handleDeletePeptide = (id: string) => {
-    dbDeletePeptide(id);
-    setPeptides(getPeptides());
+    deletePeptide(id);
     setDeleteConfirm(null);
   };
 
   const handleToggleActive = (peptide: Peptide) => {
     const updated = { ...peptide, isActive: !peptide.isActive };
-    dbUpdatePeptide(updated);
-    setPeptides(getPeptides());
+    updatePeptide(updated);
   };
 
   const handleArchivePeptide = (peptide: Peptide) => {
     const updated = { ...peptide, isArchived: true, isActive: false };
-    dbUpdatePeptide(updated);
-    setPeptides(getPeptides());
+    updatePeptide(updated);
   };
 
   const handleLogInjection = (log: PeptideLogEntry) => {

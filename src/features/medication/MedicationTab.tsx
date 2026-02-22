@@ -15,9 +15,10 @@ import OfficialScheduleModal from './components/OfficialScheduleModal';
 import { GLP1Entry, GLP1Protocol } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
 import { useThemeStyles } from '../../contexts/ThemeContext';
-import { addMedicationGeneratedEntry, addMedicationManualEntry, clearMedicationEntries, deleteMedicationProtocol, saveMedicationProtocols, getMedicationManualEntries } from '../../shared/utils/database';
+import { useAppStore } from '../../stores/appStore';
 import { MEDICATIONS, generateId } from '../../constants/medications';
-import { generateDosesFromProtocols, saveProtocol, deleteProtocol, archiveProtocol, getActiveProtocols } from '../../services/MedicationService';
+import { saveProtocol, deleteProtocol, archiveProtocol } from '../../services/MedicationService';
+import { getMedicationManualEntries, addMedicationManualEntry, clearMedicationEntries, addMedicationGeneratedEntry } from '../../shared/utils/database';
 import { timeService } from '../../core/timeService';
 import { useMedicationStats, useActiveProtocol, isMedicationOverdue } from './hooks/useMedicationStats';
 
@@ -25,43 +26,41 @@ interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
   onAddMedication: (dose: number, medication: string, date: string) => void;
   onRefreshMedications: () => void;
-  onLogDose: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
   useWheelForNumbers?: boolean;
   useWheelForDate?: boolean;
 }
 
-const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, onLogDose, chartPeriod, onChartPeriodChange, useWheelForNumbers = true, useWheelForDate = true }) => {
+const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddMedication, onRefreshMedications, chartPeriod, onChartPeriodChange, useWheelForNumbers = true, useWheelForDate = true }) => {
+  const {
+    protocols,
+    setProtocols,
+    generateDosesFromProtocols,
+    collapsedMedications,
+    setCollapsedMedications,
+    latestDoseDone,
+    setLatestDoseDone,
+  } = useAppStore();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLogDoseModal, setShowLogDoseModal] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
   const [activeProtocolForModal, setActiveProtocolForModal] = useState<GLP1Protocol | null>(null);
-  const [protocols, setProtocols] = useState<GLP1Protocol[]>(() => getActiveProtocols());
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
   const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
-  const [collapsedMedications, setCollapsedMedications] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem('glpal_collapsed_medications');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  });
 
-  useEffect(() => {
-    localStorage.setItem('glpal_collapsed_medications', JSON.stringify(Array.from(collapsedMedications)));
-  }, [collapsedMedications]);
+  const collapsedSet = useMemo(() => new Set(collapsedMedications), [collapsedMedications]);
 
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
-  const [latestDoseDone, setLatestDoseDone] = useState<number | null>(() => {
-    const saved = localStorage.getItem('latestDoseDone');
-    return saved ? parseInt(saved, 10) : null;
-  });
 
-  const nowTimestamp = useTime(100);
+  const nowTimestamp = useTime(1000);
   const now = new Date(nowTimestamp);
   const activeProtocol = useActiveProtocol(protocols);
   const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone);
@@ -83,16 +82,13 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     [medicationEntries]
   );
 
-  useEffect(() => {
-    const saved = localStorage.getItem('latestDoseDone');
-    if (saved) {
-      setLatestDoseDone(parseInt(saved, 10));
-    }
-  }, []);
-
   const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
+    if (!Array.isArray(protocolList) || protocolList.length === 0) {
+      return;
+    }
     clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
+    if (!generatedDoses) return;
     generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
     
     const now = new Date();
@@ -129,15 +125,10 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   };
 
   const toggleMedication = (medicationName: string) => {
-    setCollapsedMedications(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(medicationName)) {
-        newSet.delete(medicationName);
-      } else {
-        newSet.add(medicationName);
-      }
-      return newSet;
-    });
+    const newSet = collapsedSet.has(medicationName)
+      ? collapsedMedications.filter(m => m !== medicationName)
+      : [...collapsedMedications, medicationName];
+    setCollapsedMedications(newSet);
   };
 
   const handleDeleteMedication = (medicationName: string) => {
@@ -145,27 +136,26 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     protocols.forEach(p => {
       const med = MEDICATIONS.find(m => m.id === p.medication);
       if ((med?.name || p.medication) === medicationName) {
-        deleteMedicationProtocol(p.id);
         updatedProtocols = updatedProtocols.filter(proc => proc.id !== p.id);
       }
     });
-    saveMedicationProtocols(updatedProtocols);
     setProtocols(updatedProtocols);
     handleGenerateDoses(updatedProtocols);
     onRefreshMedications();
-    setCollapsedMedications(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(medicationName);
-      return newSet;
-    });
+    setCollapsedMedications(collapsedMedications.filter(m => m !== medicationName));
     setDeleteConfirmMed(null);
   };
 
   const handleSaveProtocol = (protocol: GLP1Protocol) => {
     const updatedProtocols = saveProtocol(protocol, protocols);
     setProtocols(updatedProtocols);
-    handleGenerateDoses(updatedProtocols);
-    onRefreshMedications();
+    try {
+      handleGenerateDoses(updatedProtocols);
+      onRefreshMedications();
+    } catch (e) {
+      console.error('Error generating doses:', e);
+    }
+    setIsProtocolModalOpen(false);
   };
 
   const handleEditProtocol = (protocol: GLP1Protocol) => {
@@ -190,10 +180,13 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
   const handleOfficialScheduleSave = (newProtocols: GLP1Protocol[]) => {
     const updatedProtocols = [...protocols, ...newProtocols];
-    saveMedicationProtocols(updatedProtocols);
     setProtocols(updatedProtocols);
-    handleGenerateDoses(updatedProtocols);
-    onRefreshMedications();
+    try {
+      handleGenerateDoses(updatedProtocols);
+      onRefreshMedications();
+    } catch (e) {
+      console.error('Error generating doses:', e);
+    }
     setShowOfficialScheduleModal(false);
   };
 
@@ -287,9 +280,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const handleLogDoseSave = () => {
     const now = timeService.nowDate();
     setLatestDoseDone(now.getTime());
-    localStorage.setItem('latestDoseDone', now.getTime().toString());
     onRefreshMedications();
-    onLogDose();
     setIsLogging(false);
   };
 
@@ -395,7 +386,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         
         <ProtocolList
           protocols={protocols}
-          collapsedMedications={collapsedMedications}
+          collapsedMedications={collapsedSet}
           onToggleMedication={toggleMedication}
           onEditProtocol={handleEditProtocol}
           onDeleteClick={setDeleteConfirmMed}

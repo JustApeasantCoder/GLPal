@@ -1,30 +1,16 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import SettingsMenu from './features/dashboard/components/SettingsMenu';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
-import { WeightEntry, GLP1Entry, UserProfile } from './types';
 import { ChartPeriod, useTime } from './shared/hooks';
-import { useAppHistory, ModalType } from './shared/hooks/useAppHistory';
-import { 
-  initializeDatabase, 
-  getWeightEntries, 
-  getAllGLP1Entries, 
-  getUserProfile, 
-  addWeightEntry, 
-  addGLP1ManualEntry,
-  saveUserProfile,
-  clearAllData
-} from './shared/utils/database';
-import { initializeSampleData } from './shared/utils/sampleData';
+import { useAppStore, TabType } from './stores/appStore';
 import { timeService } from './core/timeService';
 
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
-const MedicationTab = lazy(() => import('./features/medication/MedicationTab'));
-const DosageCalculatorTab = lazy(() => import('./features/medication/DosageCalculatorTab'));
-const PeptidesTab = lazy(() => import('./features/peptides/PeptidesTab'));
-const LogTab = lazy(() => import('./features/medication/LogTab'));
-
-type TabType = 'dashboard' | 'doses' | 'dosage' | 'log' | 'peptides';
+import Dashboard from './features/dashboard/Dashboard';
+import MedicationTab from './features/medication/MedicationTab';
+import DosageCalculatorTab from './features/medication/DosageCalculatorTab';
+import PeptidesTab from './features/peptides/PeptidesTab';
+import LogTab from './features/medication/LogTab';
 
 interface TabContentProps {
   children: React.ReactNode;
@@ -43,29 +29,27 @@ const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
 
 function App() {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [timeResetKey, setTimeResetKey] = useState(0);
+  const [timeResetKey, setTimeResetKey] = React.useState(0);
   const now = useTime(1000, timeResetKey);
-  const [activeTab, setActiveTab] = useState<TabType>(() => {
-    const saved = localStorage.getItem('glpal_active_tab');
-    return (saved as TabType) || 'dashboard';
-  });
-  const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>(() => {
-    const saved = localStorage.getItem('glpal_chart_period');
-    return (saved as ChartPeriod) || '90days';
-  });
-
-  const { openModal, closeModal } = useAppHistory(
+  
+  const {
     activeTab,
     setActiveTab,
     activeModal,
-    setActiveModal
-  );
-
-  const isSettingsOpen = activeModal === 'settings';
-  const [weights, setWeights] = useState<WeightEntry[]>([]);
-  const [dosesEntries, setDosesEntries] = useState<GLP1Entry[]>([]);
-  const [logRefreshKey, setLogRefreshKey] = useState(0);
+    setActiveModal,
+    chartPeriod,
+    setChartPeriod,
+    profile,
+    weights,
+    dosesEntries,
+    initialize,
+    addWeight,
+    addDose,
+    refreshDoses,
+    updateProfile,
+    clearAllData,
+    generateSampleData,
+  } = useAppStore();
 
   useEffect(() => {
     const isInPWA = window.matchMedia('(display-mode: standalone)').matches || 
@@ -89,131 +73,41 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('glpal_active_tab', activeTab);
-  }, [activeTab]);
+    initialize();
+  }, [initialize]);
 
-  useEffect(() => {
-    localStorage.setItem('glpal_chart_period', chartPeriod);
-  }, [chartPeriod]);
-  
-  const [profile, setProfile] = useState<UserProfile>({
-    age: 35,
-    gender: 'male',
-    height: 180,
-    activityLevel: 1.2,
-    unitSystem: 'metric',
-    useWheelForNumbers: false,
-    useWheelForDate: true,
-  });
-
-  // Save profile immediately for responsive input experience
-  const handleSave = useCallback((newProfile: UserProfile) => {
-    saveUserProfile(newProfile);
-  }, []);
-
-  // Initialize database and load data
-  useEffect(() => {
-    const initializeApp = () => {
-      try {
-        initializeDatabase();
-        
-        // Load existing data
-        const existingWeights = getWeightEntries();
-        const existingGLP1 = getAllGLP1Entries();
-        const existingProfile = getUserProfile();
-        
-        // Just load data - no automatic sample generation
-        setWeights(existingWeights);
-        setDosesEntries(existingGLP1);
-        
-        // Load profile or use default
-        if (existingProfile) {
-          setProfile(existingProfile);
-        } else {
-          saveUserProfile(profile);
-        }
-      } catch (error) {
-        console.error('Error initializing database:', error);
-      }
-    };
-    
-    initializeApp();
-  }, []);
-
-  // Generate sample data on demand
-  const handleGenerateSampleData = useCallback(() => {
-    clearAllData();
-    initializeSampleData();
-    const newWeights = getWeightEntries();
-    const newDoses = getAllGLP1Entries();
-    const newProfile = getUserProfile();
-    setWeights(newWeights);
-    setDosesEntries(newDoses);
-    if (newProfile) {
-      setProfile(newProfile);
-    }
-  }, []);
-
-const handleAddWeight = (newWeight: number) => {
+  const handleAddWeight = useCallback((newWeight: number) => {
     const today = timeService.nowDate().toISOString().split('T')[0];
     const newEntry = { date: today, weight: newWeight };
-    
-    // Save to database
-    addWeightEntry(newEntry);
-    
-    // Update state
-    setWeights(prev => [...prev, newEntry]);
-  };
+    addWeight(newEntry);
+  }, [addWeight]);
 
-  const handleAddDose = (dose: number, medication: string, date: string) => {
+  const handleAddDose = useCallback((dose: number, medication: string, date: string) => {
     const newEntry = { 
       date, 
       medication, 
       dose, 
-      halfLifeHours: 144 
+      halfLifeHours: 144,
+      isManual: true,
     };
-    
-    // Save to database (manual entry)
-    addGLP1ManualEntry(newEntry);
-    
-    // Reload all entries for chart (both generated and manual)
-    const allEntries = getAllGLP1Entries();
-    setDosesEntries(allEntries);
-  };
+    addDose(newEntry);
+    refreshDoses();
+  }, [addDose, refreshDoses]);
 
   const handleRefreshDoses = useCallback(() => {
-    const entries = getAllGLP1Entries();
-    setDosesEntries(entries);
-  }, []);
+    refreshDoses();
+  }, [refreshDoses]);
 
-  const handleClearData = () => {
+  const handleClearData = useCallback(() => {
     if (window.confirm('Are you sure you want to delete all data? This cannot be undone.')) {
       clearAllData();
-      initializeDatabase();
-      
-      setWeights([]);
-      setDosesEntries([]);
-      
-      const defaultProfile: UserProfile = {
-        age: 35,
-        gender: 'male',
-        height: 180,
-        activityLevel: 1.2,
-        unitSystem: 'metric',
-        useWheelForNumbers: false,
-        useWheelForDate: true,
-      };
-      setProfile(defaultProfile);
-      saveUserProfile(defaultProfile);
     }
-  };
+  }, [clearAllData]);
 
-// Use goal weight from profile with fallback
   const goalWeight = profile.goalWeight || 80;
+  const isSettingsOpen = activeModal === 'settings';
 
-
-
-return (
+  return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end animate-gradient-shift hide-scrollbar">
       {/* Fixed top navigation */}
       <nav className={`fixed top-0 left-0 right-0 backdrop-blur-xl border-b px-4 py-3 z-50 shadow-theme ${
@@ -230,9 +124,9 @@ return (
               </span>
             )}
           </h1>
-<div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => openModal('settings')}
+              onClick={() => setActiveModal('settings')}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Settings"
               title="Settings"
@@ -376,7 +270,6 @@ return (
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
         <div className="w-full px-4 py-2 space-y-3 md:px-6 lg:px-8 relative">
-          <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-pulse text-text-muted">Loading...</div></div>}>
           <TabContent isActive={activeTab === 'dashboard'}>
             <div className="max-w-md mx-auto">
               <Dashboard
@@ -392,15 +285,12 @@ return (
             </div>
           </TabContent>
 
-
-
           <TabContent isActive={activeTab === 'doses'}>
             <div className="max-w-md mx-auto">
               <MedicationTab 
                 medicationEntries={dosesEntries} 
                 onAddMedication={handleAddDose}
                 onRefreshMedications={handleRefreshDoses}
-                onLogDose={() => setLogRefreshKey(k => k + 1)}
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
                 useWheelForNumbers={profile.useWheelForNumbers ?? false}
@@ -422,27 +312,22 @@ return (
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
             <div className="max-w-md mx-auto">
-              <LogTab refreshKey={logRefreshKey} profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
+              <LogTab profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>
-          </Suspense>
         </div>
       </main>
 
       <SettingsMenu
         profile={profile}
-        onProfileUpdate={useCallback((newProfile: UserProfile) => {
-          // Update UI state immediately for responsive experience
-          setProfile(newProfile);
-          
-          // Save immediately for responsive input
-          handleSave(newProfile);
-        }, [handleSave])}
+        onProfileUpdate={useCallback((newProfile) => {
+          updateProfile(newProfile);
+        }, [updateProfile])}
         isDarkMode={isDarkMode}
         onThemeToggle={toggleTheme}
         isOpen={isSettingsOpen}
-        onClose={closeModal}
-        onGenerateSampleData={handleGenerateSampleData}
+        onClose={() => setActiveModal(null)}
+        onGenerateSampleData={generateSampleData}
       />
     </div>
   );

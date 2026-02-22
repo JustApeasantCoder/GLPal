@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile, PeptideLogEntry, Peptide } from '../../types';
-import { getMedicationManualEntries, getMedicationProtocols, saveMedicationManualEntries, getWeightEntries, saveWeightEntries, getPeptideLogs, getPeptides } from '../../shared/utils/database';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
+import { useAppStore } from '../../stores/appStore';
+import { saveMedicationManualEntries, saveWeightEntries } from '../../shared/utils/database';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
 
 interface LogTabProps {
@@ -59,15 +60,23 @@ const COMMON_SIDE_EFFECTS = [
   'Heartburn',
 ];
 
-const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers = true }) => {
+const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) => {
   const { bigCard, isDarkMode } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
   const bigCardText = {
     title: "text-lg font-bold text-text-primary mb-2"
   };
-  const [manualEntries, setManualEntries] = useState<GLP1Entry[]>([]);
-  const [protocols, setProtocols] = useState<GLP1Protocol[]>([]);
+  
+  const { weights, dosesEntries, protocols, peptides, peptideLogs, addPeptideLog, deletePeptideLog, addPeptide, updatePeptide, deletePeptide, addWeight, deleteWeight, refreshWeights } = useAppStore();
+  
+  const [manualEntries, setManualEntries] = useState<GLP1Entry[]>(() => 
+    dosesEntries.filter(e => e.isManual).sort((a, b) => b.date.localeCompare(a.date))
+  );
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>(() => 
+    [...weights].sort((a, b) => b.date.localeCompare(a.date))
+  );
+  
   const [editingEntry, setEditingEntry] = useState<GLP1Entry | null>(null);
   const [isDoseLogCollapsed, setIsDoseLogCollapsed] = useState(() => {
     const saved = localStorage.getItem('glpal_dose_log_collapsed');
@@ -77,7 +86,6 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [sortAsc, setSortAsc] = useState(false);
   const [isSideEffectsVisible, setIsSideEffectsVisible] = useState(false);
   const [isSideEffectsClosing, setIsSideEffectsClosing] = useState(false);
-  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [isWeightLogCollapsed, setIsWeightLogCollapsed] = useState(() => {
     const saved = localStorage.getItem('glpal_weight_log_collapsed');
     return saved === 'true';
@@ -88,24 +96,21 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
-  const [peptideLogs, setPeptideLogs] = useState<PeptideLogEntry[]>([]);
-  const [peptides, setPeptides] = useState<Peptide[]>([]);
   const [isPeptideLogCollapsed, setIsPeptideLogCollapsed] = useState(() => {
     const saved = localStorage.getItem('glpal_peptide_log_collapsed');
     return saved === 'true';
   });
 
-  // Picker states
   const [showCaloriePicker, setShowCaloriePicker] = useState(false);
   const [showProteinPicker, setShowProteinPicker] = useState(false);
   const [showCarbsPicker, setShowCarbsPicker] = useState(false);
   const [showFatPicker, setShowFatPicker] = useState(false);
 
   const weeklyAverages = useMemo(() => {
-    if (weightEntries.length === 0) return new Map<string, number>();
+    if (weights.length === 0) return new Map<string, number>();
     
     const weekGroups = new Map<string, WeightEntry[]>();
-    weightEntries.forEach(entry => {
+    weights.forEach(entry => {
       const key = getWeekKey(entry.date);
       if (!weekGroups.has(key)) {
         weekGroups.set(key, []);
@@ -120,12 +125,12 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
     });
     
     return averages;
-  }, [weightEntries]);
+  }, [weights]);
 
   const aggregatedWeightData = useMemo(() => {
-    if (weightEntries.length === 0) return { data: [], prevChange: null };
+    if (weights.length === 0) return { data: [], prevChange: null };
     
-    const sorted = [...weightEntries].sort((a, b) => a.date.localeCompare(b.date));
+    const sorted = [...weights].sort((a, b) => a.date.localeCompare(b.date));
     
     if (weightViewMode === 'daily') {
       const dailyWithChange = sorted.map((entry, idx) => {
@@ -148,42 +153,55 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
       const weekGroups = new Map<string, WeightEntry[]>();
       sorted.forEach(entry => {
         const key = getWeekKey(entry.date);
-        if (!weekGroups.has(key)) weekGroups.set(key, []);
+        if (!weekGroups.has(key)) {
+          weekGroups.set(key, []);
+        }
         weekGroups.get(key)!.push(entry);
       });
       
-      const weekly: { date: string; avgWeight: number; weekLabel: string; change: number | null; macros: { calories: number; protein: number; carbs: number; fat: number } | null; hasNotes: boolean }[] = [];
-      const sortedWeeks = Array.from(weekGroups.keys()).sort();
+      const weekly: (WeightEntry & { change: number | null; weekLabel: string })[] = [];
+      let prevAvg: number | null = null;
       
-      sortedWeeks.forEach((weekKey, idx) => {
+      const sortedWeeks = Array.from(weekGroups.keys()).sort();
+      sortedWeeks.forEach(weekKey => {
         const entries = weekGroups.get(weekKey)!;
-        const sum = entries.reduce((acc, e) => acc + e.weight, 0);
-        const avg = sum / entries.length;
-        const prevAvg = idx > 0 ? weekly[idx - 1].avgWeight : null;
+        const avg = entries.reduce((sum, e) => sum + e.weight, 0) / entries.length;
         const change = prevAvg !== null ? prevAvg - avg : null;
+        prevAvg = avg;
         
-        const macrosSum = entries.reduce((acc, e) => ({
-          calories: acc.calories + (e.macros?.calories || 0),
-          protein: acc.protein + (e.macros?.protein || 0),
-          carbs: acc.carbs + (e.macros?.carbs || 0),
-          fat: acc.fat + (e.macros?.fat || 0),
-        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        const weekLabel = getWeekLabel(entries[0].date);
         
-        const hasNotes = entries.some(e => e.notes);
+        const notes = entries.filter(e => e.notes).map(e => e.notes).filter(Boolean).join('; ');
         
-        weekly.push({ 
-          date: weekKey, 
-          avgWeight: avg, 
-          weekLabel: getWeekLabel(entries[0].date), 
+        const aggregatedMacros = entries.reduce(
+          (acc, e) => {
+            if (e.macros) {
+              acc.calories += e.macros.calories || 0;
+              acc.protein += e.macros.protein || 0;
+              acc.carbs += e.macros.carbs || 0;
+              acc.fat += e.macros.fat || 0;
+            }
+            return acc;
+          },
+          { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
+        const macros = aggregatedMacros.calories > 0 || aggregatedMacros.protein > 0 || aggregatedMacros.carbs > 0 || aggregatedMacros.fat > 0 
+          ? aggregatedMacros 
+          : undefined;
+        
+        weekly.push({
+          date: weekKey,
+          weight: avg,
           change,
-          macros: macrosSum.calories > 0 || macrosSum.protein > 0 || macrosSum.carbs > 0 || macrosSum.fat > 0 ? macrosSum : null,
-          hasNotes
+          weekLabel,
+          notes: notes || undefined,
+          macros,
         });
       });
       
       let prevChange: number | null = null;
       if (weekly.length >= 2) {
-        prevChange = weekly[weekly.length - 2].avgWeight - weekly[weekly.length - 1].avgWeight;
+        prevChange = weekly[weekly.length - 2].weight - weekly[weekly.length - 1].weight;
       }
       
       return { data: weekly, prevChange };
@@ -193,49 +211,62 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
       const monthGroups = new Map<string, WeightEntry[]>();
       sorted.forEach(entry => {
         const key = getMonthKey(entry.date);
-        if (!monthGroups.has(key)) monthGroups.set(key, []);
+        if (!monthGroups.has(key)) {
+          monthGroups.set(key, []);
+        }
         monthGroups.get(key)!.push(entry);
       });
       
-      const monthly: { date: string; avgWeight: number; monthLabel: string; change: number | null; macros: { calories: number; protein: number; carbs: number; fat: number } | null; hasNotes: boolean }[] = [];
-      const sortedMonths = Array.from(monthGroups.keys()).sort();
+      const monthly: (WeightEntry & { change: number | null; monthLabel: string })[] = [];
+      let prevAvg: number | null = null;
       
-      sortedMonths.forEach((monthKey, idx) => {
+      const sortedMonths = Array.from(monthGroups.keys()).sort();
+      sortedMonths.forEach(monthKey => {
         const entries = monthGroups.get(monthKey)!;
-        const sum = entries.reduce((acc, e) => acc + e.weight, 0);
-        const avg = sum / entries.length;
-        const prevAvg = idx > 0 ? monthly[idx - 1].avgWeight : null;
+        const avg = entries.reduce((sum, e) => sum + e.weight, 0) / entries.length;
         const change = prevAvg !== null ? prevAvg - avg : null;
+        prevAvg = avg;
         
-        const macrosSum = entries.reduce((acc, e) => ({
-          calories: acc.calories + (e.macros?.calories || 0),
-          protein: acc.protein + (e.macros?.protein || 0),
-          carbs: acc.carbs + (e.macros?.carbs || 0),
-          fat: acc.fat + (e.macros?.fat || 0),
-        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        const monthLabel = getMonthLabel(entries[0].date);
         
-        const hasNotes = entries.some(e => e.notes);
+        const notes = entries.filter(e => e.notes).map(e => e.notes).filter(Boolean).join('; ');
         
-        monthly.push({ 
-          date: monthKey, 
-          avgWeight: avg, 
-          monthLabel: getMonthLabel(entries[0].date), 
+        const aggregatedMacros = entries.reduce(
+          (acc, e) => {
+            if (e.macros) {
+              acc.calories += e.macros.calories || 0;
+              acc.protein += e.macros.protein || 0;
+              acc.carbs += e.macros.carbs || 0;
+              acc.fat += e.macros.fat || 0;
+            }
+            return acc;
+          },
+          { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
+        const macros = aggregatedMacros.calories > 0 || aggregatedMacros.protein > 0 || aggregatedMacros.carbs > 0 || aggregatedMacros.fat > 0 
+          ? aggregatedMacros 
+          : undefined;
+        
+        monthly.push({
+          date: monthKey + '-01',
+          weight: avg,
           change,
-          macros: macrosSum.calories > 0 || macrosSum.protein > 0 || macrosSum.carbs > 0 || macrosSum.fat > 0 ? macrosSum : null,
-          hasNotes
+          monthLabel,
+          notes: notes || undefined,
+          macros,
         });
       });
       
       let prevChange: number | null = null;
       if (monthly.length >= 2) {
-        prevChange = monthly[monthly.length - 2].avgWeight - monthly[monthly.length - 1].avgWeight;
+        prevChange = monthly[monthly.length - 2].weight - monthly[monthly.length - 1].weight;
       }
       
       return { data: monthly, prevChange };
     }
     
     return { data: sorted, prevChange: null };
-  }, [weightEntries, weightViewMode]);
+  }, [weights, weightViewMode]);
 
   const allMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -265,24 +296,6 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   const [activeSideEffect, setActiveSideEffect] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadData = () => {
-      const entries = getMedicationManualEntries();
-      const prots = getMedicationProtocols();
-      setManualEntries(entries.sort((a, b) => b.date.localeCompare(a.date)));
-      setProtocols(prots);
-
-      const realWeightEntries = getWeightEntries();
-      setWeightEntries(realWeightEntries);
-
-      const loadedPeptides = getPeptides();
-      setPeptides(loadedPeptides);
-      const loadedPeptideLogs = getPeptideLogs();
-      setPeptideLogs(loadedPeptideLogs.sort((a, b) => b.date.localeCompare(a.date)));
-    };
-    loadData();
-  }, [refreshKey]);
-
-  useEffect(() => {
     localStorage.setItem('glpal_dose_log_collapsed', String(isDoseLogCollapsed));
   }, [isDoseLogCollapsed]);
 
@@ -293,6 +306,14 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
   useEffect(() => {
     localStorage.setItem('glpal_peptide_log_collapsed', String(isPeptideLogCollapsed));
   }, [isPeptideLogCollapsed]);
+
+  useEffect(() => {
+    setManualEntries(dosesEntries.filter(e => e.isManual).sort((a, b) => b.date.localeCompare(a.date)));
+  }, [dosesEntries]);
+
+  useEffect(() => {
+    setWeightEntries([...weights].sort((a, b) => b.date.localeCompare(a.date)));
+  }, [weights]);
 
   useEffect(() => {
     if (editingEntry) {
@@ -382,7 +403,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
     );
     
     saveWeightEntries(updatedEntries);
-    setWeightEntries(updatedEntries);
+    refreshWeights();
     setEditingWeightEntry(null);
   };
 
@@ -603,7 +624,7 @@ const LogTab: React.FC<LogTabProps> = ({ refreshKey, profile, useWheelForNumbers
                       <p className="text-[#4ADEA8] font-bold">
                         {weightViewMode === 'daily' 
                           ? `${convertWeightFromKg(entry.weight, unitSystem).toFixed(1)}${weightUnit}` 
-                          : `${convertWeightFromKg(entry.avgWeight, unitSystem).toFixed(1)}${weightUnit}`
+                          : `${convertWeightFromKg(entry.weight, unitSystem).toFixed(1)}${weightUnit}`
                         }
                       </p>
                     </div>

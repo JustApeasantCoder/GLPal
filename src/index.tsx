@@ -20,11 +20,15 @@ root.render(
   </React.StrictMode>
 );
 
-serviceWorkerRegistration.register({
-  onUpdate: (registration) => {
-    console.log('New version available, refreshing...');
-    window.location.reload();
-  },
-});
+const isElectron = window.navigator.userAgent.includes('Electron');
+
+if (!isElectron) {
+  serviceWorkerRegistration.register({
+    onUpdate: (registration) => {
+      console.log('New version available, refreshing...');
+      window.location.reload();
+    },
+  });
+}
 
 reportWebVitals();
