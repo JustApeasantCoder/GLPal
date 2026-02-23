@@ -18,8 +18,9 @@ import { CHART_DATE_FORMATS } from '../../shared/utils/chartUtils';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { useAppStore } from '../../stores/appStore';
 import { MEDICATIONS, generateId } from '../../constants/medications';
-import { saveProtocol, deleteProtocol, archiveProtocol } from '../../services/MedicationService';
-import { getMedicationManualEntries, addMedicationManualEntry, clearMedicationEntries, addMedicationGeneratedEntry } from '../../shared/utils/database';
+import { saveProtocol, deleteProtocol, archiveProtocol, generateDosesFromProtocols, regenerateAllDoses } from '../../services/MedicationService';
+import { getMedicationManualEntries, addMedicationManualEntry, clearMedicationEntries, addMedicationGeneratedEntry, saveMedicationProtocols, setMedicationEntries, deleteMedicationProtocols, getMedicationEntries } from '../../shared/utils/database';
+import { db } from '../../db/dexie';
 import { timeService } from '../../core/timeService';
 import { useMedicationStats, useActiveProtocol, isMedicationOverdue } from './hooks/useMedicationStats';
 import { normalizeMedName } from '../../shared/utils/medicationUtils';
@@ -39,7 +40,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const {
     protocols,
     setProtocols,
-    generateDosesFromProtocols,
     collapsedMedications,
     setCollapsedMedications,
     latestDoseDone,
@@ -90,20 +90,24 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     [medicationEntries]
   );
 
-  const handleGenerateDoses = (protocolList: GLP1Protocol[]) => {
+  const handleGenerateDoses = async (protocolList: GLP1Protocol[]) => {
     if (!Array.isArray(protocolList) || protocolList.length === 0) {
       return;
     }
-    clearMedicationEntries();
+    await clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     if (!generatedDoses) return;
-    generatedDoses.forEach(entry => addMedicationGeneratedEntry(entry));
+    for (const entry of generatedDoses) {
+      await addMedicationGeneratedEntry(entry);
+    }
     
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
-    protocolList.forEach(protocol => {
-      if (protocol.isArchived) return;
+    const existingManual = await getMedicationManualEntries();
+    
+    for (const protocol of protocolList) {
+      if (protocol.isArchived) continue;
       
       const start = new Date(protocol.startDate);
       const stop = protocol.stopDate ? new Date(protocol.stopDate) : now;
@@ -113,7 +117,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       while (d < stop && d <= now) {
         const dateStr = CHART_DATE_FORMATS.localDate(d);
         
-        const existingManual = getMedicationManualEntries();
         const alreadyLogged = existingManual.some(e => e.date === dateStr && e.medication === protocol.medication);
         
         if (!alreadyLogged) {
@@ -124,12 +127,12 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             halfLifeHours: protocol.halfLifeHours,
             isManual: true
           };
-          addMedicationManualEntry(manualEntry);
+          await addMedicationManualEntry(manualEntry);
         }
         
         d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
       }
-    });
+    }
   };
 
   const toggleMedication = (medicationName: string) => {
@@ -139,17 +142,29 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     setCollapsedMedications(newSet);
   };
 
-  const handleDeleteMedication = (medicationName: string) => {
-    let updatedProtocols = [...protocols];
-    protocols.forEach(p => {
+  const handleDeleteMedication = async (medicationName: string) => {
+    const updatedProtocols = protocols.filter(p => {
       const med = MEDICATIONS.find(m => m.id === p.medication);
-      if ((med?.name || p.medication) === medicationName) {
-        updatedProtocols = updatedProtocols.filter(proc => proc.id !== p.id);
-      }
+      return (med?.name || p.medication) !== medicationName;
     });
-    setProtocols(updatedProtocols);
-    handleGenerateDoses(updatedProtocols);
-    onRefreshMedications();
+    
+    const idsToDelete = protocols.filter(p => {
+      const med = MEDICATIONS.find(m => m.id === p.medication);
+      return (med?.name || p.medication) === medicationName;
+    }).map(p => p.id);
+    
+    await deleteMedicationProtocols(idsToDelete);
+    
+    const existingEntries = await getMedicationEntries();
+    const manualEntries = existingEntries.filter(e => e.isManual);
+    
+    const newDoses = regenerateAllDoses(updatedProtocols, true);
+    const allEntries = [...manualEntries, ...newDoses];
+    await db.medications.clear();
+    await db.medications.bulkPut(allEntries);
+    
+    await setProtocols(updatedProtocols);
+    await onRefreshMedications();
     setCollapsedMedications(collapsedMedications.filter(m => m !== medicationName));
     setDeleteConfirmMed(null);
   };
@@ -174,16 +189,16 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
   const handleDeleteProtocol = async (id: string) => {
     const updatedList = await deleteProtocol(id, protocols);
-    setProtocols(updatedList);
+    await setProtocols(updatedList);
     setEditingProtocol(null);
-    onRefreshMedications();
+    await onRefreshMedications();
   };
 
   const handleArchiveProtocol = async (protocol: GLP1Protocol) => {
     const updatedList = await archiveProtocol(protocol, protocols);
-    setProtocols(updatedList);
+    await setProtocols(updatedList);
     setEditingProtocol(null);
-    onRefreshMedications();
+    await onRefreshMedications();
   };
 
   const handleOfficialScheduleSave = async (newProtocols: GLP1Protocol[]) => {

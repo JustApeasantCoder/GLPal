@@ -6,7 +6,11 @@ import {
   getMedicationProtocols, 
   deleteMedicationProtocol, 
   setMedicationEntries,
-  getArchivedMedicationProtocols 
+  clearMedicationEntries,
+  getMedicationEntries,
+  getArchivedMedicationProtocols,
+  addMedicationGeneratedEntry,
+  addMedicationManualEntry,
 } from '../shared/utils/database';
 
 export const generateDosesFromProtocols = (
@@ -42,13 +46,14 @@ export const generateDosesFromProtocols = (
   return generatedDoses;
 };
 
-export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
+export const regenerateAllDoses = (protocols: GLP1Protocol[], includeFuture: boolean = false): GLP1Entry[] => {
   const today = timeService.nowDate();
+  const endDate = includeFuture ? new Date('2099-12-31') : today;
   const newDoses: GLP1Entry[] = [];
   
   protocols.forEach(prot => {
     const start = new Date(prot.startDate);
-    const end = prot.stopDate ? new Date(prot.stopDate) : today;
+    const end = prot.stopDate ? new Date(prot.stopDate) : endDate;
     const intervalDays = 7 / prot.frequencyPerWeek;
 
     let d = new Date(start);
@@ -91,8 +96,13 @@ export const deleteProtocol = async (id: string, existingProtocols: GLP1Protocol
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== id);
   await saveMedicationProtocols(updatedList);
   
-  const newDoses = regenerateAllDoses(updatedList);
-  await setMedicationEntries(newDoses);
+  const existingEntries = await getMedicationEntries();
+  const manualEntries = existingEntries.filter(e => e.isManual);
+  
+  const newDoses = regenerateAllDoses(updatedList, true);
+  const allEntries = [...manualEntries, ...newDoses];
+  await db.medications.clear();
+  await db.medications.bulkPut(allEntries);
   
   return updatedList;
 };
@@ -101,8 +111,13 @@ export const archiveProtocol = async (protocol: GLP1Protocol, existingProtocols:
   const updatedList = (Array.isArray(existingProtocols) ? existingProtocols : []).filter(p => p.id !== protocol.id);
   await saveMedicationProtocols(updatedList);
   
-  const newDoses = regenerateAllDoses(updatedList);
-  await setMedicationEntries(newDoses);
+  const existingEntries = await getMedicationEntries();
+  const manualEntries = existingEntries.filter(e => e.isManual);
+  
+  const newDoses = regenerateAllDoses(updatedList, true);
+  const allEntries = [...manualEntries, ...newDoses];
+  await db.medications.clear();
+  await db.medications.bulkPut(allEntries);
   
   return updatedList;
 };

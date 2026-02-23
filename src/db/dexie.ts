@@ -13,7 +13,7 @@ export class GLPalDB extends Dexie {
     super('GLPalDB');
     this.version(1).stores({
       weights: 'date',
-      medications: 'date, medication',
+      medications: '[date+medication], date, medication',
       protocols: 'id, medication, startDate',
       peptides: 'id, category, isActive',
       peptideLogs: 'id, peptideId, date',

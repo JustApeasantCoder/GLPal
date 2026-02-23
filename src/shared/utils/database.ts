@@ -101,8 +101,23 @@ export const clearMedicationEntries = async (): Promise<void> => {
   await db.medications.clear();
 };
 
-export const setMedicationEntries = async (entries: GLP1Entry[]): Promise<void> => {
-  await db.medications.bulkPut(entries);
+export const setMedicationEntries = async (newEntries: GLP1Entry[]): Promise<void> => {
+  const existingEntries = await getMedicationEntries();
+  
+  for (const newEntry of newEntries) {
+    const existingIndex = existingEntries.findIndex(
+      e => e.date === newEntry.date && e.medication === newEntry.medication
+    );
+    
+    if (existingIndex >= 0) {
+      existingEntries[existingIndex] = newEntry;
+    } else {
+      existingEntries.push(newEntry);
+    }
+  }
+  
+  existingEntries.sort((a, b) => a.date.localeCompare(b.date));
+  await db.medications.bulkPut(existingEntries);
 };
 
 export const addMedicationGeneratedEntry = async (entry: GLP1Entry): Promise<void> => {
@@ -189,6 +204,10 @@ export const updateMedicationProtocol = async (updatedProtocol: GLP1Protocol): P
 
 export const deleteMedicationProtocol = async (id: string): Promise<void> => {
   await db.protocols.delete(id);
+};
+
+export const deleteMedicationProtocols = async (ids: string[]): Promise<void> => {
+  await db.protocols.bulkDelete(ids);
 };
 
 export const getArchivedMedicationProtocols = async (): Promise<GLP1Protocol[]> => {
