@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import MedicationChart from './components/MedicationChart';
 import MedicationModal from './components/MedicationModal';
 import LogDoseModal from './components/LogDoseModal';
@@ -62,6 +62,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [showProgressDebug, setShowProgressDebug] = useState(false);
   const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
+  
+  const protocolRef = useRef<GLP1Protocol | null>(null);
 
   const nowTimestamp = useTime();
   const now = new Date(nowTimestamp);
@@ -246,6 +248,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
     if (targetProtocol) {
+      protocolRef.current = targetProtocol;
       setIsLogging(true);
       setActiveProtocolForModal(targetProtocol);
       setShowLogDoseModal(true);
@@ -262,6 +265,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     const targetMed = loggingMedicationName || activeProtocol?.medication;
     const targetProtocol = targetMed ? getActiveProtocolForMedication(targetMed) : activeProtocol;
     if (targetProtocol) {
+      protocolRef.current = targetProtocol;
       setIsLogging(true);
       setActiveProtocolForModal(targetProtocol);
       setShowLogDoseModal(true);
@@ -472,6 +476,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         }}
         onSave={handleLogDoseSave}
         protocol={activeProtocolForModal || activeProtocol || null}
+        protocolRef={protocolRef}
         allMedications={uniqueMedications}
       />
 

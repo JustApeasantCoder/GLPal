@@ -11,6 +11,7 @@ interface LogDoseModalProps {
   onSave: () => void;
   protocol: GLP1Protocol | null;
   allMedications?: string[];
+  protocolRef?: React.MutableRefObject<GLP1Protocol | null>;
 }
 
 const INJECTION_AREAS = ['Abdomen', 'Thigh', 'Arm', 'Buttock'];
@@ -31,12 +32,15 @@ const getPainLevelColor = (level: number): string => {
   return '#f87171';
 };
 
-const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [] }) => {
+const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [], protocolRef }) => {
   const { isDarkMode } = useTheme();
+  
+  const effectiveProtocol = protocolRef?.current || protocol;
+  
   const medicationColor = useMemo(() => {
-    if (!protocol?.medication || allMedications.length === 0) return '#B19CD9';
-    return getMedicationColorByName(protocol.medication, allMedications).stroke;
-  }, [protocol?.medication, allMedications]);
+    if (!effectiveProtocol?.medication || allMedications.length === 0) return '#B19CD9';
+    return getMedicationColorByName(effectiveProtocol.medication, allMedications).stroke;
+  }, [effectiveProtocol?.medication, allMedications]);
   const [painLevel, setPainLevel] = useState<number>(0);
   const [injectionArea, setInjectionArea] = useState<string>('');
   const [injectionSide, setInjectionSide] = useState<string>('');
@@ -76,7 +80,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
 
   const painLevelColor = useMemo(() => getPainLevelColor(painLevel), [painLevel]);
 
-  if (!isVisible) return null;
+  if (!isOpen) return null;
 
   const today = timeService.nowDate().toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -93,17 +97,20 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
     return parts.join(' ');
   };
 
-  const handleSave = () => {
-    if (!protocol) return;
+  const handleSave = async () => {
+    if (!effectiveProtocol?.medication) {
+      console.warn('No protocol available for save');
+      return;
+    }
 
     const todayStr = timeService.todayString();
     const injectionSite = getInjectionSiteString();
     
     const newEntry: GLP1Entry = {
       date: todayStr,
-      medication: protocol.medication,
-      dose: protocol.dose,
-      halfLifeHours: protocol.halfLifeHours,
+      medication: effectiveProtocol.medication,
+      dose: effectiveProtocol.dose,
+      halfLifeHours: effectiveProtocol.halfLifeHours,
       isManual: true,
       time: currentTime,
       painLevel: painLevel > 0 ? painLevel : undefined,
@@ -112,8 +119,8 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
       notes: notes || undefined,
     };
 
-    addMedicationManualEntry(newEntry);
-    onSave();
+    await addMedicationManualEntry(newEntry);
+    await onSave();
     onClose();
   };
 
@@ -170,7 +177,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           }`}>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Medication</span>
-              <span className="text-sm font-medium" style={{ color: medicationColor }}>{protocol?.medication || 'N/A'}</span>
+              <span className="text-sm font-medium" style={{ color: medicationColor }}>{effectiveProtocol?.medication || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-text-secondary">Date</span>
@@ -182,7 +189,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-text-secondary">Dose</span>
-              <span className="text-sm font-medium text-[#4ADEA8]">{protocol?.dose || 0}mg</span>
+              <span className="text-sm font-medium text-[#4ADEA8]">{effectiveProtocol?.dose || 0}mg</span>
             </div>
           </div>
         </div>
@@ -308,7 +315,12 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white font-medium hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all"
+            disabled={!effectiveProtocol?.medication}
+            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+              effectiveProtocol?.medication
+                ? 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:shadow-[0_0_20px_rgba(74,222,168,0.5)]'
+                : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+            }`}
           >
             Save
           </button>
