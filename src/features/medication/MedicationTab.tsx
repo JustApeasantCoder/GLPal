@@ -321,7 +321,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Total Doses</p>
-              <p className={text.value}>{stats.totalDoses}</p>
+              <p className={text.value}>{stats.totalPlannedDoses}</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Cost/Month</p>
@@ -337,11 +337,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
             <div className={smallCard}>
               <p className={text.label}>Planned Doses</p>
-              <p className={text.value}>{stats.plannedDoses}</p>
+              <p className={text.value}>{stats.allFuturePlannedDoses}</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Logged Doses</p>
-              <p className={text.value}>{stats.thisMonth}</p>
+              <p className={text.value}>{medicationEntries.filter(e => e.isManual).length}</p>
             </div>
           </div>
           
@@ -554,6 +554,39 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
             const end = p.stopDate || '2099-12-31';
             return todayStr >= start && todayStr <= end;
           });
+
+          const calculateFutureDosesForMed = () => {
+            if (!filteredProtocols || filteredProtocols.length === 0) return 0;
+            let count = 0;
+            filteredProtocols.forEach(protocol => {
+              const start = new Date(protocol.startDate);
+              const end = protocol.stopDate ? new Date(protocol.stopDate) : new Date('2099-12-31');
+              const interval = 7 / protocol.frequencyPerWeek;
+              let d = new Date(start);
+              while (d < end) {
+                if (d > now) count++;
+                d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+              }
+            });
+            return count;
+          };
+
+          const calculateTotalDosesForMed = () => {
+            if (!filteredProtocols || filteredProtocols.length === 0) return 0;
+            let count = 0;
+            filteredProtocols.forEach(protocol => {
+              const start = new Date(protocol.startDate);
+              const end = protocol.stopDate ? new Date(protocol.stopDate) : new Date('2099-12-31');
+              const interval = 7 / protocol.frequencyPerWeek;
+              let d = new Date(start);
+              while (d < end) {
+                count++;
+                d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+              }
+            });
+            return count;
+          };
+
           return (
             <div key={med} className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs">
               <span className="text-cyan-400">{med}:</span>
@@ -562,6 +595,10 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
                 {medHasProtocol ? ` ${filteredProtocols.length} prot` : ' no prot'} |
                 {activeForMed ? ` active: ${activeForMed.dose}mg` : ' no active'}
               </span>
+              <span className="text-gray-400">future doses:</span>
+              <span className="text-yellow-400">{calculateFutureDosesForMed()}</span>
+              <span className="text-gray-400">total in protocol:</span>
+              <span className="text-green-400">{calculateTotalDosesForMed()}</span>
             </div>
           );
         })}
@@ -602,8 +639,11 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
       <div className="border-t border-red-500/20 my-2"></div>
       <div className="text-red-300 mb-1">Stats Object (First Medication):</div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-        <span className="text-gray-400">totalDoses:</span>
+        <span className="text-gray-400">totalDoses (entries):</span>
         <span className="text-white">{stats.totalDoses}</span>
+        
+        <span className="text-gray-400">totalPlannedDoses:</span>
+        <span className="text-green-400">{stats.totalPlannedDoses}</span>
         
         <span className="text-gray-400">totalCurrentDose:</span>
         <span className="text-white">{stats.totalCurrentDose}mg</span>
@@ -613,6 +653,9 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
         
         <span className="text-gray-400">plannedDoses:</span>
         <span className="text-white">{stats.plannedDoses}</span>
+        
+        <span className="text-gray-400">allFuturePlannedDoses:</span>
+        <span className="text-green-400">{stats.allFuturePlannedDoses}</span>
         
         <span className="text-gray-400">intervalDays:</span>
         <span className="text-white">{stats.intervalDays}</span>

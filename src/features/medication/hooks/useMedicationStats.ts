@@ -6,6 +6,7 @@ import { calculateMedicationConcentration } from '../../../shared/utils/calculat
 
 export interface MedicationStats {
   totalDoses: number;
+  totalPlannedDoses: number;
   currentDoses: never[];
   totalCurrentDose: number;
   nextDueDays: number;
@@ -16,6 +17,7 @@ export interface MedicationStats {
   currentLevel: number;
   thisMonth: number;
   plannedDoses: number;
+  allFuturePlannedDoses: number;
   lastDoseDateStr: string;
   daysSinceLastDose: number;
   actualDaysSinceLastDose: number;
@@ -250,6 +252,42 @@ export const useMedicationStats = (
       });
       return count;
     })();
+
+    const allFutureDoses = (() => {
+      if (!filteredProtocols || filteredProtocols.length === 0) return 0;
+
+      let count = 0;
+      filteredProtocols!.forEach(protocol => {
+        const start = new Date(protocol.startDate);
+        const end = protocol.stopDate ? new Date(protocol.stopDate) : new Date('2099-12-31');
+        const interval = 7 / protocol.frequencyPerWeek;
+
+        let d = new Date(start);
+        while (d < end) {
+          if (d > currentTimeDate) count++;
+          d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+        }
+      });
+      return count;
+    })();
+
+    const totalPlannedDoses = (() => {
+      if (!filteredProtocols || filteredProtocols.length === 0) return 0;
+
+      let count = 0;
+      filteredProtocols!.forEach(protocol => {
+        const start = new Date(protocol.startDate);
+        const end = protocol.stopDate ? new Date(protocol.stopDate) : new Date('2099-12-31');
+        const interval = 7 / protocol.frequencyPerWeek;
+
+        let d = new Date(start);
+        while (d < end) {
+          count++;
+          d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+        }
+      });
+      return count;
+    })();
     
     const isScheduleStartDay = !!(activeProtocol && activeProtocol.startDate === todayStr);
     
@@ -260,6 +298,7 @@ export const useMedicationStats = (
     
     return { 
       totalDoses, 
+      totalPlannedDoses,
       currentDoses: [], 
       totalCurrentDose, 
       nextDueDays, 
@@ -270,6 +309,7 @@ export const useMedicationStats = (
       currentLevel: isNaN(currentLevel) ? 0 : currentLevel, 
       thisMonth: thisMonthDoses, 
       plannedDoses: upcomingDoses, 
+      allFuturePlannedDoses: allFutureDoses,
       lastDoseDateStr, 
       daysSinceLastDose, 
       intervalDays,
