@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GLPal - Privacy-First GLP-1 & Weight Tracking App</title>
   <meta name="description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy. No accounts, no cloud logging—just your data, on your terms.">
+  <meta name="keywords" content="GLP-1, weight tracking, medication tracker, peptide calculator, health app, privacy first, local storage">
+  <meta name="author" content="GLPal">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
+  <meta property="og:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy. No accounts, no cloud logging.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://justapeasantcoder.github.io/GLPal/">
+  <meta property="og:image" content="https://justapeasantcoder.github.io/GLPal/og-image.png">
+  <meta property="og:site_name" content="GLPal">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
+  <meta name="twitter:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy.">
+  <meta name="twitter:image" content="https://justapeasantcoder.github.io/GLPal/og-image.png">
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="https://justapeasantcoder.github.io/GLPal/">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,6 +45,78 @@
       --text-muted: #6a6a7a;
       --border: rgba(177, 156, 217, 0.15);
       --border-light: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(26, 26, 36, 0.6);
+    }
+
+    /* Light Mode */
+    body.light-mode {
+      --dark: #f5f5f7;
+      --dark-secondary: #ffffff;
+      --dark-card: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-muted: #86868b;
+      --border: rgba(0, 0, 0, 0.1);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --card-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    body.light-mode .bg-effects::before {
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 222, 168, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(177, 156, 217, 0.08) 0%, transparent 70%);
+    }
+
+    body.light-mode header {
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .glass {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .feature-card,
+    body.light-mode .testimonial-card,
+    body.light-mode .screenshot-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .phone-mockup {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15);
+    }
+
+    body.light-mode .phone-screen {
+      background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+    }
+
+    body.light-mode .hero::before,
+    body.light-mode .hero::after {
+      opacity: 0.5;
+    }
+
+    body.light-mode .privacy-badge {
+      background: rgba(177, 156, 217, 0.15);
+      border-color: rgba(177, 156, 217, 0.3);
+      color: #7c5fb8;
+    }
+
+    body.light-mode .footer-content {
+      border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode footer {
+      border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .copyright,
+    body.light-mode .footer-links a {
+      color: #86868b;
     }
 
     * {
@@ -747,6 +842,43 @@
       margin-bottom: 24px;
     }
 
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(177, 156, 217, 0.1);
+      color: var(--text);
+      border-color: var(--primary);
+    }
+
+    .theme-toggle .icon-sun {
+      display: none;
+    }
+
+    .theme-toggle .icon-moon {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-sun {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-moon {
+      display: none;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .hero .container {
@@ -811,6 +943,143 @@
         text-align: center;
       }
     }
+
+    /* Scroll Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Stagger delays */
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+    .delay-4 { transition-delay: 0.4s; }
+    .delay-5 { transition-delay: 0.5s; }
+    .delay-6 { transition-delay: 0.6s; }
+    .delay-7 { transition-delay: 0.7s; }
+    .delay-8 { transition-delay: 0.8s; }
+
+    /* FAQ Section */
+    .faq {
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.03));
+    }
+
+    .faq-grid {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: rgba(26, 26, 36, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--primary);
+    }
+
+    body.light-mode .faq-item {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 20px 24px;
+      background: none;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .faq-question:hover {
+      color: var(--primary);
+    }
+
+    .faq-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+      color: var(--primary);
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-answer-content {
+      padding: 0 24px 20px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 15px;
+    }
   </style>
 </head>
 <body>
@@ -822,7 +1091,23 @@
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
-        <a href="#testimonials">Reviews</a>
+        <a href="#faq">FAQ</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
         <a href="app/" class="btn btn-primary">Open App</a>
       </div>
     </div>
@@ -830,7 +1115,7 @@
 
   <section class="hero">
     <div class="container">
-      <div class="hero-content">
+      <div class="hero-content fade-in-up">
         <div class="privacy-badge">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -858,7 +1143,7 @@
           </div>
         </div>
       </div>
-      <div class="hero-visual">
+      <div class="hero-visual fade-in-up delay-2">
         <div class="phone-mockup">
           <div class="phone-screen">
             <div class="phone-notch"></div>
@@ -910,52 +1195,52 @@
 
   <section class="features" id="features">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header fade-in">
         <h2>Everything You Need</h2>
         <p>Powerful tracking tools designed for GLP-1 users, with privacy at the core.</p>
       </div>
       <div class="features-grid">
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-1">
           <div class="feature-icon">⚖️</div>
           <h3>Weight Tracking</h3>
           <p>Log daily weight with easy input, set goals, and visualize progress with beautiful charts and long-term trends.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-2">
           <div class="feature-icon">💊</div>
           <h3>GLP-1 Medication</h3>
           <p>Track doses, injection sites, timing, and side effects. Never miss a dose with smart reminders.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-3">
           <div class="feature-icon">🧬</div>
           <h3>Peptide Logging</h3>
           <p>Support for BPC-157, TB-500, CJC-1295, and more. Manage complex protocols with ease.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-4">
           <div class="feature-icon">📊</div>
           <h3>Progress Analytics</h3>
           <p>Beautiful charts, trends, and insights. Understand your journey with powerful visual analytics.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-5">
           <div class="feature-icon">🧮</div>
           <h3>Peptide Calculator</h3>
           <p>Calculate doses, reconstitute solutions, and adjust concentrations. Precision dosing made simple.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-6">
           <div class="feature-icon">☁️</div>
           <h3>Cloud Backup (Optional)</h3>
           <p>Backup to Google Drive when you choose. Your data stays encrypted, you stay in control.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-7">
           <div class="feature-icon">📱</div>
           <h3>Installable PWA</h3>
           <p>Add to home screen for full-screen app experience. Works offline after first load.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-8">
           <div class="feature-icon">🔒</div>
           <h3>Complete Privacy</h3>
           <p>No accounts, no cloud by default, no tracking. All data stored locally on your device.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card fade-in-up delay-8">
           <div class="feature-icon">📦</div>
           <h3>Import & Export</h3>
           <p>Export to CSV/JSON anytime. Full ownership of your data, portable anywhere.</p>
@@ -966,22 +1251,22 @@
 
   <section class="how-it-works" id="how-it-works">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header fade-in">
         <h2>How It Works</h2>
         <p>Get started in seconds. No sign-up, no configuration, just track.</p>
       </div>
       <div class="steps">
-        <div class="step">
+        <div class="step fade-in-up delay-1">
           <div class="step-number">1</div>
           <h3>Open the App</h3>
           <p>Visit GLPal in your browser or add it to your home screen. No download needed.</p>
         </div>
-        <div class="step">
+        <div class="step fade-in-up delay-2">
           <div class="step-number">2</div>
           <h3>Start Tracking</h3>
           <p>Log your weight, add medications, and set your goals. It takes seconds to enter data.</p>
         </div>
-        <div class="step">
+        <div class="step fade-in-up delay-3">
           <div class="step-number">3</div>
           <h3>Watch Progress</h3>
           <p>See your trends, stay motivated, and achieve your health goals with powerful insights.</p>
@@ -992,12 +1277,12 @@
 
   <section class="screenshots" id="screenshots">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header fade-in">
         <h2>Your Health, Visualized</h2>
         <p>Beautiful, intuitive interfaces designed for daily use.</p>
       </div>
       <div class="screenshots-grid">
-        <div class="screenshot-card">
+        <div class="screenshot-card fade-in-up delay-1">
           <div class="screenshot-placeholder">
             <div class="screenshot-icon">📊</div>
             <div class="screenshot-label">Dashboard</div>
@@ -1025,40 +1310,99 @@
     </div>
   </section>
 
-  <section class="testimonials" id="testimonials">
+  <section class="faq" id="faq">
     <div class="container">
-      <div class="section-header">
-        <h2>Trusted by Users</h2>
-        <p>Join thousands who chose privacy-first health tracking.</p>
+      <div class="section-header fade-in">
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know about GLPal.</p>
       </div>
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <p class="testimonial-quote">"GLPal keeps my weight goals in check while my data stays private on my device. No cloud accounts, no worries."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">A</div>
-            <div>
-              <div class="testimonial-name">Alex</div>
-              <div class="testimonial-role">Using GLPal since 2024</div>
+      <div class="faq-grid">
+        <div class="faq-item fade-in-up delay-1">
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is my data really private?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes, 100%. All your data is stored locally on your device using IndexedDB. We don't have any servers or cloud databases. Your health information never leaves your device unless you explicitly choose to export it or backup to your own Google Drive.
             </div>
           </div>
         </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">"I track my GLP-1 schedule and weight without any extra apps. Works perfectly offline and my data never leaves my phone."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">P</div>
-            <div>
-              <div class="testimonial-name">Priya</div>
-              <div class="testimonial-role">Using GLPal since 2024</div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Do I need to create an account?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              No accounts, no sign-ups, no email required. GLPal is completely free to use. Just open the app and start tracking immediately.
             </div>
           </div>
         </div>
-        <div class="testimonial-card">
-          <p class="testimonial-quote">"Clear visuals, easy logging, and total data ownership. It's a relief to have a private tool that's actually powerful."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">M</div>
-            <div>
-              <div class="testimonial-name">Marco</div>
-              <div class="testimonial-role">Using GLPal since 2024</div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I use GLPal on multiple devices?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes! You can export your data to a file and import it on any device. For seamless syncing, you can optionally enable Google Drive backup to keep your data in sync across devices.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>What GLP-1 medications can I track?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              GLPal supports all major GLP-1 medications including Ozempic, Wegovy, Mounjaro, Zepbound, Saxenda, Rybelsus, and semaglutide. You can also create custom medications and track any peptide or supplement.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Does GLPal work offline?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes! Once loaded, GLPal works completely offline. You can track your weight and medications without an internet connection. The app is a Progressive Web App (PWA) that you can install on your device.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I export my data?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Absolutely. You can export all your data to JSON or CSV format at any time. This gives you full ownership and portability of your health data.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is GLPal free?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes, GLPal is completely free with no premium tiers, no subscriptions, and no hidden costs. It's an open-source project built to help the GLP-1 community.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is GLPal a medical device?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              No, GLPal is a personal health tracking tool and is not a medical device. It provides information to help you track your progress but does not provide medical advice. Always consult your healthcare provider for medical decisions.
             </div>
           </div>
         </div>
@@ -1066,7 +1410,7 @@
     </div>
   </section>
 
-  <section class="cta">
+  <section class="cta fade-in">
     <div class="container">
       <h2>Start Your Journey Today</h2>
       <p>Join thousands of users tracking their GLP-1 progress with complete privacy.</p>
@@ -1088,5 +1432,60 @@
       </div>
     </div>
   </footer>
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('glpal-landing-theme');
+    
+    // Apply saved theme on load
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('glpal-landing-theme', isLight ? 'light' : 'dark');
+    });
+
+    // Scroll Animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all fade-in elements
+    document.querySelectorAll('.fade-in, .fade-in-up, .fade-in-left, .fade-in-right').forEach(el => {
+      observer.observe(el);
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const faqItem = button.parentElement;
+        const isOpen = faqItem.classList.contains('open');
+        
+        // Close all other FAQ items
+        document.querySelectorAll('.faq-item.open').forEach(item => {
+          item.classList.remove('open');
+        });
+        
+        // Toggle current item
+        if (!isOpen) {
+          faqItem.classList.add('open');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

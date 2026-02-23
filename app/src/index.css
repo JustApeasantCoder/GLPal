@@ -25,25 +25,25 @@
 }
 
 .dark {
-  /* Dark Mode Colors (exact original values) */
-  --bg-primary: #0d0a15;
-  --bg-secondary: #161220;
-  --bg-tertiary: #2d1b4e;
-  --text-primary: #cdbcec;
-  --text-secondary: #ffffff;
-  --text-muted: #9579be;
-  --border-color: #9579be;
-  --card-bg: rgba(0, 0, 0, 0.3);
-  --card-border: rgba(156, 123, 211, 0.2);
-  --accent-purple-light: #cdbcec;
-  --accent-purple-light-shadow: rgba(138, 43, 226, 0.8);
-  --accent-purple-medium: #9579be;
-  --accent-purple-dark: #5b4b8a;
-  --accent-mint: #4adea8;
-  --gradient-start: #0d0a15;
-  --gradient-mid: #161220;
-  --gradient-end: #2d1b4e;
-  --shadow-color: rgba(156, 123, 211, 0.2);
+  /* Dark Mode Colors - Matching Landing Page */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a24;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6a6a7a;
+  --border-color: rgba(177, 156, 217, 0.15);
+  --card-bg: rgba(26, 26, 36, 0.6);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --accent-purple-light: #B19CD9;
+  --accent-purple-light-shadow: rgba(177, 156, 217, 0.5);
+  --accent-purple-medium: #9C7BD3;
+  --accent-purple-dark: #7c5fb8;
+  --accent-mint: #4ADEA8;
+  --gradient-start: #0a0a0f;
+  --gradient-mid: #12121a;
+  --gradient-end: #1a1a24;
+  --shadow-color: rgba(177, 156, 217, 0.2);
 }
 
 body {
