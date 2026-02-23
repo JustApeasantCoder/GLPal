@@ -8,6 +8,7 @@ import { CHART_COLORS } from '../../../shared/utils/chartUtils';
 import ChartEmptyState from '../../../shared/components/ChartEmptyState';
 import { useTime } from '../../../shared/hooks';
 import { isMobile } from '../../../shared/utils/common';
+import { timeService } from '../../../core/timeService';
 
 import { ChartPeriod } from '../../../shared/hooks';
 
@@ -33,7 +34,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
   const firstDataDate = useMemo(
     () =>
       data.length > 0
-        ? new Date(Math.min(...data.map((d) => new Date(d.date).getTime())))
+        ? timeService.parseLocalDate(data.map(d => d.date).sort()[0])
         : new Date(),
     [data]
   );
@@ -41,7 +42,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
   const lastDataDate = useMemo(
     () =>
       data.length > 0
-        ? new Date(Math.max(...data.map((d) => new Date(d.date).getTime())))
+        ? timeService.parseLocalDate(data.map(d => d.date).sort().pop()!)
         : new Date(),
     [data]
   );
