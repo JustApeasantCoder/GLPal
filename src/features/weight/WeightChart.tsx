@@ -292,10 +292,14 @@ const WeightChart: React.FC<WeightChartProps> = ({
       legend: {
         data: doseChanges.length > 0 ? Array.from(new Set(medicationData.map(e => shortenMedicationName(e.medication)))) : [],
         bottom: 0,
-        top: 10,
+        left: 'left',
+        floating: true,
+        layout: 'horizontal',
+        itemGap: 6,
+        padding: [2, 4],
         icon: 'circle',
-        itemWidth: 12,
-        itemHeight: 12,
+        itemWidth: 10,
+        itemHeight: 10,
         textStyle: { fontSize: 12, color: '#94a3b8' },
         formatter: (value: string) => shortenMedicationName(value),
         tooltip: {
@@ -303,10 +307,10 @@ const WeightChart: React.FC<WeightChartProps> = ({
         },
       },
       grid: {
-        top: 0,
+        top: 10,
         left: 10,
         right: 10,
-        bottom: 25,
+        bottom: 40,
         containLabel: true,
       },
       xAxis: {

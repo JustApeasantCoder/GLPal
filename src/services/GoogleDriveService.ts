@@ -1,5 +1,6 @@
 import { WeightEntry, GLP1Entry, GLP1Protocol, Peptide, PeptideLogEntry, UserProfile } from '../types';
 import { db } from '../db/dexie';
+import { timeService } from '../core/timeService';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
@@ -289,7 +290,7 @@ class GoogleDriveService {
     await this.ensureValidToken();
 
     const folderId = await this.getOrCreateBackupFolder();
-    const date = new Date().toISOString().split('T')[0];
+    const date = timeService.todayString();
     const fileName = `glpal-backup-${date}.json`;
 
     const jsonContent = JSON.stringify(data, null, 2);

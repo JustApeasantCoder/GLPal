@@ -22,6 +22,8 @@ import { saveProtocol, deleteProtocol, archiveProtocol } from '../../services/Me
 import { getMedicationManualEntries, addMedicationManualEntry, clearMedicationEntries, addMedicationGeneratedEntry } from '../../shared/utils/database';
 import { timeService } from '../../core/timeService';
 import { useMedicationStats, useActiveProtocol, isMedicationOverdue } from './hooks/useMedicationStats';
+import { normalizeMedName } from '../../shared/utils/medicationUtils';
+import { getCurrentLevel } from '../../shared/utils/medicationChartUtils';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
@@ -65,6 +67,11 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const now = new Date(nowTimestamp);
   const activeProtocol = useActiveProtocol(protocols);
   const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone);
+
+  const currentLevelData = useMemo(() => 
+    getCurrentLevel(medicationEntries, now), 
+    [medicationEntries, now]
+  );
 
   const uniqueMedications = useMemo(() => {
     const medSet = new Set<string>();
@@ -298,11 +305,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               <p className={text.value}>{stats.totalDoses}</p>
             </div>
             <div className={smallCard}>
-              <p className={text.label}>Next Due</p>
-              <p className={text.totalLossValue} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>{stats.nextDueDays > 0 ? `${stats.nextDueDays} Day${stats.nextDueDays > 1 ? 's' : ''}` : 'Today'}</span>
-                <span className={text.percentage}>{stats.nextDueDateStr}</span>
-              </p>
+              <p className={text.label}>Cost/Month</p>
+              <p className={text.value}>--</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Current Dose</p>
@@ -310,7 +314,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
             <div className={smallCard}>
               <p className={text.label}>Current Level</p>
-              <p className={text.value}>{stats.currentLevel.toFixed(2)}mg</p>
+              <p className={text.value}>{currentLevelData.total.toFixed(2)}mg</p>
             </div>
             <div className={smallCard}>
               <p className={text.label}>Planned Doses</p>

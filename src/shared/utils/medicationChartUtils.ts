@@ -1,6 +1,61 @@
 import { GLP1Entry } from '../../types';
 import { calculateMedicationConcentration } from './calculations';
 import { CHART_COLORS } from './chartUtils';
+import { timeService } from '../../core/timeService';
+
+export interface CurrentLevelResult {
+  total: number;
+  breakdown: Array<{
+    name: string;
+    concentration: number;
+  }>;
+}
+
+export const getCurrentLevel = (
+  medicationEntries: GLP1Entry[],
+  currentTime: Date
+): CurrentLevelResult => {
+  if (medicationEntries.length === 0) {
+    return { total: 0, breakdown: [] };
+  }
+
+  const medications = Array.from(new Set(medicationEntries.map(e => e.medication)));
+  
+  const dosesByMed: Record<string, { date: Date; dose: number }[]> = {};
+  const halfLifeByMed: Record<string, number> = {};
+
+  medications.forEach(med => {
+    dosesByMed[med] = medicationEntries
+      .filter(e => e.medication === med)
+      .map(e => ({ date: timeService.parseLocalDate(e.date), dose: e.dose }));
+    
+    const medData = medicationEntries.find(e => e.medication === med);
+    if (medData) {
+      halfLifeByMed[med] = medData.halfLifeHours;
+    }
+  });
+
+  const breakdown: CurrentLevelResult['breakdown'] = [];
+  let total = 0;
+
+  medications.forEach(med => {
+    const concentration = calculateMedicationConcentration(
+      dosesByMed[med],
+      halfLifeByMed[med] || 168,
+      currentTime
+    );
+    
+    if (concentration > 0.01) {
+      breakdown.push({
+        name: med,
+        concentration: isNaN(concentration) ? 0 : concentration
+      });
+      total += isNaN(concentration) ? 0 : concentration;
+    }
+  });
+
+  return { total, breakdown };
+};
 
 interface MedicationSeriesParams {
   medications: string[];

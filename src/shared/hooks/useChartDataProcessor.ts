@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { GLP1Entry, WeightEntry } from '../../types';
 import { getMedicationColor } from '../utils/chartUtils';
+import { timeService } from '../../core/timeService';
 
 interface ProcessedMedicationData {
   medications: string[];
@@ -38,7 +39,7 @@ export const useMedicationChartData = (
     medications.forEach((med) => {
       dosesByMed[med] = sortedData
         .filter((e) => e.medication === med)
-        .map((e) => ({ date: new Date(e.date), dose: e.dose }));
+        .map((e) => ({ date: timeService.parseLocalDate(e.date), dose: e.dose }));
     });
 
     const halfLifeByMed: Record<string, number> = {};

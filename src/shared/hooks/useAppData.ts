@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { WeightEntry, GLP1Entry, UserProfile } from '../../types';
-import { 
+import { timeService } from '../../core/timeService';
+import {
   initializeDatabase, 
   getWeightEntries, 
   getAllGLP1Entries, 
@@ -69,7 +70,7 @@ export const useAppData = (): AppDataContextType => {
   }, [profile]); // Only include profile as dependency to prevent infinite loops
 
   const addWeight = useCallback(async (weight: number) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = timeService.todayString();
     const newEntry: WeightEntry = { date: today, weight };
     
     try {
@@ -83,7 +84,7 @@ export const useAppData = (): AppDataContextType => {
   }, []);
 
   const addGLP1EntryFunc = useCallback(async (entry: Omit<GLP1Entry, 'date'>) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = timeService.todayString();
     const newEntry: GLP1Entry = { ...entry, date: today };
     
     try {

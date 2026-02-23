@@ -1,5 +1,6 @@
 import { CsvRow, CSV_HEADER, ALL_COLUMNS, SIDE_EFFECT_COLUMNS } from './csvTypes';
 import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol } from '../types';
+import { timeService } from '../core/timeService';
 
 const escapeCsvValue = (value: string | number | boolean | undefined): string => {
   if (value === undefined || value === null) return '';
@@ -168,7 +169,7 @@ export const exportAllToCsv = (
 };
 
 export const generateExportFilename = (): string => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = timeService.todayString();
   return `glpal_export_${today}.csv`;
 };
 

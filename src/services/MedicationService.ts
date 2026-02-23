@@ -1,5 +1,6 @@
 import { GLP1Entry, GLP1Protocol } from '../types';
 import { CHART_DATE_FORMATS } from '../shared/utils/chartUtils';
+import { timeService } from '../core/timeService';
 import { 
   saveMedicationProtocols, 
   getMedicationProtocols, 
@@ -12,7 +13,7 @@ export const generateDosesFromProtocols = (
   protocols: GLP1Protocol[],
   existingEntries: GLP1Entry[] = []
 ): GLP1Entry[] => {
-  const today = new Date();
+  const today = timeService.nowDate();
   const generatedDoses: GLP1Entry[] = [];
 
   protocols.forEach(prot => {
@@ -42,7 +43,7 @@ export const generateDosesFromProtocols = (
 };
 
 export const regenerateAllDoses = (protocols: GLP1Protocol[]): GLP1Entry[] => {
-  const today = new Date();
+  const today = timeService.nowDate();
   const newDoses: GLP1Entry[] = [];
   
   protocols.forEach(prot => {

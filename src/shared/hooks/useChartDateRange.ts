@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { ChartPeriod } from './useFilteredWeights';
+import { timeService } from '../../core/timeService';
 
 const PERIOD_WINDOW_DAYS: Record<ChartPeriod, number> = {
   week: 14,
@@ -27,7 +28,7 @@ export const useChartDateRange = (
   minDays: number = 14,
   currentDate?: Date
 ): DateRangeResult => {
-  const now = currentDate || new Date();
+  const now = currentDate || timeService.nowDate();
   
   return useMemo(() => {
     let firstDate = new Date(firstDataDate);
@@ -111,7 +112,7 @@ export const useWeightChartDateRange = (
   visibleEndIndex: number;
   totalPoints: number;
 } => {
-  const now = currentDate || new Date();
+  const now = currentDate || timeService.nowDate();
   
   return useMemo(() => {
     const today = new Date(now);

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { GLP1Protocol, GLP1Entry } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { normalizeMedName, MedicationKey, MEDICATION_KEYS } from '../../../shared/utils/medicationUtils';
+import { calculateMedicationConcentration } from '../../../shared/utils/calculations';
 
 export interface MedicationStats {
   totalDoses: number;
@@ -194,7 +195,34 @@ export const useMedicationStats = (
     }
     
     const totalDoses = filteredEntries.length;
-    const totalCurrentDose = filteredEntries.length > 0 ? filteredEntries[0].dose : 0;
+    const currentlyActiveProtocols = filteredProtocols?.filter(p => {
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
+    }) || [];
+    const totalCurrentDose = currentlyActiveProtocols.reduce((sum, p) => sum + p.dose, 0);
+
+    const dosesByMed: Record<string, { date: Date; dose: number }[]> = {};
+    const halfLifeByMed: Record<string, number> = {};
+    currentlyActiveProtocols.forEach(p => {
+      const medKey = normalizeMedName(p.medication);
+      if (!medKey) return;
+      if (!dosesByMed[medKey]) dosesByMed[medKey] = [];
+      const medEntries = filteredEntries.filter(e => normalizeMedName(e.medication) === medKey);
+      dosesByMed[medKey] = medEntries.map(e => ({ date: new Date(e.date), dose: e.dose }));
+      if (p.halfLifeHours) halfLifeByMed[medKey] = p.halfLifeHours;
+    });
+
+    let currentLevel = 0;
+    Object.keys(dosesByMed).forEach(med => {
+      if (dosesByMed[med].length > 0 && halfLifeByMed[med]) {
+        currentLevel += calculateMedicationConcentration(
+          dosesByMed[med],
+          halfLifeByMed[med],
+          currentTimeDate
+        );
+      }
+    });
     
     const thisMonthDoses = filteredEntries.filter(entry => {
       const entryDate = new Date(entry.date);
@@ -239,7 +267,7 @@ export const useMedicationStats = (
       nextDueMinutes, 
       nextDueSeconds, 
       nextDueDateStr, 
-      currentLevel: 0, 
+      currentLevel: isNaN(currentLevel) ? 0 : currentLevel, 
       thisMonth: thisMonthDoses, 
       plannedDoses: upcomingDoses, 
       lastDoseDateStr, 

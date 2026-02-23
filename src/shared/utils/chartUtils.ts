@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { WeightEntry, GLP1Entry } from '../../types';
+import { timeService } from '../../core/timeService';
 
 // Chart color palettes
 export const CHART_COLORS = {
@@ -127,10 +128,9 @@ export const filterDataByPeriod = <T extends { date: string }>(
 ): T[] => {
   if (period === 'ALL') return data;
   
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - PERIOD_CONFIGS[period].days);
+  const cutoffDate = timeService.subtractDays(timeService.nowDate(), PERIOD_CONFIGS[period].days);
   
-  return data.filter(entry => new Date(entry.date) >= cutoffDate);
+  return data.filter(entry => timeService.parseLocalDate(entry.date) >= cutoffDate);
 };
 
 // Custom tooltip formatter
@@ -173,14 +173,8 @@ export const getEmptyStateMessage = (dataType: 'weight' | 'glp1', period: ChartP
 
 // Date range utilities
 export const getDateRange = (period: ChartPeriod): { start: Date; end: Date } => {
-  const end = new Date();
-  const start = new Date();
-  
-  if (period !== 'ALL') {
-    start.setDate(start.getDate() - PERIOD_CONFIGS[period].days);
-  } else {
-    start.setFullYear(start.getFullYear() - 1); // Default to 1 year ago for "ALL"
-  }
+  const end = timeService.nowDate();
+  const start = timeService.subtractDays(end, period === 'ALL' ? 365 : PERIOD_CONFIGS[period].days);
   
   return { start, end };
 };

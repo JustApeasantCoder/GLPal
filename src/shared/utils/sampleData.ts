@@ -1,5 +1,6 @@
 import { addWeightEntry, addGLP1Entry, initializeDatabase, getUserProfile, saveUserProfile } from './database';
 import { CHART_DATE_FORMATS } from './chartUtils';
+import { timeService } from '../../core/timeService';
 
 // Generate only weight data (no GLP-1 entries)
 export const initializeSampleWeightData = (): void => {
@@ -169,7 +170,7 @@ export const initializeSampleData = (): void => {
 
   medicationDates.forEach((timestamp, index) => {
     const medDate = new Date(timestamp);
-    const dateString = medDate.toISOString().split('T')[0];
+    const dateString = timeService.toLocalDateString(medDate);
     const medication = medications[index % medications.length];
     
     addGLP1Entry({

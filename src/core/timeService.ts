@@ -6,12 +6,10 @@ class TimeService {
     return Date.now() + this.offset;
   }
 
-  // Get the simulated date as a Date object
   nowDate(): Date {
     return new Date(this.now());
   }
 
-  // Get local date string (YYYY-MM-DD) - avoids UTC issues
   toLocalDateString(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -19,33 +17,61 @@ class TimeService {
     return `${year}-${month}-${day}`;
   }
 
-  // Get today's date string in local time
   todayString(): string {
     return this.toLocalDateString(this.nowDate());
   }
 
-  // Travel to a specific date (positive = future, negative = past)
+  toLocalISOString(date: Date): string {
+    return date.toISOString();
+  }
+
+  todayISOString(): string {
+    return this.nowDate().toISOString();
+  }
+
+  getLocalISODateString(): string {
+    const now = this.nowDate();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  parseLocalDate(dateString: string): Date {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  isSameDay(date1: Date, date2: Date): boolean {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  }
+
+  isToday(date: Date): boolean {
+    return this.isSameDay(date, this.nowDate());
+  }
+
   travelToDate(date: Date): void {
     this.offset = date.getTime() - Date.now();
     this.isSimulationMode = true;
     this.persist();
   }
 
-  // Travel days forward or backward
   travelDays(days: number): void {
     this.offset += days * 24 * 60 * 60 * 1000;
     this.isSimulationMode = true;
     this.persist();
   }
 
-  // Fast forward by ms
   fastForward(ms: number): void {
     this.offset += ms;
     this.isSimulationMode = true;
     this.persist();
   }
 
-  // Reset to real time
   reset(): void {
     this.offset = 0;
     this.isSimulationMode = false;
@@ -61,7 +87,6 @@ class TimeService {
     return this.isSimulationMode;
   }
 
-  // Initialize from localStorage if exists
   initialize(): void {
     const stored = localStorage.getItem('glpal_sim_offset');
     if (stored) {
@@ -70,11 +95,25 @@ class TimeService {
     }
   }
 
-  // Save current state to localStorage
   persist(): void {
     if (this.isSimulationMode) {
       localStorage.setItem('glpal_sim_offset', this.offset.toString());
     }
+  }
+
+  addDays(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  subtractDays(date: Date, days: number): Date {
+    return this.addDays(date, -days);
+  }
+
+  getDaysBetween(date1: Date, date2: Date): number {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return Math.floor((date2.getTime() - date1.getTime()) / msPerDay);
   }
 }
 

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { WeightEntry } from '../../types';
+import { timeService } from '../../core/timeService';
 
 export type ChartPeriod = 'week' | 'month' | '90days' | 'all';
 
@@ -7,8 +8,8 @@ export const useFilteredWeights = (weights: WeightEntry[], period: ChartPeriod):
   return useMemo(() => {
     if (period === 'all') return weights;
     
-    const now = new Date();
-    const filterDate = new Date();
+    const now = timeService.nowDate();
+    const filterDate = timeService.nowDate();
     
     switch (period) {
       case 'week':
@@ -24,7 +25,7 @@ export const useFilteredWeights = (weights: WeightEntry[], period: ChartPeriod):
         return weights;
     }
     
-    const filterDateStr = filterDate.toISOString().split('T')[0];
+    const filterDateStr = timeService.toLocalDateString(filterDate);
     return weights.filter(entry => entry.date >= filterDateStr);
   }, [weights, period]);
 };
