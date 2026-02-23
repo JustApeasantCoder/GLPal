@@ -101,8 +101,7 @@ export const deleteProtocol = async (id: string, existingProtocols: GLP1Protocol
   
   const newDoses = regenerateAllDoses(updatedList, true);
   const allEntries = [...manualEntries, ...newDoses];
-  await db.medications.clear();
-  await db.medications.bulkPut(allEntries);
+  await setMedicationEntries(allEntries);
   
   return updatedList;
 };
@@ -116,17 +115,7 @@ export const archiveProtocol = async (protocol: GLP1Protocol, existingProtocols:
   
   const newDoses = regenerateAllDoses(updatedList, true);
   const allEntries = [...manualEntries, ...newDoses];
-  await db.medications.clear();
-  await db.medications.bulkPut(allEntries);
+  await setMedicationEntries(allEntries);
   
   return updatedList;
-};
-
-export const getActiveProtocols = async (): Promise<GLP1Protocol[]> => {
-  try {
-    const protocols = await getMedicationProtocols();
-    return Array.isArray(protocols) ? protocols : [];
-  } catch {
-    return [];
-  }
 };

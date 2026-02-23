@@ -20,20 +20,12 @@ export const initializeDatabase = async (): Promise<void> => {
   }
 };
 
-export const clearCache = async (): Promise<void> => {
-  // No cache in Dexie version
-};
-
 export const clearAllData = async (): Promise<void> => {
   await clearDatabase();
   await initializeDatabase();
   localStorage.removeItem('glpal_last_doses');
   localStorage.removeItem('glpal_last_medication');
   localStorage.removeItem('glpal_dosage_calculator');
-};
-
-export const closeDatabase = async (): Promise<void> => {
-  await db.close();
 };
 
 // Weight entries
@@ -219,14 +211,6 @@ export const archiveMedicationProtocol = async (protocol: GLP1Protocol): Promise
   await db.protocols.put(archivedProtocol);
 };
 
-export const deleteArchivedMedicationProtocol = async (_id: string): Promise<void> => {
-  // Not implemented in Dexie version
-};
-
-export const clearMedicationProtocol = async (): Promise<void> => {
-  await db.protocols.clear();
-};
-
 // User profile
 export const saveUserProfile = async (profile: UserProfile): Promise<void> => {
   await db.userProfile.put(profile);
@@ -302,11 +286,6 @@ export const getActivePeptides = async (): Promise<Peptide[]> => {
   return peptides.filter(p => p.isActive && !p.isArchived);
 };
 
-export const getArchivedPeptides = async (): Promise<Peptide[]> => {
-  const peptides = await getPeptides();
-  return peptides.filter(p => p.isArchived);
-};
-
 // Peptide Logs
 export const getPeptideLogs = async (): Promise<PeptideLogEntry[]> => {
   try {
@@ -336,11 +315,6 @@ export const getPeptideLogsById = async (peptideId: string): Promise<PeptideLogE
   } catch {
     return [];
   }
-};
-
-export const getLatestPeptideLog = async (peptideId: string): Promise<PeptideLogEntry | null> => {
-  const logs = await getPeptideLogsById(peptideId);
-  return logs.length > 0 ? logs[0] : null;
 };
 
 export const clearPeptideData = async (): Promise<void> => {
@@ -394,5 +368,3 @@ export const updateGLP1Protocol = updateMedicationProtocol;
 export const deleteGLP1Protocol = deleteMedicationProtocol;
 export const getArchivedProtocols = getArchivedMedicationProtocols;
 export const archiveProtocol = archiveMedicationProtocol;
-export const deleteArchivedProtocol = deleteArchivedMedicationProtocol;
-export const clearGLP1Protocol = clearMedicationProtocol;

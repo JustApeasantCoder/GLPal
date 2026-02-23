@@ -198,7 +198,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
                   />
                   
                   {/* Expanded Chart View */}
-                  {isExpanded && logs.length > 0 && (
+                  {isExpanded && peptideLogs.length > 0 && (
                     <div className={`mt-2 p-3 rounded-xl border ${
                       isDarkMode 
                         ? 'bg-black/20 border-[#B19CD9]/10' 
@@ -215,12 +215,12 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
                           </svg>
                         </button>
                       </div>
-                      <PeptideChart logs={logs} color={peptide.color} height={150} />
+                      <PeptideChart logs={peptideLogs} color={peptide.color} height={150} />
                       
                       {/* Recent Logs */}
                       <div className="mt-3 space-y-1">
                         <p className="text-xs text-gray-500">Recent Logs:</p>
-                        {logs.slice(0, 5).map(log => (
+                        {peptideLogs.slice(0, 5).map((log) => (
                           <div key={log.id} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-white/5">
                             <span className="text-gray-300">{log.date} {log.time}</span>
                             <span className="text-[#4ADEA8]">{log.dose}{log.doseUnit}</span>

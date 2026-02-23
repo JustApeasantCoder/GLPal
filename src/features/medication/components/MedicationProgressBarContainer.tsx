@@ -196,6 +196,27 @@ const calculateMedicationStats = (
     return count;
   })();
 
+  const allFutureDoses = (() => {
+    if (!filteredProtocols || filteredProtocols.length === 0) return 0;
+
+    const endOfYear = new Date(currentTimeDate);
+    endOfYear.setFullYear(endOfYear.getFullYear() + 1);
+
+    let count = 0;
+    filteredProtocols.forEach(protocol => {
+      const start = new Date(protocol.startDate);
+      const end = protocol.stopDate ? new Date(protocol.stopDate) : endOfYear;
+      const interval = 7 / protocol.frequencyPerWeek;
+
+      let d = new Date(start);
+      while (d <= end) {
+        if (d > currentTimeDate) count++;
+        d = new Date(d.getTime() + interval * 24 * 60 * 60 * 1000);
+      }
+    });
+    return count;
+  })();
+
   const isScheduleStartDay = !!(activeProtocol && activeProtocol.startDate === todayStr);
 
   const nextDoseDateAtMidnight = nextDoseDate ? toLocalDateStr(nextDoseDate) : null;
@@ -205,6 +226,7 @@ const calculateMedicationStats = (
 
   const stats: MedicationStats = {
     totalDoses,
+    totalPlannedDoses: upcomingDoses,
     currentDoses: [],
     totalCurrentDose,
     nextDueDays,
@@ -215,6 +237,7 @@ const calculateMedicationStats = (
     currentLevel: 0,
     thisMonth: thisMonthDoses,
     plannedDoses: upcomingDoses,
+    allFuturePlannedDoses: allFutureDoses,
     lastDoseDateStr,
     daysSinceLastDose,
     intervalDays,

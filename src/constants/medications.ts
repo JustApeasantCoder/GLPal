@@ -21,10 +21,6 @@ export const MEDICATIONS: Medication[] = [
   { id: 'other', name: 'Custom', defaultDose: 1, halfLifeHours: 120 },
 ];
 
-export const getMedicationById = (id: string): Medication | undefined => {
-  return MEDICATIONS.find(m => m.id === id);
-};
-
 export const generateId = (): string => {
   return Math.random().toString(36).substr(2, 9);
 };
