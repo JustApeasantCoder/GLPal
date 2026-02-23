@@ -117,7 +117,9 @@ function App() {
       }`}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>
-            GLPal
+            <a href="#/" aria-label="Go to landing" style={{ color: 'inherit', textDecoration: 'none' }}>
+              GLPal
+            </a>
             {process.env.NODE_ENV === 'development' && (
               <span className="text-sm font-normal text-text-muted">
                 {new Date(time).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

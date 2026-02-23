@@ -16,8 +16,11 @@ Health tracking app for GLP-1 medication users with weight logging, medication t
 
 ## Commands
 
+Run all commands from the `app/` folder:
+
 ```bash
 # Development
+cd app
 npm run dev               # Vite dev server
 npm start                 # Alias for dev
 npm run electron-dev      # Electron with hot reload
@@ -37,25 +40,30 @@ npm run deploy            # Deploy to GitHub Pages
 ## Project Structure
 
 ```
-src/
-├── features/             # Feature modules
-│   ├── dashboard/        # Dashboard view
-│   ├── medication/      # Medication tracking
-│   ├── peptides/        # Peptide logging
-│   └── weight/          # Weight tracking
-├── shared/              # Shared code
-│   ├── components/     # Reusable UI components
-│   ├── hooks/          # Custom hooks
-│   └── utils/          # Utility functions
-├── stores/              # Zustand state stores
-├── services/            # Business logic services
-├── contexts/            # React contexts
-├── core/                # Core services (time, etc.)
-├── db/                  # Database configuration
-├── constants/           # App constants
-├── styles/              # Theme/styles
-├── types.ts             # TypeScript definitions
-└── App.tsx              # Main component
+app/
+├── src/
+│   ├── features/             # Feature modules
+│   │   ├── dashboard/        # Dashboard view
+│   │   ├── medication/      # Medication tracking
+│   │   ├── peptides/        # Peptide logging
+│   │   └── weight/          # Weight tracking
+│   ├── shared/              # Shared code
+│   │   ├── components/     # Reusable UI components
+│   │   ├── hooks/          # Custom hooks
+│   │   └── utils/          # Utility functions
+│   ├── stores/              # Zustand state stores
+│   ├── services/            # Business logic services
+│   ├── contexts/            # React contexts
+│   ├── core/                # Core services (time, etc.)
+│   ├── db/                  # Database configuration
+│   ├── constants/           # App constants
+│   ├── styles/              # Theme/styles
+│   ├── types.ts             # TypeScript definitions
+│   └── App.tsx              # Main component
+├── public/                  # Static assets
+├── package.json
+├── vite.config.ts
+└── tailwind.config.js
 ```
 
 ## Code Style
@@ -229,9 +237,9 @@ Guidelines: Use `getByRole`, mock Dexie/db, test edge cases.
 
 ## Key Files
 
-- `src/db/dexie.ts` - Database configuration
-- `src/stores/appStore.ts` - Main Zustand store
-- `src/contexts/ThemeContext.tsx` - Theme provider
-- `src/services/WeightAnalytics.ts` - Weight calculations
-- `src/shared/hooks/useWeightMetrics.ts` - Weight metrics hook
-- `src/shared/components/` - Reusable UI components
+- `app/src/db/dexie.ts` - Database configuration
+- `app/src/stores/appStore.ts` - Main Zustand store
+- `app/src/contexts/ThemeContext.tsx` - Theme provider
+- `app/src/services/WeightAnalytics.ts` - Weight calculations
+- `app/src/shared/hooks/useWeightMetrics.ts` - Weight metrics hook
+- `app/src/shared/components/` - Reusable UI components

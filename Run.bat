@@ -2,6 +2,8 @@
 echo Starting GLPal Health Tracker...
 echo.
 
+cd /d "%~dp0app"
+
 :: Check if dependencies are installed
 if not exist "node_modules" (
     echo Installing dependencies...
@@ -12,7 +14,6 @@ if not exist "node_modules" (
         exit /b 1
     )
 )
-
 
 echo Starting in Electron mode...
 call npm run electron-dev

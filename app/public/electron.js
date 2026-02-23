@@ -3,16 +3,16 @@ const path = require('path');
 const fs = require('fs');
 
 const isElectronDev = process.env.ELECTRON_DEV === 'true';
-const buildPath = path.join(__dirname, '../build');
+const buildPath = path.join(__dirname, '../build/app');
 const hasBuild = fs.existsSync(buildPath) && fs.existsSync(path.join(buildPath, 'index.html'));
 const isProduction = hasBuild && !isElectronDev;
 
 let mainWindow;
 
 function createWindow() {
-  const indexPath = path.join(__dirname, '../build/index.html');
+  const indexPath = path.join(__dirname, '../build/app/index.html');
   const fileUrl = `file://${indexPath}`;
-  const devUrl = 'http://localhost:3000';
+  const devUrl = 'http://localhost:3000/app/';
   
   console.log('isProduction:', isProduction, 'isElectronDev:', isElectronDev);
   console.log('Loading URL:', isProduction ? fileUrl : devUrl);
@@ -27,14 +27,14 @@ function createWindow() {
       devTools: true,
     },
     title: 'GLPal - Health Tracker',
-    icon: path.join(__dirname, '../public/favicon.ico'),
+    icon: path.join(__dirname, 'favicon.ico'),
     show: false
   });
 
   mainWindow.loadURL(
     isProduction
       ? fileUrl
-      : 'http://localhost:3000'
+      : 'http://localhost:3000/app/'
   );
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
