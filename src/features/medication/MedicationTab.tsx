@@ -314,7 +314,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   return (
     <div className="space-y-3">
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Doses</h1>
+        <h1 className={bigCardText.title} >Doses</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <div className="space-y-3 mb-6">
@@ -405,7 +405,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
       </div>
 
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dosing Plans</h1>
+        <h1 className={bigCardText.title} >Dosing Plans</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <ProtocolList

@@ -5,7 +5,7 @@ import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModa
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { timeService } from '../../../core/timeService';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface LogPeptideModalProps {
   isOpen: boolean;
@@ -41,6 +41,7 @@ const getTodayString = () => timeService.todayString();
 
 const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
+  const { inputButton, input: inputStyle, textarea } = useThemeStyles();
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(() => {
     const now = timeService.nowDate();
@@ -289,11 +290,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any observations..."
                 rows={2}
-                className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:border-[#4ADEA8]/50 resize-none ${
-                  isDarkMode
-                    ? 'bg-white/10 border-[#4ADEA8]/20 text-white placeholder-gray-500'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                }`}
+                className={textarea}
               />
             </div>
           </form>

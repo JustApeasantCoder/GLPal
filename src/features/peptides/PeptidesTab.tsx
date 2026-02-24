@@ -127,7 +127,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
   return (
     <div className="space-y-3">
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
+        <h1 className={bigCardText.title} >
           Peptides
         </h1>
 

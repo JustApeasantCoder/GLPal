@@ -8,7 +8,7 @@ interface PeriodSelectorProps {
 }
 
 const PeriodSelector: React.FC<PeriodSelectorProps> = ({ value, onChange }) => {
-  const { button } = useThemeStyles();
+  const { segmentedControl } = useThemeStyles();
 
   const periods: { value: ChartPeriod; label: string }[] = [
     { value: 'week', label: 'Week' },
@@ -24,11 +24,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({ value, onChange }) => {
           <button
             key={period.value}
             onClick={() => onChange(period.value)}
-            className={`flex-1 px-2 py-2 text-sm rounded-lg transition-all duration-300 ${
-              value === period.value
-                ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
-            }`}
+            className={segmentedControl(value === period.value)}
           >
             {period.label}
           </button>

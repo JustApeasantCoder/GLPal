@@ -28,7 +28,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
   return (
     <div className="space-y-4">
     <div>
-      <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
+      <h1 className={bigCardText.title} >
         Weight Loss Calorie Targets
       </h1>
       <div className="border-t border-[#B19CD9]/20 mt-3"></div>
@@ -76,7 +76,7 @@ const TDEEDisplay: React.FC<TDEEDisplayProps> = ({ profile, currentWeight }) => 
     <div className="border-t border-card-border pt-4">
       <h4
         className={bigCardText.title}
-        style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}
+        
       >
         Based on Current Weight: {formatWeight(currentWeight, unitSystem)}
       </h4>

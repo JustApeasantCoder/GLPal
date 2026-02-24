@@ -51,7 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     <>
       {/* Unified Dashboard Card */}
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dashboard</h1>
+        <h1 className={bigCardText.title} >Dashboard</h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         {/* Metrics Section */}

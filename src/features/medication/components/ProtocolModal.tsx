@@ -6,7 +6,7 @@ import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModa
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { useProtocolForm, frequencyOptions, durationPresets, toLocalDateString } from '../hooks/useProtocolForm';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ interface ProtocolModalProps {
 
 const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
+  const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal } = useThemeStyles();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
@@ -122,11 +123,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${
-        isDarkMode 
-          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-          : 'bg-white/95'
-      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
         </h2>
@@ -164,11 +161,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 <button
                   type="button"
                   onClick={() => setShowDosePicker(true)}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                      : 'border-gray-300 bg-white text-gray-700'
-                  }`}
+                  className={inputButton}
                 >
                   {dose ? `${dose} mg` : 'Select dose'}
                 </button>
@@ -178,11 +171,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   step="0.25"
                   value={dose || ''}
                   onChange={(e) => setDose(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                      : 'border-gray-300 bg-white text-gray-700'
-                  }`}
+                  className={inputStyle}
                   placeholder="Enter dose"
                 />
               )}
@@ -192,11 +181,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               <button
                 type="button"
                 onClick={() => setShowSchedulePicker(true)}
-                className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                    : 'border-gray-300 bg-white text-gray-700'
-                }`}
+                className={inputButton}
               >
                 {frequencyOptions.find(f => f.value === frequency)?.label || 'Select schedule'}
               </button>
@@ -211,11 +196,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             <button
               type="button"
               onClick={() => setShowStartDatePicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                  : 'border-gray-300 bg-white text-gray-700'
-              }`}
+              className={inputButton}
             >
               {startDate ? new Date(startDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -230,13 +211,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                     key={preset.label}
                     type="button"
                     onClick={() => handleDurationPreset(preset.days)}
-                    className={`flex-1 px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
-                      isSelected 
-                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                        : isDarkMode
-                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20 hover:shadow-[0_0_10px_rgba(177,156,217,0.3)]'
-                          : 'bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300'
-                    }`}
+                    className={secondaryButton(isSelected)}
                   >
                     {preset.label}
                   </button>
@@ -250,11 +225,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
             <button
               type="button"
               onClick={() => setShowStopDatePicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                  : 'border-gray-300 bg-white text-gray-700'
-              }`}
+              className={inputButton}
             >
               {stopDate ? new Date(stopDate).toLocaleDateString() : 'Select date'}
             </button>
@@ -372,11 +343,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 value={customMedication}
                 onChange={(e) => setCustomMedication(e.target.value)}
                 placeholder="Custom medication name"
-                className={`w-full px-3 py-2 border rounded-lg text-sm mb-2 ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/30 bg-black/20 text-white'
-                    : 'border-gray-300 bg-white text-gray-900'
-                }`}
+                className={`${inputStyle} mb-2`}
               />
               <button
                 onClick={handleCustomMedicationAdd}

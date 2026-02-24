@@ -61,7 +61,7 @@ const COMMON_SIDE_EFFECTS = [
 ];
 
 const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) => {
-  const { bigCard, isDarkMode } = useThemeStyles();
+  const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
   const bigCardText = {
@@ -416,7 +416,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
     <div className="space-y-3 pb-20">
       <div className={bigCard}>
         <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Dose Log</h1>
+          <h1 className={bigCardText.title} >Dose Log</h1>
           <button
             onClick={() => setIsDoseLogCollapsed(!isDoseLogCollapsed)}
             className="text-text-muted hover:text-white transition-colors"
@@ -543,7 +543,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
 
       <div className={bigCard}>
         <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Weight Log</h1>
+          <h1 className={bigCardText.title} >Weight Log</h1>
           <button
             onClick={() => setIsWeightLogCollapsed(!isWeightLogCollapsed)}
             className="text-text-muted hover:text-white transition-colors"
@@ -775,11 +775,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
                   placeholder="Additional notes..."
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none resize-none ${
-                    isDarkMode
-                      ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary placeholder-text-muted focus:border-[#B19CD9]/60'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#9C7BD3]'
-                  }`}
+                  className={textarea}
                   rows={3}
                 />
               </div>
@@ -842,11 +838,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                       <button
                         type="button"
                         onClick={() => setShowCaloriePicker(true)}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                          isDarkMode
-                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        className={inputButton}
                       >
                         {editWeightMacros.calories || 'Tap to select'}
                       </button>
@@ -856,11 +848,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                         min="0"
                         value={editWeightMacros.calories || ''}
                         onChange={(e) => setEditWeightMacros({ ...editWeightMacros, calories: parseInt(e.target.value) || 0 })}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                          isDarkMode
-                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={inputStyle}
                         placeholder="0"
                       />
                     )}
@@ -871,11 +859,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                       <button
                         type="button"
                         onClick={() => setShowProteinPicker(true)}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                          isDarkMode
-                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        className={inputButton}
                       >
                         {editWeightMacros.protein || 'Tap to select'}
                       </button>
@@ -885,11 +869,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                         min="0"
                         value={editWeightMacros.protein || ''}
                         onChange={(e) => setEditWeightMacros({ ...editWeightMacros, protein: parseInt(e.target.value) || 0 })}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                          isDarkMode
-                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={inputStyle}
                         placeholder="0"
                       />
                     )}
@@ -900,11 +880,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                       <button
                         type="button"
                         onClick={() => setShowCarbsPicker(true)}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                          isDarkMode
-                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        className={inputButton}
                       >
                         {editWeightMacros.carbs || 'Tap to select'}
                       </button>
@@ -914,11 +890,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                         min="0"
                         value={editWeightMacros.carbs || ''}
                         onChange={(e) => setEditWeightMacros({ ...editWeightMacros, carbs: parseInt(e.target.value) || 0 })}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                          isDarkMode
-                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={inputStyle}
                         placeholder="0"
                       />
                     )}
@@ -929,11 +901,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                       <button
                         type="button"
                         onClick={() => setShowFatPicker(true)}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                          isDarkMode
-                            ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        className={inputButton}
                       >
                         {editWeightMacros.fat || 'Tap to select'}
                       </button>
@@ -943,11 +911,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                         min="0"
                         value={editWeightMacros.fat || ''}
                         onChange={(e) => setEditWeightMacros({ ...editWeightMacros, fat: parseInt(e.target.value) || 0 })}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none ${
-                          isDarkMode
-                            ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className={inputStyle}
                         placeholder="0"
                       />
                     )}
@@ -965,11 +929,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
                   value={editWeightNotes}
                   onChange={(e) => setEditWeightNotes(e.target.value)}
                   placeholder="Additional notes..."
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none resize-none ${
-                    isDarkMode
-                      ? 'bg-black/20 border-[#B19CD9]/30 text-text-primary placeholder-text-muted focus:border-[#B19CD9]/60'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#9C7BD3]'
-                  }`}
+                  className={textarea}
                   rows={3}
                 />
               </div>
@@ -1002,7 +962,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
       {/* Peptide Log Section */}
       <div className={bigCard}>
         <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Peptide Log</h1>
+          <h1 className={bigCardText.title} >Peptide Log</h1>
           <button
             onClick={() => setIsPeptideLogCollapsed(!isPeptideLogCollapsed)}
             className="text-text-muted hover:text-white transition-colors"

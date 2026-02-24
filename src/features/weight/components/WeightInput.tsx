@@ -3,7 +3,7 @@ import { UnitSystem } from '../../../types';
 import { convertWeightToKg } from '../../../shared/utils/unitConversion';
 import Button from '../../../shared/components/Button';
 import WeightWheelPickerModal from './WeightWheelPickerModal';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface WeightInputProps {
   onAddWeight: (weight: number) => void;
@@ -14,6 +14,7 @@ interface WeightInputProps {
 
 const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight, unitSystem = 'metric', lastWeight, useWheelForNumbers = false }) => {
   const { isDarkMode } = useTheme();
+  const { inputButton, input: inputStyle, primaryButton } = useThemeStyles();
   const defaultWeight = lastWeight 
     ? String(Math.round(lastWeight * 10) / 10)
     : (unitSystem === 'imperial' ? '180' : '80');
@@ -45,11 +46,7 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight, unitSystem = 'me
         <button
           type="button"
           onClick={() => setShowPicker(true)}
-          className={`w-full px-3 py-2 border rounded-lg text-sm text-left transition-all ${
-            isDarkMode
-              ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
-              : 'border-gray-300 bg-white text-gray-900'
-          }`}
+          className={inputButton}
         >
           + Log Weight
         </button>
@@ -60,17 +57,13 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight, unitSystem = 'me
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleKeyboardSubmit()}
-            className={`flex-1 px-3 py-2 border rounded-lg text-sm transition-all ${
-              isDarkMode
-                ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-            }`}
+            className={inputStyle}
             placeholder={`Enter weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
           />
           <button
             type="button"
             onClick={handleKeyboardSubmit}
-            className="px-4 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white rounded-lg text-sm font-medium"
+            className={primaryButton}
           >
             Add
           </button>

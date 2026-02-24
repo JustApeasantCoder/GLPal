@@ -11,7 +11,7 @@ const DosageCalculatorTab: React.FC<DosageCalculatorTabProps> = ({ useWheelForNu
   return (
     <div className="space-y-4">
       <div className={bigCard}>
-        <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>
+        <h1 className={bigCardText.title} >
           Peptide Calculator
         </h1>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>

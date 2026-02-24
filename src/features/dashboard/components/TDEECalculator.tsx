@@ -3,7 +3,7 @@ import { UserProfile } from '../../../types';
 import { convertHeightFromCm, feetInchesToCm } from '../../../shared/utils/unitConversion';
 import NumberPickerModal from '../../../shared/components/NumberPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface TDEECalculatorProps {
   profile: UserProfile;
@@ -13,6 +13,7 @@ interface TDEECalculatorProps {
 
 const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
+  const { segmentButton, inputButton, input: inputStyle } = useThemeStyles();
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const [showAgePicker, setShowAgePicker] = useState(false);
   const [showHeightPicker, setShowHeightPicker] = useState(false);
@@ -56,11 +57,7 @@ return (
             <button
               type="button"
               onClick={() => setShowAgePicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
-                  : 'border-gray-300 bg-white text-gray-900'
-              }`}
+              className={inputButton}
             >
               {profile.age || 'Select age'}
             </button>
@@ -72,11 +69,7 @@ return (
                 const value = parseInt(e.target.value) || 0;
                 handleChange({ ...profile, age: value });
               }}
-              className={`w-full px-3 py-2 border rounded-lg transition-all ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-              }`}
+              className={inputStyle}
               placeholder="Enter age"
             />
           )}
@@ -90,26 +83,14 @@ return (
             <button
               type="button"
               onClick={() => handleChange({ ...profile, gender: 'male' })}
-              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                profile.gender === 'male'
-                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : isDarkMode
-                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
+              className={segmentButton(profile.gender === 'male')}
             >
               Male
             </button>
             <button
               type="button"
               onClick={() => handleChange({ ...profile, gender: 'female' })}
-              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                profile.gender === 'female'
-                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : isDarkMode
-                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
+              className={segmentButton(profile.gender === 'female')}
             >
               Female
             </button>
@@ -124,11 +105,7 @@ return (
             <button
               type="button"
               onClick={() => setShowHeightPicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
-                  : 'border-gray-300 bg-white text-gray-900'
-              }`}
+              className={inputButton}
             >
               {unitSystem === 'imperial' 
                 ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
@@ -148,11 +125,7 @@ return (
                       handleChange({ ...profile, height: heightCm });
                     }
                   }}
-                  className={`w-full px-3 py-2 border rounded-lg transition-all ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-                  }`}
+                  className={inputStyle}
                   placeholder="ft"
                   min={0}
                   max={8}
@@ -167,11 +140,7 @@ return (
                       handleChange({ ...profile, height: heightCm });
                     }
                   }}
-                  className={`w-full px-3 py-2 border rounded-lg transition-all ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-                  }`}
+                  className={inputStyle}
                   placeholder="in"
                   min={0}
                   max={11}
@@ -187,11 +156,7 @@ return (
                     handleChange({ ...profile, height: value });
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-lg transition-all ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-                }`}
+                className={inputStyle}
                 placeholder="Enter height (cm)"
               />
             )
@@ -206,26 +171,14 @@ return (
             <button
               type="button"
               onClick={() => handleChange({ ...profile, unitSystem: 'metric' })}
-              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                (profile.unitSystem || 'metric') === 'metric'
-                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : isDarkMode
-                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
+              className={segmentButton((profile.unitSystem || 'metric') === 'metric')}
             >
               Metric
             </button>
             <button
               type="button"
               onClick={() => handleChange({ ...profile, unitSystem: 'imperial' })}
-              className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                profile.unitSystem === 'imperial'
-                  ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
-                  : isDarkMode
-                    ? 'bg-black/40 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
+              className={segmentButton(profile.unitSystem === 'imperial')}
             >
               Imperial
             </button>
@@ -240,11 +193,7 @@ return (
         <button
           type="button"
           onClick={() => setShowActivityPicker(true)}
-          className={`w-full px-3 py-2 border rounded-lg text-left transition-all ${
-            isDarkMode
-              ? 'border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
-              : 'border-gray-300 bg-white text-gray-900'
-          }`}
+          className={inputButton}
         >
           {activityLevels.find(l => l.value === profile.activityLevel)?.label || 'Select activity level'}
         </button>

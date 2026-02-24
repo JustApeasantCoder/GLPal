@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 import { getDosageCalculatorData, saveDosageCalculatorData, clearDosageCalculatorData } from '../../../shared/utils/database';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 
@@ -81,6 +81,7 @@ const SyringeIndicator: React.FC<SyringeIndicatorProps> = ({ value, maxValue = 1
 
 const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
+  const { input, primaryButton, secondaryButton } = useThemeStyles();
   const [vialStrength, setVialStrength] = useState<string>('');
   const [waterAmount, setWaterAmount] = useState<string>('');
   const [desiredDose, setDesiredDose] = useState<string>('');

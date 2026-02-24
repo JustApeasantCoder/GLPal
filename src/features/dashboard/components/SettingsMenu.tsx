@@ -6,6 +6,7 @@ import { convertWeightFromKg, convertWeightToKg } from '../../../shared/utils/un
 import WeightWheelPickerModal from '../../weight/components/WeightWheelPickerModal';
 import ImportExportModal from './ImportExportModal';
 import CloudBackupModal from './CloudBackupModal';
+import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 const IS_DEV = import.meta.env.VITE_IS_DEV === 'true';
 
@@ -28,7 +29,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onClose,
   onGenerateSampleData,
 }) => {
-const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
+  const { inputButton, input: inputStyle } = useThemeStyles();
+  const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
@@ -146,11 +148,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                     <button
                       type="button"
                       onClick={() => setShowGoalWeightPicker(true)}
-                      className={`w-full px-3 py-2 rounded-lg text-sm text-left transition-all ${
-                        isDarkMode
-                          ? 'border border-[#B19CD9]/50 bg-black/40 text-[#B19CD9]'
-                          : 'border border-gray-300 bg-white text-gray-900'
-                      }`}
+                      className={inputButton}
                     >
                       {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
                     </button>
@@ -165,11 +163,7 @@ const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
                           onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
                         }
                       }}
-                      className={`w-full px-3 py-2 rounded-lg text-sm transition-all ${
-                        isDarkMode
-                          ? 'border border-[#B19CD9]/50 bg-black/40 text-[#B19CD9] placeholder-[#B19CD9]/50'
-                          : 'border border-gray-300 bg-white text-gray-900 placeholder-gray-400'
-                      }`}
+                      className={inputStyle}
                       placeholder={`Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
                     />
                   )}

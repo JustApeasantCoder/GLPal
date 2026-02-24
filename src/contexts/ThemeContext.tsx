@@ -111,7 +111,7 @@ export const useThemeStyles = () => {
         ? "text-lg font-bold text-white [text-shadow:0_0_3px_rgba(255,255,255,0.3)]"
         : "text-lg font-bold text-gray-900",
       subtitle: isDarkMode
-        ? "text-sm text-[var(--text-secondary)]/60 -mt-1 inline-block"
+        ? "text-sm text-white/60 -mt-1 inline-block"
         : "text-sm text-gray-500 -mt-1 inline-block"
     },
     
@@ -126,6 +126,54 @@ export const useThemeStyles = () => {
         : "w-20 px-3 py-1 text-xs rounded-lg transition-all duration-300 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100";
     },
 
+    // ==================== Buttons ====================
+    // Primary action buttons (Save, Create, Calculate, Add)
+    primaryButton: isDarkMode
+      ? "bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium py-2 px-4 rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all"
+      : "bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium py-2 px-4 rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all",
+
+    // Secondary/small buttons (pill-shaped presets like 40mg, 50mg)
+    secondaryButton: (isActive: boolean = false) => {
+      if (isActive) {
+        return "py-2 px-2 rounded-full text-xs font-medium whitespace-nowrap transition-all bg-[#B19CD9] text-white";
+      }
+      return isDarkMode
+        ? "py-2 px-2 rounded-full text-xs font-medium whitespace-nowrap transition-all bg-[#B19CD9]/5 text-[#B19CD9] border border-[#9C7BD3]/20 hover:bg-[#B19CD9]/10 hover:border-[#9C7BD3]/40"
+        : "py-2 px-2 rounded-full text-xs font-medium whitespace-nowrap transition-all bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200";
+    },
+
+    // Segment/toggle buttons (gender, Yes/No)
+    segmentButton: (isActive: boolean = false) => {
+      if (isActive) {
+        return "flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]";
+      }
+      return isDarkMode
+        ? "flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-[#B19CD9]/5 text-[#B19CD9] border border-[#9C7BD3]/20 hover:bg-[#B19CD9]/10 hover:border-[#9C7BD3]/40"
+        : "flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200";
+    },
+
+    // Segmented control buttons (PeriodSelector - full-width grid toggles)
+    segmentedControl: (isActive: boolean = false) => {
+      if (isActive) {
+        return "flex-1 px-2 py-2 text-sm rounded-lg transition-all duration-300 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]";
+      }
+      return isDarkMode
+        ? "flex-1 px-2 py-2 text-sm rounded-lg transition-all duration-300 bg-[#B19CD9]/5 text-[#B19CD9] border border-[#9C7BD3]/20 hover:bg-[#B19CD9]/10 hover:border-[#9C7BD3]/40"
+        : "flex-1 px-2 py-2 text-sm rounded-lg transition-all duration-300 bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200";
+    },
+
+    // ==================== Form Inputs ====================
+    // <textarea> fields
+    textarea: isDarkMode
+      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-text-muted resize-none"
+      : "w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-gray-400 resize-none",
+
+    // Buttons that look like inputs (date pickers, dropdown selects)
+    inputButton: isDarkMode
+      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-white rounded-lg text-sm text-left"
+      : "w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm text-left",
+
+    // ==================== Form Inputs ====================
     // Input styles
     input: isDarkMode
       ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-text-muted"
@@ -135,6 +183,11 @@ export const useThemeStyles = () => {
     card: isDarkMode
       ? "bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)]"
       : "bg-white/90 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-sm",
+
+    // Modal styles - Big Card style with glass effect
+    modal: isDarkMode
+      ? "bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)]"
+      : "bg-white/90 backdrop-blur-lg rounded-2xl border border-gray-200",
 
     // Include isDarkMode for future use
     isDarkMode

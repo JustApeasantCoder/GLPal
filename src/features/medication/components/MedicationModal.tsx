@@ -5,7 +5,7 @@ import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModa
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 import { timeService } from '../../../core/timeService';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 const getTodayString = () => timeService.todayString();
 
@@ -18,6 +18,7 @@ interface MedicationModalProps {
 
 const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
+  const { input: inputStyle, modal } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -98,11 +99,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${
-        isDarkMode 
-          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-          : 'bg-white/95'
-      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
@@ -117,11 +114,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                 value={selectedDate}
                 readOnly
                 onClick={() => setShowDatePicker(true)}
-                className={`w-full px-3 py-2 pr-10 border rounded-lg cursor-pointer ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                    : 'border-gray-300 bg-white text-gray-900'
-                }`}
+                className={inputStyle}
                 placeholder="Select date"
               />
               <svg

@@ -5,7 +5,7 @@ import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModa
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { timeService } from '../../../core/timeService';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface PeptideModalProps {
   isOpen: boolean;
@@ -69,6 +69,7 @@ const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
+  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton } = useThemeStyles();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
   const [dose, setDose] = useState('');
@@ -432,11 +433,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Any additional notes..."
                     rows={2}
-                    className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 resize-none ${
-                      isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                    }`}
+                    className={textarea}
                   />
                 </div>
 

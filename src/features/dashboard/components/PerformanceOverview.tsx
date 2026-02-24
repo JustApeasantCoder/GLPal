@@ -35,7 +35,7 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
   
   return (
     <div className={bigCard}>
-      <h1 className={bigCardText.title} style={{ textShadow: '0 0 15px var(--accent-purple-light-shadow)' }}>Performance Overview</h1>
+      <h1 className={bigCardText.title} >Performance Overview</h1>
       <div className="border-t border-[#B19CD9]/20 mb-3"></div>
       
       {/* Performance Overview Row */}

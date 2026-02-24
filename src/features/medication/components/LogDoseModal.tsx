@@ -3,7 +3,7 @@ import { GLP1Entry, GLP1Protocol } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { addMedicationManualEntry } from '../../../shared/utils/database';
 import { getMedicationColorByName } from '../../../shared/utils/chartUtils';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface LogDoseModalProps {
   isOpen: boolean;
@@ -34,6 +34,7 @@ const getPainLevelColor = (level: number): string => {
 
 const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [], protocolRef }) => {
   const { isDarkMode } = useTheme();
+  const { inputButton, textarea } = useThemeStyles();
   
   const effectiveProtocol = protocolRef?.current || protocol;
   
@@ -288,11 +289,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional notes..."
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#B19CD9]/60 resize-y ${
-                isDarkMode
-                  ? 'bg-black/30 border-[#B19CD9]/30 text-text-primary placeholder-text-muted'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-              }`}
+              className={textarea}
               rows={2}
             />
           </div>
