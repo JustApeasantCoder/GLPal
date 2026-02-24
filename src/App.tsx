@@ -5,6 +5,7 @@ import { useTheme } from './contexts/ThemeContext';
 import { ChartPeriod, useTime } from './shared/hooks';
 import { useAppStore, TabType } from './stores/appStore';
 import { useTimeStore } from './stores/timeStore';
+import { useAppHistory } from './shared/hooks/useAppHistory';
 
 import Dashboard from './features/dashboard/Dashboard';
 import MedicationTab from './features/medication/MedicationTab';
@@ -50,6 +51,13 @@ function App() {
     clearAllData,
     generateSampleData,
   } = useAppStore();
+
+  const { openModal, closeModal } = useAppHistory(
+    activeTab,
+    setActiveTab,
+    activeModal,
+    setActiveModal
+  );
 
   useEffect(() => {
     const isInPWA = window.matchMedia('(display-mode: standalone)').matches || 
@@ -128,7 +136,7 @@ function App() {
           </h1>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setActiveModal('settings')}
+              onClick={() => openModal('settings')}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
               aria-label="Settings"
               title="Settings"
@@ -296,13 +304,21 @@ function App() {
                 onChartPeriodChange={setChartPeriod}
                 useWheelForNumbers={profile.useWheelForNumbers ?? false}
                 useWheelForDate={profile.useWheelForDate ?? true}
+                activeModal={activeModal}
+                onOpenModal={openModal}
+                onCloseModal={closeModal}
               />
             </div>
           </TabContent>
 
           <TabContent isActive={activeTab === 'peptides'}>
             <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
-              <PeptidesTab useWheelForDate={profile.useWheelForDate ?? true} />
+              <PeptidesTab 
+                useWheelForDate={profile.useWheelForDate ?? true}
+                activeModal={activeModal}
+                onOpenModal={openModal}
+                onCloseModal={closeModal}
+              />
             </div>
           </TabContent>
 
@@ -327,7 +343,7 @@ function App() {
         isDarkMode={isDarkMode}
         onThemeToggle={toggleTheme}
         isOpen={isSettingsOpen}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         onGenerateSampleData={generateSampleData}
       />
     </div>

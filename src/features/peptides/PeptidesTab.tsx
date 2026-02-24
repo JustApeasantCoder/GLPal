@@ -8,9 +8,13 @@ import PeptideModal from './components/PeptideModal';
 import LogPeptideModal from './components/LogPeptideModal';
 import PeptideCard from './components/PeptideCard';
 import PeptideChart from './components/PeptideChart';
+import { ModalType } from '../../shared/hooks/useAppHistory';
 
 interface PeptidesTabProps {
   useWheelForDate?: boolean;
+  activeModal: ModalType;
+  onOpenModal: (modal: ModalType) => void;
+  onCloseModal: () => void;
 }
 
 const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
@@ -26,7 +30,7 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
   { id: 'other', label: 'Other' },
 ];
 
-const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => {
+const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activeModal, onOpenModal, onCloseModal }) => {
   const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
   const now = useTime();
   const currentTime = useMemo(() => new Date(now), [now]);
@@ -34,8 +38,6 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
   const { peptides, peptideLogs, addPeptide, updatePeptide, deletePeptide, addPeptideLog, deletePeptideLog } = useAppStore();
   
   const [selectedCategory, setSelectedCategory] = useState<PeptideCategory | 'all'>('all');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showLogModal, setShowLogModal] = useState(false);
   const [editingPeptide, setEditingPeptide] = useState<Peptide | null>(null);
   const [selectedPeptide, setSelectedPeptide] = useState<Peptide | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(() => {
@@ -44,6 +46,9 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isDeleteClosing, setIsDeleteClosing] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+
+  const showAddModal = activeModal === 'peptide';
+  const showLogModal = activeModal === 'logPeptide';
 
   useEffect(() => {
     if (expandedCard) {
@@ -115,13 +120,13 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
 
   const handleLogInjection = (log: PeptideLogEntry) => {
     addPeptideLog(log);
-    setShowLogModal(false);
+    onCloseModal();
     setSelectedPeptide(null);
   };
 
   const openLogModal = (peptide: Peptide) => {
     setSelectedPeptide(peptide);
-    setShowLogModal(true);
+    onOpenModal('logPeptide');
   };
 
   return (
@@ -172,7 +177,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
             <div className="text-4xl mb-3">💉</div>
             <p className="text-gray-400 mb-4">No peptides yet</p>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => onOpenModal('peptide')}
               className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#D4B8E8] text-white font-medium text-sm hover:shadow-lg hover:shadow-[#B19CD9]/30 transition-all"
             >
               Add Your First Peptide
@@ -192,7 +197,10 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
                     latestLog={latestLog}
                     currentTime={currentTime}
                     onLog={() => openLogModal(peptide)}
-                    onEdit={() => setEditingPeptide(peptide)}
+                    onEdit={() => {
+                      setEditingPeptide(peptide);
+                      onOpenModal('peptide');
+                    }}
                     onDelete={() => setDeleteConfirm(peptide.id)}
                     onToggleActive={() => handleToggleActive(peptide)}
                   />
@@ -239,7 +247,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
         {/* Add Button */}
         {filteredPeptides.length > 0 && (
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => onOpenModal('peptide')}
             className="w-full mt-4 py-3 rounded-xl border-2 border-dashed border-[#B19CD9]/30 text-[#B19CD9] font-medium hover:border-[#B19CD9]/60 hover:bg-[#B19CD9]/5 transition-all"
           >
             + Add Peptide
@@ -251,8 +259,8 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
       <PeptideModal
         isOpen={showAddModal || editingPeptide !== null}
         onClose={() => {
-          setShowAddModal(false);
           setEditingPeptide(null);
+          onCloseModal();
         }}
         onSave={editingPeptide ? handleUpdatePeptide : handleAddPeptide}
         editPeptide={editingPeptide}
@@ -263,7 +271,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
       <LogPeptideModal
         isOpen={showLogModal}
         onClose={() => {
-          setShowLogModal(false);
+          onCloseModal();
           setSelectedPeptide(null);
         }}
         onSave={handleLogInjection}

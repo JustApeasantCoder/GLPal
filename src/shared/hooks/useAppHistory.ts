@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef, Dispatch, SetStateAction } from 'react';
 
-export type ModalType = 'settings' | 'importExport' | null;
+export type ModalType = 'settings' | 'importExport' | 'medication' | 'protocol' | 'logDose' | 'peptide' | 'logPeptide' | null;
 
 interface HistoryState {
   tab: string;
