@@ -61,6 +61,11 @@
       --card-bg: rgba(255, 255, 255, 0.8);
     }
 
+    body.light-mode .btn-primary,
+    body.light-mode .nav-links .btn-primary {
+      color: #000000 !important;
+    }
+
     body.light-mode .bg-effects::before {
       background: 
         radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.15) 0%, transparent 50%),
@@ -1219,7 +1224,7 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
-        <a href="/app/" class="btn btn-primary">Open App</a>
+        <a href="/app/" class="btn btn-primary" style="color: #000000;">Open App</a>
       </div>
     </div>
   </header>
