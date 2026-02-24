@@ -204,7 +204,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           onClick={handleClose} 
         />
         <div 
-          className={`relative w-full max-w-sm max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
+          className={`relative w-full max-w-sm sm:max-w-md lg:max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
             isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
           style={isDarkMode ? { boxShadow: '0 0 30px rgba(177, 156, 217, 0.3)' } : {}}

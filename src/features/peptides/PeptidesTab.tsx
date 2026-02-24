@@ -275,7 +275,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
       {deleteConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className={`fixed inset-0 bg-black/60 ${isDeleteClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} onClick={() => setDeleteConfirm(null)} />
-          <div className={`relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6 ${isDeleteClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative bg-gradient-to-b from-[#1a1625]/98 to-[#0d0a15]/98 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 ${isDeleteClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <h3 className="text-lg font-bold text-white mb-2">Delete Peptide?</h3>
             <p className="text-sm text-gray-400 mb-4">
               This will permanently delete this peptide and all its injection logs. This action cannot be undone.

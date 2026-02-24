@@ -75,7 +75,7 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div 
-        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal} ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 ${modal} ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
       >
         <h2 className={`text-xl font-semibold mb-6 ${modalText.title}`}>Add Schedule</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>

@@ -686,7 +686,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingEntry(null)} 
           />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             {!editingEntry ? null : (
             <>
             <h3 className={`text-lg font-semibold mb-2 ${modalText.title}`}>Side Effects & Notes</h3>
@@ -810,7 +810,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingWeightEntry(null)} 
           />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <h3 className={`text-lg font-semibold mb-2 ${modalText.title}`}>Macros & Notes</h3>
             <p className={`text-sm mb-4 ${modalText.subtitle}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight !== undefined ? `${convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}${weightUnit}` : '-'}</p>
             

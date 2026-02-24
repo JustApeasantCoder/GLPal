@@ -22,7 +22,7 @@ const OverdueDisclaimerModal: React.FC<OverdueDisclaimerModalProps> = ({ isOpen,
         onClick={onClose} 
       />
       <div 
-        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <h3 className="text-lg font-bold text-white mb-3">Disclaimer</h3>

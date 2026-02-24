@@ -23,7 +23,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, medicat
         onClick={onClose} 
       />
       <div 
-        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <h2 className={`text-xl font-semibold mb-2 ${modalText.title}`}>Delete {medicationName}?</h2>

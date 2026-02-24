@@ -124,7 +124,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
           onClick={handleClose} 
         />
         <div 
-          className={`relative w-full max-w-sm max-h-[98vh] sm:max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
+          className={`relative w-full max-w-sm sm:max-w-md lg:max-w-2xl max-h-[98vh] sm:max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
             isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
           style={isDarkMode ? { boxShadow: '0 0 30px rgba(74, 222, 168, 0.3)' } : {}}
