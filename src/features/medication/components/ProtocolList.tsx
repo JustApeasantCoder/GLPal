@@ -36,7 +36,7 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
   }, {} as GroupedProtocols);
 
   return (
-    <div className="space-y-3 mb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
       {Object.entries(groupedProtocols).map(([medicationName, medProtocols]) => {
         const isExpanded = !collapsedMedications.has(medicationName);
         return (

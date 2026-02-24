@@ -287,7 +287,7 @@ function App() {
           </TabContent>
 
           <TabContent isActive={activeTab === 'doses'}>
-            <div className="max-w-md mx-auto">
+            <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <MedicationTab 
                 medicationEntries={dosesEntries} 
                 onAddMedication={handleAddDose}
@@ -301,18 +301,18 @@ function App() {
           </TabContent>
 
           <TabContent isActive={activeTab === 'peptides'}>
-            <div className="max-w-md mx-auto">
+            <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <PeptidesTab useWheelForDate={profile.useWheelForDate ?? true} />
             </div>
           </TabContent>
 
           <TabContent isActive={activeTab === 'dosage'}>
-            <div className="max-w-md mx-auto">
+            <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <DosageCalculatorTab useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
-            <div className="max-w-md mx-auto">
+            <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <LogTab profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
             </div>
           </TabContent>

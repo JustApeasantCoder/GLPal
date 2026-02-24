@@ -318,7 +318,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <div className="space-y-3 mb-6">
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 overflow-visible">
             <div className={smallCard}>
               <p className={text.label}>Total Doses</p>
               <p className={text.value}>{stats.totalPlannedDoses}</p>
@@ -388,8 +388,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
-            <div className="h-64 sm:h-80">
-              <MedicationChart 
+            <div className="h-64 sm:h-80 lg:h-96">
+              <MedicationChart
                 data={generatedEntries} 
                 period={chartPeriod} 
               />

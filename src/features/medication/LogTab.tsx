@@ -413,7 +413,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
   };
 
   return (
-    <div className="space-y-3 pb-20">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-20">
       <div className={bigCard}>
         <div className="flex justify-between items-center mb-2">
           <h1 className={bigCardText.title} >Dose Log</h1>

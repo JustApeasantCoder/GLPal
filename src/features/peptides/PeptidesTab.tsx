@@ -149,7 +149,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
           <div className={smallCard}>
             <p className={text.label}>Active</p>
             <p className={text.value}>{activePeptides.length}</p>
@@ -179,7 +179,7 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true }) => 
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {filteredPeptides.map(peptide => {
               const peptideSpecificLogs = peptideLogs.filter(l => l.peptideId === peptide.id);
               const latestLog = peptideSpecificLogs[0] || null;
