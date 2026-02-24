@@ -23,6 +23,30 @@ const landingPagePlugin = () => ({
           return;
         }
       }
+      if (req.url === '/privacy' || req.url === '/privacy.html') {
+        const privacyPath = path.resolve(__dirname, 'landing/privacy.html');
+        if (fs.existsSync(privacyPath)) {
+          let content = fs.readFileSync(privacyPath, 'utf-8');
+          content = content.replace(/href="\/app\/"/g, `href="${base}app/"`);
+          content = content.replace(/href="\/privacy"/g, `href="${base}privacy"`);
+          content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
+          res.setHeader('Content-Type', 'text/html');
+          res.end(content);
+          return;
+        }
+      }
+      if (req.url === '/terms' || req.url === '/terms.html') {
+        const termsPath = path.resolve(__dirname, 'landing/terms.html');
+        if (fs.existsSync(termsPath)) {
+          let content = fs.readFileSync(termsPath, 'utf-8');
+          content = content.replace(/href="\/app\/"/g, `href="${base}app/"`);
+          content = content.replace(/href="\/privacy"/g, `href="${base}privacy"`);
+          content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
+          res.setHeader('Content-Type', 'text/html');
+          res.end(content);
+          return;
+        }
+      }
       next();
     });
   },
@@ -61,7 +85,17 @@ const fixBuildPaths = () => ({
     const privacySrc = path.resolve(__dirname, 'landing/privacy.html');
     const privacyDest = path.resolve(buildDir, 'privacy.html');
     if (fs.existsSync(privacySrc)) {
-      fs.copyFileSync(privacySrc, privacyDest);
+      let content = fs.readFileSync(privacySrc, 'utf-8');
+      content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
+      fs.writeFileSync(privacyDest, content);
+    }
+
+    const termsSrc = path.resolve(__dirname, 'landing/terms.html');
+    const termsDest = path.resolve(buildDir, 'terms.html');
+    if (fs.existsSync(termsSrc)) {
+      let content = fs.readFileSync(termsSrc, 'utf-8');
+      content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
+      fs.writeFileSync(termsDest, content);
     }
   },
 });
@@ -83,6 +117,7 @@ export default defineConfig({
         index: path.resolve(__dirname, 'landing/index.html'),
         'app/index': path.resolve(__dirname, 'app/index.html'),
         privacy: path.resolve(__dirname, 'landing/privacy.html'),
+        terms: path.resolve(__dirname, 'landing/terms.html'),
       },
       output: {
         dir: 'build',
