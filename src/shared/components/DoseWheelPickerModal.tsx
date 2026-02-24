@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import WheelPicker from './WheelPicker';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 
 interface DoseWheelPickerModalProps {
   isOpen: boolean;
@@ -29,6 +29,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
   presets,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal: modalStyle } = useThemeStyles();
   const [localValue, setLocalValue] = useState(defaultValue || '0.25');
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -102,11 +103,7 @@ const DoseWheelPickerModal: React.FC<DoseWheelPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${
-            isDarkMode 
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-white'
-          } ${
+          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${modalStyle} ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'

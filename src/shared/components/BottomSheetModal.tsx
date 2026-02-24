@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 
 interface BottomSheetOption {
   value: string | number;
@@ -29,6 +29,7 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
   closeOnBackdrop = true,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal: modalStyle } = useThemeStyles();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -70,14 +71,10 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`rounded-2xl border shadow-2xl p-4 max-h-[90vh] overflow-y-auto transition-all ${
+          className={`rounded-2xl border shadow-2xl p-4 max-h-[90vh] overflow-y-auto transition-all ${modalStyle} ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'
-          } ${
-            isDarkMode
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-gradient-to-b from-white to-gray-50'
           }`}
         >
           <div className="flex justify-between items-center mb-4">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { format, addMonths, subMonths } from 'date-fns';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 import DatePicker from './DatePicker';
 
 interface CalendarPickerModalProps {
@@ -18,6 +18,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
   onClose,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal: modalStyle } = useThemeStyles();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     value ? new Date(value) : undefined
   );
@@ -101,11 +102,7 @@ const CalendarPickerModal: React.FC<CalendarPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border shadow-2xl p-4 max-h-[90vh] overflow-y-auto transition-all ${
-            isDarkMode 
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-white'
-          } ${
+          className={`relative isolate rounded-2xl border shadow-2xl p-4 max-h-[90vh] overflow-y-auto transition-all ${modalStyle} ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'

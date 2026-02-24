@@ -81,7 +81,7 @@ const SyringeIndicator: React.FC<SyringeIndicatorProps> = ({ value, maxValue = 1
 
 const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
-  const { input, primaryButton, secondaryButton } = useThemeStyles();
+  const { input, primaryButton, secondaryButton, modal } = useThemeStyles();
   const [vialStrength, setVialStrength] = useState<string>('');
   const [waterAmount, setWaterAmount] = useState<string>('');
   const [desiredDose, setDesiredDose] = useState<string>('');
@@ -451,11 +451,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
       </button>
 
       {result && (
-        <div className={`p-4 rounded-xl border border-[#B19CD9]/30 ${
-          isDarkMode 
-            ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-            : 'bg-white/95'
-        }`}>
+        <div className={`p-4 rounded-xl ${modal}`}>
           <h4 className={`font-medium mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Calculation Results</h4>
           <div className="space-y-2">
             <div className="flex justify-between">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface DeleteConfirmModalProps {
 }
 
 const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, medicationName, onClose, onConfirm }) => {
+  const { modal } = useThemeStyles();
   if (!isOpen) return null;
 
   return (
@@ -21,7 +23,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, medicat
         onClick={onClose} 
       />
       <div 
-        className="relative bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6"
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <h2 className="text-xl font-semibold text-white mb-2">Delete {medicationName}?</h2>

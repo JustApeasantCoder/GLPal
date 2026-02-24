@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import WheelPicker from './WheelPicker';
 import { timeService } from '../../core/timeService';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 
 const getToday = () => new Date(timeService.now());
 
@@ -23,6 +23,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
   maxDate,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal: modalStyle } = useThemeStyles();
   const [localDate, setLocalDate] = useState(value);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -146,11 +147,7 @@ const DateWheelPickerModal: React.FC<DateWheelPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${
-            isDarkMode 
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-white'
-          } ${
+          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${modalStyle} ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'

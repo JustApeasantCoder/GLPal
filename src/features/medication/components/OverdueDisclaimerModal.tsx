@@ -1,4 +1,5 @@
 import React from 'react';
+import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface OverdueDisclaimerModalProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface OverdueDisclaimerModalProps {
 }
 
 const OverdueDisclaimerModal: React.FC<OverdueDisclaimerModalProps> = ({ isOpen, onClose, onConfirm }) => {
+  const { modal } = useThemeStyles();
   if (!isOpen) return null;
 
   return (
@@ -20,7 +22,7 @@ const OverdueDisclaimerModal: React.FC<OverdueDisclaimerModalProps> = ({ isOpen,
         onClick={onClose} 
       />
       <div 
-        className="relative bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95 rounded-2xl shadow-2xl border border-red-500/30 w-full max-w-sm p-6"
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <h3 className="text-lg font-bold text-white mb-3">Disclaimer</h3>

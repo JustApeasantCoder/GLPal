@@ -34,7 +34,7 @@ const getPainLevelColor = (level: number): string => {
 
 const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [], protocolRef }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, textarea } = useThemeStyles();
+  const { inputButton, textarea, modal } = useThemeStyles();
   
   const effectiveProtocol = protocolRef?.current || protocol;
   
@@ -162,11 +162,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
-        isDarkMode 
-          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-          : 'bg-white/95'
-      } ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <h2 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 

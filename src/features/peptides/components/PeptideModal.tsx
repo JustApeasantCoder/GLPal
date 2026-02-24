@@ -69,7 +69,7 @@ const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton } = useThemeStyles();
+  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal } = useThemeStyles();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
   const [dose, setDose] = useState('');
@@ -204,11 +204,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           onClick={handleClose} 
         />
         <div 
-          className={`relative w-full max-w-sm max-h-[90vh] rounded-2xl shadow-2xl border overflow-hidden flex flex-col ${
-            isDarkMode 
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-white'
-          } ${
+          className={`relative w-full max-w-sm max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
             isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
           style={isDarkMode ? { boxShadow: '0 0 30px rgba(177, 156, 217, 0.3)' } : {}}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 
 interface WheelPickerProps {
   value: string;
@@ -20,6 +20,7 @@ const WheelPicker: React.FC<WheelPickerProps> = ({
   format = (v) => v,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal } = useThemeStyles();
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 

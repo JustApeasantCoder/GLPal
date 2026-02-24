@@ -309,11 +309,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       {showOtherModal && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
           <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
-          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto ${
-            isDarkMode 
-              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-              : 'bg-white/95'
-          } modal-content-fade-in`}>
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto ${modal} modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Select Medication</h3>
             <div className="space-y-2 mb-4">
               {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { googleDriveService, BackupFile, BackupData } from '../../../services/GoogleDriveService';
+import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface CloudBackupModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
   isDarkMode,
   onDataRestored,
 }) => {
+  const { modal } = useThemeStyles();
   const [activeTab, setActiveTab] = useState<ModalTab>('backup');
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -205,13 +207,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
         onClick={onClose}
       />
       <div
-        className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${
-          isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
-        } ${
-          isDarkMode
-            ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 border border-[#B19CD9]/30'
-            : 'bg-gradient-to-b from-white to-gray-50 border border-gray-200'
-        }`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>

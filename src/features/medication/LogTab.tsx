@@ -61,7 +61,7 @@ const COMMON_SIDE_EFFECTS = [
 ];
 
 const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) => {
-  const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea } = useThemeStyles();
+  const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea, modal } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
   const bigCardText = {
@@ -686,11 +686,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingEntry(null)} 
           />
-          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
-            isDarkMode 
-              ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-              : 'bg-white/95'
-          } ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             {!editingEntry ? null : (
             <>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Side Effects & Notes</h3>
@@ -814,13 +810,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
             style={{ backdropFilter: 'blur(8px)' }} 
             onClick={() => setEditingWeightEntry(null)} 
           />
-          <div className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${
-              isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'
-            } ${
-              isDarkMode 
-                ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-                : 'bg-white/95'
-            }`}>
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
             <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight !== undefined ? `${convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}${weightUnit}` : '-'}</p>
             

@@ -29,7 +29,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onClose,
   onGenerateSampleData,
 }) => {
-  const { inputButton, input: inputStyle } = useThemeStyles();
+  const { inputButton, input: inputStyle, modal } = useThemeStyles();
   const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
@@ -112,11 +112,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
       <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] sm:max-h-[85vh] p-4 sm:p-6 overflow-hidden flex flex-col ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'} ${
-        isDarkMode
-          ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 border border-[#B19CD9]/30'
-          : 'bg-gradient-to-b from-white to-gray-50 border border-gray-200'
-      }`}>
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] sm:max-h-[85vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             Settings

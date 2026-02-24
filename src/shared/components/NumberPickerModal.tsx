@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import WheelPicker from './WheelPicker';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 
 interface NumberPickerModalProps {
   isOpen: boolean;
@@ -33,6 +33,7 @@ const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
   secondaryDefaultValue,
 }) => {
   const { isDarkMode } = useTheme();
+  const { modal: modalStyle } = useThemeStyles();
   const [localValue, setLocalValue] = useState(defaultValue || String(min));
   const [secondaryValue, setSecondaryValue] = useState(secondaryDefaultValue || String(secondaryMin || 0));
   const [isVisible, setIsVisible] = useState(false);
@@ -121,14 +122,10 @@ const NumberPickerModal: React.FC<NumberPickerModalProps> = ({
 
       <div className="relative w-full max-w-sm">
         <div
-          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${
+          className={`relative isolate rounded-2xl border shadow-2xl p-6 max-h-[90vh] overflow-y-auto transition-all ${modalStyle} ${
             isClosing
               ? 'modal-fade-out'
               : 'modal-content-fade-in'
-          } ${
-            isDarkMode
-              ? 'border-[#B19CD9]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-300 bg-gradient-to-b from-white to-gray-50'
           }`}
         >
           <div className="flex justify-between items-center mb-4">

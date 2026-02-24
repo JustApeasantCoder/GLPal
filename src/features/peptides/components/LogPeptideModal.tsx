@@ -41,7 +41,7 @@ const getTodayString = () => timeService.todayString();
 
 const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSave, peptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, input: inputStyle, textarea } = useThemeStyles();
+  const { inputButton, input: inputStyle, textarea, modal } = useThemeStyles();
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(() => {
     const now = timeService.nowDate();
@@ -124,11 +124,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
           onClick={handleClose} 
         />
         <div 
-          className={`relative w-full max-w-sm max-h-[98vh] sm:max-h-[95vh] rounded-2xl shadow-2xl border overflow-hidden flex flex-col ${
-            isDarkMode 
-              ? 'border-[#4ADEA8]/30 bg-gradient-to-b from-[#1a1625]/95 to-[#0d0a15]/95'
-              : 'border-gray-200 bg-white'
-          } ${
+          className={`relative w-full max-w-sm max-h-[98vh] sm:max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
             isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
           style={isDarkMode ? { boxShadow: '0 0 30px rgba(74, 222, 168, 0.3)' } : {}}

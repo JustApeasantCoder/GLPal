@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { UserProfile } from '../../../types';
 import { dataImportExportService } from '../../../services/DataImportExportService';
 import { ImportPreview, ImportResult, ImportMode } from '../../../utils/csvTypes';
+import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface ImportExportModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
   isDarkMode,
   onImportComplete,
 }) => {
+  const { modal } = useThemeStyles();
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importMode, setImportMode] = useState<ImportMode>('merge');
@@ -103,13 +105,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
         onClick={onClose}
       />
       <div
-        className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${
-          isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
-        } ${
-          isDarkMode
-            ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 border border-[#B19CD9]/30'
-            : 'bg-gradient-to-b from-white to-gray-50 border border-gray-200'
-        }`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>

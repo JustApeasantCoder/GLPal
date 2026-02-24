@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface DisclaimerModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface DisclaimerModalProps {
 
 const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose, onAcknowledged }) => {
   const { isDarkMode } = useTheme();
+  const { modal } = useThemeStyles();
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
@@ -35,11 +36,7 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose, onAc
         onClick={() => { onClose(); setAcknowledged(false); }} 
       />
       <div 
-        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${
-          isDarkMode
-            ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95 border border-[#B19CD9]/30'
-            : 'bg-gradient-to-b from-white to-gray-50 border border-gray-200'
-        }`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Disclaimer</h2>

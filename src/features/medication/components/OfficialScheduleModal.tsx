@@ -4,7 +4,7 @@ import { MEDICATIONS, generateId } from '../../../constants/medications';
 import { CHART_DATE_FORMATS } from '../../../shared/utils/chartUtils';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
 
 interface OfficialScheduleModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface OfficialScheduleModalProps {
 
 const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
+  const { modal } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('semaglutide');
   const [startDate, setStartDate] = useState<string>(() => {
     const today = new Date();
@@ -74,11 +75,7 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div 
-        className={`relative rounded-2xl shadow-2xl border border-[#B19CD9]/30 w-full max-w-sm p-6 ${
-          isDarkMode
-            ? 'bg-gradient-to-b from-[#1a1625]/70 to-[#0d0a15]/95' 
-            : 'bg-white/95'
-        } ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
+        className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal} ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
       >
         <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Add Schedule</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
