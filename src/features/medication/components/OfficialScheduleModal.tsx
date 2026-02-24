@@ -15,7 +15,7 @@ interface OfficialScheduleModalProps {
 
 const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { modal, modalText } = useThemeStyles();
+  const { modal, modalText, input } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('semaglutide');
   const [startDate, setStartDate] = useState<string>(() => {
     const today = new Date();
@@ -97,7 +97,7 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
                         : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className={`${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`}>{med.name}</span>
+                  <span className={modalText.value}>{med.name}</span>
                 </button>
               ))}
             </div>
@@ -147,13 +147,9 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
             <button
               type="button"
               onClick={() => setShowDatePicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/30 bg-black/20 text-[#B19CD9]'
-                  : 'border-gray-300 bg-white text-gray-700'
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg text-sm text-left ${input}`}
             >
-              {new Date(startDate).toLocaleDateString()}
+              <span className={modalText.value}>{new Date(startDate).toLocaleDateString()}</span>
             </button>
           </div>
 

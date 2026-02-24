@@ -170,14 +170,15 @@ export const useThemeStyles = () => {
 
     // Buttons that look like inputs (date pickers, dropdown selects)
     inputButton: isDarkMode
-      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-white rounded-lg text-sm text-left"
+      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-text-secondary rounded-lg text-sm text-left"
       : "w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm text-left",
 
-    // ==================== Form Inputs ====================
     // Input styles
     input: isDarkMode
-      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-text-muted"
-      : "w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-gray-400",
+      ? "w-full px-3 py-2 border border-[var(--card-border)] bg-black/20 text-text-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-text-muted"
+      : "w-full px-3 py-2 border border-gray-300 bg-white text-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B19CD9]/50 placeholder-gray-400",
+
+    // ==================== Form Inputs ====================
 
     // Card base for generic use
     card: isDarkMode
@@ -195,16 +196,16 @@ export const useThemeStyles = () => {
       title: isDarkMode ? "text-white" : "text-gray-900",
       
       // Form labels - like "Medication", "Date", "Dose"
-      label: isDarkMode ? "text-text-secondary" : "text-gray-700",
+      label: isDarkMode ? "text-white" : "text-gray-800",
       
       // Display values - like medication name, selected values
-      value: isDarkMode ? "text-text-primary" : "text-gray-900",
+      value: isDarkMode ? "text-text-secondary" : "text-gray-600",
       
       // Subtitles/secondary info - like dates, descriptions  
-      subtitle: isDarkMode ? "text-white/80" : "text-gray-600",
+      subtitle: isDarkMode ? "text-text-secondary" : "text-gray-600",
       
       // Muted/hint text - placeholders, hints
-      muted: isDarkMode ? "text-text-muted" : "text-gray-500",
+      muted: isDarkMode ? "text-text-muted" : "text-gray-600",
     },
 
     // Include isDarkMode for future use
