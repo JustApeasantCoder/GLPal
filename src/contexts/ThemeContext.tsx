@@ -187,7 +187,7 @@ export const useThemeStyles = () => {
     // Modal styles - Big Card style with glass effect
     modal: isDarkMode
       ? "bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)]"
-      : "bg-white/90 backdrop-blur-lg rounded-2xl border border-gray-200",
+      : "bg-white backdrop-blur-lg rounded-2xl border border-gray-200",
 
     // Include isDarkMode for future use
     isDarkMode
