@@ -38,56 +38,49 @@ const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({
       <h1 className={bigCardText.title} >Performance Overview</h1>
       <div className="border-t border-[#B19CD9]/20 mb-3"></div>
       
-      {/* Performance Overview Row */}
-      <div className="space-y-3 mb-3">
-        <div className="grid grid-cols-3 gap-3">
-          <div className={smallCard}>
-            <p className={text.label}>Progress Rate</p>
-            <div className="text-left">
-              <p className={text.value}>
-                {((totalLoss / (startWeight - goalWeight)) * 100).toFixed(1)}%
-              </p>
-            </div>
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+        <div className={smallCard}>
+          <p className={text.label}>Progress Rate</p>
+          <div className="text-left">
+            <p className={text.value}>
+              {((totalLoss / (startWeight - goalWeight)) * 100).toFixed(1)}%
+            </p>
           </div>
-          <div className={smallCard}>
-            <p className={text.label}>Best Week</p>
-<div className="text-left">
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Best Week</p>
+          <div className="text-left">
             <p className={text.value}>
               -{formatWeight(WeightAnalytics.calculateBestWeek(weights), unitSystem)}
             </p>
           </div>
-          </div>
-          <div className={smallCard}>
-            <p className={text.label}>Time Active</p>
-            <div className="text-left">
-              <p className={text.value}>
-                {getTimeActive()}
-              </p>
-            </div>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Time Active</p>
+          <div className="text-left">
+            <p className={text.value}>
+              {getTimeActive()}
+            </p>
           </div>
         </div>
-
-        {/* Additional Metrics */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className={smallCard}>
-            <p className={text.label}>Start Weight</p>
-            <div className="text-left">
-              <p className={text.value}>{formatWeight(startWeight, unitSystem)}</p>
-            </div>
+        <div className={smallCard}>
+          <p className={text.label}>Start Weight</p>
+          <div className="text-left">
+            <p className={text.value}>{formatWeight(startWeight, unitSystem)}</p>
           </div>
-          <div className={smallCard}>
-            <p className={text.label}>Best Month</p>
-            <div className="text-left">
-              <p className={text.value}>
-                -{formatWeight(WeightAnalytics.calculateBestMonth(weights), unitSystem)}
-              </p>
-            </div>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Best Month</p>
+          <div className="text-left">
+            <p className={text.value}>
+              -{formatWeight(WeightAnalytics.calculateBestMonth(weights), unitSystem)}
+            </p>
           </div>
-          <div className={smallCard}>
-            <p className={text.label}>Total Loss</p>
-            <div className="text-left">
-              <p className={text.value}>{formatWeight(totalLoss, unitSystem)}</p>
-            </div>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Total Loss</p>
+          <div className="text-left">
+            <p className={text.value}>{formatWeight(totalLoss, unitSystem)}</p>
           </div>
         </div>
       </div>

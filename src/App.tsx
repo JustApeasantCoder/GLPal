@@ -272,7 +272,7 @@ function App() {
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
         <div className="w-full px-4 py-2 space-y-3 md:px-6 lg:px-8 relative">
           <TabContent isActive={activeTab === 'dashboard'}>
-            <div className="max-w-md mx-auto">
+            <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <Dashboard
                 weights={weights}
                 dosesEntries={dosesEntries}

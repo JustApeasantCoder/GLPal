@@ -57,13 +57,13 @@ const WeightInput: React.FC<WeightInputProps> = ({ onAddWeight, unitSystem = 'me
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleKeyboardSubmit()}
-            className={inputStyle}
+            className={`${inputStyle} flex-1`}
             placeholder={`Enter weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
           />
           <button
             type="button"
             onClick={handleKeyboardSubmit}
-            className={primaryButton}
+            className={`${primaryButton} flex-1`}
           >
             Add
           </button>

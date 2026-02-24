@@ -55,60 +55,53 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         {/* Metrics Section */}
-        <div className="space-y-3 mb-3">
-{/* Row 1: Current, BMI, Total Loss */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 overflow-visible">
-            <div className={smallCard}>
-              <p className={text.label}>Current</p>
-              <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
-            </div>
-            <div className={smallCard}>
-              <div className="flex justify-between items-center mb-1">
-                <p className={text.label}>BMI</p>
-                <BMIInfoTooltip />
-              </div>
-              <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
-                  {weightMetrics.bmi.toFixed(1)}
-                </span>
-                <span className={`${text.bmiCategory} ${weightMetrics.bmiCategory.color}`}>
-                  ({weightMetrics.bmiCategory.category})
-                </span>
-              </p>
-            </div>
-            <div className={smallCard}>
-              <p className={text.label}>Total Loss</p>
-              <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
-                  {formatWeight(weightMetrics.totalLoss, unitSystem)}
-                </span>
-                <span className={text.percentage}>
-                  ({weightMetrics.totalLossPercentage.toFixed(1)}%)
-                </span>
-              </p>
-            </div>
+        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 overflow-visible">
+          <div className={smallCard}>
+            <p className={text.label}>Current</p>
+            <p className={text.value}>{formatWeight(weightMetrics.currentWeight, unitSystem)}</p>
           </div>
-          
-          {/* Row 2: Weekly Avg, Monthly Avg, To Lose */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className={smallCard}>
-              <p className={text.label}>Weekly Avg</p>
-              <p className={text.value}>
-                {weightMetrics.weeklyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.weeklyAverageLoss), unitSystem)}
-              </p>
+          <div className={smallCard}>
+            <div className="flex justify-between items-center mb-1">
+              <p className={text.label}>BMI</p>
+              <BMIInfoTooltip />
             </div>
-            <div className={smallCard}>
-              <p className={text.label}>Monthly Avg</p>
-              <p className={text.value}>
-                {weightMetrics.monthlyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.monthlyAverageLoss), unitSystem)}
-              </p>
-            </div>
-            <div className={smallCard}>
-              <p className={text.label}>To Lose</p>
-              <p className={text.value}>
-                {formatWeight(weightMetrics.currentWeight - actualGoalWeight, unitSystem)}
-              </p>
-            </div>
+            <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+              <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
+                {weightMetrics.bmi.toFixed(1)}
+              </span>
+              <span className={`${text.bmiCategory} ${weightMetrics.bmiCategory.color}`}>
+                ({weightMetrics.bmiCategory.category})
+              </span>
+            </p>
+          </div>
+          <div className={smallCard}>
+            <p className={text.label}>Total Loss</p>
+            <p className={text.totalLossValue} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+              <span style={{display: 'inline-block', whiteSpace: 'nowrap'}}>
+                {formatWeight(weightMetrics.totalLoss, unitSystem)}
+              </span>
+              <span className={text.percentage}>
+                ({weightMetrics.totalLossPercentage.toFixed(1)}%)
+              </span>
+            </p>
+          </div>
+          <div className={smallCard}>
+            <p className={text.label}>Weekly Avg</p>
+            <p className={text.value}>
+              {weightMetrics.weeklyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.weeklyAverageLoss), unitSystem)}
+            </p>
+          </div>
+          <div className={smallCard}>
+            <p className={text.label}>Monthly Avg</p>
+            <p className={text.value}>
+              {weightMetrics.monthlyAverageLoss > 0 ? '-' : ''}{formatWeight(Math.abs(weightMetrics.monthlyAverageLoss), unitSystem)}
+            </p>
+          </div>
+          <div className={smallCard}>
+            <p className={text.label}>To Lose</p>
+            <p className={text.value}>
+              {formatWeight(weightMetrics.currentWeight - actualGoalWeight, unitSystem)}
+            </p>
           </div>
         </div>
 
@@ -119,14 +112,14 @@ const Dashboard: React.FC<DashboardProps> = ({
 {/* Weight Trends */}
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
-            <div className="h-64 sm:h-72">
+            <div className="h-64 sm:h-72 lg:h-96">
               <WeightChart data={weights} goalWeight={actualGoalWeight} unitSystem={unitSystem} period={chartPeriod} medicationData={dosesEntries} />
             </div>
           </div>
 
           {/* Medication Status */}
           <div>
-            <div className="h-64 sm:h-72">
+            <div className="h-64 sm:h-72 lg:h-96">
               <MedicationChart data={generatedEntries} period={chartPeriod} />
             </div>
           </div>
