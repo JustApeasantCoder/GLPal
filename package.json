@@ -32,9 +32,9 @@
     "preview": "vite preview",
     "test": "jest",
     "electron": "electron .",
-    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000/app/ && cross-env ELECTRON_DEV=true electron .\"",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000/ && cross-env ELECTRON_DEV=true electron .\"",
     "electron-pack": "cross-env ELECTRON=true npm run build && electron .",
-    "electron-serve": "cross-env ELECTRON_DEV=true npm run build && concurrently \"serve -s build -p 3000\" \"wait-on http://localhost:3000/app/ && electron .\"",
+    "electron-serve": "cross-env ELECTRON_DEV=true npm run build && concurrently \"serve -s build -p 3000\" \"wait-on http://localhost:3000/ && electron .\"",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },

@@ -3,19 +3,18 @@ const path = require('path');
 const fs = require('fs');
 
 const isElectronDev = process.env.ELECTRON_DEV === 'true';
-const buildPath = path.join(__dirname, '../build/app');
+const buildPath = path.join(__dirname, '../build');
 const hasBuild = fs.existsSync(buildPath) && fs.existsSync(path.join(buildPath, 'index.html'));
 const isProduction = hasBuild && !isElectronDev;
 
 let mainWindow;
 
 function createWindow() {
-  const indexPath = path.join(__dirname, '../build/app/index.html');
-  const fileUrl = `file://${indexPath}`;
-  const devUrl = 'http://localhost:3000/app/';
+  const landingPath = path.join(__dirname, '../build/app/index.html');
+  const devUrl = 'http://localhost:3000/';
   
   console.log('isProduction:', isProduction, 'isElectronDev:', isElectronDev);
-  console.log('Loading URL:', isProduction ? fileUrl : devUrl);
+  console.log('Loading URL:', isProduction ? landingPath : devUrl);
   
   mainWindow = new BrowserWindow({
     width: 500,
@@ -31,11 +30,11 @@ function createWindow() {
     show: false
   });
 
-  mainWindow.loadURL(
-    isProduction
-      ? fileUrl
-      : 'http://localhost:3000/app/'
-  );
+  if (isProduction) {
+    mainWindow.loadFile(landingPath);
+  } else {
+    mainWindow.loadURL(devUrl);
+  }
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     console.error('Failed to load:', errorCode, errorDescription);

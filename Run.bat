@@ -2,8 +2,6 @@
 echo Starting GLPal Health Tracker...
 echo.
 
-cd /d "%~dp0app"
-
 :: Check if dependencies are installed
 if not exist "node_modules" (
     echo Installing dependencies...
