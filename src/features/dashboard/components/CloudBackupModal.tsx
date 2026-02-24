@@ -18,7 +18,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
   isDarkMode,
   onDataRestored,
 }) => {
-  const { modal } = useThemeStyles();
+  const { modal, modalText } = useThemeStyles();
   const [activeTab, setActiveTab] = useState<ModalTab>('backup');
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -210,7 +210,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
         className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-xl font-semibold ${modalText.title}`}>
             Cloud Backup
           </h2>
           <div className={`text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30`}>
@@ -315,7 +315,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
                 </p>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Restore Mode
                   </h3>
                   <div className="space-y-2">
@@ -352,7 +352,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Available Backups
                   </h3>
                   {isLoading && backups.length === 0 ? (

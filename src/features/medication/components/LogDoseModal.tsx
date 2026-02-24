@@ -34,7 +34,7 @@ const getPainLevelColor = (level: number): string => {
 
 const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, protocol, allMedications = [], protocolRef }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, textarea, modal } = useThemeStyles();
+  const { inputButton, textarea, modal, modalText } = useThemeStyles();
   
   const effectiveProtocol = protocolRef?.current || protocol;
   
@@ -163,7 +163,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         onClick={onClose}
       />
       <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
+        <h2 className={`text-xl font-semibold mb-2 ${modalText.title}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
         <div className="space-y-3 mb-4">
@@ -173,19 +173,19 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
               : 'bg-gray-50 border-gray-200'
           }`}>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-secondary">Medication</span>
+              <span className={`text-sm ${modalText.label}`}>Medication</span>
               <span className="text-sm font-medium" style={{ color: medicationColor }}>{effectiveProtocol?.medication || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-secondary">Date</span>
-              <span className="text-sm text-text-primary">{today}</span>
+              <span className={`text-sm ${modalText.label}`}>Date</span>
+              <span className={`text-sm ${modalText.value}`}>{today}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-text-secondary">Time</span>
-              <span className="text-sm font-medium text-text-primary">{currentTime}</span>
+              <span className={`text-sm ${modalText.label}`}>Time</span>
+              <span className={`text-sm font-medium ${modalText.value}`}>{currentTime}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-text-secondary">Dose</span>
+              <span className={`text-sm ${modalText.label}`}>Dose</span>
               <span className="text-sm font-medium text-[#4ADEA8]">{effectiveProtocol?.dose || 0}mg</span>
             </div>
           </div>
@@ -196,7 +196,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
         <div className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-sm font-medium text-text-secondary">
+              <label className={`text-sm font-medium ${modalText.label}`}>
                 Pain Level (optional)
               </label>
               <span className="pain-level-indicator text-sm font-medium" style={{ color: painLevelColor }}>
@@ -224,7 +224,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Injection Site (optional)
             </label>
             {renderSelector('Area', INJECTION_AREAS, injectionArea, setInjectionArea, 4)}
@@ -246,7 +246,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Injection Site Reaction (optional)
             </label>
             <div className="flex gap-2">
@@ -278,7 +278,7 @@ const LogDoseModal: React.FC<LogDoseModalProps> = ({ isOpen, onClose, onSave, pr
           <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Notes (optional)
             </label>
             <textarea

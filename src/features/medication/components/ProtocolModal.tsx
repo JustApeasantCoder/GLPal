@@ -23,7 +23,7 @@ interface ProtocolModalProps {
 
 const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal } = useThemeStyles();
+  const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal, modalText } = useThemeStyles();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
@@ -124,14 +124,14 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <h2 className={`text-xl font-semibold mb-6 ${modalText.title}`}>
           {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
         </h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
         <div className="space-y-4">
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Medication</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Medication</label>
             <div className="grid grid-cols-2 gap-2">
               {MAIN_MEDICATIONS.map((med) => (
                 <button
@@ -146,7 +146,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                         : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className={isDarkMode ? 'text-text-primary' : 'text-gray-900'}>{med.name}</span>
+                  <span className={modalText.value}>{med.name}</span>
                 </button>
               ))}
             </div>
@@ -156,7 +156,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dose (mg)</label>
+              <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Dose (mg)</label>
               {useWheelForNumbers ? (
                 <button
                   type="button"
@@ -177,7 +177,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               )}
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Dosing Schedule</label>
+              <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Dosing Schedule</label>
               <button
                 type="button"
                 onClick={() => setShowSchedulePicker(true)}
@@ -192,7 +192,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Start Date</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Start Date</label>
             <button
               type="button"
               onClick={() => setShowStartDatePicker(true)}
@@ -221,7 +221,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>End Date</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>End Date</label>
             <button
               type="button"
               onClick={() => setShowStopDatePicker(true)}
@@ -310,7 +310,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
           <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto ${modal} modal-content-fade-in`}>
-            <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Select Medication</h3>
+            <h3 className={`text-lg font-semibold mb-4 ${modalText.title}`}>Select Medication</h3>
             <div className="space-y-2 mb-4">
               {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
                 <button
@@ -328,7 +328,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                         : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className={isDarkMode ? 'text-text-primary' : 'text-gray-900'}>{med.name}</span>
+                  <span className={modalText.value}>{med.name}</span>
                 </button>
               ))}
             </div>

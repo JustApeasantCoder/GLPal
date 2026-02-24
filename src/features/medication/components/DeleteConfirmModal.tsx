@@ -9,7 +9,7 @@ interface DeleteConfirmModalProps {
 }
 
 const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, medicationName, onClose, onConfirm }) => {
-  const { modal } = useThemeStyles();
+  const { modal, modalText } = useThemeStyles();
   if (!isOpen) return null;
 
   return (
@@ -26,7 +26,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, medicat
         className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
-        <h2 className="text-xl font-semibold text-white mb-2">Delete {medicationName}?</h2>
+        <h2 className={`text-xl font-semibold mb-2 ${modalText.title}`}>Delete {medicationName}?</h2>
         <p className="text-sm text-text-muted mb-6">This will remove all protocols for this medication. This action cannot be undone.</p>
         <div className="flex gap-3">
           <button

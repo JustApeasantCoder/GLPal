@@ -15,7 +15,7 @@ interface OfficialScheduleModalProps {
 
 const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, onClose, onSave, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { modal } = useThemeStyles();
+  const { modal, modalText } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('semaglutide');
   const [startDate, setStartDate] = useState<string>(() => {
     const today = new Date();
@@ -77,12 +77,12 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
       <div 
         className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal} ${isClosing ? 'modal-fade-out' : 'modal-fade-in'}`}
       >
-        <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Add Schedule</h2>
+        <h2 className={`text-xl font-semibold mb-6 ${modalText.title}`}>Add Schedule</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <div className="space-y-4">
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Medication</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Medication</label>
             <div className="grid grid-cols-1 gap-2">
               {MEDICATIONS.filter(m => m.titrationDoses && m.titrationDoses.length > 0 && ['semaglutide', 'tirzepatide', 'retatrutide', 'cagrilintide'].includes(m.id)).map(med => (
                 <button
@@ -106,7 +106,7 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
           <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Split Dosing</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Split Dosing</label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -143,7 +143,7 @@ const OfficialScheduleModal: React.FC<OfficialScheduleModalProps> = ({ isOpen, o
           <div className="border-t border-[#B19CD9]/20 my-4"></div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Start Date</label>
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Start Date</label>
             <button
               type="button"
               onClick={() => setShowDatePicker(true)}

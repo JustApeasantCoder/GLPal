@@ -61,7 +61,7 @@ const COMMON_SIDE_EFFECTS = [
 ];
 
 const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) => {
-  const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea, modal } = useThemeStyles();
+  const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea, modal, modalText } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
   const bigCardText = {
@@ -689,14 +689,14 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             {!editingEntry ? null : (
             <>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Side Effects & Notes</h3>
-            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
+            <h3 className={`text-lg font-semibold mb-2 ${modalText.title}`}>Side Effects & Notes</h3>
+            <p className={`text-sm mb-4 ${modalText.subtitle}`}>{formatDate(editingEntry.date)} - <span style={{ color: getMedColor(editingEntry.medication) }}>{editingEntry.medication}</span></p>
             
             <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
                   Side Effects
                 </label>
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -762,9 +762,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
               </div>
               
               <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
-              
+               
               <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-text-secondary' : 'text-gray-700'}`}>
+                <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>
                   Notes
                 </label>
                 <textarea
@@ -811,14 +811,14 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
             onClick={() => setEditingWeightEntry(null)} 
           />
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Macros & Notes</h3>
-            <p className={`text-sm mb-4 ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight !== undefined ? `${convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}${weightUnit}` : '-'}</p>
+            <h3 className={`text-lg font-semibold mb-2 ${modalText.title}`}>Macros & Notes</h3>
+            <p className={`text-sm mb-4 ${modalText.subtitle}`}>{formatDate(editingWeightEntry.date)} - {editingWeightEntry.weight !== undefined ? `${convertWeightFromKg(editingWeightEntry.weight, unitSystem).toFixed(1)}${weightUnit}` : '-'}</p>
             
             <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
                   Macros
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -910,9 +910,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
               </div>
               
               <div className={`border-t my-4 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
-              
+               
               <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-text-secondary' : 'text-gray-700'}`}>
+                <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>
                   Notes
                 </label>
                 <textarea

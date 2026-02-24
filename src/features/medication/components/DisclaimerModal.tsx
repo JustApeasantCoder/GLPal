@@ -9,7 +9,7 @@ interface DisclaimerModalProps {
 
 const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose, onAcknowledged }) => {
   const { isDarkMode } = useTheme();
-  const { modal } = useThemeStyles();
+  const { modal, modalText } = useThemeStyles();
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onClose, onAc
         className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 ${modal}`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
-        <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Disclaimer</h2>
+        <h2 className={`text-xl font-semibold mb-4 ${modalText.title}`}>Disclaimer</h2>
         <p className={`text-sm mb-4 leading-relaxed ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>
           This app is for informational and tracking purposes only. Medication schedules shown are based on publicly available prescribing information and are not medical advice.
         </p>

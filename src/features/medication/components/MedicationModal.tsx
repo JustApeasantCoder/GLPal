@@ -18,7 +18,7 @@ interface MedicationModalProps {
 
 const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { input: inputStyle, modal } = useThemeStyles();
+  const { input: inputStyle, modal, modalText } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -100,12 +100,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
         onClick={onClose}
       />
       <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Log Dose</h2>
+        <h2 className={`text-xl font-semibold mb-6 ${modalText.title}`}>Log Dose</h2>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Date
             </label>
             <div className="relative">
@@ -118,7 +118,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                 placeholder="Select date"
               />
               <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted pointer-events-none"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 ${modalText.muted} pointer-events-none`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -168,7 +168,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
 
           <div className="mb-4">
             <div className="border-t border-[#B19CD9]/20 my-3"></div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Medication
             </label>
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -185,7 +185,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                         : 'bg-gray-100 border border-transparent hover:bg-gray-200'
                   }`}
                 >
-                  <span className="text-sm text-text-primary">{med.name}</span>
+                  <span className={`text-sm ${modalText.value}`}>{med.name}</span>
                 </button>
               ))}
             </div>
@@ -193,17 +193,13 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
 
           <div className="mb-4">
             <div className="border-t border-[#B19CD9]/20 my-3"></div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Dose (mg)
             </label>
             <button
               type="button"
               onClick={() => setShowDosePicker(true)}
-              className={`w-full px-3 py-2 border rounded-lg text-left ${
-                isDarkMode
-                  ? 'border-[#B19CD9]/30 bg-black/20 text-text-primary'
-                  : 'border-gray-300 bg-white text-gray-900'
-              }`}
+              className={inputStyle}
             >
               {dose ? `${dose} mg` : 'Select dose'}
             </button>

@@ -29,7 +29,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onClose,
   onGenerateSampleData,
 }) => {
-  const { inputButton, input: inputStyle, modal } = useThemeStyles();
+  const { inputButton, input: inputStyle, modal, modalText } = useThemeStyles();
   const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
@@ -114,7 +114,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
       <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] sm:max-h-[85vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-xl font-semibold ${modalText.title}`}>
             Settings
           </h2>
         </div>
@@ -125,7 +125,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
             {/* User Settings Section */}
             <div>
-              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>User Settings</h3>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>User Settings</h3>
               <TDEECalculator profile={localProfile} onProfileUpdate={(updatedProfile) => {
     setLocalProfile(updatedProfile);
     onProfileUpdate(updatedProfile);
@@ -137,7 +137,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               {/* Goal Weight Setting */}
               <div className="space-y-4 mt-4">
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-700'}`} style={isDarkMode ? { textShadow: '0 0 10px rgba(177,156,217,0.5)' } : {}}>
+                  <label className={`block text-sm font-medium mb-2 ${modalText.label}`} style={isDarkMode ? { textShadow: '0 0 10px rgba(177,156,217,0.5)' } : {}}>
                     Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
                   </label>
                   {useWheelForNumbers ? (
@@ -172,11 +172,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
             {/* Input Method Section */}
             <div>
-              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Input Method</h3>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Input Method</h3>
               
               {/* Number Entry */}
               <div className="mb-4">
-                <span className={`text-sm font-medium ${isDarkMode ? 'text-text-secondary' : 'text-gray-600'}`}>Number Entry</span>
+                <span className={`text-sm font-medium ${modalText.label}`}>Number Entry</span>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <button
                     type="button"
@@ -209,7 +209,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
               {/* Date Selection */}
               <div>
-                <span className={`text-sm font-medium ${isDarkMode ? 'text-text-secondary' : 'text-gray-600'}`}>Date Selection</span>
+                <span className={`text-sm font-medium ${modalText.label}`}>Date Selection</span>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <button
                     type="button"
@@ -246,7 +246,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
             {/* Data Management Section */}
             <div>
-              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Data Management</h3>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Data Management</h3>
               
               <button
                 onClick={() => setShowImportExport(true)}
@@ -306,7 +306,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
             {/* Appearance Section */}
             <div>
-              <h3 className={`text-lg font-medium mb-4 ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Appearance</h3>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Appearance</h3>
               <div className={`flex items-center justify-between p-3 rounded-lg border ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}>
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-3 text-accent-purple-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">

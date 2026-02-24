@@ -18,7 +18,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
   isDarkMode,
   onImportComplete,
 }) => {
-  const { modal } = useThemeStyles();
+  const { modal, modalText } = useThemeStyles();
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importMode, setImportMode] = useState<ImportMode>('merge');
@@ -108,7 +108,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
         className={`relative rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] p-4 sm:p-6 overflow-hidden flex flex-col ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-xl font-semibold ${modalText.title}`}>
             Import / Export Data
           </h2>
         </div>
@@ -190,7 +190,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
             {preview && (
               <>
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Import Preview
                   </h3>
                   <div className={`grid grid-cols-2 gap-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -204,7 +204,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Import Mode
                   </h3>
                   <div className="space-y-2">
@@ -241,7 +241,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Data to Import
                   </h3>
                   <div className="space-y-2">
@@ -267,7 +267,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Weight Unit
                   </h3>
                   <div className="grid grid-cols-3 gap-2">
@@ -311,7 +311,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <h3 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm font-medium mb-2 ${modalText.label}`}>
                     Date Offset (for timezone adjustments)
                   </h3>
                   <div className="flex gap-4">

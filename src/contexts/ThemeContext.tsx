@@ -189,6 +189,24 @@ export const useThemeStyles = () => {
       ? "bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)]"
       : "bg-white backdrop-blur-lg rounded-2xl border border-gray-200",
 
+    // Modal text styles - unified text colors for all modals
+    modalText: {
+      // Modal titles (h2) - bold headers
+      title: isDarkMode ? "text-white" : "text-gray-900",
+      
+      // Form labels - like "Medication", "Date", "Dose"
+      label: isDarkMode ? "text-text-secondary" : "text-gray-700",
+      
+      // Display values - like medication name, selected values
+      value: isDarkMode ? "text-text-primary" : "text-gray-900",
+      
+      // Subtitles/secondary info - like dates, descriptions  
+      subtitle: isDarkMode ? "text-white/80" : "text-gray-600",
+      
+      // Muted/hint text - placeholders, hints
+      muted: isDarkMode ? "text-text-muted" : "text-gray-500",
+    },
+
     // Include isDarkMode for future use
     isDarkMode
   };

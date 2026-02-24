@@ -215,6 +215,13 @@
       letter-spacing: -0.5px;
     }
 
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     .nav-links {
       display: flex;
       gap: 32px;
@@ -1080,6 +1087,110 @@
       line-height: 1.7;
       font-size: 15px;
     }
+
+    /* Why I Built Section */
+    .why-i-built {
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.05), transparent);
+    }
+
+    .why-i-built-content {
+      max-width: 700px;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    .why-i-built-content p {
+      margin-bottom: 20px;
+    }
+
+    .philosophy-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 28px 0;
+      padding: 28px;
+      background: rgba(26, 26, 36, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+    }
+
+    body.light-mode .philosophy-list {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .philosophy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .philosophy-icon {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--accent), #4FD99C);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .trust-points {
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 500;
+      line-height: 1.6;
+      margin: 24px 0;
+    }
+
+    .trust-heading {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-top: 28px;
+      margin-bottom: 24px;
+    }
+
+    /* Support Section */
+    .support {
+      padding: 60px 0;
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.05));
+      text-align: center;
+    }
+
+    .support-content {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .support-content h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .support-content p {
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .support-action {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -1090,7 +1201,7 @@
       <a href="/app/" class="logo">GLPal</a>
       <div class="nav-links">
         <a href="#features">Features</a>
-        <a href="#how-it-works">How It Works</a>
+        <a href="#why-i-built">Why I Built This</a>
         <a href="#faq">FAQ</a>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1122,11 +1233,10 @@
           </svg>
           100% Private • No Accounts Required
         </div>
-        <h1>Track Your <span>GLP-1</span> Journey<br>with Complete Privacy</h1>
+        <h1>Track Your <span class="gradient-text">GLP-1</span> Journey<br>with Complete Privacy</h1>
         <p>Monitor weight, log medications, and visualize progress—all stored locally on your device. No cloud accounts, no data selling, no tracking. Your health data stays yours.</p>
-        <div class="hero-buttons">
+        <div class="hero-buttons" style="justify-content: center;">
           <a href="/app/" class="btn btn-primary">Get Started Free</a>
-          <a href="#features" class="btn btn-secondary">Learn More</a>
         </div>
         <div class="hero-stats">
           <div class="stat">
@@ -1149,7 +1259,7 @@
             <div class="phone-notch"></div>
             <div class="phone-content">
               <div class="app-header">
-                <div class="app-logo">GLPal</div>
+                <div class="app-logo gradient-text">GLPal</div>
                 <div class="app-nav">
                   <div class="app-nav-dot"></div>
                   <div class="app-nav-dot"></div>
@@ -1197,7 +1307,7 @@
     <div class="container">
       <div class="section-header fade-in">
         <h2>Everything You Need</h2>
-        <p>Powerful tracking tools designed for GLP-1 users, with privacy at the core.</p>
+        <p>Powerful tracking tools designed for <span class="gradient-text">GLP-1</span> users, with privacy at the core.</p>
       </div>
       <div class="features-grid">
         <div class="feature-card fade-in-up delay-1">
@@ -1207,7 +1317,7 @@
         </div>
         <div class="feature-card fade-in-up delay-2">
           <div class="feature-icon">💊</div>
-          <h3>GLP-1 Medication</h3>
+          <h3><span class="gradient-text">GLP-1</span> Medication</h3>
           <p>Track doses, injection sites, timing, and side effects. Never miss a dose with smart reminders.</p>
         </div>
         <div class="feature-card fade-in-up delay-3">
@@ -1249,69 +1359,58 @@
     </div>
   </section>
 
-  <section class="how-it-works" id="how-it-works">
+  <section class="why-i-built" id="why-i-built">
     <div class="container">
       <div class="section-header fade-in">
-        <h2>How It Works</h2>
-        <p>Get started in seconds. No sign-up, no configuration, just track.</p>
+        <h2>Why I Built <span class="gradient-text">GLPal</span></h2>
       </div>
-      <div class="steps">
-        <div class="step fade-in-up delay-1">
-          <div class="step-number">1</div>
-          <h3>Open the App</h3>
-          <p>Visit GLPal in your browser or add it to your home screen. No download needed.</p>
-        </div>
-        <div class="step fade-in-up delay-2">
-          <div class="step-number">2</div>
-          <h3>Start Tracking</h3>
-          <p>Log your weight, add medications, and set your goals. It takes seconds to enter data.</p>
-        </div>
-        <div class="step fade-in-up delay-3">
-          <div class="step-number">3</div>
-          <h3>Watch Progress</h3>
-          <p>See your trends, stay motivated, and achieve your health goals with powerful insights.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="screenshots" id="screenshots">
-    <div class="container">
-      <div class="section-header fade-in">
-        <h2>Your Health, Visualized</h2>
-        <p>Beautiful, intuitive interfaces designed for daily use.</p>
-      </div>
-      <div class="screenshots-grid">
-        <div class="screenshot-card fade-in-up delay-1">
-          <div class="screenshot-placeholder">
-            <div class="screenshot-icon">📊</div>
-            <div class="screenshot-label">Dashboard</div>
+      <div class="why-i-built-content fade-in-up">
+        <p>I started using <span class="gradient-text">GLP-1</span> medications not too long ago. Like many people, I wanted a simple way to track my weight, log doses, and see my progress over time.</p>
+        
+        <p>When I looked at existing apps, I noticed a pattern.</p>
+        
+        <p class="trust-points">They wanted my Email.<br>They wanted my Data.<br>And eventually, they wanted my Money.</p>
+        
+        <p>Some required accounts just to open the app. Others locked basic features behind subscriptions. Almost all of them collected more personal information than necessary.</p>
+        
+        <p>I didn't want to trade my private health data just to use a simple tracker.</p>
+        
+        <p>So I built one that doesn't ask for any of that.</p>
+        
+        <p class="trust-heading" style="text-align: center;"><span class="gradient-text">GLPal</span> Is Built Differently:</p>
+        
+        <div class="philosophy-list">
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No account required — open the app and start tracking immediately</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>Your data stays on your device — stored locally in your browser</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No tracking or analytics — no third-party data collection</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No subscriptions — all features are free</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>Your data remains yours — export anytime or back up to your own Google Drive</span>
           </div>
         </div>
-        <div class="screenshot-card">
-          <div class="screenshot-placeholder">
-            <div class="screenshot-icon">💊</div>
-            <div class="screenshot-label">Medication</div>
-          </div>
-        </div>
-        <div class="screenshot-card">
-          <div class="screenshot-placeholder">
-            <div class="screenshot-icon">📈</div>
-            <div class="screenshot-label">Progress</div>
-          </div>
-        </div>
-        <div class="screenshot-card">
-          <div class="screenshot-placeholder">
-            <div class="screenshot-icon">🧮</div>
-            <div class="screenshot-label">Calculator</div>
-          </div>
-        </div>
+        
       </div>
     </div>
   </section>
 
   <section class="faq" id="faq">
     <div class="container">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <a href="/app/" class="btn btn-primary">Get Started Free</a>
+      </div>
       <div class="section-header fade-in">
         <h2>Frequently Asked Questions</h2>
         <p>Everything you need to know about GLPal.</p>
@@ -1353,7 +1452,7 @@
         </div>
         <div class="faq-item">
           <button class="faq-question">
-            <span>What GLP-1 medications can I track?</span>
+            <span>What <span class="gradient-text">GLP-1</span> medications can I track?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
@@ -1413,9 +1512,24 @@
   <section class="cta fade-in">
     <div class="container">
       <h2>Start Your Journey Today</h2>
-      <p>Join thousands of users tracking their GLP-1 progress with complete privacy.</p>
+      <p>Join thousands of users tracking their <span class="gradient-text">GLP-1</span> progress with complete privacy.</p>
       <div class="cta-buttons">
-        <a href="/app/" class="btn btn-primary">Open GLPal Free</a>
+        <a href="/app/" class="btn btn-primary">Let's Get Started</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="support">
+    <div class="container">
+      <div class="support-content">
+        <h3>Support</h3>
+        <p>GLPal is completely free and built independently.</p>
+        <p>If you find it useful, your support helps fund development and future platform distribution.</p>
+        <p class="support-action">
+          <a href="https://ko-fi.com/justapeasantcoder" target="_blank" rel="noopener" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+            <span>☕</span> Buy me a coffee
+          </a>
+        </p>
       </div>
     </div>
   </section>
@@ -1429,7 +1543,7 @@
           <a href="/terms">Terms of Use</a>
           <a href="https://github.com/JustApeasantCoder/GLPal" target="_blank" rel="noopener">GitHub</a>
         </div>
-        <div class="copyright">© 2024 GLPal. All rights reserved.</div>
+        <div class="copyright">© 2026 GLPal. All rights reserved.</div>
       </div>
     </div>
   </footer>
