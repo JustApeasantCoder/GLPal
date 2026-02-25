@@ -97,6 +97,45 @@ const fixBuildPaths = () => ({
       content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
       fs.writeFileSync(termsDest, content);
     }
+
+    // Add prefetch hints for app assets to speed up app load
+    const landingIndex = path.resolve(buildDir, 'index.html');
+    if (fs.existsSync(landingIndex)) {
+      let content = fs.readFileSync(landingIndex, 'utf-8');
+      
+      // Find app assets and add prefetch links
+      const assetsDir = path.resolve(buildDir, 'assets');
+      const appAssetsDir = path.resolve(buildDir, 'assets', 'app');
+      
+      let prefetchLinks = '';
+      
+      // Prefetch app JS bundle
+      if (fs.existsSync(appAssetsDir)) {
+        const appJsFiles = fs.readdirSync(appAssetsDir).filter(f => f.endsWith('.js'));
+        appJsFiles.forEach(file => {
+          prefetchLinks += `  <link rel="prefetch" href="/assets/app/${file}">\n`;
+        });
+      }
+      
+      // Prefetch main CSS
+      const mainCssFiles = fs.readdirSync(assetsDir).filter(f => f.startsWith('index-') && f.endsWith('.css'));
+      mainCssFiles.forEach(file => {
+        prefetchLinks += `  <link rel="prefetch" href="/assets/${file}">\n`;
+      });
+      
+      // Prefetch medication progress bar JS (lazy loaded)
+      const medicationFiles = fs.readdirSync(assetsDir).filter(f => f.startsWith('MedicationProgressBar-') && f.endsWith('.js'));
+      medicationFiles.forEach(file => {
+        prefetchLinks += `  <link rel="prefetch" href="/assets/${file}">\n`;
+      });
+      
+      // Insert prefetch links before </head>
+      if (prefetchLinks) {
+        content = content.replace('</head>', `${prefetchLinks}</head>`);
+        fs.writeFileSync(landingIndex, content);
+        console.log('Added prefetch hints for app assets');
+      }
+    }
   },
 });
 

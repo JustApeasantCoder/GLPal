@@ -214,7 +214,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
             Cloud Backup
           </h2>
           <div className={`text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30`}>
-            DEV
+            BETA
           </div>
         </div>
 

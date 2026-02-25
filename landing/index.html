@@ -130,11 +130,6 @@
       box-sizing: border-box;
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      max-width: 100vw;
-    }
-
     html {
       scroll-behavior: smooth;
       overflow-x: hidden;
@@ -936,17 +931,6 @@
     }
 
     @media (max-width: 768px) {
-      .hero::before,
-      .hero::after {
-        width: 200px;
-        height: 200px;
-      }
-      
-      .cta::before {
-        width: 200px;
-        height: 200px;
-      }
-      
       .hero-content h1 {
         font-size: 32px;
       }
@@ -971,6 +955,15 @@
         flex-direction: column;
         gap: 20px;
         text-align: center;
+      }
+
+      .hero::before,
+      .hero::after,
+      .cta::before {
+        width: 300px;
+        height: 300px;
+        right: -50%;
+        left: -50%;
       }
     }
 
@@ -1436,7 +1429,7 @@
       </div>
       <div class="section-header fade-in">
         <h2>Frequently Asked Questions</h2>
-        <p>Everything you need to know about GLPal.</p>
+        <p>Everything you need to know about <span class="gradient-text">GLPal</span>.</p>
       </div>
       <div class="faq-grid">
         <div class="faq-item fade-in-up delay-1">
@@ -1458,13 +1451,13 @@
           </button>
           <div class="faq-answer">
             <div class="faq-answer-content">
-              No accounts, no sign-ups, no email required. GLPal is completely free to use. Just open the app and start tracking immediately.
+              No accounts, no sign-ups, no email required. <span class="gradient-text">GLPal</span> is completely free to use. Just open the app and start tracking immediately.
             </div>
           </div>
         </div>
         <div class="faq-item">
           <button class="faq-question">
-            <span>Can I use GLPal on multiple devices?</span>
+            <span>Can I use <span class="gradient-text">GLPal</span> on multiple devices?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
@@ -1480,18 +1473,18 @@
           </button>
           <div class="faq-answer">
             <div class="faq-answer-content">
-              GLPal supports all major GLP-1 medications including Ozempic, Wegovy, Mounjaro, Zepbound, Saxenda, Rybelsus, and semaglutide. You can also create custom medications and track any peptide or supplement.
+              <span class="gradient-text">GLPal</span> supports all major <span class="gradient-text">GLP-1</span> medications including Ozempic, Wegovy, Mounjaro, Zepbound, Saxenda, Rybelsus, and semaglutide. You can also create custom medications and track any peptide or supplement.
             </div>
           </div>
         </div>
         <div class="faq-item">
           <button class="faq-question">
-            <span>Does GLPal work offline?</span>
+            <span>Does <span class="gradient-text">GLPal</span> work offline?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
             <div class="faq-answer-content">
-              Yes! Once loaded, GLPal works completely offline. You can track your weight and medications without an internet connection. The app is a Progressive Web App (PWA) that you can install on your device.
+              Yes! Once loaded, <span class="gradient-text">GLPal</span> works completely offline. You can track your weight and medications without an internet connection. The app is a Progressive Web App (PWA) that you can install on your device.
             </div>
           </div>
         </div>
@@ -1508,23 +1501,23 @@
         </div>
         <div class="faq-item">
           <button class="faq-question">
-            <span>Is GLPal free?</span>
+            <span>Is <span class="gradient-text">GLPal</span> free?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
             <div class="faq-answer-content">
-              Yes, GLPal is completely free with no premium tiers, no subscriptions, and no hidden costs. It's an open-source project built to help the GLP-1 community.
+              Yes, <span class="gradient-text">GLPal</span> is completely free with no premium tiers, no subscriptions, and no hidden costs. It's an open-source project built to help the <span class="gradient-text">GLP-1</span> community.
             </div>
           </div>
         </div>
         <div class="faq-item">
           <button class="faq-question">
-            <span>Is GLPal a medical device?</span>
+            <span>Is <span class="gradient-text">GLPal</span> a medical device?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
             <div class="faq-answer-content">
-              No, GLPal is a personal health tracking tool and is not a medical device. It provides information to help you track your progress but does not provide medical advice. Always consult your healthcare provider for medical decisions.
+              No, <span class="gradient-text">GLPal</span> is a personal health tracking tool and is not a medical device. It provides information to help you track your progress but does not provide medical advice. Always consult your healthcare provider for medical decisions.
             </div>
           </div>
         </div>
@@ -1546,7 +1539,7 @@
     <div class="container">
       <div class="support-content">
         <h3>Support</h3>
-        <p>GLPal is completely free and built independently.</p>
+        <p><span class="gradient-text">GLPal</span> is completely free and built independently.</p>
         <p>If you find it useful, your support helps fund development and future platform distribution.</p>
         <p class="support-action">
           <a href="https://ko-fi.com/justapeasantcoder" target="_blank" rel="noopener" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
@@ -1566,7 +1559,7 @@
           <a href="/terms">Terms of Use</a>
           <a href="https://github.com/JustApeasantCoder/GLPal" target="_blank" rel="noopener">GitHub</a>
         </div>
-        <div class="copyright">© 2026 GLPal. All rights reserved.</div>
+        <div class="copyright">© 2026 <span class="gradient-text">GLPal</span>. All rights reserved.</div>
       </div>
     </div>
   </footer>

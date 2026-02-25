@@ -10,7 +10,7 @@ type Config = {
 };
 
 export function register(config?: Config) {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  if (process.env.NODE_ENV === 'development' && 'serviceWorker' in navigator) {
     const publicUrl = new URL(import.meta.env.BASE_URL || '/', window.location.href);
     if (publicUrl.origin !== window.location.origin) {
       return;
