@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Peptide, PeptideLogEntry, PeptideFrequency } from '../../../types';
 import { timeService } from '../../../core/timeService';
 
@@ -230,6 +230,11 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
       label = 'Due now';
     }
 
+    // Debug info
+    const safeIsoString = (d: Date | null | undefined) => d && !isNaN(d.getTime()) ? d.toISOString() : 'invalid';
+    const safeParseIso = (date: string | null | undefined, time: string | null | undefined) => 
+      date && time ? safeIsoString(parseLocalDateTime(date, time)) : 'no log';
+    
     return {
       progress: progressPercent,
       timeRemaining: { 
@@ -244,18 +249,56 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
       daysSinceLastDose: daysSinceLastLog,
       // Debug info
       debug: {
+        // Time info
+        currentTime: safeIsoString(currentTime),
         currentTimeInMinutes,
         preferredTimeInMinutes,
+        // Latest log
+        latestLogDate: latestLog ? latestLog.date : null,
+        latestLogTime: latestLog ? latestLog.time : null,
+        lastLogDateParsed: safeParseIso(latestLog?.date, latestLog?.time),
+        timeSinceLastLogMs: timeSinceLastLog,
+        timeSinceLastLogHours: Math.round(timeSinceLastLog / 3600000 * 10) / 10,
+        // Interval
+        intervalDays,
+        intervalMs,
+        intervalHours: Math.round(intervalMs / 3600000 * 10) / 10,
+        // Progress
+        progressPercent,
+        // Due window
         dueWindowStartMinutes,
         dueWindowEndMinutes,
         isWithinDueWindow,
+        // Time until next
         timeUntilNext,
-        intervalMs,
+        timeUntilNextMin: Math.round(timeUntilNext / 60000),
+        // Flags
+        isDueFlag,
+        isOverdueFlag,
+        isDaily,
+        isLoggedToday,
+        // Non-daily specific
+        ...(isDaily ? {} : {
+          lastLogMidnight: latestLog ? (() => {
+            const d = parseLocalDateTime(latestLog.date, latestLog.time);
+            d.setDate(d.getDate() + 1);
+            d.setHours(0, 0, 0, 0);
+            return safeIsoString(d);
+          })() : null,
+          timeSinceMidnightMs: latestLog ? (() => {
+            const d = parseLocalDateTime(latestLog.date, latestLog.time);
+            d.setDate(d.getDate() + 1);
+            d.setHours(0, 0, 0, 0);
+            return currentTime.getTime() - d.getTime();
+          })() : null,
+        }),
       },
     };
   }, [peptide.frequency, peptide.preferredTime, latestLog, currentTime]);
 
-  const { progress, timeRemaining, isDue, isOverdue, isLoggedToday, isDaily, daysSinceLastDose, debug = {} as any } = result;
+  const { progress, timeRemaining, isDue, isOverdue, isLoggedToday, isDaily, daysSinceLastDose, isDueFlag, isOverdueFlag, debug = {} as any } = result;
+
+  const [showDebug, setShowDebug] = useState(false);
 
   const peptidePurple = '#B19CD9';
   // For daily overdue, keep purple color
@@ -329,20 +372,56 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
 
       {/* Debug Panel */}
       {process.env.NODE_ENV === 'development' && (
-      <div className="mt-2 p-2 bg-black/50 rounded text-xs font-mono text-gray-400">
-        <div className="grid grid-cols-2 gap-1">
-          <div>currentTimeInMinutes: {debug.currentTimeInMinutes}</div>
-          <div>preferredTimeInMinutes: {debug.preferredTimeInMinutes}</div>
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={() => setShowDebug(!showDebug)}
+          className="text-xs text-gray-500 hover:text-gray-300 mb-1 flex items-center gap-1"
+        >
+          <span className={showDebug ? 'text-green-400' : 'text-gray-500'}>{showDebug ? '▼' : '▶'}</span>
+          Debug
+        </button>
+        {showDebug && (
+        <div className="p-2 bg-black/50 rounded text-xs font-mono text-gray-400">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1">Basic Info</div>
+          <div>isDaily: <span className={isDaily ? 'text-green-400' : 'text-red-400'}>{String(isDaily)}</span></div>
+          <div>isLoggedToday: <span className={isLoggedToday ? 'text-green-400' : 'text-red-400'}>{String(isLoggedToday)}</span></div>
+          <div>isDue: <span className={isDueFlag ? 'text-green-400' : 'text-red-400'}>{String(isDueFlag)}</span></div>
+          <div>isOverdue: <span className={isOverdueFlag ? 'text-green-400' : 'text-red-400'}>{String(isOverdueFlag)}</span></div>
+          
+          <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Latest Log</div>
+          <div>date: {debug.latestLogDate || 'null'}</div>
+          <div>time: {debug.latestLogTime || 'null'}</div>
+          <div>parsed: {debug.lastLogDateParsed || 'null'}</div>
+          <div>timeSince: {debug.timeSinceLastLogHours}h</div>
+          
+          <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Interval</div>
+          <div>intervalDays: {debug.intervalDays}</div>
+          <div>intervalHours: {debug.intervalHours}h</div>
+          
+          <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Progress</div>
+          <div>progressPercent: <span className="text-cyan-400">{Math.round(debug.progressPercent)}%</span></div>
+          <div>displayProgress: <span className="text-cyan-400">{Math.round((isOverdueFlag && isDaily) ? 100 : debug.progressPercent)}%</span></div>
+          <div>timeUntilNextMin: {debug.timeUntilNextMin}min</div>
+          
+          <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Daily Only</div>
+          <div>currentTimeInMin: {debug.currentTimeInMinutes}</div>
+          <div>preferredTimeInMin: {debug.preferredTimeInMinutes}</div>
           <div>dueWindowStart: {debug.dueWindowStartMinutes}</div>
           <div>dueWindowEnd: {debug.dueWindowEndMinutes}</div>
           <div>isWithinDueWindow: <span className={debug.isWithinDueWindow ? 'text-green-400' : 'text-red-400'}>{String(debug.isWithinDueWindow)}</span></div>
-          <div>timeUntilNext: {Math.round(debug.timeUntilNext / 60000)}min</div>
-          <div>intervalMs: {Math.round(debug.intervalMs / 3600000)}h</div>
-          <div>isDue: <span className={isDue ? 'text-green-400' : 'text-red-400'}>{String(isDue)}</span></div>
-          <div>isOverdue: <span className={isOverdue ? 'text-green-400' : 'text-red-400'}>{String(isOverdue)}</span></div>
-          <div>isDaily: {String(isDaily)}</div>
-          <div>isLoggedToday: {String(isLoggedToday)}</div>
+          
+          {!isDaily && (
+            <>
+              <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Non-Daily Only</div>
+              <div className="col-span-2">lastLogMidnight: {debug.lastLogMidnight || 'null'}</div>
+              <div className="col-span-2">timeSinceMidnightMs: {debug.timeSinceMidnightMs}</div>
+            </>
+          )}
         </div>
+        </div>
+        )}
       </div>
       )}
     </div>

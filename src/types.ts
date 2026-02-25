@@ -182,9 +182,6 @@ export const PEPTIDE_PRESETS: PeptidePreset[] = [
   { name: '5-Amino-1MQ', category: 'fat_loss', defaultDose: 50, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 6, description: 'NNMT inhibitor - fat loss' },
   
   // Muscle building peptides
-  { name: 'S-23', category: 'muscle', defaultDose: 10, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'oral', halfLifeHours: 12, description: 'SARM - muscle building' },
-  { name: 'LGD-4033', category: 'muscle', defaultDose: 10, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'oral', halfLifeHours: 24, description: 'SARM - muscle building' },
-  { name: 'RAD-140', category: 'muscle', defaultDose: 10, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'oral', halfLifeHours: 16, description: 'SARM - muscle building' },
   { name: 'MK-677', category: 'muscle', defaultDose: 25, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'oral', halfLifeHours: 24, description: 'Ibutamoren - GH secretagogue' },
   
   // Longevity peptides

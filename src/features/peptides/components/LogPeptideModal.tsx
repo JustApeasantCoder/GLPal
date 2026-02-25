@@ -50,7 +50,7 @@ const LogPeptideModal: React.FC<LogPeptideModalProps> = ({ isOpen, onClose, onSa
   useEffect(() => {
     if (isOpen) {
       const now = timeService.nowDate();
-      setCurrentTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+      setCurrentTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
       setPainLevel(0);
       setInjectionArea('');
       setInjectionSide('');

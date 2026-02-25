@@ -69,11 +69,18 @@ const CATEGORY_ORDER: PeptideCategory[] = [
   'healing', 'growth_hormone', 'fat_loss', 'muscle', 'skin', 'longevity', 'immune', 'cognitive', 'other'
 ];
 
-const getOrganizedPresets = () => {
+const getOrganizedPresets = (searchQuery: string = '') => {
+  const filtered = searchQuery 
+    ? PEPTIDE_PRESETS.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : PEPTIDE_PRESETS;
+    
   const grouped: Record<PeptideCategory, typeof PEPTIDE_PRESETS> = {} as Record<PeptideCategory, typeof PEPTIDE_PRESETS>;
   CATEGORY_ORDER.forEach(cat => { grouped[cat] = []; });
   
-  PEPTIDE_PRESETS.forEach(preset => {
+  filtered.forEach(preset => {
     if (grouped[preset.category]) {
       grouped[preset.category].push(preset);
     } else {
@@ -102,6 +109,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [color, setColor] = useState(CATEGORY_COLORS.other);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState<'start' | 'end'>('start');
@@ -233,22 +241,12 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           style={isDarkMode ? { boxShadow: '0 0 30px rgba(177, 156, 217, 0.3)' } : {}}
         >
           {/* Header */}
-          <div className={`flex items-center justify-between p-3 sm:p-4 border-b ${
+          <div className={`flex items-center p-3 sm:p-4 border-b ${
             isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'
           }`}>
             <h2 className={`text-xl font-semibold ${modalText.title}`}>
               {editPeptide ? 'Edit Peptide' : 'Add Peptide'}
             </h2>
-            <button
-              onClick={handleClose}
-              className={`p-1.5 rounded-lg transition-colors ${
-                isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 6M6 18M6 6l12 12" />
-              </svg>
-            </button>
           </div>
 
           {/* Content */}
@@ -256,10 +254,16 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           <div key={contentKey} className="flex-1 overflow-y-auto p-4 space-y-4 tab-fade-in">
             {showPresets && !editPeptide ? (
               <div className="space-y-4">
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quick select a peptide preset:</p>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search peptides..."
+                  className={inputStyle}
+                />
                 <div className="grid grid-cols-1 gap-2 max-h-[70vh] overflow-y-auto">
                   {CATEGORY_ORDER.map(category => {
-                    const presets = getOrganizedPresets()[category];
+                    const presets = getOrganizedPresets(searchQuery)[category];
                     if (presets.length === 0) return null;
                     return (
                       <div key={category} className="mb-4">
@@ -295,6 +299,11 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                       </div>
                     );
                   })}
+                  {CATEGORY_ORDER.every(cat => getOrganizedPresets(searchQuery)[cat].length === 0) && (
+                    <p className={`text-center py-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      No peptides found
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={handleClose}
