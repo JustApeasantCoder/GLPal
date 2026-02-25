@@ -32,7 +32,7 @@ const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string; color?: strin
 ];
 
 const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activeModal, onOpenModal, onCloseModal }) => {
-  const { bigCard, bigCardText, smallCard, text, isDarkMode } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, isDarkMode, pillButton } = useThemeStyles();
   const now = useTime();
   const currentTime = useMemo(() => new Date(now), [now]);
   
@@ -139,23 +139,19 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activ
 
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-1.5 pb-2 mb-3">
-          {CATEGORY_TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedCategory === tab.id 
-                  ? 'text-white shadow-md' 
-                  : 'bg-white/10 text-gray-400 hover:bg-white/20'
-              }`}
-              style={selectedCategory === tab.id && tab.color ? { 
-                backgroundColor: tab.color,
-                boxShadow: `0 0 10px ${tab.color}60`
-              } : undefined}
-            >
-              {tab.label}
-            </button>
-          ))}
+          {CATEGORY_TABS.map(tab => {
+            const isSelected = selectedCategory === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedCategory(tab.id)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200"
+                style={pillButton(isSelected, tab.color)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Stats Row */}

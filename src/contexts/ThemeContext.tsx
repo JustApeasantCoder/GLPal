@@ -152,6 +152,30 @@ export const useThemeStyles = () => {
         : "flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200";
     },
 
+    // Filter/Pill buttons (small category filter buttons)
+    // Returns style object with backgroundColor, color, border
+    pillButton: (isActive: boolean = false, activeColor?: string): React.CSSProperties => {
+      const color = activeColor || '#B19CD9';
+      if (isActive) {
+        return {
+          backgroundColor: color,
+          color: 'white',
+          boxShadow: `0 0 10px ${color}60`,
+        };
+      }
+      return isDarkMode
+        ? {
+            backgroundColor: 'rgba(26, 26, 36, 0.6)',
+            color: '#9CA3AF',
+            border: '1px solid rgba(177, 156, 217, 0.2)',
+          }
+        : {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            color: '#6B7280',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+          };
+    },
+
     // Segmented control buttons (PeriodSelector - full-width grid toggles)
     segmentedControl: (isActive: boolean = false) => {
       if (isActive) {
