@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import MedicationChart from './components/MedicationChart';
 import MedicationModal from './components/MedicationModal';
 import LogDoseModal from './components/LogDoseModal';

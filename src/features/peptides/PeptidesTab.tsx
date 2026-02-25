@@ -9,6 +9,7 @@ import LogPeptideModal from './components/LogPeptideModal';
 import PeptideCard from './components/PeptideCard';
 import PeptideChart from './components/PeptideChart';
 import { ModalType } from '../../shared/hooks/useAppHistory';
+import Button from '../../shared/components/Button';
 
 interface PeptidesTabProps {
   useWheelForDate?: boolean;
@@ -246,12 +247,13 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activ
 
         {/* Add Button */}
         {filteredPeptides.length > 0 && (
-          <button
+          <Button
             onClick={() => onOpenModal('peptide')}
-            className="w-full mt-4 py-3 rounded-xl border-2 border-dashed border-[#B19CD9]/30 text-[#B19CD9] font-medium hover:border-[#B19CD9]/60 hover:bg-[#B19CD9]/5 transition-all"
+            fullWidth
+            className="mt-4"
           >
             + Add Peptide
-          </button>
+          </Button>
         )}
       </div>
 
@@ -276,7 +278,6 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activ
         }}
         onSave={handleLogInjection}
         peptide={selectedPeptide}
-        useWheelForDate={useWheelForDate}
       />
 
       {/* Delete Confirmation Modal */}

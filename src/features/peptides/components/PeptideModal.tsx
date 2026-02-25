@@ -65,11 +65,34 @@ const ROUTE_LABELS: Record<InjectionRoute, string> = {
   sublingual: 'Sublingual',
 };
 
+const CATEGORY_ORDER: PeptideCategory[] = [
+  'healing', 'growth_hormone', 'fat_loss', 'muscle', 'skin', 'longevity', 'immune', 'cognitive', 'other'
+];
+
+const getOrganizedPresets = () => {
+  const grouped: Record<PeptideCategory, typeof PEPTIDE_PRESETS> = {} as Record<PeptideCategory, typeof PEPTIDE_PRESETS>;
+  CATEGORY_ORDER.forEach(cat => { grouped[cat] = []; });
+  
+  PEPTIDE_PRESETS.forEach(preset => {
+    if (grouped[preset.category]) {
+      grouped[preset.category].push(preset);
+    } else {
+      grouped.other.push(preset);
+    }
+  });
+  
+  Object.keys(grouped).forEach(cat => {
+    grouped[cat as PeptideCategory].sort((a, b) => a.name.localeCompare(b.name));
+  });
+  
+  return grouped;
+};
+
 const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal } = useThemeStyles();
+  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal, modalText } = useThemeStyles();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
   const [dose, setDose] = useState('');
@@ -213,7 +236,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           <div className={`flex items-center justify-between p-3 sm:p-4 border-b ${
             isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'
           }`}>
-            <h2 className={`text-base sm:text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h2 className={`text-xl font-semibold ${modalText.title}`}>
               {editPeptide ? 'Edit Peptide' : 'Add Peptide'}
             </h2>
             <button
@@ -232,30 +255,46 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
           {/* Use a reliable fade-in animation when content switches (presets -> form) */}
           <div key={contentKey} className="flex-1 overflow-y-auto p-4 space-y-4 tab-fade-in">
             {showPresets && !editPeptide ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quick select a peptide preset:</p>
-                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
-                  {PEPTIDE_PRESETS.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => handlePresetSelect(preset)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
-                        isDarkMode
-                          ? 'bg-white/5 hover:bg-white/10 border-[#B19CD9]/20 hover:border-[#B19CD9]/40'
-                          : 'bg-gray-50 hover:bg-gray-100 border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: CATEGORY_COLORS[preset.category] }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{preset.name}</p>
-                        <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{preset.description}</p>
+                <div className="grid grid-cols-1 gap-2 max-h-[70vh] overflow-y-auto">
+                  {CATEGORY_ORDER.map(category => {
+                    const presets = getOrganizedPresets()[category];
+                    if (presets.length === 0) return null;
+                    return (
+                      <div key={category} className="mb-4">
+                        <p 
+                          className="text-xs font-semibold uppercase tracking-wide mb-2" 
+                          style={{ color: CATEGORY_COLORS[category] }}
+                        >
+                          {CATEGORY_LABELS[category]}
+                        </p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {presets.map((preset) => (
+                            <button
+                              key={preset.name}
+                              onClick={() => handlePresetSelect(preset)}
+                              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left w-full ${
+                                isDarkMode
+                                  ? 'bg-black/20 border-transparent hover:bg-[#B19CD9]/10'
+                                  : 'bg-gray-100 border-transparent hover:bg-gray-200'
+                              }`}
+                            >
+                              <div 
+                                className="w-3 h-3 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: CATEGORY_COLORS[preset.category] }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{preset.name}</p>
+                                <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{preset.description}</p>
+                              </div>
+                              <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{preset.defaultDose}{preset.defaultDoseUnit}</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{preset.defaultDose}{preset.defaultDoseUnit}</span>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
                 <button
                   onClick={handleClose}
@@ -270,24 +309,20 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Peptide Name</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Peptide Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g., BPC-157"
-                    className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
-                      isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                    }`}
+                    className={inputStyle}
                     required
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Category</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Category</label>
                   <div className="flex flex-wrap gap-2">
                     {(Object.keys(CATEGORY_COLORS) as PeptideCategory[]).map((cat) => (
                       <button
@@ -318,34 +353,26 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                 {/* Dose & Frequency */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dose (mg)</label>
+                    <label className={`block text-xs mb-1 ${modalText.label}`}>Dose (mg)</label>
                     <input
                       type="number"
                       value={dose}
                       onChange={(e) => setDose(e.target.value)}
                       placeholder="0.5"
                       step="0.1"
-                      className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9] placeholder-gray-500'
-                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-                      }`}
+                      className={inputStyle}
                       required
                     />
                   </div>
                   <div>
-                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dosing Schedule</label>
+                    <label className={`block text-xs mb-1 ${modalText.label}`}>Dosing Schedule</label>
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setShowFrequencyPicker(true); }}
-                      className={`w-full px-3 py-2 rounded-lg border text-left flex items-center justify-between text-sm ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className={inputButton}
                     >
                       <span>{FREQUENCY_LABELS[frequency]}</span>
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
@@ -354,36 +381,28 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Preferred Time */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Preferred Time</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Preferred Time</label>
                   <input
                     type="time"
                     value={preferredTime}
                     onChange={(e) => setPreferredTime(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[#B19CD9]/50 ${
-                      isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
-                        : 'bg-white border-gray-300 text-gray-900'
-                    }`}
+                    className={inputStyle}
                   />
-                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <p className={`text-xs mt-1 ${modalText.muted}`}>
                     You'll be reminded around this time
                   </p>
                 </div>
 
                 {/* Route */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Injection Route</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Injection Route</label>
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setShowRoutePicker(true); }}
-                    className={`w-full px-3 py-2 rounded-lg border text-left flex items-center justify-between text-sm ${
-                      isDarkMode
-                        ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
-                        : 'bg-white border-gray-300 text-gray-900'
-                    }`}
+                    className={inputButton}
                   >
                     <span>{ROUTE_LABELS[route]}</span>
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -392,29 +411,21 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Start Date</label>
+                    <label className={`block text-xs mb-1 ${modalText.label}`}>Start Date</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('start')}
-                      className={`w-full px-3 py-2 rounded-lg border text-left text-sm ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className={inputButton}
                     >
                       {startDate}
                     </button>
                   </div>
                   <div>
-                    <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>End Date (optional)</label>
+                    <label className={`block text-xs mb-1 ${modalText.label}`}>End Date (optional)</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('end')}
-                      className={`w-full px-3 py-2 rounded-lg border text-left text-sm ${
-                        isDarkMode
-                          ? 'bg-black/20 border-[#B19CD9]/30 text-[#B19CD9]'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className={inputButton}
                     >
                       {endDate || 'Ongoing'}
                     </button>
@@ -423,7 +434,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Notes */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Notes</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Notes</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -435,7 +446,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
 
                 {/* Color */}
                 <div>
-                  <label className={`block text-xs mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Color</label>
+                  <label className={`block text-xs mb-1 ${modalText.label}`}>Color</label>
                   <div className="flex gap-2">
                     {Object.values(CATEGORY_COLORS).map((c) => (
                       <button

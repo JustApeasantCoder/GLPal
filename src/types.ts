@@ -164,14 +164,14 @@ export const PEPTIDE_PRESETS: PeptidePreset[] = [
   { name: 'TB-500', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'twice_week', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Thymosin Beta-4 - tissue repair' },
   { name: 'TB-500 / BPC-157 Stack', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'twice_week', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Combined healing protocol' },
   { name: 'KPV', category: 'healing', defaultDose: 0.3, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 2, description: 'Tripeptide - anti-inflammatory' },
-  { name: 'PEG-MGF', category: 'healing', defaultDose: 0.2, defaultDoseUnit: 'mg', defaultFrequency: 'every_other_day', defaultRoute: 'subcutaneous', halfLifeHours: 6, description: ' mechano Growth Factor - muscle repair' },
+  { name: 'PEG-MGF', category: 'healing', defaultDose: 0.2, defaultDoseUnit: 'mg', defaultFrequency: 'every_other_day', defaultRoute: 'subcutaneous', halfLifeHours: 6, description: 'Mechano Growth Factor - muscle repair' },
   
   // Growth Hormone peptides
   { name: 'CJC-1295', category: 'growth_hormone', defaultDose: 0.1, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 168, description: 'GHRH analog - increases GH' },
   { name: 'CJC-1295 + Ipamorelin', category: 'growth_hormone', defaultDose: 0.1, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 168, description: 'GHRH + GHRP stack' },
   { name: 'Ipamorelin', category: 'growth_hormone', defaultDose: 0.2, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 2, description: 'GHRP - growth hormone secretagogue' },
   { name: 'Tesamorelin', category: 'growth_hormone', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 2, description: 'GHRH analog - increases GH and IGF-1' },
-  { name: ' Sermorelin', category: 'growth_hormone', defaultDose: 0.3, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 12, description: 'GHRH analog' },
+  { name: 'Sermorelin', category: 'growth_hormone', defaultDose: 0.3, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 12, description: 'GHRH analog' },
   { name: 'GHRP-2', category: 'growth_hormone', defaultDose: 0.1, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 0.5, description: 'GHRP - appetite boost' },
   { name: 'GHRP-6', category: 'growth_hormone', defaultDose: 0.1, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 1.5, description: 'GHRP - strong appetite boost' },
   
@@ -190,7 +190,7 @@ export const PEPTIDE_PRESETS: PeptidePreset[] = [
   // Longevity peptides
   { name: 'Epithalon', category: 'longevity', defaultDose: 10, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 1, description: 'Telomerase activator' },
   { name: 'FOXO3-DT', category: 'longevity', defaultDose: 10, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 6, description: 'FOXO3 gene activator' },
-  { name: 'NAD+', category: 'longevity', defaultDose: 500, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 4, description: 'Nicotinamide riboside - cellular energy' },
+  { name: 'NAD+', category: 'longevity', defaultDose: 500, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 4, description: 'Coenzyme - cellular energy & DNA repair' },
   { name: 'NMN', category: 'longevity', defaultDose: 500, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'sublingual', halfLifeHours: 3, description: 'NAD+ precursor' },
   
   // Immune peptides
@@ -208,8 +208,8 @@ export const PEPTIDE_PRESETS: PeptidePreset[] = [
   { name: 'Semax', category: 'cognitive', defaultDose: 0.9, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'intranasal', halfLifeHours: 1, description: 'ACTH analog - cognitive & immune boost' },
   
   // Additional Growth Hormone peptides
-  { name: 'GLOW', category: 'growth_hormone', defaultDose: 0.3, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 2, description: 'GHRP-2 + GHRP-6 hybrid - strong GH release' },
-  { name: 'KLOW', category: 'growth_hormone', defaultDose: 1, defaultDoseUnit: 'mg', defaultFrequency: 'weekly', defaultRoute: 'subcutaneous', halfLifeHours: 168, description: 'CJC-1295 DAC - sustained GH release' },
+  { name: 'GLOW', category: 'skin', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'TB-500 + BPC-157 + GHK-Cu stack - healing & skin' },
+  { name: 'KLOW', category: 'skin', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'GLOW + KPV stack - enhanced healing & anti-inflammatory' },
   { name: 'Hexarelin', category: 'growth_hormone', defaultDose: 0.2, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 3, description: 'GHRP - strongest GH release' },
   { name: 'GHRP-3', category: 'growth_hormone', defaultDose: 0.1, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 0.5, description: 'GHRP - moderate GH release' },
   
