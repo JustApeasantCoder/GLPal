@@ -1,6 +1,21 @@
 import { useEffect, useCallback, useRef, Dispatch, SetStateAction } from 'react';
+import { useMobileBackButton } from './useMobileBackButton';
 
-export type ModalType = 'settings' | 'importExport' | 'medication' | 'protocol' | 'logDose' | 'peptide' | 'logPeptide' | null;
+export type ModalType = 
+  | 'settings' 
+  | 'importExport' 
+  | 'medication' 
+  | 'protocol' 
+  | 'logDose' 
+  | 'peptide' 
+  | 'logPeptide'
+  | 'officialSchedule'
+  | 'disclaimer'
+  | 'overdueDisclaimer'
+  | 'deleteConfirm'
+  | 'goalWeightPicker'
+  | 'cloudBackup'
+  | null;
 
 interface HistoryState {
   tab: string;
@@ -18,6 +33,7 @@ export function useAppHistory<T extends string>(
   const currentIndex = useRef(0);
   const isInitialMount = useRef(true);
   const ignoreNextPopState = useRef(false);
+  const isNavigatingBack = useRef(false);
 
   const pushState = useCallback((tab: string, modal: ModalType = null) => {
     const state: HistoryState = { tab, modal, index: currentIndex.current + 1 };
@@ -110,6 +126,30 @@ export function useAppHistory<T extends string>(
     setActiveModal(null);
     pushState(activeTab, null);
   }, [activeTab, setActiveModal, pushState]);
+
+  const handleMobileBack = useCallback((): boolean => {
+    if (activeModal) {
+      ignoreNextPopState.current = true;
+      setActiveModal(null);
+      pushState(activeTab, null);
+      return true;
+    }
+
+    if (currentIndex.current > 0) {
+      ignoreNextPopState.current = true;
+      isNavigatingBack.current = true;
+      currentIndex.current = Math.max(0, currentIndex.current - 1);
+      const prevState = historyStack.current[currentIndex.current];
+      if (prevState) {
+        setActiveTab(prevState.tab as T);
+      }
+      return true;
+    }
+
+    return false;
+  }, [activeTab, activeModal, setActiveModal, setActiveTab, pushState]);
+
+  useMobileBackButton(handleMobileBack);
 
   return { openModal, closeModal };
 }

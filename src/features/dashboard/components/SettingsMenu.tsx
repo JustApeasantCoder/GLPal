@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { UserProfile, UnitSystem } from '../../../types';
+import { ModalType } from '../../../shared/hooks/useAppHistory';
 import TDEECalculator from './TDEECalculator';
 import { convertWeightFromKg, convertWeightToKg } from '../../../shared/utils/unitConversion';
 import WeightWheelPickerModal from '../../weight/components/WeightWheelPickerModal';
@@ -18,6 +19,8 @@ interface SettingsMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onGenerateSampleData?: () => void;
+  activeModal?: ModalType;
+  onOpenModal?: (modal: ModalType) => void;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({
@@ -28,15 +31,36 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   isOpen,
   onClose,
   onGenerateSampleData,
+  activeModal,
+  onOpenModal,
 }) => {
   const { inputButton, input: inputStyle, modal, modalText } = useThemeStyles();
   const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
-  const [showGoalWeightPicker, setShowGoalWeightPicker] = useState(false);
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
   const [useWheelForDate, setUseCalendarPicker] = useState(true);
-  const [showImportExport, setShowImportExport] = useState(false);
-  const [showCloudBackup, setShowCloudBackup] = useState(false);
+
+  const showGoalWeightPicker = activeModal === 'goalWeightPicker';
+  const showImportExportModal = activeModal === 'importExport';
+  const showCloudBackupModal = activeModal === 'cloudBackup';
+
+  useEffect(() => {
+    if (!activeModal) {
+      // Reset local state when modal closes
+    }
+  }, [activeModal]);
+
+  const handleOpenModal = useCallback((modal: 'goalWeightPicker' | 'importExport' | 'cloudBackup') => {
+    if (onOpenModal) {
+      onOpenModal(modal);
+    }
+  }, [onOpenModal]);
+
+  const handleCloseModal = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
 
   const unitSystem = localProfile.unitSystem || 'metric';
 
@@ -143,7 +167,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   {useWheelForNumbers ? (
                     <button
                       type="button"
-                      onClick={() => setShowGoalWeightPicker(true)}
+                      onClick={() => handleOpenModal('goalWeightPicker')}
                       className={inputButton}
                     >
                       {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
@@ -249,7 +273,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Data Management</h3>
               
               <button
-                onClick={() => setShowImportExport(true)}
+                onClick={() => handleOpenModal('importExport')}
                 className={`w-full py-3 px-4 rounded-lg border transition-all duration-300 flex items-center justify-center gap-2 mb-3 ${
                   isDarkMode
                     ? 'border-[#B19CD9]/50 bg-[#B19CD9]/10 text-[#B19CD9] hover:bg-[#B19CD9]/20'
@@ -263,7 +287,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               </button>
 
               <button
-                  onClick={() => setShowCloudBackup(true)}
+                  onClick={() => handleOpenModal('cloudBackup')}
                   className={`w-full py-3 px-4 rounded-lg border transition-all duration-300 flex items-center justify-center gap-2 mb-3 ${
                     isDarkMode
                       ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20'
@@ -352,9 +376,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             setPendingGoalWeight(value);
             onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
           }
-          setShowGoalWeightPicker(false);
+          handleCloseModal();
         }}
-        onClose={() => setShowGoalWeightPicker(false)}
+        onClose={handleCloseModal}
         min={1}
         max={unitSystem === 'imperial' ? 1100 : 500}
         label="Goal Weight"
@@ -363,8 +387,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
       />
 
       <ImportExportModal
-        isOpen={showImportExport}
-        onClose={() => setShowImportExport(false)}
+        isOpen={showImportExportModal}
+        onClose={handleCloseModal}
         isDarkMode={isDarkMode}
         onImportComplete={() => {
           // Refresh data after import
@@ -372,8 +396,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
       />
 
       <CloudBackupModal
-          isOpen={showCloudBackup}
-          onClose={() => setShowCloudBackup(false)}
+          isOpen={showCloudBackupModal}
+          onClose={handleCloseModal}
           isDarkMode={isDarkMode}
           onDataRestored={() => {
             // Refresh data after restore

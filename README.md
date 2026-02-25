@@ -17,7 +17,7 @@ Just you and your data.
 
 Access GLPal directly in your browser:
 
-**https://justapeasantcoder.github.io/GLPal/**
+**https://glpal.app/app**
 
 Simply visit the URL on any device with a web browser — desktop, tablet, or phone. Your data is stored locally in your browser.
 
@@ -28,14 +28,14 @@ Simply visit the URL on any device with a web browser — desktop, tablet, or ph
 GLPal works as a Progressive Web App (PWA), giving you an app-like experience on your phone.
 
 #### iPhone (Safari)
-1. Open **https://justapeasantcoder.github.io/GLPal/** in Safari
+1. Open **https://glpal.app/app** in Safari
 2. Tap the **Share** button (square with arrow pointing up)
 3. Scroll down and tap **"Add to Home Screen"**
 4. Tap **Add**
 5. GLPal will appear on your home screen like a regular app
 
 #### Android (Chrome)
-1. Open **https://justapeasantcoder.github.io/GLPal/** in Chrome
+1. Open **https://glpal.app/app** in Chrome
 2. Tap the three dots (menu) in the top right
 3. Tap **"Add to Home Screen"** or **"Install App"**
 4. Tap **Install**

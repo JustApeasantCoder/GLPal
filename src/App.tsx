@@ -60,27 +60,6 @@ function App() {
   );
 
   useEffect(() => {
-    const isInPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                    (window.navigator as { standalone?: boolean }).standalone === true;
-    
-    if (isInPWA) {
-      const handlePopState = (event: PopStateEvent) => {
-        if (event.state === null) {
-          event.preventDefault();
-          window.history.pushState({}, '', window.location.href);
-        }
-      };
-      
-      window.addEventListener('popstate', handlePopState, { passive: false });
-      window.history.pushState({}, '', window.location.href);
-      
-      return () => {
-        window.removeEventListener('popstate', handlePopState);
-      };
-    }
-  }, []);
-
-  useEffect(() => {
     initialize();
   }, [initialize]);
 
@@ -345,6 +324,8 @@ function App() {
         isOpen={isSettingsOpen}
         onClose={closeModal}
         onGenerateSampleData={generateSampleData}
+        activeModal={activeModal}
+        onOpenModal={openModal}
       />
     </div>
   );

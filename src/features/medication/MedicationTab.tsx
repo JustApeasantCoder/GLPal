@@ -54,15 +54,34 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const [activeProtocolForModal, setActiveProtocolForModal] = useState<GLP1Protocol | null>(null);
   const [editingProtocol, setEditingProtocol] = useState<GLP1Protocol | null>(null);
   const [protocolModalMode, setProtocolModalMode] = useState<'add' | 'edit'>('add');
-  const [showOfficialScheduleModal, setShowOfficialScheduleModal] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [deleteConfirmMed, setDeleteConfirmMed] = useState<string | null>(null);
 
   const collapsedSet = useMemo(() => new Set(collapsedMedications), [collapsedMedications]);
 
   const [showProgressDebug, setShowProgressDebug] = useState(false);
-  const [showOverdueDisclaimer, setShowOverdueDisclaimer] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
+
+  const showOfficialScheduleModal = activeModal === 'officialSchedule';
+  const showDisclaimer = activeModal === 'disclaimer';
+  const showOverdueDisclaimer = activeModal === 'overdueDisclaimer';
+  const showDeleteConfirm = activeModal === 'deleteConfirm';
+
+  useEffect(() => {
+    if (!activeModal && deleteConfirmMed) {
+      setDeleteConfirmMed(null);
+    }
+  }, [activeModal, deleteConfirmMed]);
+
+  const handleDeleteClick = useCallback((medicationName: string) => {
+    setDeleteConfirmMed(medicationName);
+    onOpenModal('deleteConfirm');
+  }, [onOpenModal]);
+
+  const closeLocalModal = useCallback(() => {
+    onCloseModal();
+    setDeleteConfirmMed(null);
+    setIsLogging(false);
+  }, [onCloseModal]);
   
   const protocolRef = useRef<GLP1Protocol | null>(null);
 
@@ -213,7 +232,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     } catch (e) {
       console.error('Error generating doses:', e);
     }
-    setShowOfficialScheduleModal(false);
+    onCloseModal();
   };
 
   const handleRegenerate = () => {
@@ -241,7 +260,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     
     if (statsOverdue) {
       setLoggingMedicationName(targetMed || '');
-      setShowOverdueDisclaimer(true);
+      onOpenModal('overdueDisclaimer');
       return;
     }
     
@@ -259,7 +278,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   };
   
   const handleConfirmOverdueDose = () => {
-    setShowOverdueDisclaimer(false);
+    onCloseModal();
     const today = timeService.nowDate();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
@@ -292,16 +311,15 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   }, [now, activeProtocol?.id, medicationEntries]);
 
   const handleDisclaimerAcknowledged = () => {
-    setShowDisclaimer(false);
-    setShowOfficialScheduleModal(true);
+    onOpenModal('officialSchedule');
   };
 
   const handleOpenOfficialSchedule = () => {
     const acknowledged = localStorage.getItem('glpal_disclaimer_acknowledged');
     if (acknowledged === 'true') {
-      setShowOfficialScheduleModal(true);
+      onOpenModal('officialSchedule');
     } else {
-      setShowDisclaimer(true);
+      onOpenModal('disclaimer');
     }
   };
 
@@ -414,7 +432,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           collapsedMedications={collapsedSet}
           onToggleMedication={toggleMedication}
           onEditProtocol={handleEditProtocol}
-          onDeleteClick={setDeleteConfirmMed}
+          onDeleteClick={handleDeleteClick}
         />
 
         <div className="border-t border-[#B19CD9]/20 my-3"></div>
@@ -457,7 +475,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
       <OfficialScheduleModal
         isOpen={showOfficialScheduleModal}
-        onClose={() => setShowOfficialScheduleModal(false)}
+        onClose={onCloseModal}
         onSave={handleOfficialScheduleSave}
         useWheelForDate={useWheelForDate}
       />
@@ -471,10 +489,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
       <LogDoseModal
         isOpen={activeModal === 'logDose'}
-        onClose={() => {
-          onCloseModal();
-          setIsLogging(false);
-        }}
+        onClose={closeLocalModal}
         onSave={handleLogDoseSave}
         protocol={activeProtocolForModal || activeProtocol || null}
         protocolRef={protocolRef}
@@ -483,20 +498,20 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
       <OverdueDisclaimerModal
         isOpen={showOverdueDisclaimer}
-        onClose={() => setShowOverdueDisclaimer(false)}
+        onClose={onCloseModal}
         onConfirm={handleConfirmOverdueDose}
       />
 
       <DeleteConfirmModal
-        isOpen={!!deleteConfirmMed}
+        isOpen={showDeleteConfirm}
         medicationName={deleteConfirmMed || ''}
-        onClose={() => setDeleteConfirmMed(null)}
+        onClose={closeLocalModal}
         onConfirm={() => deleteConfirmMed && handleDeleteMedication(deleteConfirmMed)}
       />
 
       <DisclaimerModal
         isOpen={showDisclaimer}
-        onClose={() => setShowDisclaimer(false)}
+        onClose={onCloseModal}
         onAcknowledged={handleDisclaimerAcknowledged}
       />
     </div>
