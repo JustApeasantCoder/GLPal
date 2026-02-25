@@ -18,17 +18,17 @@ interface PeptidesTabProps {
   onCloseModal: () => void;
 }
 
-const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string }[] = [
+const CATEGORY_TABS: { id: PeptideCategory | 'all'; label: string; color?: string }[] = [
   { id: 'all', label: 'All' },
-  { id: 'healing', label: 'Healing' },
-  { id: 'growth_hormone', label: 'GH' },
-  { id: 'fat_loss', label: 'Fat Loss' },
-  { id: 'muscle', label: 'Muscle' },
-  { id: 'longevity', label: 'Longevity' },
-  { id: 'immune', label: 'Immune' },
-  { id: 'skin', label: 'Skin' },
-  { id: 'cognitive', label: 'Cognitive' },
-  { id: 'other', label: 'Other' },
+  { id: 'healing', label: 'Healing', color: '#EF4444' },
+  { id: 'growth_hormone', label: 'GH', color: '#F59E0B' },
+  { id: 'fat_loss', label: 'Fat Loss', color: '#10B981' },
+  { id: 'muscle', label: 'Muscle', color: '#3B82F6' },
+  { id: 'longevity', label: 'Longevity', color: '#8B5CF6' },
+  { id: 'immune', label: 'Immune', color: '#EC4899' },
+  { id: 'skin', label: 'Skin', color: '#F472B6' },
+  { id: 'cognitive', label: 'Cognitive', color: '#06B6D4' },
+  { id: 'other', label: 'Other', color: '#6B7280' },
 ];
 
 const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activeModal, onOpenModal, onCloseModal }) => {
@@ -138,16 +138,20 @@ const PeptidesTab: React.FC<PeptidesTabProps> = ({ useWheelForDate = true, activ
         </h1>
 
         {/* Category Tabs */}
-        <div className="flex gap-1 overflow-x-auto pb-2 mb-3 -mx-2 px-2 hide-scrollbar">
+        <div className="flex flex-wrap gap-1.5 pb-2 mb-3">
           {CATEGORY_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 selectedCategory === tab.id 
-                  ? 'bg-[#B19CD9] text-white' 
+                  ? 'text-white shadow-md' 
                   : 'bg-white/10 text-gray-400 hover:bg-white/20'
               }`}
+              style={selectedCategory === tab.id && tab.color ? { 
+                backgroundColor: tab.color,
+                boxShadow: `0 0 10px ${tab.color}60`
+              } : undefined}
             >
               {tab.label}
             </button>

@@ -58,7 +58,11 @@ export const useProtocolForm = ({
   const [dose, setDose] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('1');
   const [startDate, setStartDate] = useState<string>(getTodayString());
-  const [stopDate, setStopDate] = useState<string>('');
+  const [stopDate, setStopDate] = useState<string>(() => {
+    const today = timeService.nowDate();
+    const defaultEndDate = new Date(today.getTime() + 28 * 24 * 60 * 60 * 1000);
+    return timeService.toLocalDateString(defaultEndDate);
+  });
   const [continuationInfo, setContinuationInfo] = useState<string | null>(null);
   const [phase, setPhase] = useState<'titrate' | 'maintenance' | undefined>(undefined);
   const [selectedDurationDays, setSelectedDurationDays] = useState<number>(() => {
@@ -331,11 +335,15 @@ export const useProtocolForm = ({
   };
 
   const resetForm = () => {
+    const today = timeService.nowDate();
+    const defaultEndDate = new Date(today.getTime() + 28 * 24 * 60 * 60 * 1000);
+    const defaultEndDateStr = timeService.toLocalDateString(defaultEndDate);
+    
     setSelectedMedication('');
     setDose('');
     setFrequency('1');
     setStartDate(getTodayString());
-    setStopDate('');
+    setStopDate(defaultEndDateStr);
     setContinuationInfo(null);
     setPhase(undefined);
     setShowOtherModal(false);
@@ -387,10 +395,9 @@ export const frequencyOptions = [
 ];
 
 export const durationPresets = [
-  { label: '1W', days: 7 },
-  { label: '2W', days: 14 },
-  { label: '1M', days: 28 },
-  { label: '1Y', days: 336 },
+  { label: 'Week', days: 7 },
+  { label: 'Month', days: 28 },
+  { label: 'Year', days: 336 },
 ];
 
 export { toLocalDateString, getTodayString };

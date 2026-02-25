@@ -464,7 +464,7 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
               <div className="flex justify-between">
                 <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Doses per Vial:</span>
                 <span className={`text-sm font-bold text-[#B19CD9]`}>
-                  {formatNumber(result.vialStrength / result.dose)} doses
+                  {formatNumber(result.vialStrength / result.dose)} Doses
                 </span>
               </div>
             )}

@@ -211,7 +211,13 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                     key={preset.label}
                     type="button"
                     onClick={() => handleDurationPreset(preset.days)}
-                    className={secondaryButton(isSelected)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                      isSelected
+                        ? 'bg-[#B19CD9] text-white'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#9C7BD3]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                    }`}
                   >
                     {preset.label}
                   </button>
