@@ -26,13 +26,24 @@ const getFrequencyDays = (frequency: PeptideFrequency): number => {
     case 'every_5_days': return 5;
     case 'every_6_days': return 6;
     case 'weekly': return 7;
-    case 'twice_week': return 3.5;
+    case 'weekday': return 1;
+    case 'weekend': return 1;
     case 'biweekly': return 14;
     case 'triweekly': return 21;
     case 'monthly': return 30;
     case 'as_needed': return 7;
     default: return 7;
   }
+};
+
+const isWeekday = (date: Date): boolean => {
+  const day = date.getDay();
+  return day >= 1 && day <= 5;
+};
+
+const isWeekend = (date: Date): boolean => {
+  const day = date.getDay();
+  return day === 0 || day === 6;
 };
 
 // Get due window in hours (±8 from preferred time)
@@ -48,7 +59,8 @@ const getFrequencyLabel = (frequency: PeptideFrequency): string => {
     case 'every_5_days': return 'Every 5 Days';
     case 'every_6_days': return 'Every 6 Days';
     case 'weekly': return 'Every Week';
-    case 'twice_week': return '2x / Week';
+    case 'weekday': return 'Every Weekday';
+    case 'weekend': return 'Every Weekend';
     case 'biweekly': return 'Every 2 Weeks';
     case 'triweekly': return 'Every 3 Weeks';
     case 'monthly': return 'Every Month';
@@ -67,7 +79,10 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
     const intervalDays = getFrequencyDays(peptide.frequency);
     const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
     const dueWindowMs = getDueWindowHours() * 60 * 60 * 1000;
-    const isDaily = peptide.frequency === 'daily';
+    const isDaily = peptide.frequency === 'daily' || peptide.frequency === 'weekday' || peptide.frequency === 'weekend';
+    const isWeekdayFreq = peptide.frequency === 'weekday';
+    const isWeekendFreq = peptide.frequency === 'weekend';
+    const isValidDayToday = (isWeekdayFreq && isWeekday(currentTime)) || (isWeekendFreq && isWeekend(currentTime)) || !isWeekdayFreq && !isWeekendFreq;
     
     // Parse preferred time (only used for daily)
     const preferredParts = (peptide.preferredTime || '08:00').split(':');
@@ -77,11 +92,14 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
     if (!latestLog) {
       return {
         progress: 100,
-        timeRemaining: { days: 0, hours: 0, label: 'Never logged' },
+        timeRemaining: { days: 0, hours: 0, label: 'New Schedule - Log First Dose' },
         isDue: true,
         isOverdue: false,
         isLoggedToday: false,
         isDaily,
+        isWeekdayFreq,
+        isWeekendFreq,
+        isValidDayToday,
         daysSinceLastDose: 0,
       };
     }
@@ -155,8 +173,22 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
     
     if (isDaily) {
       // Daily: based on preferred time
-      isOverdueFlag = currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday;
-      isDueFlag = isWithinDueWindow;
+      isOverdueFlag = currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday && isValidDayToday;
+      isDueFlag = isWithinDueWindow && isValidDayToday;
+      
+      // For weekday/weekend: if not a valid day today, show countdown to next valid day
+      if (!isValidDayToday) {
+        // Find next valid day
+        let nextValidDay = new Date(currentTime);
+        nextValidDay.setHours(0, 0, 0, 0);
+        do {
+          nextValidDay.setDate(nextValidDay.getDate() + 1);
+        } while (!((isWeekdayFreq && isWeekday(nextValidDay)) || (isWeekendFreq && isWeekend(nextValidDay))));
+        
+        nextValidDay.setHours(preferredHours, preferredMinutes, 0, 0);
+        timeUntilNext = nextValidDay.getTime() - currentTime.getTime();
+        progressPercent = 0;
+      }
     } else {
       // Non-daily: based on midnight after last log
       const lastLogMidnight = new Date(lastLogDate);
@@ -246,6 +278,9 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
       isOverdue: isOverdueFlag,
       isLoggedToday,
       isDaily,
+      isWeekdayFreq,
+      isWeekendFreq,
+      isValidDayToday,
       daysSinceLastDose: daysSinceLastLog,
       // Debug info
       debug: {
@@ -296,7 +331,9 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
     };
   }, [peptide.frequency, peptide.preferredTime, latestLog, currentTime]);
 
-  const { progress, timeRemaining, isDue, isOverdue, isLoggedToday, isDaily, daysSinceLastDose, isDueFlag, isOverdueFlag, debug = {} as any } = result;
+  const { progress, timeRemaining, isDue, isOverdue, isLoggedToday, isDaily, isWeekdayFreq, isWeekendFreq, isValidDayToday, daysSinceLastDose, debug = {} as any } = result;
+  const isDueFlag = debug.isDueFlag;
+  const isOverdueFlag = debug.isOverdueFlag;
 
   const [showDebug, setShowDebug] = useState(false);
 
@@ -312,14 +349,22 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
 
   // For daily, override overdue to show "Dose Due Today" and keep bar full
   const isOverdueDaily = isOverdue && isDaily;
-  const displayProgress = isOverdueDaily ? 100 : progress;
-  const displayLabel = isOverdueDaily 
-    ? 'Dose Due Today - Log Now' 
-    : isOverdue 
-      ? `Overdue - ${getFrequencyLabel(peptide.frequency)}` 
-      : isDaily || !isDue 
-        ? timeRemaining.label
-        : 'Due Now - Log Dose';
+  
+  // Handle weekday/weekend not scheduled today
+  const isWeekdayOrWeekend = isWeekdayFreq || isWeekendFreq;
+  const notScheduledToday = isWeekdayOrWeekend && !isValidDayToday;
+  
+  const displayProgress = isOverdueDaily ? 100 : notScheduledToday ? 0 : progress;
+  
+  const displayLabel = notScheduledToday
+    ? 'Day Off'
+    : isOverdueDaily 
+      ? 'Dose Due Today - Log Now' 
+      : isOverdue 
+        ? `Overdue - ${getFrequencyLabel(peptide.frequency)}` 
+        : isDaily || !isDue 
+          ? timeRemaining.label
+          : 'Due Now - Log Dose';
 
   return (
     <div className="mb-4">
@@ -389,6 +434,10 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
           <div>isLoggedToday: <span className={isLoggedToday ? 'text-green-400' : 'text-red-400'}>{String(isLoggedToday)}</span></div>
           <div>isDue: <span className={isDueFlag ? 'text-green-400' : 'text-red-400'}>{String(isDueFlag)}</span></div>
           <div>isOverdue: <span className={isOverdueFlag ? 'text-green-400' : 'text-red-400'}>{String(isOverdueFlag)}</span></div>
+          <div>isWeekdayFreq: <span className={isWeekdayFreq ? 'text-green-400' : 'text-red-400'}>{String(isWeekdayFreq)}</span></div>
+          <div>isWeekendFreq: <span className={isWeekendFreq ? 'text-green-400' : 'text-red-400'}>{String(isWeekendFreq)}</span></div>
+          <div>isValidDayToday: <span className={isValidDayToday ? 'text-green-400' : 'text-red-400'}>{String(isValidDayToday)}</span></div>
+          <div>notScheduledToday: <span className={notScheduledToday ? 'text-green-400' : 'text-red-400'}>{String(notScheduledToday)}</span></div>
           
           <div className="col-span-2 font-bold text-yellow-400 border-b border-gray-600 mb-1 mt-1">Latest Log</div>
           <div>date: {debug.latestLogDate || 'null'}</div>

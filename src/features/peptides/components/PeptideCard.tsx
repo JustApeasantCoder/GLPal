@@ -72,7 +72,8 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
       case 'every_5_days': return 5;
       case 'every_6_days': return 6;
       case 'weekly': return 7;
-      case 'twice_week': return 3.5;
+      case 'weekday': return 1;
+      case 'weekend': return 1;
       case 'biweekly': return 14;
       case 'triweekly': return 21;
       case 'monthly': return 30;
@@ -82,7 +83,21 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
   })();
   const intervalMs = frequencyDays * 24 * 60 * 60 * 1000;
   
-  const isDaily = peptide.frequency === 'daily';
+  const isDaily = peptide.frequency === 'daily' || peptide.frequency === 'weekday' || peptide.frequency === 'weekend';
+  const isWeekdayFreq = peptide.frequency === 'weekday';
+  const isWeekendFreq = peptide.frequency === 'weekend';
+  const isWeekday = (date: Date): boolean => {
+    const day = date.getDay();
+    return day >= 1 && day <= 5;
+  };
+  const isWeekend = (date: Date): boolean => {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  };
+  const isValidDayToday = (isWeekdayFreq && isWeekday(currentTime)) || (isWeekendFreq && isWeekend(currentTime)) || !isWeekdayFreq && !isWeekendFreq;
+  const isWeekdayOrWeekend = isWeekdayFreq || isWeekendFreq;
+  const notScheduledToday = isWeekdayOrWeekend && !isValidDayToday;
+  
   const todayStr = timeService.toLocalDateString(currentTime);
   const isLoggedToday = latestLog && latestLog.date === todayStr;
   
@@ -111,8 +126,8 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
     
     const isWithinDueWindow = currentTimeInMinutes >= dueWindowStartMinutes && currentTimeInMinutes <= dueWindowEndMinutes;
     
-    isOverdue = currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday;
-    isDue = isWithinDueWindow;
+    isOverdue = currentTimeInMinutes > preferredTimeInMinutes && !isLoggedToday && isValidDayToday;
+    isDue = isWithinDueWindow && isValidDayToday;
   } else {
     // Non-daily: countdown starts at next midnight after log
     const lastLogDate = parseLocalDateTime(latestLog.date, latestLog.time);
@@ -135,7 +150,7 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
     isDue = isDueDay;
   }
   // For daily, show button only when not logged today; for others, show when due or overdue
-  const showLogButton = peptide.isActive && (isDaily ? !isLoggedToday : (isDue || isOverdue));
+  const showLogButton = peptide.isActive && !notScheduledToday && (isDaily ? !isLoggedToday : (isDue || isOverdue));
   // Show "Dose Logged For Today" if logged today
   const logButtonText = isLoggedToday 
     ? 'Dose Logged For Today' 

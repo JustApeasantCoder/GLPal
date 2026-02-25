@@ -85,7 +85,8 @@ export type PeptideFrequency =
   | 'every_5_days'
   | 'every_6_days'
   | 'weekly'
-  | 'twice_week'
+  | 'weekday'
+  | 'weekend'
   | 'biweekly'
   | 'triweekly'
   | 'monthly'
@@ -161,8 +162,8 @@ export interface PeptidePreset {
 export const PEPTIDE_PRESETS: PeptidePreset[] = [
   // Healing peptides
   { name: 'BPC-157', category: 'healing', defaultDose: 0.5, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 4, description: 'Body Protection Compound - promotes healing' },
-  { name: 'TB-500', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'twice_week', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Thymosin Beta-4 - tissue repair' },
-  { name: 'TB-500 / BPC-157 Stack', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'twice_week', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Combined healing protocol' },
+  { name: 'TB-500', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'weekly', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Thymosin Beta-4 - tissue repair' },
+  { name: 'TB-500 / BPC-157 Stack', category: 'healing', defaultDose: 2, defaultDoseUnit: 'mg', defaultFrequency: 'weekly', defaultRoute: 'subcutaneous', halfLifeHours: 24, description: 'Combined healing protocol' },
   { name: 'KPV', category: 'healing', defaultDose: 0.3, defaultDoseUnit: 'mg', defaultFrequency: 'daily', defaultRoute: 'subcutaneous', halfLifeHours: 2, description: 'Tripeptide - anti-inflammatory' },
   { name: 'PEG-MGF', category: 'healing', defaultDose: 0.2, defaultDoseUnit: 'mg', defaultFrequency: 'every_other_day', defaultRoute: 'subcutaneous', halfLifeHours: 6, description: 'Mechano Growth Factor - muscle repair' },
   

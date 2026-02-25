@@ -48,7 +48,8 @@ const FREQUENCY_LABELS: Record<PeptideFrequency, string> = {
   every_5_days: 'Every 5 Days',
   every_6_days: 'Every 6 Days',
   weekly: 'Every Week',
-  twice_week: '2x / Week',
+  weekday: 'Every Weekday',
+  weekend: 'Every Weekend',
   biweekly: 'Every 2 Weeks',
   triweekly: 'Every 3 Weeks',
   monthly: 'Every Month',
@@ -381,9 +382,6 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                       className={inputButton}
                     >
                       <span>{FREQUENCY_LABELS[frequency]}</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
                     </button>
                   </div>
                 </div>
@@ -411,9 +409,6 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, ed
                     className={inputButton}
                   >
                     <span>{ROUTE_LABELS[route]}</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
                   </button>
                 </div>
 
