@@ -176,6 +176,38 @@ export const useThemeStyles = () => {
           };
     },
 
+    // Small pill buttons (for calculator presets - smaller, full rounded)
+    // Returns { className, style } object
+    smallPillButton: (isActive: boolean = false, activeColor?: string): { className: string; style: React.CSSProperties } => {
+      const color = activeColor || '#B19CD9';
+      const baseClass = "flex-1 py-2 px-2 rounded-lg text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-colors duration-200";
+      
+      if (isActive) {
+        return {
+          className: baseClass,
+          style: {
+            backgroundColor: color,
+            color: 'white',
+            boxShadow: `0 0 10px ${color}60`,
+          },
+        };
+      }
+      return {
+        className: baseClass,
+        style: isDarkMode
+          ? {
+              backgroundColor: 'rgba(26, 26, 36, 0.6)',
+              color: '#9CA3AF',
+              border: '1px solid rgba(177, 156, 217, 0.2)',
+            }
+          : {
+              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              color: '#6B7280',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+            },
+      };
+    },
+
     // Segmented control buttons (PeriodSelector - full-width grid toggles)
     segmentedControl: (isActive: boolean = false) => {
       if (isActive) {

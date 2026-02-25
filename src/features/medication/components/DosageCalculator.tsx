@@ -81,7 +81,7 @@ const SyringeIndicator: React.FC<SyringeIndicatorProps> = ({ value, maxValue = 1
 
 const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
-  const { input, primaryButton, secondaryButton, modal } = useThemeStyles();
+  const { input, primaryButton, secondaryButton, modal, smallPillButton } = useThemeStyles();
   const [vialStrength, setVialStrength] = useState<string>('');
   const [waterAmount, setWaterAmount] = useState<string>('');
   const [desiredDose, setDesiredDose] = useState<string>('');
@@ -219,34 +219,36 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
             />
           )}
           <div className="flex gap-1 mt-0.5">
-            {[10, 20, 30].map(val => (
-              <button
-                key={val}
-                onClick={() => setVialStrength(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  vialStrength === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}mg
-              </button>
-            ))}
+            {[10, 20, 30].map(val => {
+              const isSelected = vialStrength === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setVialStrength(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}mg
+                </button>
+              );
+            })}
           </div>
           <div className="flex gap-1 mt-0.5">
-            {[40, 50, 60].map(val => (
-              <button
-                key={val}
-                onClick={() => setVialStrength(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  vialStrength === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}mg
-              </button>
-            ))}
+            {[40, 50, 60].map(val => {
+              const isSelected = vialStrength === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setVialStrength(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}mg
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -283,34 +285,36 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
             />
           )}
           <div className="flex gap-1 mt-0.5">
-            {[1, 1.5, 2].map(val => (
-              <button
-                key={val}
-                onClick={() => setWaterAmount(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  waterAmount === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}ml
-              </button>
-            ))}
+            {[1, 1.5, 2].map(val => {
+              const isSelected = waterAmount === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setWaterAmount(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}ml
+                </button>
+              );
+            })}
           </div>
           <div className="flex gap-1 mt-0.5">
-            {[2.5, 3, 3.5].map(val => (
-              <button
-                key={val}
-                onClick={() => setWaterAmount(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  waterAmount === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}ml
-              </button>
-            ))}
+            {[2.5, 3, 3.5].map(val => {
+              const isSelected = waterAmount === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setWaterAmount(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}ml
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -347,34 +351,36 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
             />
           )}
           <div className="flex gap-1 mt-0.5">
-            {[0.25, 0.5, 1].map(val => (
-              <button
-                key={val}
-                onClick={() => setDesiredDose(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  desiredDose === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}mg
-              </button>
-            ))}
+            {[0.25, 0.5, 1].map(val => {
+              const isSelected = desiredDose === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setDesiredDose(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}mg
+                </button>
+              );
+            })}
           </div>
           <div className="flex gap-1 mt-0.5">
-            {[2, 4, 6].map(val => (
-              <button
-                key={val}
-                onClick={() => setDesiredDose(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  desiredDose === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}mg
-              </button>
-            ))}
+            {[2, 4, 6].map(val => {
+              const isSelected = desiredDose === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setDesiredDose(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}mg
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -411,34 +417,36 @@ const DosageCalculator: React.FC<DosageCalculatorProps> = ({ onClose, useWheelFo
             />
           )}
           <div className="flex gap-1 mt-0.5">
-            {[10, 20, 30].map(val => (
-              <button
-                key={val}
-                onClick={() => setSyringeDraw(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  syringeDraw === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}iu
-              </button>
-            ))}
+            {[10, 20, 30].map(val => {
+              const isSelected = syringeDraw === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setSyringeDraw(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}iu
+                </button>
+              );
+            })}
           </div>
           <div className="flex gap-1 mt-0.5">
-            {[40, 50, 60].map(val => (
-              <button
-                key={val}
-                onClick={() => setSyringeDraw(val.toString())}
-                className={`flex-1 py-2 px-2 rounded-full text-xs lg:py-1 lg:px-1.5 lg:text-[10px] font-medium whitespace-nowrap transition-all ${
-                  syringeDraw === val.toString()
-                    ? 'bg-[#B19CD9] text-white'
-                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                }`}
-              >
-                {val}iu
-              </button>
-            ))}
+            {[40, 50, 60].map(val => {
+              const isSelected = syringeDraw === val.toString();
+              const { className, style } = smallPillButton(isSelected);
+              return (
+                <button
+                  key={val}
+                  onClick={() => setSyringeDraw(val.toString())}
+                  className={className}
+                  style={style}
+                >
+                  {val}iu
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

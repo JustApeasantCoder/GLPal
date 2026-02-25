@@ -36,9 +36,33 @@ function createWindow() {
     mainWindow.loadURL(devUrl);
   }
 
-  // Handle navigation to app
+  // Handle page reload in dev mode - reload the dev server URL
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription);
+    // Retry loading in dev mode
+    if (!isProduction) {
+      mainWindow.loadURL(devUrl);
+    }
+  });
+
+  // Handle renderer process crash
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    console.error('Renderer process gone:', details.reason);
+    if (!isProduction) {
+      mainWindow.loadURL(devUrl);
+    }
+  });
+
+  // Handle page reload in dev mode
+  mainWindow.webContents.on('reload', () => {
+    if (!isProduction) {
+      mainWindow.loadURL(devUrl);
+    }
+  });
+
+  // Handle navigation to app (mainly for production)
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.includes('/app/') || url.endsWith('/app')) {
+    if (isProduction && (url.includes('/app/') || url.endsWith('/app'))) {
       event.preventDefault();
       const appPath = path.join(__dirname, '../build/app/index.html');
       console.log('Navigating to app:', appPath);
@@ -47,15 +71,11 @@ function createWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.includes('/app/') || url.endsWith('/app')) {
+    if (isProduction && (url.includes('/app/') || url.endsWith('/app'))) {
       const appPath = path.join(__dirname, '../build/app/index.html');
       mainWindow.loadFile(appPath);
     }
     return { action: 'deny' };
-  });
-
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription);
   });
 
   mainWindow.webContents.on('console-message', (event, level, message) => {
@@ -81,6 +101,21 @@ function createWindow() {
   mainWindow.webContents.once('did-finish-load', () => {
     mainWindow.show();
     mainWindow.webContents.openDevTools();
+  });
+
+  // Handle blank page issues in dev mode
+  mainWindow.webContents.on('did-stop-loading', () => {
+    // Check if the page is blank
+    mainWindow.webContents.executeJavaScript('document.body.innerHTML').then((content) => {
+      if (!content || content.trim() === '') {
+        console.log('Page appears blank, reloading...');
+        if (!isProduction) {
+          mainWindow.loadURL(devUrl);
+        }
+      }
+    }).catch(() => {
+      // Ignore errors
+    });
   });
 
   mainWindow.on('closed', () => {
