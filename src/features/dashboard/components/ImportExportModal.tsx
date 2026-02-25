@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UserProfile } from '../../../types';
 import { dataImportExportService } from '../../../services/DataImportExportService';
 import { ImportPreview, ImportResult, ImportMode } from '../../../utils/csvTypes';
@@ -51,12 +50,12 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
     }
   }, [isOpen]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     dataImportExportService.exportData();
     onClose();
-  };
+  }, [onClose]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -67,9 +66,9 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
       setPreview(preview);
     };
     reader.readAsText(file);
-  };
+  }, [importWeightUnit]);
 
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     if (!preview) return;
 
     setIsLoading(true);
@@ -85,19 +84,19 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
     if (result.success) {
       onImportComplete();
     }
-  };
+  }, [preview, importMode, includeData, includeUserSettings, importWeightUnit, offsetDays, offsetHours, onImportComplete]);
 
-  const handleResetImport = () => {
+  const handleResetImport = useCallback(() => {
     setPreview(null);
     setImportResult(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
+  }, []);
 
-  if (!isVisible) return null;
+  if (!isOpen) return null;
 
-  return ReactDOM.createPortal(
+  return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
       <div
         className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
@@ -417,8 +416,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 

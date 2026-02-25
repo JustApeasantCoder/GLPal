@@ -5,8 +5,6 @@ import { ModalType } from '../../../shared/hooks/useAppHistory';
 import TDEECalculator from './TDEECalculator';
 import { convertWeightFromKg, convertWeightToKg } from '../../../shared/utils/unitConversion';
 import WeightWheelPickerModal from '../../weight/components/WeightWheelPickerModal';
-import ImportExportModal from './ImportExportModal';
-import CloudBackupModal from './CloudBackupModal';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 
 const IS_DEV = import.meta.env.VITE_IS_DEV === 'true';
@@ -38,11 +36,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   const [localProfile, setLocalProfile] = useState<UserProfile>(profile);
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
-  const [useWheelForDate, setUseCalendarPicker] = useState(true);
+  const [useWheelForDate, setUseCalendarPicker] = useState(false);
 
   const showGoalWeightPicker = activeModal === 'goalWeightPicker';
-  const showImportExportModal = activeModal === 'importExport';
-  const showCloudBackupModal = activeModal === 'cloudBackup';
 
   useEffect(() => {
     if (!activeModal) {
@@ -385,24 +381,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
         decimals={1}
         defaultValue={goalWeightDisplayValue || (unitSystem === 'imperial' ? '150' : '70')}
       />
-
-      <ImportExportModal
-        isOpen={showImportExportModal}
-        onClose={handleCloseModal}
-        isDarkMode={isDarkMode}
-        onImportComplete={() => {
-          // Refresh data after import
-        }}
-      />
-
-      <CloudBackupModal
-          isOpen={showCloudBackupModal}
-          onClose={handleCloseModal}
-          isDarkMode={isDarkMode}
-          onDataRestored={() => {
-            // Refresh data after restore
-          }}
-        />
     </div>,
     document.body
   );

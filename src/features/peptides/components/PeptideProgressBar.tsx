@@ -210,24 +210,24 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
         const overdueDays = Math.abs(remainingDays);
         const overdueHoursAbs = Math.abs(remainingHours);
         label = overdueDays > 0 
-          ? `Overdue by ${overdueDays}d ${overdueHoursAbs}h`
-          : `Overdue by ${overdueHoursAbs}h`;
+          ? `Overdue by ${overdueDays}Days ${overdueHoursAbs}Hours`
+          : `Overdue by ${overdueHoursAbs}Hours`;
       }
     } else if (isDaily) {
       // For daily, always show countdown to preferred time (not "Due now")
       if (remainingDays > 0) {
-        label = `${remainingDays}d ${remainingHours}h until next`;
+        label = `${remainingDays}Days ${remainingHours}Hours Until Next Dose`;
       } else if (remainingHours > 0) {
-        label = `${remainingHours}h ${remainingMinutes}m until next`;
+        label = `${remainingHours}Hours ${remainingMinutes}Minutes Until Next Dose`;
       } else {
-        label = `${remainingMinutes}m until next`;
+        label = `${remainingMinutes}Minutes Until Next Dose`;
       }
     } else if (remainingDays > 0) {
-      label = `${remainingDays}d ${remainingHours}h until next`;
+      label = `${remainingDays}Days ${remainingHours}Hours Until Next Dose`;
     } else if (remainingHours > 0) {
-      label = `${remainingHours}h ${remainingMinutes}m until next`;
+      label = `${remainingHours}Hours ${remainingMinutes}Minutes Until Next Dose`;
     } else {
-      label = 'Due now';
+      label = 'Due Now';
     }
 
     // Debug info

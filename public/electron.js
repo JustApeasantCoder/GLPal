@@ -10,8 +10,8 @@ const isProduction = hasBuild && !isElectronDev;
 let mainWindow;
 
 function createWindow() {
-  const landingPath = path.join(__dirname, '../build/app/index.html');
-  const devUrl = 'http://localhost:3000/';
+  const landingPath = path.join(__dirname, '../build/index.html');
+  const devUrl = isElectronDev ? 'http://localhost:3000/app/' : 'http://localhost:3000/';
   
   console.log('isProduction:', isProduction, 'isElectronDev:', isElectronDev);
   console.log('Loading URL:', isProduction ? landingPath : devUrl);
@@ -35,6 +35,24 @@ function createWindow() {
   } else {
     mainWindow.loadURL(devUrl);
   }
+
+  // Handle navigation to app
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.includes('/app/') || url.endsWith('/app')) {
+      event.preventDefault();
+      const appPath = path.join(__dirname, '../build/app/index.html');
+      console.log('Navigating to app:', appPath);
+      mainWindow.loadFile(appPath);
+    }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes('/app/') || url.endsWith('/app')) {
+      const appPath = path.join(__dirname, '../build/app/index.html');
+      mainWindow.loadFile(appPath);
+    }
+    return { action: 'deny' };
+  });
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     console.error('Failed to load:', errorCode, errorDescription);

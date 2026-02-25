@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import { googleDriveService, BackupFile, BackupData } from '../../../services/GoogleDriveService';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 
@@ -31,6 +30,130 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  const loadBackups = async () => {
+    try {
+      setIsLoading(true);
+      const files = await googleDriveService.listBackups(10);
+      setBackups(files);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load backups');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkSignInStatus = async () => {
+    try {
+      const signedIn = googleDriveService.isSignedIn();
+      setIsSignedIn(signedIn);
+      if (signedIn) {
+        await loadBackups();
+      }
+    } catch (err: any) {
+      console.error('Error checking sign in status:', err);
+    }
+  };
+
+  const handleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      await googleDriveService.initialize();
+      const success = await googleDriveService.signIn();
+      if (success) {
+        setIsSignedIn(true);
+        await loadBackups();
+      } else {
+        setError('Sign in was cancelled or failed. Please try again.');
+      }
+    } catch (err: any) {
+      console.error('Sign in error:', err);
+      if (err.message?.includes('popup') || err.message?.includes('Failed to open')) {
+        setError('Popup was blocked. Please allow popups for this site and try again.');
+      } else {
+        setError(err.message || 'Failed to sign in. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    googleDriveService.signOut();
+    setIsSignedIn(false);
+    setBackups([]);
+    setSelectedBackup(null);
+  };
+
+  const handleBackup = async () => {
+    try {
+      setIsLoading(true);
+      setStatus('Creating backup...');
+      setError('');
+      const data = await googleDriveService.exportAllData();
+      await googleDriveService.uploadBackup(data);
+      setStatus('Backup created successfully!');
+      await loadBackups();
+    } catch (err: any) {
+      setError(err.message || 'Failed to create backup');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setStatus(''), 3000);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!selectedBackup) return;
+    try {
+      setIsLoading(true);
+      setStatus('Restoring data...');
+      setError('');
+      const data = await googleDriveService.downloadBackup(selectedBackup.id);
+      await googleDriveService.restoreData(data, restoreMode);
+      setStatus('Data restored successfully!');
+      onDataRestored();
+    } catch (err: any) {
+      setError(err.message || 'Failed to restore backup');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setStatus(''), 3000);
+    }
+  };
+
+  const handleDeleteBackup = async (fileId: string) => {
+    try {
+      setIsLoading(true);
+      await googleDriveService.deleteBackup(fileId);
+      await loadBackups();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete backup');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
@@ -48,158 +171,9 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
     }
   }, [isOpen]);
 
-  const checkSignInStatus = async () => {
-    const hasToken = !!localStorage.getItem('glpal_google_token');
-    if (!hasToken) {
-      setIsSignedIn(false);
-      return;
-    }
-    
-    try {
-      await googleDriveService.ensureGapiReady();
-      await googleDriveService.ensureValidToken();
-      setIsSignedIn(true);
-      await loadBackups();
-    } catch (err: any) {
-      const errorMsg = err.message || '';
-      if (errorMsg.includes('Session expired') || errorMsg.includes('Not signed in') || err.status === 401 || err.status === 403) {
-        googleDriveService.forceSignOut();
-        setIsSignedIn(false);
-      } else {
-        setIsSignedIn(true);
-      }
-    }
-  };
+  if (!isOpen) return null;
 
-  const loadBackups = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      const list = await googleDriveService.listBackups(5);
-      setBackups(list);
-    } catch (err: any) {
-      const errorMsg = err.message || '';
-      if (errorMsg.includes('Session expired') || errorMsg.includes('Not signed in') || err.status === 401 || err.status === 403) {
-        googleDriveService.signOut();
-        setIsSignedIn(false);
-        setError('Session expired. Please sign in again.');
-      } else {
-        setError(err.message || 'Failed to load backups');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignIn = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      const success = await googleDriveService.signIn();
-      if (success) {
-        await checkSignInStatus();
-      } else {
-        setError('Sign in was cancelled');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignOut = () => {
-    googleDriveService.signOut();
-    setIsSignedIn(false);
-    setBackups([]);
-    setSelectedBackup(null);
-    setError('');
-  };
-
-  const handleBackup = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      setStatus('Exporting data...');
-      
-      const data = await googleDriveService.exportAllData();
-      
-      setStatus('Uploading to Google Drive...');
-      await googleDriveService.uploadBackup(data);
-      
-      setStatus('Backup complete!');
-      await loadBackups();
-      setTimeout(() => setStatus(''), 3000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create backup');
-    } finally {
-      setIsLoading(false);
-      setStatus('');
-    }
-  };
-
-  const handleRestore = async () => {
-    if (!selectedBackup) return;
-
-    try {
-      setIsLoading(true);
-      setError('');
-      setStatus('Downloading backup...');
-      
-      const data = await googleDriveService.downloadBackup(selectedBackup.id);
-      
-      setStatus('Restoring data...');
-      await googleDriveService.restoreData(data, restoreMode);
-      
-      setStatus('Restore complete!');
-      onDataRestored();
-      setTimeout(() => {
-        setStatus('');
-        onClose();
-      }, 1500);
-    } catch (err: any) {
-      setError(err.message || 'Failed to restore backup');
-    } finally {
-      setIsLoading(false);
-      setStatus('');
-    }
-  };
-
-  const handleDeleteBackup = async (fileId: string) => {
-    if (!window.confirm('Are you sure you want to delete this backup?')) return;
-    
-    try {
-      setIsLoading(true);
-      setError('');
-      await googleDriveService.deleteBackup(fileId);
-      await loadBackups();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete backup');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  if (!isVisible) return null;
-
-  return ReactDOM.createPortal(
+  return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
       <div
         className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
@@ -436,8 +410,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 

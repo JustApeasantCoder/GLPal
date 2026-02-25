@@ -1,5 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import SettingsMenu from './features/dashboard/components/SettingsMenu';
+import CloudBackupModal from './features/dashboard/components/CloudBackupModal';
+import ImportExportModal from './features/dashboard/components/ImportExportModal';
 import Navigation from './shared/components/Navigation';
 import { useTheme } from './contexts/ThemeContext';
 import { ChartPeriod, useTime } from './shared/hooks';
@@ -282,7 +284,7 @@ function App() {
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
                 useWheelForNumbers={profile.useWheelForNumbers ?? false}
-                useWheelForDate={profile.useWheelForDate ?? true}
+                useWheelForDate={profile.useWheelForDate ?? false}
                 activeModal={activeModal}
                 onOpenModal={openModal}
                 onCloseModal={closeModal}
@@ -293,7 +295,7 @@ function App() {
           <TabContent isActive={activeTab === 'peptides'}>
             <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <PeptidesTab 
-                useWheelForDate={profile.useWheelForDate ?? true}
+                useWheelForDate={profile.useWheelForDate ?? false}
                 activeModal={activeModal}
                 onOpenModal={openModal}
                 onCloseModal={closeModal}
@@ -327,6 +329,28 @@ function App() {
         activeModal={activeModal}
         onOpenModal={openModal}
       />
+
+      {activeModal === 'cloudBackup' && (
+        <CloudBackupModal
+          isOpen={true}
+          onClose={closeModal}
+          isDarkMode={isDarkMode}
+          onDataRestored={() => {
+            // Refresh data after restore
+          }}
+        />
+      )}
+
+      {activeModal === 'importExport' && (
+        <ImportExportModal
+          isOpen={true}
+          onClose={closeModal}
+          isDarkMode={isDarkMode}
+          onImportComplete={() => {
+            // Refresh data after import
+          }}
+        />
+      )}
     </div>
   );
 }

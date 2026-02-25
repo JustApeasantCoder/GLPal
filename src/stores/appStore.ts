@@ -88,7 +88,7 @@ const DEFAULT_PROFILE: UserProfile = {
   activityLevel: 1.2,
   unitSystem: 'metric',
   useWheelForNumbers: false,
-  useWheelForDate: true,
+  useWheelForDate: false,
 };
 
 const DEFAULT_CHART_PERIOD: ChartPeriod = '90days';

@@ -134,8 +134,8 @@ const PeptideCard: React.FC<PeptideCardProps> = ({
     const isDueDay = todayMidnight.getTime() === nextDueMidnight.getTime();
     isDue = isDueDay;
   }
-  // For daily, always show button; otherwise only show when due or overdue
-  const showLogButton = peptide.isActive && (isDaily || isDue || isOverdue);
+  // For daily, show button only when not logged today; for others, show when due or overdue
+  const showLogButton = peptide.isActive && (isDaily ? !isLoggedToday : (isDue || isOverdue));
   // Show "Dose Logged For Today" if logged today
   const logButtonText = isLoggedToday 
     ? 'Dose Logged For Today' 
