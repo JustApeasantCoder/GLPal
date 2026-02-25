@@ -262,8 +262,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 Import / Export CSV
               </button>
 
-              {IS_DEV && (
-                <button
+              <button
                   onClick={() => setShowCloudBackup(true)}
                   className={`w-full py-3 px-4 rounded-lg border transition-all duration-300 flex items-center justify-center gap-2 mb-3 ${
                     isDarkMode
@@ -275,9 +274,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
                   Cloud Backup
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20">DEV</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20">BETA</span>
                 </button>
-              )}
 
               {onGenerateSampleData && (
                 <button
@@ -373,8 +371,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
         }}
       />
 
-      {IS_DEV && (
-        <CloudBackupModal
+      <CloudBackupModal
           isOpen={showCloudBackup}
           onClose={() => setShowCloudBackup(false)}
           isDarkMode={isDarkMode}
@@ -382,7 +379,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             // Refresh data after restore
           }}
         />
-      )}
     </div>,
     document.body
   );

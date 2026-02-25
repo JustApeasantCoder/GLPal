@@ -6,7 +6,7 @@ import fs from 'fs';
 const isProd = process.env.NODE_ENV === 'production';
 const isElectron = process.env.ELECTRON === 'true';
 
-const base = isProd ? (isElectron ? './' : '/GLPal/') : '/';
+const base = isProd ? (isElectron ? './' : '/') : '/';
 
 const landingPagePlugin = () => ({
   name: 'landing-page-plugin',

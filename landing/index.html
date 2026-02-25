@@ -13,18 +13,18 @@
   <meta property="og:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
   <meta property="og:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy. No accounts, no cloud logging.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://justapeasantcoder.github.io/GLPal/">
-  <meta property="og:image" content="https://justapeasantcoder.github.io/GLPal/og-image.png">
+  <meta property="og:url" content="https://glpal.app/">
+  <meta property="og:image" content="https://glpal.app/og-image.png">
   <meta property="og:site_name" content="GLPal">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
   <meta name="twitter:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy.">
-  <meta name="twitter:image" content="https://justapeasantcoder.github.io/GLPal/og-image.png">
+  <meta name="twitter:image" content="https://glpal.app/og-image.png">
   
   <!-- Canonical -->
-  <link rel="canonical" href="https://justapeasantcoder.github.io/GLPal/">
+  <link rel="canonical" href="https://glpal.app/">
   
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -130,8 +130,14 @@
       box-sizing: border-box;
     }
 
+    *, *::before, *::after {
+      box-sizing: border-box;
+      max-width: 100vw;
+    }
+
     html {
       scroll-behavior: smooth;
+      overflow-x: hidden;
     }
 
     body {
@@ -140,6 +146,7 @@
       color: var(--text);
       line-height: 1.6;
       overflow-x: hidden;
+      max-width: 100vw;
     }
 
     /* Background Effects */
@@ -929,6 +936,17 @@
     }
 
     @media (max-width: 768px) {
+      .hero::before,
+      .hero::after {
+        width: 200px;
+        height: 200px;
+      }
+      
+      .cta::before {
+        width: 200px;
+        height: 200px;
+      }
+      
       .hero-content h1 {
         font-size: 32px;
       }
