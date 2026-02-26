@@ -167,6 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* Medication Storage */}
       <StorageCard
         medicationStorage={medicationStorage}
+        glp1Entries={dosesEntries}
         onAddStorage={onAddMedicationStorage}
         onUpdateStorage={onUpdateMedicationStorage}
         onDeleteStorage={onDeleteMedicationStorage}

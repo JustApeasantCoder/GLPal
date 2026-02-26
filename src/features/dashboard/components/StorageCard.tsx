@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { MedicationStorage, StorageCategory, StorageType, PeptideCategory } from '../../../types';
+import { MedicationStorage, StorageCategory, StorageType, PeptideCategory, GLP1Entry } from '../../../types';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 import { timeService } from '../../../core/timeService';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import { MEDICATIONS } from '../../../constants/medications';
 import { PEPTIDE_PRESETS } from '../../../types';
+import StorageChart from './StorageChart';
 
 const MAIN_MEDICATIONS = MEDICATIONS.slice(0, -1); // All except 'other'
 const ALL_MEDICATIONS = MEDICATIONS;
@@ -97,6 +98,7 @@ const StorageItemRow: React.FC<StorageItemRowProps> = ({ item, onEdit, onDelete 
 
 interface StorageCardProps {
   medicationStorage: MedicationStorage[];
+  glp1Entries?: GLP1Entry[];
   onAddStorage: (item: MedicationStorage) => void;
   onUpdateStorage: (item: MedicationStorage) => void;
   onDeleteStorage: (id: string) => void;
@@ -109,6 +111,7 @@ interface StorageCardProps {
 
 const StorageCard: React.FC<StorageCardProps> = ({
   medicationStorage,
+  glp1Entries = [],
   onAddStorage,
   onUpdateStorage,
   onDeleteStorage,
@@ -127,6 +130,19 @@ const StorageCard: React.FC<StorageCardProps> = ({
   const [showMedicationPicker, setShowMedicationPicker] = useState(false);
   const [showPeptidePicker, setShowPeptidePicker] = useState(false);
   const [peptideSearchQuery, setPeptideSearchQuery] = useState('');
+
+  // Get unique medication order from logged entries (matches Medication Chart)
+  const glp1MedicationOrder = useMemo(() => {
+    const seen = new Set<string>();
+    const order: string[] = [];
+    glp1Entries.forEach(entry => {
+      if (!seen.has(entry.medication)) {
+        seen.add(entry.medication);
+        order.push(entry.medication);
+      }
+    });
+    return order;
+  }, [glp1Entries]);
 
   const openStorageModal = () => {
     onOpenModal?.();
@@ -290,33 +306,6 @@ const StorageCard: React.FC<StorageCardProps> = ({
       
       <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 pb-2 mb-3">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`flex-1 py-2 text-xs rounded-lg transition-all ${
-            selectedCategory === 'all'
-              ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
-              : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-          }`}
-        >
-          All
-        </button>
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`flex-1 py-2 text-xs rounded-lg transition-all ${
-              selectedCategory === cat.id
-                ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
-                : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
       {/* Metrics */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4">
         <div className={smallCard}>
@@ -345,6 +334,38 @@ const StorageCard: React.FC<StorageCardProps> = ({
         </div>
       </div>
 
+      {/* Category Tabs */}
+      <div className="flex gap-2 pb-2 mb-3">
+        <button
+          type="button"
+          onClick={() => setSelectedCategory('all')}
+          className={`flex-1 py-2 text-xs rounded-lg transition-all ${
+            selectedCategory === 'all'
+              ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
+              : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+          }`}
+        >
+          All
+        </button>
+        {CATEGORIES.map(cat => (
+          <button
+            type="button"
+            key={cat.id}
+            onClick={() => setSelectedCategory(cat.id)}
+            className={`flex-1 py-2 text-xs rounded-lg transition-all ${
+              selectedCategory === cat.id
+                ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
+                : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Storage Overview Chart */}
+      <StorageChart storage={medicationStorage} selectedCategory={selectedCategory} glp1MedicationOrder={glp1MedicationOrder} height={180} />
+
       {/* Add Button */}
       <button
         onClick={openAddModal}
@@ -354,14 +375,14 @@ const StorageCard: React.FC<StorageCardProps> = ({
       </button>
 
       {/* Storage List grouped by category */}
-      {medicationStorage.length > 0 ? (
+      {filteredStorage.length > 0 ? (
         <div className="space-y-4 mt-4">
           {/* GLP-1 Card */}
-          {medicationStorage.filter(item => item.category === 'glp1').length > 0 && (
+          {(selectedCategory === 'all' || selectedCategory === 'glp1') && filteredStorage.filter(item => item.category === 'glp1').length > 0 && (
             <div className="bg-blue-500/10 rounded-lg border border-blue-500/20 p-3">
               <h3 className="text-sm font-medium text-blue-400 mb-2">GLP-1</h3>
               <div className="space-y-2">
-                {medicationStorage.filter(item => item.category === 'glp1').map(item => (
+                {filteredStorage.filter(item => item.category === 'glp1').map(item => (
                   <StorageItemRow 
                     key={item.id} 
                     item={item} 
@@ -374,11 +395,11 @@ const StorageCard: React.FC<StorageCardProps> = ({
           )}
 
           {/* Peptides Card */}
-          {medicationStorage.filter(item => item.category === 'peptide').length > 0 && (
+          {(selectedCategory === 'all' || selectedCategory === 'peptide') && filteredStorage.filter(item => item.category === 'peptide').length > 0 && (
             <div className="bg-green-500/10 rounded-lg border border-green-500/20 p-3">
               <h3 className="text-sm font-medium text-green-400 mb-2">Peptides</h3>
               <div className="space-y-2">
-                {medicationStorage.filter(item => item.category === 'peptide').map(item => (
+                {filteredStorage.filter(item => item.category === 'peptide').map(item => (
                   <StorageItemRow 
                     key={item.id} 
                     item={item} 
@@ -391,11 +412,11 @@ const StorageCard: React.FC<StorageCardProps> = ({
           )}
 
           {/* Others Card */}
-          {medicationStorage.filter(item => item.category === 'other').length > 0 && (
+          {(selectedCategory === 'all' || selectedCategory === 'other') && filteredStorage.filter(item => item.category === 'other').length > 0 && (
             <div className="bg-gray-500/10 rounded-lg border border-gray-500/20 p-3">
               <h3 className="text-sm font-medium text-gray-400 mb-2">Other</h3>
               <div className="space-y-2">
-                {medicationStorage.filter(item => item.category === 'other').map(item => (
+                {filteredStorage.filter(item => item.category === 'other').map(item => (
                   <StorageItemRow 
                     key={item.id} 
                     item={item} 
