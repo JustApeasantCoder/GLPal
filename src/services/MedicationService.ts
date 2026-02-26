@@ -5,7 +5,6 @@ import {
   saveMedicationProtocols, 
   getMedicationProtocols, 
   deleteMedicationProtocol, 
-  setMedicationEntries,
   clearMedicationEntries,
   getMedicationEntries,
   getArchivedMedicationProtocols,
@@ -99,9 +98,14 @@ export const deleteProtocol = async (id: string, existingProtocols: GLP1Protocol
   const existingEntries = await getMedicationEntries();
   const manualEntries = existingEntries.filter(e => e.isManual);
   
-  const newDoses = regenerateAllDoses(updatedList, true);
-  const allEntries = [...manualEntries, ...newDoses];
-  await setMedicationEntries(allEntries);
+  await clearMedicationEntries();
+  const newDoses = generateDosesFromProtocols(updatedList, []);
+  for (const entry of newDoses) {
+    await addMedicationGeneratedEntry(entry);
+  }
+  for (const entry of manualEntries) {
+    await addMedicationManualEntry(entry);
+  }
   
   return updatedList;
 };
@@ -113,9 +117,14 @@ export const archiveProtocol = async (protocol: GLP1Protocol, existingProtocols:
   const existingEntries = await getMedicationEntries();
   const manualEntries = existingEntries.filter(e => e.isManual);
   
-  const newDoses = regenerateAllDoses(updatedList, true);
-  const allEntries = [...manualEntries, ...newDoses];
-  await setMedicationEntries(allEntries);
+  await clearMedicationEntries();
+  const newDoses = generateDosesFromProtocols(updatedList, []);
+  for (const entry of newDoses) {
+    await addMedicationGeneratedEntry(entry);
+  }
+  for (const entry of manualEntries) {
+    await addMedicationManualEntry(entry);
+  }
   
   return updatedList;
 };

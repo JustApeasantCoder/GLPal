@@ -12,7 +12,6 @@ interface ProtocolModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (protocol: GLP1Protocol) => void;
-  onArchive?: (protocol: GLP1Protocol) => void;
   onDelete?: (id: string) => void;
   protocol?: GLP1Protocol | null;
   mode: 'add' | 'edit';
@@ -21,10 +20,10 @@ interface ProtocolModalProps {
   useWheelForDate?: boolean;
 }
 
-const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onArchive, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
+const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
   const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal, modalText } = useThemeStyles();
-  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
   const [showDosePicker, setShowDosePicker] = useState(false);
@@ -66,12 +65,14 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
+      setShowDeleteConfirm(false);
       document.body.classList.add('modal-open');
     } else if (isVisible && !isClosing) {
       setIsClosing(true);
       setTimeout(() => {
         setIsVisible(false);
         setIsClosing(false);
+        setShowDeleteConfirm(false);
         document.body.classList.remove('modal-open');
       }, 200);
     }
@@ -128,22 +129,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <h2 className={`text-xl font-semibold ${modalText.title}`}>
             {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
           </h2>
-          {mode === 'edit' && !confirmAction && (
+          {mode === 'edit' && (
             <div className="flex gap-1">
-              {onArchive && (
-                <button
-                  onClick={() => setConfirmAction('archive')}
-                  className="p-1.5 text-[#B19CD9] hover:bg-[#B19CD9]/10 rounded transition-colors"
-                  title="Archive"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l1-8 3 6 2-4 3 6z" />
-                  </svg>
-                </button>
-              )}
               {onDelete && (
                 <button
-                  onClick={() => setConfirmAction('delete')}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
                   title="Delete"
                 >
@@ -268,24 +258,10 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="flex gap-2">
-            {mode === 'edit' && confirmAction && (
+            {mode === 'edit' && (
               <>
                 <button
-                  onClick={() => {
-                    if (protocol && confirmAction === 'archive' && onArchive) {
-                      onArchive(protocol);
-                    }
-                    if (protocol && confirmAction === 'delete' && onDelete) {
-                      onDelete(protocol.id);
-                    }
-                    onClose();
-                  }}
-                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                >
-                  Yes, {confirmAction}
-                </button>
-                <button
-                  onClick={() => setConfirmAction(null)}
+                  onClick={onClose}
                   className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
                     isDarkMode
                       ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
@@ -294,27 +270,33 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                 >
                   Cancel
                 </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm"
+                >
+                  Save
+                </button>
               </>
             )}
             {mode === 'add' && (
-              <button
-                onClick={onClose}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Cancel
-              </button>
-            )}
-            {!confirmAction && (
-              <button
-                onClick={handleSave}
-                className={`${mode === 'edit' ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm`}
-              >
-                Save
-              </button>
+              <>
+                <button
+                  onClick={onClose}
+                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm"
+                >
+                  Save
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -430,6 +412,35 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
         }}
         onClose={() => setShowSchedulePicker(false)}
       />
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-xs p-6 bg-[#1a1a24] border border-red-500/30 modal-content-fade-in">
+            <h3 className="text-lg font-semibold mb-2 text-white">Delete Protocol?</h3>
+            <p className="text-gray-400 text-sm mb-4">This action cannot be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (protocol && onDelete) {
+                    onDelete(protocol.id);
+                  }
+                  onClose();
+                }}
+                className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

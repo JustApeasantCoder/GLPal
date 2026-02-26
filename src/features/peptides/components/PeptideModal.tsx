@@ -157,12 +157,14 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
+      setConfirmAction(null);
     }
   }, [isOpen]);
 
   const handleClose = () => {
     if (isClosing) return;
     setIsClosing(true);
+    setConfirmAction(null);
     document.body.classList.remove('modal-open');
     const timer = setTimeout(() => {
       setIsVisible(false);
@@ -486,50 +488,24 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
             <div className={`p-3 sm:p-4 border-t flex gap-2 ${
               isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'
             }`}>
-              {confirmAction && editPeptide ? (
-                <>
-                  <button
-                    onClick={() => {
-                      if (confirmAction === 'delete' && onDelete) {
-                        onDelete(editPeptide.id);
-                        onClose();
-                      }
-                    }}
-                    className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                  >
-                    Yes, delete
-                  </button>
-                  <button
-                    onClick={() => setConfirmAction(null)}
-                    className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                      isDarkMode
-                        ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handleClose}
-                    className={`flex-1 py-2.5 sm:py-3 rounded-xl border font-medium transition-all ${
-                      isDarkMode
-                        ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-semibold hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
-                  >
-                    {editPeptide ? 'Update' : 'Add Peptide'}
-                  </button>
-                </>
-              )}
+              <>
+                <button
+                  onClick={handleClose}
+                  className={`flex-1 py-2.5 sm:py-3 rounded-xl border font-medium transition-all ${
+                    isDarkMode
+                      ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-semibold hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
+                >
+                  {editPeptide ? 'Update' : 'Add Peptide'}
+                </button>
+              </>
             </div>
           )}
         </div>
@@ -593,6 +569,35 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
           }}
           onClose={() => setShowRoutePicker(false)}
         />
+      )}
+
+      {confirmAction && editPeptide && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-xs p-6 bg-[#1a1a24] border border-red-500/30 modal-content-fade-in">
+            <h3 className="text-lg font-semibold mb-2 text-white">Delete Peptide?</h3>
+            <p className="text-gray-400 text-sm mb-4">This action cannot be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (onDelete) {
+                    onDelete(editPeptide.id);
+                  }
+                  handleClose();
+                }}
+                className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

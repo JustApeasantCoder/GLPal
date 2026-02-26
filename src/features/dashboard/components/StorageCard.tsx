@@ -148,6 +148,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
 
   const closeStorageModal = () => {
     setIsModalClosing(true);
+    setConfirmAction(null);
     setTimeout(() => {
       setIsModalClosing(false);
       onCloseModal?.();
@@ -772,43 +773,21 @@ const StorageCard: React.FC<StorageCardProps> = ({
             </div>
 
             <div className="flex gap-2 mt-4 pt-3 border-t border-[#B19CD9]/20">
-              {confirmAction && editingItem ? (
-                <>
-                  <button
-                    onClick={() => {
-                      if (confirmAction === 'delete') {
-                        onDeleteStorage(editingItem.id);
-                        closeStorageModal();
-                      }
-                    }}
-                    className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                  >
-                    Yes, delete
-                  </button>
-                  <button
-                    onClick={() => setConfirmAction(null)}
-                    className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={closeStorageModal}
-                    className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleSave(true)}
-                    disabled={!formData.medicationName || !formData.initialUnits}
-                    className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
-                  >
-                    {editingItem ? 'Update' : 'Add'}
-                  </button>
-                </>
-              )}
+              <>
+                <button
+                  onClick={closeStorageModal}
+                  className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleSave(true)}
+                  disabled={!formData.medicationName || !formData.initialUnits}
+                  className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
+                >
+                  {editingItem ? 'Update' : 'Add'}
+                </button>
+              </>
             </div>
           </div>
         </div>,
@@ -988,6 +967,34 @@ const StorageCard: React.FC<StorageCardProps> = ({
             >
               Cancel
             </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {confirmAction && editingItem && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-xs p-6 bg-[#1a1a24] border border-red-500/30 modal-content-fade-in">
+            <h3 className="text-lg font-semibold mb-2 text-white">Delete Storage Item?</h3>
+            <p className="text-gray-400 text-sm mb-4">This action cannot be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteStorage(editingItem.id);
+                  closeStorageModal();
+                }}
+                className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>,
         document.body
