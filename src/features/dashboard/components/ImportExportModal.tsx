@@ -147,7 +147,7 @@ const ImportExportModal: React.FC<ImportExportModalProps> = ({
             
             <div className={`p-3 rounded-lg mb-4 ${isDarkMode ? 'bg-[#B19CD9]/10' : 'bg-blue-50'}`}>
               <p className={`text-sm ${isDarkMode ? 'text-[#B19CD9]' : 'text-blue-700'}`}>
-                Export includes: Weight logs, Dose logs, Side effects, and User settings.
+                Export includes: Weight logs, Dose logs, Side effects, Peptides, and User settings.
               </p>
             </div>
 

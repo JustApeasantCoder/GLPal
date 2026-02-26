@@ -212,6 +212,42 @@ export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs
         case 'useWheelForDate':
           row[standardName] = parseBoolean(value);
           break;
+        // Peptide definition columns (Pep prefix)
+        case 'PepId':
+        case 'PepName':
+        case 'PepCategory':
+        case 'PepDoseUnit':
+        case 'PepFrequency':
+        case 'PepPreferredTime':
+        case 'PepRoute':
+        case 'PepStartDate':
+        case 'PepEndDate':
+        case 'PepNotes':
+        case 'PepColor':
+          row[standardName] = value || undefined;
+          break;
+        case 'PepDose':
+        case 'PepHalfLifeHours':
+          row[standardName] = parseNumberWithUnit(value);
+          break;
+        case 'PepIsActive':
+          row[standardName] = parseBoolean(value);
+          break;
+        // Peptide log columns (PL prefix)
+        case 'PLdate':
+        case 'PLtime':
+        case 'PLpeptideId':
+        case 'PLpeptideName':
+        case 'PLdoseUnit':
+        case 'PLroute':
+        case 'PLinjectionSite':
+        case 'PLnotes':
+          row[standardName] = value || undefined;
+          break;
+        case 'PLdose':
+        case 'PLpainLevel':
+          row[standardName] = parseNumberWithUnit(value);
+          break;
       }
     });
     
@@ -237,6 +273,10 @@ export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs
       rows.push(row as CsvRow);
     } else if (row.Mmedication || row.Mdate) {
       rows.push(row as CsvRow);
+    } else if (row.PepId || row.PepName) {
+      rows.push(row as CsvRow);
+    } else if (row.PLdate || row.PLpeptideId) {
+      rows.push(row as CsvRow);
     }
   }
   
@@ -257,6 +297,10 @@ export const generateImportPreview = (rows: CsvRow[]): ImportPreview => {
     } else if (row.Pmedication || row.Pid) {
       preview.entries++;
     } else if (row.Mmedication || row.Mdate) {
+      preview.entries++;
+    } else if (row.PepId || row.PepName) {
+      preview.entries++;
+    } else if (row.PLdate || row.PLpeptideId) {
       preview.entries++;
     }
   });
