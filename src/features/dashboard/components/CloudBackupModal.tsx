@@ -252,7 +252,7 @@ const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
             {activeTab === 'backup' && (
               <div className="flex-1">
                 <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Create a backup of all your data (weights, medications, protocols, peptides, and user profile) and save it to Google Drive.
+                  Create a backup of all your data (weights, medications, protocols, peptides, medication storage, and user profile) and save it to Google Drive.
                 </p>
 
                 <div className={`p-3 rounded-lg mb-4 ${isDarkMode ? 'bg-[#B19CD9]/10' : 'bg-blue-50'}`}>

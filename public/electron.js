@@ -11,7 +11,7 @@ let mainWindow;
 
 function createWindow() {
   const landingPath = path.join(__dirname, '../build/index.html');
-  const devUrl = isElectronDev ? 'http://localhost:3000/app/' : 'http://localhost:3000/';
+  const devUrl = 'http://localhost:3000/';
   
   console.log('isProduction:', isProduction, 'isElectronDev:', isElectronDev);
   console.log('Loading URL:', isProduction ? landingPath : devUrl);

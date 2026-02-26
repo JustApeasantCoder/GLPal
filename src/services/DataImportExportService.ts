@@ -1,5 +1,5 @@
 import { CsvRow, ImportPreview, ImportResult, ImportMode, SIDE_EFFECT_KEYS } from '../utils/csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect, Peptide, PeptideLogEntry } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
 import {
   parseCsv,
   generateImportPreview,
@@ -28,6 +28,8 @@ import {
   savePeptides,
   getPeptideLogs,
   savePeptideLogs,
+  getMedicationStorage,
+  saveMedicationStorage,
 } from '../shared/utils/database';
 
 class DataImportExportService {
@@ -36,16 +38,17 @@ class DataImportExportService {
   
   async exportData(): Promise<void> {
     console.log('Starting CSV export with embedded protocols...');
-    const [weightEntries, doseEntries, protocols, profile, peptides, peptideLogs] = await Promise.all([
+    const [weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage] = await Promise.all([
       getWeightEntries(),
       getMedicationEntries(),
       getMedicationProtocols(),
       getUserProfile(),
       getPeptides(),
       getPeptideLogs(),
+      getMedicationStorage(),
     ]);
     
-    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols, profile, peptides, peptideLogs);
+    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage);
     const filename = generateExportFilename();
     downloadCsv(csvContent, filename);
   }
@@ -231,6 +234,32 @@ class DataImportExportService {
           imported += peptideLogs.length;
         }
       }
+      
+      // Medication Storage import (replace mode)
+      const storageRows = validRows.filter(row => row.MSid || row.MSmedicationName);
+      if (storageRows.length > 0) {
+        const storageItems: MedicationStorage[] = storageRows.map(row => ({
+          id: row.MSid || crypto.randomUUID(),
+          medicationName: row.MSmedicationName || '',
+          category: (row.MScategory as any) || 'glp1',
+          type: (row.MStype as any) || 'vial',
+          dosagePerUnit: row.MSdosagePerUnit || 0,
+          initialUnits: row.MSinitialUnits || 0,
+          remainingUnits: row.MSremainingUnits || 0,
+          unitCost: row.MSunitCost || 0,
+          purchaseDate: row.MSpurchaseDate || '',
+          expiryDate: row.MSexpiryDate || undefined,
+          notes: row.MSnotes || '',
+          isActive: row.MSisActive ?? true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+        
+        if (storageItems.length > 0) {
+          await saveMedicationStorage(storageItems);
+          imported += storageItems.length;
+        }
+      }
     } else {
       validRows.forEach(row => {
         if (!row.date) {
@@ -377,6 +406,34 @@ class DataImportExportService {
           const mergedLogs = [...existingLogs, ...peptideLogs];
           await savePeptideLogs(mergedLogs);
           imported += peptideLogs.length;
+        }
+      }
+      
+      // Medication Storage import (merge mode)
+      const mergeStorageRows = validRows.filter(row => row.MSid || row.MSmedicationName);
+      if (mergeStorageRows.length > 0) {
+        const storageItems: MedicationStorage[] = mergeStorageRows.map(row => ({
+          id: row.MSid || crypto.randomUUID(),
+          medicationName: row.MSmedicationName || '',
+          category: (row.MScategory as any) || 'glp1',
+          type: (row.MStype as any) || 'vial',
+          dosagePerUnit: row.MSdosagePerUnit || 0,
+          initialUnits: row.MSinitialUnits || 0,
+          remainingUnits: row.MSremainingUnits || 0,
+          unitCost: row.MSunitCost || 0,
+          purchaseDate: row.MSpurchaseDate || '',
+          expiryDate: row.MSexpiryDate || undefined,
+          notes: row.MSnotes || '',
+          isActive: row.MSisActive ?? true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+        
+        if (storageItems.length > 0) {
+          const existingStorage = await getMedicationStorage();
+          const mergedStorage = [...existingStorage, ...storageItems];
+          await saveMedicationStorage(mergedStorage);
+          imported += storageItems.length;
         }
       }
     }

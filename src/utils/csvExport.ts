@@ -1,5 +1,5 @@
 import { CsvRow, CSV_HEADER, ALL_COLUMNS, SIDE_EFFECT_COLUMNS } from './csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol, Peptide, PeptideLogEntry } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
 import { timeService } from '../core/timeService';
 
 const escapeCsvValue = (value: string | number | boolean | undefined): string => {
@@ -43,7 +43,8 @@ export const exportAllToCsv = (
   protocols: GLP1Protocol[] = [],
   profile?: UserProfile | null,
   peptides: Peptide[] = [],
-  peptideLogs: PeptideLogEntry[] = []
+  peptideLogs: PeptideLogEntry[] = [],
+  medicationStorage: MedicationStorage[] = []
 ): string => {
   const unitSystem = profile?.unitSystem || 'metric';
   
@@ -195,6 +196,27 @@ export const exportAllToCsv = (
           PLnotes: log.notes,
         };
         rows.push(peptideLogRow);
+      });
+    }
+    
+    // Add medication storage entries with MS prefix
+    if (medicationStorage.length > 0) {
+      medicationStorage.forEach(storage => {
+        const storageRow: CsvRow = {
+          MSid: storage.id,
+          MSmedicationName: storage.medicationName,
+          MScategory: storage.category,
+          MStype: storage.type,
+          MSdosagePerUnit: storage.dosagePerUnit,
+          MSinitialUnits: storage.initialUnits,
+          MSremainingUnits: storage.remainingUnits,
+          MSunitCost: storage.unitCost,
+          MSpurchaseDate: storage.purchaseDate,
+          MSexpiryDate: storage.expiryDate || '',
+          MSnotes: storage.notes,
+          MSisActive: storage.isActive,
+        };
+        rows.push(storageRow);
       });
     }
     

@@ -79,6 +79,19 @@ export const ALL_COLUMNS = [
   'PLinjectionSite',
   'PLpainLevel',
   'PLnotes',
+  // Medication Storage with MS prefix
+  'MSid',
+  'MSmedicationName',
+  'MScategory',
+  'MStype',
+  'MSdosagePerUnit',
+  'MSinitialUnits',
+  'MSremainingUnits',
+  'MSunitCost',
+  'MSpurchaseDate',
+  'MSexpiryDate',
+  'MSnotes',
+  'MSisActive',
 ] as const;
 
 export type AllColumns = typeof ALL_COLUMNS[number];
@@ -160,6 +173,19 @@ export interface CsvRow {
   PLinjectionSite?: string;
   PLpainLevel?: number;
   PLnotes?: string;
+  // Medication Storage with MS prefix
+  MSid?: string;
+  MSmedicationName?: string;
+  MScategory?: string;
+  MStype?: string;
+  MSdosagePerUnit?: number;
+  MSinitialUnits?: number;
+  MSremainingUnits?: number;
+  MSunitCost?: number;
+  MSpurchaseDate?: string;
+  MSexpiryDate?: string;
+  MSnotes?: string;
+  MSisActive?: boolean;
 }
 
 export interface ImportPreview {

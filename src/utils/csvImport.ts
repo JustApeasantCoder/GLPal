@@ -248,6 +248,25 @@ export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs
         case 'PLpainLevel':
           row[standardName] = parseNumberWithUnit(value);
           break;
+        // Medication storage columns (MS prefix)
+        case 'MSid':
+        case 'MSmedicationName':
+        case 'MScategory':
+        case 'MStype':
+        case 'MSpurchaseDate':
+        case 'MSexpiryDate':
+        case 'MSnotes':
+          row[standardName] = value || undefined;
+          break;
+        case 'MSdosagePerUnit':
+        case 'MSinitialUnits':
+        case 'MSremainingUnits':
+        case 'MSunitCost':
+          row[standardName] = parseNumberWithUnit(value);
+          break;
+        case 'MSisActive':
+          row[standardName] = parseBoolean(value);
+          break;
       }
     });
     
@@ -277,6 +296,8 @@ export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs
       rows.push(row as CsvRow);
     } else if (row.PLdate || row.PLpeptideId) {
       rows.push(row as CsvRow);
+    } else if (row.MSid || row.MSmedicationName) {
+      rows.push(row as CsvRow);
     }
   }
   
@@ -301,6 +322,8 @@ export const generateImportPreview = (rows: CsvRow[]): ImportPreview => {
     } else if (row.PepId || row.PepName) {
       preview.entries++;
     } else if (row.PLdate || row.PLpeptideId) {
+      preview.entries++;
+    } else if (row.MSid || row.MSmedicationName) {
       preview.entries++;
     }
   });
@@ -402,5 +425,5 @@ export const convertToUserProfile = (row: CsvRow): UserProfile | null => {
 };
 
 export const hasData = (row: CsvRow): boolean => {
-  return !!(row.date || row.age || row.gender || row.height || row.unitSystem || row.activityLevel || row.goalWeight !== undefined || row.Pmedication || row.Pid || row.Mmedication || row.Mdate || row.PepId || row.PepName || row.PLdate || row.PLpeptideId);
+  return !!(row.date || row.age || row.gender || row.height || row.unitSystem || row.activityLevel || row.goalWeight !== undefined || row.Pmedication || row.Pid || row.Mmedication || row.Mdate || row.PepId || row.PepName || row.PLdate || row.PLpeptideId || row.MSid || row.MSmedicationName);
 };

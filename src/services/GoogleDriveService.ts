@@ -1,4 +1,4 @@
-import { WeightEntry, GLP1Entry, GLP1Protocol, Peptide, PeptideLogEntry, UserProfile } from '../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, Peptide, PeptideLogEntry, UserProfile, MedicationStorage } from '../types';
 import { db } from '../db/dexie';
 import { timeService } from '../core/timeService';
 
@@ -19,6 +19,7 @@ export interface BackupData {
   peptides: Peptide[];
   peptideLogs: PeptideLogEntry[];
   userProfile: UserProfile | null;
+  medicationStorage: MedicationStorage[];
 }
 
 export interface BackupFile {
@@ -263,12 +264,13 @@ class GoogleDriveService {
   }
 
   async exportAllData(): Promise<BackupData> {
-    const [weights, medications, protocols, peptides, peptideLogs] = await Promise.all([
+    const [weights, medications, protocols, peptides, peptideLogs, medicationStorage] = await Promise.all([
       db.weights.toArray(),
       db.medications.toArray(),
       db.protocols.toArray(),
       db.peptides.toArray(),
       db.peptideLogs.toArray(),
+      db.medicationStorage.toArray(),
     ]);
 
     const userProfileArray = await db.userProfile.toArray();
@@ -283,6 +285,7 @@ class GoogleDriveService {
       peptides,
       peptideLogs,
       userProfile,
+      medicationStorage,
     };
   }
 
@@ -378,6 +381,7 @@ class GoogleDriveService {
       await db.peptides.clear();
       await db.peptideLogs.clear();
       await db.userProfile.clear();
+      await db.medicationStorage.clear();
     }
 
     if (data.weights && data.weights.length > 0) {
@@ -427,6 +431,16 @@ class GoogleDriveService {
         }
       } else {
         await db.peptideLogs.bulkPut(data.peptideLogs);
+      }
+    }
+
+    if (data.medicationStorage && data.medicationStorage.length > 0) {
+      if (mode === 'merge') {
+        for (const entry of data.medicationStorage) {
+          await db.medicationStorage.put(entry);
+        }
+      } else {
+        await db.medicationStorage.bulkPut(data.medicationStorage);
       }
     }
 

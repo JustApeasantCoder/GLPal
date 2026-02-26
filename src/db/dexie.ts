@@ -19,8 +19,6 @@ export class GLPalDB extends Dexie {
       peptides: 'id, category, isActive',
       peptideLogs: 'id, peptideId, date',
       userProfile: '++id',
-    });
-    this.version(2).stores({
       medicationStorage: 'id, medicationName, category, isActive'
     });
   }
