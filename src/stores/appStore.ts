@@ -198,10 +198,15 @@ export const useAppStore = create<AppState & AppActions>()(
 
       generateDosesFromProtocols: async () => {
         const { protocols } = get();
+        const existingManual = await getAllMedicationEntries().then(entries => entries.filter(e => e.isManual));
         await clearMedicationEntries();
         const generatedDoses = generateDosesFromProtocols(protocols, []);
         for (const entry of generatedDoses) {
           await dbAddMedicationGeneratedEntry(entry);
+        }
+        
+        for (const entry of existingManual) {
+          await dbAddMedicationManualEntry(entry);
         }
         
         const dosesEntries = await getAllMedicationEntries();

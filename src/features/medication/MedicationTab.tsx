@@ -116,6 +116,8 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     if (!Array.isArray(protocolList) || protocolList.length === 0) {
       return;
     }
+    
+    const existingManual = await getMedicationManualEntries();
     await clearMedicationEntries();
     const generatedDoses = generateDosesFromProtocols(protocolList, []);
     if (!generatedDoses) return;
@@ -125,8 +127,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    
-    const existingManual = await getMedicationManualEntries();
     
     for (const protocol of protocolList) {
       if (protocol.isArchived) continue;
@@ -154,6 +154,10 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         
         d = new Date(d.getTime() + intervalDays * 24 * 60 * 60 * 1000);
       }
+    }
+    
+    for (const entry of existingManual) {
+      await addMedicationManualEntry(entry);
     }
   };
 

@@ -159,8 +159,12 @@ class DataImportExportService {
             dose: row.Mdose || 0,
             halfLifeHours: row.MhalfLifeHours || 168,
             isManual: true,
-            sideEffects,
+            time: row.Mtime,
+            injectionSite: row.MinjectionSite,
+            isr: row.Misr,
+            painLevel: row.MpainLevel,
             notes: row.Mnotes,
+            sideEffects,
           };
         });
         

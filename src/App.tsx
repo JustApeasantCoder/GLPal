@@ -105,15 +105,15 @@ function App() {
           : 'bg-white/90 border-gray-200'
       }`}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ textShadow: isDarkMode ? '0 0 20px rgba(177,156,217,0.5)' : '0 0 20px rgba(45,27,78,0.3)' }}>
+<h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ 
+            background: 'linear-gradient(135deg, #B19CD9, #4ADEA8)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
             <a href="../" aria-label="Go to landing" style={{ color: 'inherit', textDecoration: 'none' }}>
               GLPal
             </a>
-            {process.env.NODE_ENV === 'development' && (
-              <span className="text-sm font-normal text-text-muted">
-                {new Date(time).toLocaleDateString([], { month: 'short', day: 'numeric' })} {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            )}
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -259,7 +259,7 @@ function App() {
 
       {/* Main scrollable content area with padding for nav - 20:9 aspect ratio for mobile */}
       <main className="flex-1 pt-16 pb-16 overflow-y-auto hide-scrollbar relative">
-        <div className="w-full px-4 py-2 space-y-3 md:px-6 lg:px-8 relative">
+        <div className="w-full px-2 py-2 space-y-3 md:px-6 lg:px-8 relative">
           <TabContent isActive={activeTab === 'dashboard'}>
             <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
               <Dashboard
@@ -336,7 +336,7 @@ function App() {
           onClose={closeModal}
           isDarkMode={isDarkMode}
           onDataRestored={() => {
-            // Refresh data after restore
+            window.location.reload();
           }}
         />
       )}
@@ -347,7 +347,7 @@ function App() {
           onClose={closeModal}
           isDarkMode={isDarkMode}
           onImportComplete={() => {
-            // Refresh data after import
+            window.location.reload();
           }}
         />
       )}
