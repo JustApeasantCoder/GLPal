@@ -859,7 +859,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           <div 
             className={`fixed inset-0 bg-black/60 ${isWeightModalClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
             style={{ backdropFilter: 'blur(8px)' }} 
-            onClick={() => setEditingWeightEntry(null)} 
+            onClick={() => { setIsWeightModalVisible(false); setEditingWeightEntry(null); }} 
           />
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isWeightModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <h3 className={`text-lg font-semibold mb-2 ${modalText.title}`}>Macros & Notes</h3>
