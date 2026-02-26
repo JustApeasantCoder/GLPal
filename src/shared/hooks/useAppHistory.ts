@@ -15,6 +15,8 @@ export type ModalType =
   | 'deleteConfirm'
   | 'goalWeightPicker'
   | 'cloudBackup'
+  | 'sideEffects'
+  | 'macros'
   | null;
 
 interface HistoryState {
@@ -34,6 +36,8 @@ export function useAppHistory<T extends string>(
   const isInitialMount = useRef(true);
   const ignoreNextPopState = useRef(false);
   const isNavigatingBack = useRef(false);
+  const isModalTransition = useRef(false);
+  const lastPushedState = useRef<HistoryState | null>(null);
 
   const pushState = useCallback((tab: string, modal: ModalType = null) => {
     const state: HistoryState = { tab, modal, index: currentIndex.current + 1 };
@@ -41,17 +45,22 @@ export function useAppHistory<T extends string>(
     historyStack.current = historyStack.current.slice(0, currentIndex.current);
     historyStack.current.push(state);
     currentIndex.current = state.index;
+    lastPushedState.current = state;
     
     window.history.pushState(state, '', `#${tab}${modal ? `/${modal}` : ''}`);
   }, []);
 
   const handlePopState = useCallback((event: PopStateEvent) => {
-    if (ignoreNextPopState.current) {
-      ignoreNextPopState.current = false;
+    const state = event.state as HistoryState | null;
+    
+    if (state && lastPushedState.current && 
+        state.index === lastPushedState.current.index &&
+        state.tab === lastPushedState.current.tab &&
+        state.modal === lastPushedState.current.modal) {
+      lastPushedState.current = null;
       return;
     }
-
-    const state = event.state as HistoryState | null;
+    lastPushedState.current = null;
 
     if (state && state.index !== undefined) {
       if (state.index < currentIndex.current) {
@@ -76,11 +85,8 @@ export function useAppHistory<T extends string>(
       }
     } else if (!state) {
       if (activeModal) {
-        ignoreNextPopState.current = true;
         setActiveModal(null);
-        pushState(activeTab, null);
       } else if (historyStack.current.length > 1) {
-        ignoreNextPopState.current = true;
         currentIndex.current = Math.max(0, currentIndex.current - 1);
         const prevState = historyStack.current[currentIndex.current - 1];
         if (prevState) {
@@ -110,33 +116,38 @@ export function useAppHistory<T extends string>(
     };
   }, [handlePopState, activeTab, activeModal]);
 
-  useEffect(() => {
-    if (isInitialMount.current) return;
-    pushState(activeTab, activeModal);
-  }, [activeTab, activeModal, pushState]);
+  const lastOpenTime = useRef(0);
+  const lastOpenModal = useRef<ModalType>(null);
 
   const openModal = useCallback((modal: ModalType) => {
-    ignoreNextPopState.current = true;
+    const now = Date.now();
+    if (now - lastOpenTime.current < 300 && lastOpenModal.current === modal) {
+      return;
+    }
+    lastOpenTime.current = now;
+    lastOpenModal.current = modal;
+    
+    isModalTransition.current = true;
     setActiveModal(modal);
-    pushState(activeTab, modal);
+    setTimeout(() => {
+      pushState(activeTab, modal);
+      isModalTransition.current = false;
+    }, 0);
   }, [activeTab, setActiveModal, pushState]);
 
   const closeModal = useCallback(() => {
-    ignoreNextPopState.current = true;
+    isModalTransition.current = true;
     setActiveModal(null);
-    pushState(activeTab, null);
-  }, [activeTab, setActiveModal, pushState]);
+    setTimeout(() => { isModalTransition.current = false; }, 0);
+  }, [setActiveModal]);
 
   const handleMobileBack = useCallback((): boolean => {
     if (activeModal) {
-      ignoreNextPopState.current = true;
       setActiveModal(null);
-      pushState(activeTab, null);
       return true;
     }
 
     if (currentIndex.current > 0) {
-      ignoreNextPopState.current = true;
       isNavigatingBack.current = true;
       currentIndex.current = Math.max(0, currentIndex.current - 1);
       const prevState = historyStack.current[currentIndex.current];
@@ -147,7 +158,7 @@ export function useAppHistory<T extends string>(
     }
 
     return false;
-  }, [activeTab, activeModal, setActiveModal, setActiveTab, pushState]);
+  }, [activeModal, activeModal, setActiveModal, setActiveTab]);
 
   useMobileBackButton(handleMobileBack);
 

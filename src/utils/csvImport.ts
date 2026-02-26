@@ -343,7 +343,7 @@ export const convertToDoseEntry = (row: CsvRow, dateOffset: number = 0): GLP1Ent
 };
 
 export const convertToUserProfile = (row: CsvRow): UserProfile | null => {
-  if (!row.age && !row.gender && !row.height && !row.unitSystem) return null;
+  if (!row.age && !row.gender && !row.height && !row.unitSystem && !row.activityLevel && row.goalWeight === undefined) return null;
   
   return {
     unitSystem: row.unitSystem || 'metric',
@@ -358,5 +358,5 @@ export const convertToUserProfile = (row: CsvRow): UserProfile | null => {
 };
 
 export const hasData = (row: CsvRow): boolean => {
-  return !!(row.date || row.age || row.gender || row.height || row.unitSystem || row.Pmedication || row.Pid || row.Mmedication || row.Mdate);
+  return !!(row.date || row.age || row.gender || row.height || row.unitSystem || row.activityLevel || row.goalWeight !== undefined || row.Pmedication || row.Pid || row.Mmedication || row.Mdate || row.PepId || row.PepName || row.PLdate || row.PLpeptideId);
 };

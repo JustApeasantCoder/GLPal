@@ -53,6 +53,32 @@ export const ALL_COLUMNS = [
   'Misr',
   'Mnotes',
   'MpainLevel',
+  // Peptide definitions with Pep prefix
+  'PepId',
+  'PepName',
+  'PepCategory',
+  'PepDose',
+  'PepDoseUnit',
+  'PepFrequency',
+  'PepPreferredTime',
+  'PepRoute',
+  'PepStartDate',
+  'PepEndDate',
+  'PepHalfLifeHours',
+  'PepNotes',
+  'PepColor',
+  'PepIsActive',
+  // Peptide log entries with PL prefix
+  'PLdate',
+  'PLtime',
+  'PLpeptideId',
+  'PLpeptideName',
+  'PLdose',
+  'PLdoseUnit',
+  'PLroute',
+  'PLinjectionSite',
+  'PLpainLevel',
+  'PLnotes',
 ] as const;
 
 export type AllColumns = typeof ALL_COLUMNS[number];
@@ -108,6 +134,32 @@ export interface CsvRow {
   Misr?: string;
   Mnotes?: string;
   MpainLevel?: number;
+  // Peptide definitions with Pep prefix
+  PepId?: string;
+  PepName?: string;
+  PepCategory?: string;
+  PepDose?: number;
+  PepDoseUnit?: string;
+  PepFrequency?: string;
+  PepPreferredTime?: string;
+  PepRoute?: string;
+  PepStartDate?: string;
+  PepEndDate?: string;
+  PepHalfLifeHours?: number;
+  PepNotes?: string;
+  PepColor?: string;
+  PepIsActive?: boolean;
+  // Peptide log entries with PL prefix
+  PLdate?: string;
+  PLtime?: string;
+  PLpeptideId?: string;
+  PLpeptideName?: string;
+  PLdose?: number;
+  PLdoseUnit?: string;
+  PLroute?: string;
+  PLinjectionSite?: string;
+  PLpainLevel?: number;
+  PLnotes?: string;
 }
 
 export interface ImportPreview {

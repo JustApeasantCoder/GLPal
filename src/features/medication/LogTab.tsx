@@ -5,12 +5,16 @@ import { useThemeStyles } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
 import { useAppStore } from '../../stores/appStore';
 import { saveMedicationManualEntries, saveWeightEntries } from '../../shared/utils/database';
+import { ModalType } from '../../shared/hooks/useAppHistory';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
 
 interface LogTabProps {
   refreshKey?: number;
   profile?: UserProfile;
   useWheelForNumbers?: boolean;
+  activeModal?: ModalType;
+  onOpenModal?: (modal: ModalType) => void;
+  onCloseModal?: () => void;
 }
 
 const getWeekStart = (date: Date): Date => {
@@ -60,7 +64,7 @@ const COMMON_SIDE_EFFECTS = [
   'Heartburn',
 ];
 
-const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) => {
+const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, activeModal, onOpenModal, onCloseModal }) => {
   const { bigCard, isDarkMode, inputButton, input: inputStyle, textarea, modal, modalText } = useThemeStyles();
   const unitSystem = profile?.unitSystem || 'metric';
   const weightUnit = getWeightUnit(unitSystem);
@@ -96,6 +100,43 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
+
+  // Derive modal visibility from activeModal if modal system is available
+  const isSideEffectsModalOpen = activeModal === 'sideEffects';
+  const isMacrosModalOpen = activeModal === 'macros';
+  
+  // Sync local state with modal system when activeModal changes
+  useEffect(() => {
+    if (activeModal === 'sideEffects') {
+      setIsSideEffectsVisible(true);
+    } else if (activeModal === null && isSideEffectsVisible) {
+      setIsSideEffectsVisible(false);
+      setEditingEntry(null);
+    }
+  }, [activeModal]);
+  
+  useEffect(() => {
+    if (activeModal === 'macros') {
+      setIsWeightModalVisible(true);
+    } else if (activeModal === null && isWeightModalVisible) {
+      setIsWeightModalVisible(false);
+      setEditingWeightEntry(null);
+    }
+  }, [activeModal]);
+  
+  // Helper to close side effects modal - just tell parent to close
+  const closeSideEffectsModal = () => {
+    if (onCloseModal) {
+      onCloseModal();
+    }
+  };
+  
+  // Helper to close macros modal - just tell parent to close
+  const closeMacrosModal = () => {
+    if (onCloseModal) {
+      onCloseModal();
+    }
+  };
   const [isPeptideLogCollapsed, setIsPeptideLogCollapsed] = useState(() => {
     const saved = localStorage.getItem('glpal_peptide_log_collapsed');
     return saved === 'true';
@@ -320,30 +361,30 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
       setIsSideEffectsVisible(true);
       setIsSideEffectsClosing(false);
       document.body.classList.add('modal-open');
-    } else if (isSideEffectsVisible && !isSideEffectsClosing) {
-      setIsSideEffectsClosing(true);
-      setTimeout(() => {
-        setIsSideEffectsVisible(false);
-        setIsSideEffectsClosing(false);
-        document.body.classList.remove('modal-open');
-      }, 200);
     }
-  }, [editingEntry, isSideEffectsVisible, isSideEffectsClosing]);
+  }, [editingEntry]);
 
+  // Separate effect to handle closing and cleanup
+  useEffect(() => {
+    if (!isSideEffectsVisible && editingEntry === null) {
+      // Modal was closed - remove the class
+      document.body.classList.remove('modal-open');
+    }
+  }, [isSideEffectsVisible, editingEntry]);
+  
   useEffect(() => {
     if (editingWeightEntry) {
       setIsWeightModalVisible(true);
       setIsWeightModalClosing(false);
       document.body.classList.add('modal-open');
-    } else if (isWeightModalVisible && !isWeightModalClosing) {
-      setIsWeightModalClosing(true);
-      setTimeout(() => {
-        setIsWeightModalVisible(false);
-        setIsWeightModalClosing(false);
-        document.body.classList.remove('modal-open');
-      }, 200);
     }
-  }, [editingWeightEntry, isWeightModalVisible, isWeightModalClosing]);
+  }, [editingWeightEntry]);
+
+  useEffect(() => {
+    if (!isWeightModalVisible && editingWeightEntry === null) {
+      document.body.classList.remove('modal-open');
+    }
+  }, [isWeightModalVisible, editingWeightEntry]);
 
   const addSideEffect = (name: string) => {
     setActiveSideEffect(name);
@@ -371,7 +412,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
     
     saveMedicationManualEntries(updatedEntries);
     setManualEntries(updatedEntries.sort((a, b) => b.date.localeCompare(a.date)));
-    setEditingEntry(null);
+    closeSideEffectsModal();
   };
 
   const openSideEffectsEditor = (entry: GLP1Entry) => {
@@ -379,12 +420,22 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
     setEditSideEffects(entry.sideEffects || []);
     setEditNotes(entry.notes || '');
     setActiveSideEffect(null);
+    if (onOpenModal) {
+      onOpenModal('sideEffects');
+    } else {
+      setIsSideEffectsVisible(true);
+    }
   };
 
   const openWeightEditor = (entry: WeightEntry) => {
     setEditingWeightEntry(entry);
     setEditWeightNotes(entry.notes || '');
     setEditWeightMacros(entry.macros || { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    if (onOpenModal) {
+      onOpenModal('macros');
+    } else {
+      setIsWeightModalVisible(true);
+    }
   };
 
   const handleSaveWeightMacros = () => {
@@ -404,7 +455,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
     
     saveWeightEntries(updatedEntries);
     refreshWeights();
-    setEditingWeightEntry(null);
+    closeMacrosModal();
   };
 
   const formatDate = (dateStr: string) => {
@@ -679,12 +730,12 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
         )}
       </div>
 
-      {!isSideEffectsVisible ? null : (
+      {!isSideEffectsVisible && !isSideEffectsModalOpen ? null : (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div 
             className={`fixed inset-0 bg-black/60 ${isSideEffectsClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
             style={{ backdropFilter: 'blur(8px)' }} 
-            onClick={() => setEditingEntry(null)} 
+            onClick={closeSideEffectsModal} 
           />
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto pointer-events-auto ${modal} ${isSideEffectsClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             {!editingEntry ? null : (
@@ -803,7 +854,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true }) =
         </div>
       )}
 
-      {isWeightModalVisible && editingWeightEntry ? (
+      {(isWeightModalVisible || isMacrosModalOpen) && editingWeightEntry ? (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div 
             className={`fixed inset-0 bg-black/60 ${isWeightModalClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}

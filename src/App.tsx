@@ -7,6 +7,7 @@ import { useTheme } from './contexts/ThemeContext';
 import { ChartPeriod, useTime } from './shared/hooks';
 import { useAppStore, TabType } from './stores/appStore';
 import { useTimeStore } from './stores/timeStore';
+import { timeService } from './core/timeService';
 import { useAppHistory } from './shared/hooks/useAppHistory';
 
 import Dashboard from './features/dashboard/Dashboard';
@@ -105,7 +106,7 @@ function App() {
           : 'bg-white/90 border-gray-200'
       }`}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-<h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ 
+          <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ 
             background: 'linear-gradient(135deg, #B19CD9, #4ADEA8)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -115,6 +116,11 @@ function App() {
               GLPal
             </a>
           </h1>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-text-secondary font-mono bg-black/20 px-2 py-1 rounded">
+              {timeService.toLocalDateString(nowDate())} {nowDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <button
               onClick={() => openModal('settings')}
@@ -131,11 +137,11 @@ function App() {
             <>
             <button
               onClick={() => {
-                travelDays(-1 / 60);
+                travelDays(-2 / 60);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
-              aria-label="Go back 1 hour"
-              title="-1 Hour"
+              aria-label="Go back 2 hours"
+              title="-2 Hours"
             >
               <svg className="w-4 h-4 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -143,35 +149,11 @@ function App() {
             </button>
             <button
               onClick={() => {
-                travelDays(1 / 60);
+                travelDays(2 / 60);
               }}
               className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
-              aria-label="Go forward 1 hour"
-              title="+1 Hour"
-            >
-              <svg className="w-4 h-4 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => {
-                travelDays(-2 / 1440);
-              }}
-              className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
-              aria-label="Go back 2 minutes"
-              title="-2 Minutes"
-            >
-              <svg className="w-4 h-4 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => {
-                travelDays(2 / 1440);
-              }}
-              className="p-2 rounded-xl hover:bg-accent-purple-light/10 transition-all duration-300"
-              aria-label="Go forward 2 minutes"
-              title="+2 Minutes"
+              aria-label="Go forward 2 hours"
+              title="+2 Hours"
             >
               <svg className="w-4 h-4 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -310,7 +292,13 @@ function App() {
           </TabContent>
           <TabContent isActive={activeTab === 'log'}>
             <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
-              <LogTab profile={profile} useWheelForNumbers={profile.useWheelForNumbers ?? true} />
+              <LogTab 
+                profile={profile} 
+                useWheelForNumbers={profile.useWheelForNumbers ?? true}
+                activeModal={activeModal}
+                onOpenModal={openModal}
+                onCloseModal={closeModal}
+              />
             </div>
           </TabContent>
         </div>

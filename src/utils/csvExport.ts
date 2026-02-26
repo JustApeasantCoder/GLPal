@@ -1,5 +1,5 @@
 import { CsvRow, CSV_HEADER, ALL_COLUMNS, SIDE_EFFECT_COLUMNS } from './csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol, Peptide, PeptideLogEntry } from '../types';
 import { timeService } from '../core/timeService';
 
 const escapeCsvValue = (value: string | number | boolean | undefined): string => {
@@ -41,7 +41,9 @@ export const exportAllToCsv = (
   weightEntries: WeightEntry[] = [],
   doseEntries: GLP1Entry[] = [],
   protocols: GLP1Protocol[] = [],
-  profile?: UserProfile | null
+  profile?: UserProfile | null,
+  peptides: Peptide[] = [],
+  peptideLogs: PeptideLogEntry[] = []
 ): string => {
   const unitSystem = profile?.unitSystem || 'metric';
   
@@ -151,6 +153,48 @@ export const exportAllToCsv = (
           ...sideEffects,
         };
         rows.push(manualRow);
+      });
+    }
+    
+    // Add peptide definitions with Pep prefix
+    if (peptides.length > 0) {
+      peptides.forEach(peptide => {
+        const peptideRow: CsvRow = {
+          PepId: peptide.id,
+          PepName: peptide.name,
+          PepCategory: peptide.category,
+          PepDose: peptide.dose,
+          PepDoseUnit: peptide.doseUnit,
+          PepFrequency: peptide.frequency,
+          PepPreferredTime: peptide.preferredTime,
+          PepRoute: peptide.route,
+          PepStartDate: peptide.startDate,
+          PepEndDate: peptide.endDate || '',
+          PepHalfLifeHours: peptide.halfLifeHours,
+          PepNotes: peptide.notes,
+          PepColor: peptide.color,
+          PepIsActive: peptide.isActive,
+        };
+        rows.push(peptideRow);
+      });
+    }
+    
+    // Add peptide log entries with PL prefix
+    if (peptideLogs.length > 0) {
+      peptideLogs.forEach(log => {
+        const peptideLogRow: CsvRow = {
+          PLdate: log.date,
+          PLtime: log.time,
+          PLpeptideId: log.peptideId,
+          PLpeptideName: '',
+          PLdose: log.dose,
+          PLdoseUnit: log.doseUnit,
+          PLroute: log.route,
+          PLinjectionSite: log.injectionSite,
+          PLpainLevel: log.painLevel || undefined,
+          PLnotes: log.notes,
+        };
+        rows.push(peptideLogRow);
       });
     }
     

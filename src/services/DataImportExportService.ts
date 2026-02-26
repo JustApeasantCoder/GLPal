@@ -1,5 +1,5 @@
 import { CsvRow, ImportPreview, ImportResult, ImportMode, SIDE_EFFECT_KEYS } from '../utils/csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect, Peptide, PeptideLogEntry } from '../types';
 import {
   parseCsv,
   generateImportPreview,
@@ -22,7 +22,12 @@ import {
   saveMedicationProtocols,
   getMedicationProtocols,
   saveUserProfile,
+  getUserProfile,
   clearAllData,
+  getPeptides,
+  savePeptides,
+  getPeptideLogs,
+  savePeptideLogs,
 } from '../shared/utils/database';
 
 class DataImportExportService {
@@ -31,14 +36,16 @@ class DataImportExportService {
   
   async exportData(): Promise<void> {
     console.log('Starting CSV export with embedded protocols...');
-    const [weightEntries, doseEntries, protocols, profile] = await Promise.all([
+    const [weightEntries, doseEntries, protocols, profile, peptides, peptideLogs] = await Promise.all([
       getWeightEntries(),
       getMedicationEntries(),
       getMedicationProtocols(),
-      saveUserProfile({} as UserProfile).then(() => null).catch(() => null),
+      getUserProfile(),
+      getPeptides(),
+      getPeptideLogs(),
     ]);
     
-    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols);
+    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols, profile, peptides, peptideLogs);
     const filename = generateExportFilename();
     downloadCsv(csvContent, filename);
   }
@@ -173,6 +180,57 @@ class DataImportExportService {
           imported += manualEntries.length;
         }
       }
+      
+      const peptideRows = validRows.filter(row => row.PepId || row.PepName);
+      if (peptideRows.length > 0) {
+        const peptides: Peptide[] = peptideRows.map(row => ({
+          id: row.PepId || crypto.randomUUID(),
+          name: row.PepName || '',
+          category: (row.PepCategory as any) || 'healing',
+          dose: row.PepDose || 0,
+          doseUnit: (row.PepDoseUnit as any) || 'mg',
+          frequency: (row.PepFrequency as any) || 'daily',
+          preferredTime: row.PepPreferredTime || '08:00',
+          route: (row.PepRoute as any) || 'subcutaneous',
+          startDate: row.PepStartDate || '',
+          endDate: row.PepEndDate || null,
+          halfLifeHours: row.PepHalfLifeHours || 24,
+          notes: row.PepNotes || '',
+          color: row.PepColor || '#4ADEA8',
+          isActive: row.PepIsActive ?? true,
+          isArchived: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          cycles: [],
+        }));
+        
+        if (peptides.length > 0) {
+          await savePeptides(peptides);
+          imported += peptides.length;
+        }
+      }
+      
+      const peptideLogRows = validRows.filter(row => row.PLdate || row.PLpeptideId);
+      if (peptideLogRows.length > 0) {
+        const peptideLogs: PeptideLogEntry[] = peptideLogRows.map(row => ({
+          id: crypto.randomUUID(),
+          peptideId: row.PLpeptideId || '',
+          date: row.PLdate || '',
+          time: row.PLtime || '',
+          dose: row.PLdose || 0,
+          doseUnit: (row.PLdoseUnit as any) || 'mg',
+          route: (row.PLroute as any) || 'subcutaneous',
+          injectionSite: row.PLinjectionSite || '',
+          painLevel: row.PLpainLevel || null,
+          notes: row.PLnotes || '',
+          createdAt: new Date().toISOString(),
+        }));
+        
+        if (peptideLogs.length > 0) {
+          await savePeptideLogs(peptideLogs);
+          imported += peptideLogs.length;
+        }
+      }
     } else {
       validRows.forEach(row => {
         if (!row.date) {
@@ -257,13 +315,68 @@ class DataImportExportService {
       }
       
       if (includeUserSettings) {
-        const userSettingsRow = validRows.find(row => row.age || row.gender || row.height || row.unitSystem);
+        const userSettingsRow = validRows.find(row => row.age || row.gender || row.height || row.unitSystem || row.activityLevel || row.goalWeight);
         if (userSettingsRow) {
           const profile = convertToUserProfile(userSettingsRow);
           if (profile && profile.age > 0) {
             await saveUserProfile(profile);
             imported++;
           }
+        }
+      }
+      
+      const mergePeptideRows = validRows.filter(row => row.PepId || row.PepName);
+      if (mergePeptideRows.length > 0) {
+        const peptides: Peptide[] = mergePeptideRows.map(row => ({
+          id: row.PepId || crypto.randomUUID(),
+          name: row.PepName || '',
+          category: (row.PepCategory as any) || 'healing',
+          dose: row.PepDose || 0,
+          doseUnit: (row.PepDoseUnit as any) || 'mg',
+          frequency: (row.PepFrequency as any) || 'daily',
+          preferredTime: row.PepPreferredTime || '08:00',
+          route: (row.PepRoute as any) || 'subcutaneous',
+          startDate: row.PepStartDate || '',
+          endDate: row.PepEndDate || null,
+          halfLifeHours: row.PepHalfLifeHours || 24,
+          notes: row.PepNotes || '',
+          color: row.PepColor || '#4ADEA8',
+          isActive: row.PepIsActive ?? true,
+          isArchived: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          cycles: [],
+        }));
+        
+        if (peptides.length > 0) {
+          const existingPeptides = await getPeptides();
+          const mergedPeptides = [...existingPeptides, ...peptides];
+          await savePeptides(mergedPeptides);
+          imported += peptides.length;
+        }
+      }
+      
+      const mergePeptideLogRows = validRows.filter(row => row.PLdate || row.PLpeptideId);
+      if (mergePeptideLogRows.length > 0) {
+        const peptideLogs: PeptideLogEntry[] = mergePeptideLogRows.map(row => ({
+          id: crypto.randomUUID(),
+          peptideId: row.PLpeptideId || '',
+          date: row.PLdate || '',
+          time: row.PLtime || '',
+          dose: row.PLdose || 0,
+          doseUnit: (row.PLdoseUnit as any) || 'mg',
+          route: (row.PLroute as any) || 'subcutaneous',
+          injectionSite: row.PLinjectionSite || '',
+          painLevel: row.PLpainLevel || null,
+          notes: row.PLnotes || '',
+          createdAt: new Date().toISOString(),
+        }));
+        
+        if (peptideLogs.length > 0) {
+          const existingLogs = await getPeptideLogs();
+          const mergedLogs = [...existingLogs, ...peptideLogs];
+          await savePeptideLogs(mergedLogs);
+          imported += peptideLogs.length;
         }
       }
     }
