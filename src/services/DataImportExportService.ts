@@ -192,7 +192,80 @@ class DataImportExportService {
         }
       });
       
-      imported = weightEntries.length + doseEntries.length;
+      if (weightEntries.length > 0) {
+        await saveWeightEntries(weightEntries);
+        imported += weightEntries.length;
+      }
+      
+      if (doseEntries.length > 0) {
+        await setMedicationEntries(doseEntries);
+        imported += doseEntries.length;
+      }
+      
+      const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);
+      if (manualRows.length > 0) {
+        const manualEntries: GLP1Entry[] = manualRows.map(row => {
+          const sideEffects: SideEffect[] = [];
+          SIDE_EFFECT_KEYS.forEach(se => {
+            const severity = (row as any)[se];
+            if (severity !== undefined && severity > 0) {
+              const name = se.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+              sideEffects.push({ name, severity });
+            }
+          });
+          
+          return {
+            date: row.Mdate || '',
+            medication: row.Mmedication || '',
+            dose: row.Mdose || 0,
+            halfLifeHours: row.MhalfLifeHours || 168,
+            isManual: true,
+            time: row.Mtime,
+            injectionSite: row.MinjectionSite,
+            isr: row.Misr,
+            painLevel: row.MpainLevel,
+            notes: row.Mnotes,
+            sideEffects,
+          };
+        });
+        
+        if (manualEntries.length > 0) {
+          await saveMedicationManualEntries(manualEntries);
+          imported += manualEntries.length;
+        }
+      }
+      
+      const protocolRows = validRows.filter(row => row.Pid || row.Pmedication);
+      if (protocolRows.length > 0) {
+        const protocols: GLP1Protocol[] = protocolRows.map(row => ({
+          id: row.Pid || '',
+          medication: row.Pmedication || '',
+          dose: row.Pdose || 0,
+          frequencyPerWeek: row.PfrequencyPerWeek || 0,
+          startDate: row.PstartDate || '',
+          stopDate: row.PstopDate || null,
+          halfLifeHours: row.PhalfLifeHours || 168,
+          phase: row.Pphase as any || 'titrate',
+        }));
+        
+        if (protocols.length > 0) {
+          const existingProtocols = await getMedicationProtocols();
+          const mergedProtocols = [...existingProtocols, ...protocols];
+          await saveMedicationProtocols(mergedProtocols);
+          imported += protocols.length;
+        }
+      }
+      
+      if (includeUserSettings) {
+        const userSettingsRow = validRows.find(row => row.age || row.gender || row.height || row.unitSystem);
+        if (userSettingsRow) {
+          const profile = convertToUserProfile(userSettingsRow);
+          if (profile && profile.age > 0) {
+            await saveUserProfile(profile);
+            imported++;
+          }
+        }
+      }
     }
     
     return {
