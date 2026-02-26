@@ -11,18 +11,6 @@ import { PEPTIDE_PRESETS } from '../../../types';
 const MAIN_MEDICATIONS = MEDICATIONS.slice(0, -1); // All except 'other'
 const ALL_MEDICATIONS = MEDICATIONS;
 
-interface StorageCardProps {
-  medicationStorage: MedicationStorage[];
-  onAddStorage: (item: MedicationStorage) => void;
-  onUpdateStorage: (item: MedicationStorage) => void;
-  onDeleteStorage: (id: string) => void;
-  unitSystem?: 'metric' | 'imperial';
-  isModalOpen?: boolean;
-  onOpenModal?: () => void;
-  onCloseModal?: () => void;
-  useWheelForDate?: boolean;
-}
-
 const CATEGORIES: { id: StorageCategory; label: string }[] = [
   { id: 'glp1', label: 'GLP-1' },
   { id: 'peptide', label: 'Peptide' },
@@ -62,6 +50,62 @@ const PEPTIDE_CATEGORY_LABELS: Record<PeptideCategory, string> = {
 const PEPTIDE_CATEGORIES: PeptideCategory[] = [
   'healing', 'growth_hormone', 'fat_loss', 'muscle', 'skin', 'longevity', 'immune', 'cognitive', 'other'
 ];
+
+interface StorageItemRowProps {
+  item: MedicationStorage;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const StorageItemRow: React.FC<StorageItemRowProps> = ({ item, onEdit, onDelete }) => {
+  return (
+    <div className="flex items-center justify-between p-2 bg-black/20 rounded-lg">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-0.5 rounded ${
+            item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
+            item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
+            'bg-gray-500/20 text-gray-400'
+          }`}>
+            {STORAGE_TYPES.find(t => t.id === item.type)?.label}
+          </span>
+        </div>
+        <p className="text-sm font-medium text-white truncate">{item.medicationName}</p>
+        <p className="text-xs text-gray-400">
+          {item.remainingUnits}/{item.initialUnits} units
+          {item.dosagePerUnit > 0 && ` • ${item.dosagePerUnit} mg`}
+          {` • $${item.unitCost}/unit`}
+        </p>
+      </div>
+      <div className="flex gap-1 ml-2">
+        <button
+          onClick={onEdit}
+          className="p-1.5 text-xs text-[#B19CD9] hover:bg-[#B19CD9]/10 rounded"
+        >
+          Edit
+        </button>
+        <button
+          onClick={onDelete}
+          className="p-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+};
+
+interface StorageCardProps {
+  medicationStorage: MedicationStorage[];
+  onAddStorage: (item: MedicationStorage) => void;
+  onUpdateStorage: (item: MedicationStorage) => void;
+  onDeleteStorage: (id: string) => void;
+  unitSystem?: 'metric' | 'imperial';
+  isModalOpen?: boolean;
+  onOpenModal?: () => void;
+  onCloseModal?: () => void;
+  useWheelForDate?: boolean;
+}
 
 const StorageCard: React.FC<StorageCardProps> = ({
   medicationStorage,
@@ -247,10 +291,10 @@ const StorageCard: React.FC<StorageCardProps> = ({
       <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
       {/* Category Tabs */}
-      <div className="flex flex-wrap gap-1.5 pb-2 mb-3">
+      <div className="flex gap-2 pb-2 mb-3">
         <button
           onClick={() => setSelectedCategory('all')}
-          className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+          className={`flex-1 py-2 text-xs rounded-lg transition-all ${
             selectedCategory === 'all'
               ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
               : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
@@ -262,7 +306,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+            className={`flex-1 py-2 text-xs rounded-lg transition-all ${
               selectedCategory === cat.id
                 ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]'
                 : 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
@@ -301,69 +345,70 @@ const StorageCard: React.FC<StorageCardProps> = ({
         </div>
       </div>
 
-      {/* Storage List */}
-      {filteredStorage.length > 0 ? (
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          {filteredStorage.map(item => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between p-3 bg-[#B19CD9]/5 rounded-lg border border-[#B19CD9]/10"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    item.category === 'glp1' ? 'bg-blue-500/20 text-blue-400' :
-                    item.category === 'peptide' ? 'bg-green-500/20 text-green-400' :
-                    'bg-gray-500/20 text-gray-400'
-                  }`}>
-                    {CATEGORIES.find(c => c.id === item.category)?.label}
-                  </span>
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
-                    item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
-                    'bg-gray-500/20 text-gray-400'
-                  }`}>
-                    {STORAGE_TYPES.find(t => t.id === item.type)?.label}
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-[#B19CD9] truncate">{item.medicationName}</p>
-                <p className="text-xs text-gray-500">
-                  {item.remainingUnits}/{item.initialUnits} units
-                  {item.dosagePerUnit > 0 && ` • ${item.dosagePerUnit} mg`}
-                  {` • $${item.unitCost}/unit`}
-                </p>
-              </div>
-              <div className="flex gap-1 ml-2">
-                <button
-                  onClick={() => openEditModal(item)}
-                  className="p-1.5 text-xs text-[#B19CD9] hover:bg-[#B19CD9]/10 rounded"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="p-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded"
-                >
-                  Delete
-                </button>
+      {/* Add Button */}
+      <button
+        onClick={openAddModal}
+        className={`w-full py-2 ${primaryButton}`}
+      >
+        + Add Storage Item
+      </button>
+
+      {/* Storage List grouped by category */}
+      {medicationStorage.length > 0 ? (
+        <div className="space-y-4 mt-4">
+          {/* GLP-1 Card */}
+          {medicationStorage.filter(item => item.category === 'glp1').length > 0 && (
+            <div className="bg-blue-500/10 rounded-lg border border-blue-500/20 p-3">
+              <h3 className="text-sm font-medium text-blue-400 mb-2">GLP-1</h3>
+              <div className="space-y-2">
+                {medicationStorage.filter(item => item.category === 'glp1').map(item => (
+                  <StorageItemRow 
+                    key={item.id} 
+                    item={item} 
+                    onEdit={() => openEditModal(item)}
+                    onDelete={() => handleDelete(item.id)}
+                  />
+                ))}
               </div>
             </div>
-          ))}
-          <button
-            onClick={openAddModal}
-            className={`w-full py-2 mt-2 border border-dashed border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm`}
-          >
-            + Add Storage Item
-          </button>
+          )}
+
+          {/* Peptides Card */}
+          {medicationStorage.filter(item => item.category === 'peptide').length > 0 && (
+            <div className="bg-green-500/10 rounded-lg border border-green-500/20 p-3">
+              <h3 className="text-sm font-medium text-green-400 mb-2">Peptides</h3>
+              <div className="space-y-2">
+                {medicationStorage.filter(item => item.category === 'peptide').map(item => (
+                  <StorageItemRow 
+                    key={item.id} 
+                    item={item} 
+                    onEdit={() => openEditModal(item)}
+                    onDelete={() => handleDelete(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Others Card */}
+          {medicationStorage.filter(item => item.category === 'other').length > 0 && (
+            <div className="bg-gray-500/10 rounded-lg border border-gray-500/20 p-3">
+              <h3 className="text-sm font-medium text-gray-400 mb-2">Other</h3>
+              <div className="space-y-2">
+                {medicationStorage.filter(item => item.category === 'other').map(item => (
+                  <StorageItemRow 
+                    key={item.id} 
+                    item={item} 
+                    onEdit={() => openEditModal(item)}
+                    onDelete={() => handleDelete(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-4">
-          <button
-            onClick={openAddModal}
-            className={primaryButton}
-          >
-            + Add Storage Item
-          </button>
           <p className="text-sm text-gray-500 mt-3">
             No storage items. Click "Add" to track your medications.
           </p>
