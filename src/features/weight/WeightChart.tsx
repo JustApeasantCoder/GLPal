@@ -251,8 +251,8 @@ const WeightChart: React.FC<WeightChartProps> = ({
       animation: !isMobile(),
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(20, 15, 35, 0.95)',
-        borderColor: 'rgba(177, 156, 217, 0.4)',
+        backgroundColor: 'rgba(26, 26, 36, 0.95)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
         borderWidth: 1,
         borderRadius: 12,
         padding: [12, 16],
