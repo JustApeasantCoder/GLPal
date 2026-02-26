@@ -257,6 +257,7 @@ function App() {
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
                 useWheelForNumbers={profile.useWheelForNumbers ?? true}
+                useWheelForDate={profile.useWheelForDate ?? false}
                 medicationStorage={medicationStorage}
                 onAddMedicationStorage={addMedicationStorage}
                 onUpdateMedicationStorage={updateMedicationStorage}

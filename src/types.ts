@@ -148,13 +148,14 @@ export interface PeptideLogEntry {
 
 export type StorageCategory = 'glp1' | 'peptide' | 'other';
 
-export type StorageType = 'vial' | 'pen' | 'bottle' | 'package';
+export type StorageType = 'vial' | 'pen' | 'powder';
 
 export interface MedicationStorage {
   id: string;
   medicationName: string;
   category: StorageCategory;
   type: StorageType;
+  dosagePerUnit: number;
   initialUnits: number;
   remainingUnits: number;
   unitCost: number;

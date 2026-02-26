@@ -21,6 +21,7 @@ interface DashboardProps {
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
   useWheelForNumbers?: boolean;
+  useWheelForDate?: boolean;
   medicationStorage: MedicationStorage[];
   onAddMedicationStorage: (item: MedicationStorage) => void;
   onUpdateMedicationStorage: (item: MedicationStorage) => void;
@@ -39,6 +40,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   chartPeriod,
   onChartPeriodChange,
   useWheelForNumbers = true,
+  useWheelForDate = false,
   medicationStorage,
   onAddMedicationStorage,
   onUpdateMedicationStorage,
@@ -170,8 +172,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         onDeleteStorage={onDeleteMedicationStorage}
         unitSystem={unitSystem}
         isModalOpen={activeModal === 'storage'}
-        onOpenModal={() => onOpenModal('storage')}
+        onOpenModal={() => onOpenModal?.('storage')}
         onCloseModal={onCloseModal}
+        useWheelForDate={useWheelForDate}
       />
     </>
   );

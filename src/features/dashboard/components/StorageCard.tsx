@@ -1,8 +1,15 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { MedicationStorage, StorageCategory, StorageType } from '../../../types';
+import { MedicationStorage, StorageCategory, StorageType, PeptideCategory } from '../../../types';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 import { timeService } from '../../../core/timeService';
+import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
+import { MEDICATIONS } from '../../../constants/medications';
+import { PEPTIDE_PRESETS } from '../../../types';
+
+const MAIN_MEDICATIONS = MEDICATIONS.slice(0, -1); // All except 'other'
+const ALL_MEDICATIONS = MEDICATIONS;
 
 interface StorageCardProps {
   medicationStorage: MedicationStorage[];
@@ -13,6 +20,7 @@ interface StorageCardProps {
   isModalOpen?: boolean;
   onOpenModal?: () => void;
   onCloseModal?: () => void;
+  useWheelForDate?: boolean;
 }
 
 const CATEGORIES: { id: StorageCategory; label: string }[] = [
@@ -24,8 +32,35 @@ const CATEGORIES: { id: StorageCategory; label: string }[] = [
 const STORAGE_TYPES: { id: StorageType; label: string }[] = [
   { id: 'vial', label: 'Vial' },
   { id: 'pen', label: 'Pen' },
-  { id: 'bottle', label: 'Bottle' },
-  { id: 'package', label: 'Package' },
+  { id: 'powder', label: 'Powder' },
+];
+
+const PEPTIDE_CATEGORY_COLORS: Record<PeptideCategory, string> = {
+  healing: '#EF4444',
+  growth_hormone: '#F59E0B',
+  fat_loss: '#10B981',
+  muscle: '#3B82F6',
+  longevity: '#8B5CF6',
+  immune: '#EC4899',
+  skin: '#F472B6',
+  cognitive: '#06B6D4',
+  other: '#6B7280',
+};
+
+const PEPTIDE_CATEGORY_LABELS: Record<PeptideCategory, string> = {
+  healing: 'Healing',
+  growth_hormone: 'GH',
+  fat_loss: 'Fat Loss',
+  muscle: 'Muscle',
+  longevity: 'Longevity',
+  immune: 'Immune',
+  skin: 'Skin',
+  cognitive: 'Cognitive',
+  other: 'Other',
+};
+
+const PEPTIDE_CATEGORIES: PeptideCategory[] = [
+  'healing', 'growth_hormone', 'fat_loss', 'muscle', 'skin', 'longevity', 'immune', 'cognitive', 'other'
 ];
 
 const StorageCard: React.FC<StorageCardProps> = ({
@@ -37,11 +72,17 @@ const StorageCard: React.FC<StorageCardProps> = ({
   isModalOpen,
   onOpenModal,
   onCloseModal,
+  useWheelForDate = true,
 }) => {
-  const { bigCard, bigCardText, smallCard, text, modal, modalText, input: inputStyle, primaryButton, textarea } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, modal, modalText, input: inputStyle, inputButton, primaryButton, textarea, segmentButton } = useThemeStyles();
   const [selectedCategory, setSelectedCategory] = useState<StorageCategory | 'all'>('all');
   const [isModalClosing, setIsModalClosing] = useState(false);
   const [editingItem, setEditingItem] = useState<MedicationStorage | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerType, setDatePickerType] = useState<'purchase' | 'expiry'>('purchase');
+  const [showMedicationPicker, setShowMedicationPicker] = useState(false);
+  const [showPeptidePicker, setShowPeptidePicker] = useState(false);
+  const [peptideSearchQuery, setPeptideSearchQuery] = useState('');
 
   const openStorageModal = () => {
     onOpenModal?.();
@@ -53,6 +94,11 @@ const StorageCard: React.FC<StorageCardProps> = ({
       setIsModalClosing(false);
       onCloseModal?.();
     }, 200);
+  };
+
+  const openDatePicker = (type: 'purchase' | 'expiry') => {
+    setDatePickerType(type);
+    setShowDatePicker(true);
   };
 
   useEffect(() => {
@@ -67,6 +113,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
     medicationName: '',
     category: 'glp1' as StorageCategory,
     type: 'vial' as StorageType,
+    dosagePerUnit: '',
     initialUnits: '',
     remainingUnits: '',
     unitCost: '',
@@ -106,6 +153,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       medicationName: '',
       category: 'glp1',
       type: 'vial',
+      dosagePerUnit: '',
       initialUnits: '',
       remainingUnits: '',
       unitCost: '',
@@ -123,6 +171,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       medicationName: item.medicationName,
       category: item.category,
       type: item.type,
+      dosagePerUnit: item.dosagePerUnit?.toString() || '',
       initialUnits: item.initialUnits.toString(),
       remainingUnits: item.remainingUnits.toString(),
       unitCost: item.unitCost.toString(),
@@ -134,13 +183,14 @@ const StorageCard: React.FC<StorageCardProps> = ({
     openStorageModal();
   };
 
-  const handleSave = () => {
+  const handleSave = (closeAfterSave: boolean = true) => {
     const now = new Date().toISOString();
     const item: MedicationStorage = {
       id: editingItem?.id || crypto.randomUUID(),
       medicationName: formData.medicationName,
       category: formData.category,
       type: formData.type,
+      dosagePerUnit: parseFloat(formData.dosagePerUnit) || 0,
       initialUnits: parseFloat(formData.initialUnits) || 0,
       remainingUnits: parseFloat(formData.remainingUnits) || 0,
       unitCost: parseFloat(formData.unitCost) || 0,
@@ -154,10 +204,28 @@ const StorageCard: React.FC<StorageCardProps> = ({
 
     if (editingItem) {
       onUpdateStorage(item);
+      closeStorageModal();
     } else {
       onAddStorage(item);
+      if (closeAfterSave) {
+        closeStorageModal();
+      } else {
+        setFormData({
+          medicationName: '',
+          category: 'glp1',
+          type: 'vial',
+          dosagePerUnit: '',
+          initialUnits: '',
+          remainingUnits: '',
+          unitCost: '',
+          purchaseDate: timeService.todayString(),
+          expiryDate: '',
+          notes: '',
+          isActive: true,
+        });
+        setEditingItem(null);
+      }
     }
-    closeStorageModal();
   };
 
   const handleDelete = (id: string) => {
@@ -257,13 +325,12 @@ const StorageCard: React.FC<StorageCardProps> = ({
                   }`}>
                     {STORAGE_TYPES.find(t => t.id === item.type)?.label}
                   </span>
-                  <span className={`text-xs ${item.isActive ? 'text-green-400' : 'text-gray-500'}`}>
-                    {item.isActive ? 'Active' : 'Inactive'}
-                  </span>
                 </div>
                 <p className="text-sm font-medium text-[#B19CD9] truncate">{item.medicationName}</p>
                 <p className="text-xs text-gray-500">
-                  {item.remainingUnits}/{item.initialUnits} units • ${item.unitCost}/unit
+                  {item.remainingUnits}/{item.initialUnits} units
+                  {item.dosagePerUnit > 0 && ` • ${item.dosagePerUnit} mg`}
+                  {` • $${item.unitCost}/unit`}
                 </p>
               </div>
               <div className="flex gap-1 ml-2">
@@ -282,6 +349,12 @@ const StorageCard: React.FC<StorageCardProps> = ({
               </div>
             </div>
           ))}
+          <button
+            onClick={openAddModal}
+            className={`w-full py-2 mt-2 border border-dashed border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm`}
+          >
+            + Add Storage Item
+          </button>
         </div>
       ) : (
         <div className="text-center py-4">
@@ -306,53 +379,131 @@ const StorageCard: React.FC<StorageCardProps> = ({
             onClick={closeStorageModal} 
           />
           <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6 overflow-y-auto max-h-[90vh] ${modal} ${isModalClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-            <h2 className={`text-lg font-semibold mb-4 ${modalText.title}`}>
+            <h2 className={`text-lg font-semibold mb-2 ${modalText.title}`}>
               {editingItem ? 'Edit Storage Item' : 'Add Storage Item'}
             </h2>
+            <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
             <div className="space-y-3">
-              <div>
-                <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
-                  Medication Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.medicationName}
-                  onChange={(e) => setFormData({ ...formData, medicationName: e.target.value })}
-                  className={inputStyle}
-                  placeholder="e.g., Ozempic, Tirzepatide"
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
                     Category
                   </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as StorageCategory })}
-                    className={inputStyle}
-                  >
+                  <div className="flex gap-1">
                     {CATEGORIES.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.label}</option>
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, category: cat.id, medicationName: '' })}
+                        className={segmentButton(formData.category === cat.id)}
+                      >
+                        {cat.label}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
                 <div>
                   <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
                     Type
                   </label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value as StorageType })}
-                    className={inputStyle}
-                  >
+                  <div className="flex gap-1">
                     {STORAGE_TYPES.map(type => (
-                      <option key={type.id} value={type.id}>{type.label}</option>
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, type: type.id })}
+                        className={segmentButton(formData.type === type.id)}
+                      >
+                        {type.label}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
+              </div>
+
+              {/* Category-specific input with dosage */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Medication/Peptide/Other name */}
+                {formData.category === 'glp1' && (
+                  <div>
+                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                      Medication
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowMedicationPicker(true)}
+                      className={inputButton}
+                    >
+                      {formData.medicationName || 'Select medication'}
+                    </button>
+                  </div>
+                )}
+
+                {formData.category === 'peptide' && (
+                  <div>
+                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                      Peptide
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPeptidePicker(true)}
+                      className={inputButton}
+                    >
+                      {formData.medicationName || 'Select peptide'}
+                    </button>
+                  </div>
+                )}
+
+                {formData.category === 'other' && (
+                  <div>
+                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                      Medication Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.medicationName}
+                      onChange={(e) => setFormData({ ...formData, medicationName: e.target.value })}
+                      className={inputStyle}
+                      placeholder="e.g., Metformin, Vitamins"
+                    />
+                  </div>
+                )}
+
+                {/* Dosage field beside medication */}
+                {formData.type === 'vial' && (
+                  <div>
+                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                      Strength (mg)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.dosagePerUnit}
+                      onChange={(e) => setFormData({ ...formData, dosagePerUnit: e.target.value })}
+                      className={inputStyle}
+                      placeholder="e.g., 0.25"
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                )}
+
+                {(formData.type === 'pen' || formData.type === 'powder') && (
+                  <div>
+                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                      Strength (mg)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.dosagePerUnit}
+                      onChange={(e) => setFormData({ ...formData, dosagePerUnit: e.target.value })}
+                      className={inputStyle}
+                      placeholder={formData.type === 'pen' ? "e.g., 0.25" : "e.g., 10"}
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -401,20 +552,6 @@ const StorageCard: React.FC<StorageCardProps> = ({
                     step="0.01"
                   />
                 </div>
-                <div>
-                  <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
-                    Active
-                  </label>
-                  <label className="flex items-center gap-2 mt-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">In Use</span>
-                  </label>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -422,23 +559,25 @@ const StorageCard: React.FC<StorageCardProps> = ({
                   <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
                     Purchase Date
                   </label>
-                  <input
-                    type="date"
-                    value={formData.purchaseDate}
-                    onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                    className={inputStyle}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => openDatePicker('purchase')}
+                    className={inputButton}
+                  >
+                    {formData.purchaseDate || 'Select date'}
+                  </button>
                 </div>
                 <div>
                   <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
                     Expiry Date (Optional)
                   </label>
-                  <input
-                    type="date"
-                    value={formData.expiryDate}
-                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                    className={inputStyle}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => openDatePicker('expiry')}
+                    className={inputButton}
+                  >
+                    {formData.expiryDate || 'Select date'}
+                  </button>
                 </div>
               </div>
 
@@ -464,13 +603,191 @@ const StorageCard: React.FC<StorageCardProps> = ({
                 Cancel
               </button>
               <button
-                onClick={handleSave}
+                onClick={() => handleSave(true)}
                 disabled={!formData.medicationName || !formData.initialUnits}
-                className={primaryButton}
+                className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
               >
                 {editingItem ? 'Update' : 'Add'}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showDatePicker && (
+        useWheelForDate ? (
+          <DateWheelPickerModal
+            isOpen={showDatePicker}
+            value={datePickerType === 'purchase' ? formData.purchaseDate : (formData.expiryDate || timeService.todayString())}
+            onChange={(date) => {
+              if (datePickerType === 'purchase') {
+                setFormData({ ...formData, purchaseDate: date });
+              } else {
+                setFormData({ ...formData, expiryDate: date });
+              }
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        ) : (
+          <CalendarPickerModal
+            isOpen={showDatePicker}
+            value={datePickerType === 'purchase' ? formData.purchaseDate : (formData.expiryDate || timeService.todayString())}
+            onChange={(date) => {
+              if (datePickerType === 'purchase') {
+                setFormData({ ...formData, purchaseDate: date });
+              } else {
+                setFormData({ ...formData, expiryDate: date });
+              }
+              setShowDatePicker(false);
+            }}
+            onClose={() => setShowDatePicker(false)}
+          />
+        )
+      )}
+
+      {/* Medication Picker Modal */}
+      {showMedicationPicker && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowMedicationPicker(false)} />
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-4 max-h-[80vh] overflow-y-auto ${modal} modal-content-fade-in`}>
+            <h3 className={`text-lg font-semibold mb-3 ${modalText.title}`}>Select Medication</h3>
+            <div className="space-y-2 mb-3">
+              {MAIN_MEDICATIONS.map((med) => (
+                <button
+                  key={med.id}
+                  type="button"
+                  onClick={() => {
+                    setFormData({ ...formData, medicationName: med.name });
+                    setShowMedicationPicker(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
+                    formData.medicationName === med.name
+                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                      : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                  }`}
+                >
+                  <span className={modalText.value}>{med.name}</span>
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-[#B19CD9]/20 pt-3">
+              <label className={`block text-xs font-medium mb-2 ${modalText.label}`}>More Options</label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {ALL_MEDICATIONS.filter(m => !MAIN_MEDICATIONS.find(main => main.id === m.id)).map((med) => (
+                  <button
+                    key={med.id}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, medicationName: med.name });
+                      setShowMedicationPicker(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
+                      formData.medicationName === med.name
+                        ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                        : 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                    }`}
+                  >
+                    <span className={modalText.value}>{med.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setShowMedicationPicker(false)}
+              className="w-full mt-3 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Peptide Picker Modal */}
+      {showPeptidePicker && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowPeptidePicker(false)} />
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-4 max-h-[80vh] flex flex-col ${modal} modal-content-fade-in`}>
+            <h3 className={`text-lg font-semibold mb-3 ${modalText.title}`}>Select Peptide</h3>
+            
+            {/* Search Bar */}
+            <input
+              type="text"
+              value={peptideSearchQuery}
+              onChange={(e) => setPeptideSearchQuery(e.target.value)}
+              placeholder="Search peptides..."
+              className={inputStyle}
+            />
+
+            {/* Peptide List grouped by category */}
+            <div className="flex-1 overflow-y-auto mt-3 space-y-4">
+              {PEPTIDE_CATEGORIES.map(category => {
+                const filteredPeptides = PEPTIDE_PRESETS.filter(p => 
+                  p.name.toLowerCase().includes(peptideSearchQuery.toLowerCase()) ||
+                  p.description.toLowerCase().includes(peptideSearchQuery.toLowerCase())
+                ).filter(p => p.category === category);
+                
+                if (filteredPeptides.length === 0) return null;
+                
+                const categoryColor = PEPTIDE_CATEGORY_COLORS[category];
+                
+                return (
+                  <div key={category}>
+                    <p 
+                      className="text-xs font-semibold uppercase tracking-wide mb-2" 
+                      style={{ color: categoryColor }}
+                    >
+                      {PEPTIDE_CATEGORY_LABELS[category]}
+                    </p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {filteredPeptides.map((peptide) => (
+                        <button
+                          key={peptide.name}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, medicationName: peptide.name });
+                            setShowPeptidePicker(false);
+                            setPeptideSearchQuery('');
+                          }}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left w-full ${
+                            formData.medicationName === peptide.name
+                              ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                              : 'bg-black/20 border-transparent hover:bg-[#B19CD9]/10'
+                          }`}
+                        >
+                          <div 
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: PEPTIDE_CATEGORY_COLORS[peptide.category] }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate text-white">{peptide.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{peptide.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {PEPTIDE_PRESETS.filter(p => 
+                p.name.toLowerCase().includes(peptideSearchQuery.toLowerCase()) ||
+                p.description.toLowerCase().includes(peptideSearchQuery.toLowerCase())
+              ).length === 0 && (
+                <p className="text-center py-4 text-gray-400">No peptides found</p>
+              )}
+            </div>
+            
+            <button
+              onClick={() => {
+                setShowPeptidePicker(false);
+                setPeptideSearchQuery('');
+              }}
+              className="w-full mt-3 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm"
+            >
+              Cancel
+            </button>
           </div>
         </div>,
         document.body
