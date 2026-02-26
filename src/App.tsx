@@ -46,6 +46,7 @@ function App() {
     profile,
     weights,
     dosesEntries,
+    medicationStorage,
     initialize,
     addWeight,
     addDose,
@@ -53,6 +54,9 @@ function App() {
     updateProfile,
     clearAllData,
     generateSampleData,
+    addMedicationStorage,
+    updateMedicationStorage,
+    deleteMedicationStorage,
   } = useAppStore();
 
   const { openModal, closeModal } = useAppHistory(
@@ -253,6 +257,13 @@ function App() {
                 chartPeriod={chartPeriod}
                 onChartPeriodChange={setChartPeriod}
                 useWheelForNumbers={profile.useWheelForNumbers ?? true}
+                medicationStorage={medicationStorage}
+                onAddMedicationStorage={addMedicationStorage}
+                onUpdateMedicationStorage={updateMedicationStorage}
+                onDeleteMedicationStorage={deleteMedicationStorage}
+                activeModal={activeModal}
+                onOpenModal={openModal}
+                onCloseModal={closeModal}
               />
             </div>
           </TabContent>

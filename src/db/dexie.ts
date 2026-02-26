@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry } from '../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
 
 export class GLPalDB extends Dexie {
   weights!: Table<WeightEntry, string>;
@@ -8,6 +8,7 @@ export class GLPalDB extends Dexie {
   peptides!: Table<Peptide, string>;
   peptideLogs!: Table<PeptideLogEntry, string>;
   userProfile!: Table<UserProfile, number>;
+  medicationStorage!: Table<MedicationStorage, string>;
 
   constructor() {
     super('GLPalDB');
@@ -17,7 +18,8 @@ export class GLPalDB extends Dexie {
       protocols: 'id, medication, startDate',
       peptides: 'id, category, isActive',
       peptideLogs: 'id, peptideId, date',
-      userProfile: '++id'
+      userProfile: '++id',
+      medicationStorage: 'id, medicationName, category, isActive'
     });
   }
 }
@@ -31,4 +33,5 @@ export const clearDatabase = async (): Promise<void> => {
   await db.peptides.clear();
   await db.peptideLogs.clear();
   await db.userProfile.clear();
+  await db.medicationStorage.clear();
 };

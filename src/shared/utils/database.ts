@@ -1,4 +1,4 @@
-import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry } from '../../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry, MedicationStorage } from '../../types';
 import { db, clearDatabase } from '../../db/dexie';
 
 const isLocalStorageAvailable = (): boolean => {
@@ -320,6 +320,38 @@ export const getPeptideLogsById = async (peptideId: string): Promise<PeptideLogE
 export const clearPeptideData = async (): Promise<void> => {
   await db.peptides.clear();
   await db.peptideLogs.clear();
+};
+
+// Medication Storage
+export const getMedicationStorage = async (): Promise<MedicationStorage[]> => {
+  try {
+    return await db.medicationStorage.toArray();
+  } catch {
+    return [];
+  }
+};
+
+export const saveMedicationStorage = async (items: MedicationStorage[]): Promise<void> => {
+  await db.medicationStorage.bulkPut(items);
+};
+
+export const addMedicationStorage = async (item: MedicationStorage): Promise<void> => {
+  const items = await getMedicationStorage();
+  items.push(item);
+  await db.medicationStorage.bulkPut(items);
+};
+
+export const updateMedicationStorage = async (updatedItem: MedicationStorage): Promise<void> => {
+  await db.medicationStorage.put(updatedItem);
+};
+
+export const deleteMedicationStorage = async (id: string): Promise<void> => {
+  await db.medicationStorage.delete(id);
+};
+
+export const getActiveMedicationStorage = async (): Promise<MedicationStorage[]> => {
+  const items = await getMedicationStorage();
+  return items.filter(item => item.isActive);
 };
 
 // Dosage Calculator (localStorage)

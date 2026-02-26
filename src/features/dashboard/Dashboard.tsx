@@ -3,11 +3,12 @@ import WeightChart from '../weight/WeightChart';
 import MedicationChart from '../medication/components/MedicationChart';
 import PerformanceOverview from './components/PerformanceOverview';
 import TDEEDisplay from './components/TDEEDisplay';
+import StorageCard from './components/StorageCard';
 import WeightInput from '../weight/components/WeightInput';
 import BMIInfoTooltip from './components/BMIInfoTooltip';
 import PeriodSelector from '../../shared/components/PeriodSelector';
 import { useWeightMetrics, type ChartPeriod } from '../../shared/hooks';
-import { WeightEntry, GLP1Entry, UserProfile } from '../../types';
+import { WeightEntry, GLP1Entry, UserProfile, MedicationStorage } from '../../types';
 import { useThemeStyles } from '../../contexts/ThemeContext';
 import { formatWeight, convertWeightFromKg } from '../../shared/utils/unitConversion';
 
@@ -20,6 +21,13 @@ interface DashboardProps {
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
   useWheelForNumbers?: boolean;
+  medicationStorage: MedicationStorage[];
+  onAddMedicationStorage: (item: MedicationStorage) => void;
+  onUpdateMedicationStorage: (item: MedicationStorage) => void;
+  onDeleteMedicationStorage: (id: string) => void;
+  activeModal?: string | null;
+  onOpenModal?: (modal: string) => void;
+  onCloseModal?: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -31,6 +39,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   chartPeriod,
   onChartPeriodChange,
   useWheelForNumbers = true,
+  medicationStorage,
+  onAddMedicationStorage,
+  onUpdateMedicationStorage,
+  onDeleteMedicationStorage,
+  activeModal,
+  onOpenModal,
+  onCloseModal,
 }) => {
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
 
@@ -146,6 +161,18 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div className={bigCard}>
         <TDEEDisplay profile={profile} currentWeight={weightMetrics.currentWeight} />
       </div>
+
+      {/* Medication Storage */}
+      <StorageCard
+        medicationStorage={medicationStorage}
+        onAddStorage={onAddMedicationStorage}
+        onUpdateStorage={onUpdateMedicationStorage}
+        onDeleteStorage={onDeleteMedicationStorage}
+        unitSystem={unitSystem}
+        isModalOpen={activeModal === 'storage'}
+        onOpenModal={() => onOpenModal('storage')}
+        onCloseModal={onCloseModal}
+      />
     </>
   );
 };

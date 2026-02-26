@@ -411,7 +411,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
 
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
-            <div className="h-64 sm:h-80 lg:h-96">
+            <div className="h-80 sm:h-96 lg:h-112">
               <MedicationChart
                 data={generatedEntries} 
                 period={chartPeriod} 

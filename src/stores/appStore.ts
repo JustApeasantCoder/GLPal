@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry } from '../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
 import { ChartPeriod } from '../shared/hooks';
 import { ModalType } from '../shared/hooks/useAppHistory';
 import {
@@ -11,6 +11,7 @@ import {
   getUserProfile,
   getPeptides,
   getPeptideLogs,
+  getMedicationStorage,
   saveUserProfile,
   clearAllData,
   addWeightEntry as dbAddWeightEntry,
@@ -27,6 +28,9 @@ import {
   addPeptide as dbAddPeptide,
   updatePeptide as dbUpdatePeptide,
   deletePeptide as dbDeletePeptide,
+  addMedicationStorage as dbAddMedicationStorage,
+  updateMedicationStorage as dbUpdateMedicationStorage,
+  deleteMedicationStorage as dbDeleteMedicationStorage,
 } from '../shared/utils/database';
 import { initializeSampleData } from '../shared/utils/sampleData';
 import { generateDosesFromProtocols } from '../services/MedicationService';
@@ -43,6 +47,7 @@ interface AppState {
   profile: UserProfile;
   peptides: Peptide[];
   peptideLogs: PeptideLogEntry[];
+  medicationStorage: MedicationStorage[];
   collapsedMedications: string[];
   latestDoseDone: number | null;
   isInitialized: boolean;
@@ -73,6 +78,10 @@ interface AppActions {
   
   addPeptideLog: (log: PeptideLogEntry) => Promise<void>;
   deletePeptideLog: (id: string) => Promise<void>;
+  
+  addMedicationStorage: (item: MedicationStorage) => Promise<void>;
+  updateMedicationStorage: (item: MedicationStorage) => Promise<void>;
+  deleteMedicationStorage: (id: string) => Promise<void>;
   
   setCollapsedMedications: (medications: string[]) => void;
   setLatestDoseDone: (timestamp: number | null) => void;
@@ -105,6 +114,7 @@ export const useAppStore = create<AppState & AppActions>()(
       profile: DEFAULT_PROFILE,
       peptides: [],
       peptideLogs: [],
+      medicationStorage: [],
       collapsedMedications: [],
       latestDoseDone: null,
       isInitialized: false,
@@ -112,13 +122,14 @@ export const useAppStore = create<AppState & AppActions>()(
       initialize: async () => {
         await initializeDatabase();
         
-        const [weights, dosesEntries, protocols, profile, peptides, peptideLogs] = await Promise.all([
+        const [weights, dosesEntries, protocols, profile, peptides, peptideLogs, medicationStorage] = await Promise.all([
           getWeightEntries(),
           getAllMedicationEntries(),
           getMedicationProtocols(),
           getUserProfile(),
           getPeptides(),
           getPeptideLogs(),
+          getMedicationStorage(),
         ]);
         
         const collapsedMedStr = localStorage.getItem('glpal_collapsed_medications');
@@ -137,6 +148,7 @@ export const useAppStore = create<AppState & AppActions>()(
           profile: profile || DEFAULT_PROFILE,
           peptides: peptides || [],
           peptideLogs: peptideLogs || [],
+          medicationStorage: medicationStorage || [],
           collapsedMedications,
           latestDoseDone,
           activeTab: savedTab || 'dashboard',
@@ -249,6 +261,24 @@ export const useAppStore = create<AppState & AppActions>()(
         set({ peptideLogs });
       },
 
+      addMedicationStorage: async (item) => {
+        await dbAddMedicationStorage(item);
+        const medicationStorage = await getMedicationStorage();
+        set({ medicationStorage });
+      },
+
+      updateMedicationStorage: async (item) => {
+        await dbUpdateMedicationStorage(item);
+        const medicationStorage = await getMedicationStorage();
+        set({ medicationStorage });
+      },
+
+      deleteMedicationStorage: async (id) => {
+        await dbDeleteMedicationStorage(id);
+        const medicationStorage = await getMedicationStorage();
+        set({ medicationStorage });
+      },
+
       setCollapsedMedications: (medications) => {
         localStorage.setItem('glpal_collapsed_medications', JSON.stringify(medications));
         set({ collapsedMedications: medications });
@@ -272,6 +302,7 @@ export const useAppStore = create<AppState & AppActions>()(
           profile: DEFAULT_PROFILE,
           peptides: [],
           peptideLogs: [],
+          medicationStorage: [],
           collapsedMedications: [],
           latestDoseDone: null,
         });
@@ -281,11 +312,12 @@ export const useAppStore = create<AppState & AppActions>()(
         await clearAllData();
         initializeSampleData();
         
-        const [weights, dosesEntries, protocols, profile] = await Promise.all([
+        const [weights, dosesEntries, protocols, profile, medicationStorage] = await Promise.all([
           getWeightEntries(),
           getAllMedicationEntries(),
           getMedicationProtocols(),
           getUserProfile(),
+          getMedicationStorage(),
         ]);
         
         set({
@@ -293,6 +325,7 @@ export const useAppStore = create<AppState & AppActions>()(
           dosesEntries: dosesEntries || [],
           protocols: protocols || [],
           profile: profile || DEFAULT_PROFILE,
+          medicationStorage: medicationStorage || [],
         });
       },
     }),

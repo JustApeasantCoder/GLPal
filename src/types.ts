@@ -146,6 +146,26 @@ export interface PeptideLogEntry {
   createdAt: string;
 }
 
+export type StorageCategory = 'glp1' | 'peptide' | 'other';
+
+export type StorageType = 'vial' | 'pen' | 'bottle' | 'package';
+
+export interface MedicationStorage {
+  id: string;
+  medicationName: string;
+  category: StorageCategory;
+  type: StorageType;
+  initialUnits: number;
+  remainingUnits: number;
+  unitCost: number;
+  purchaseDate: string;
+  expiryDate?: string;
+  notes: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Common peptide presets for quick selection
 export interface PeptidePreset {
   name: string;
