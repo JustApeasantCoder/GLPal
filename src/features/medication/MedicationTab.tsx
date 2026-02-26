@@ -436,7 +436,6 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
           collapsedMedications={collapsedSet}
           onToggleMedication={toggleMedication}
           onEditProtocol={handleEditProtocol}
-          onDeleteClick={handleDeleteClick}
         />
 
         <div className="border-t border-[#B19CD9]/20 my-3"></div>

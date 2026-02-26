@@ -24,6 +24,45 @@ const STORAGE_TYPES: { id: StorageType; label: string }[] = [
   { id: 'powder', label: 'Powder' },
 ];
 
+const GLP1_COLORS = [
+  '#9C7BD3', // Semaglutide
+  '#4ADEA8', // Tirzepatide
+  '#F59E0B', // Retatrutide
+  '#EF4444', // Cagrilintide
+  '#3B82F6', // Liraglutide
+  '#94A3B8', // Dulaglutide
+  '#6B7280', // Custom/Other
+];
+
+const getStorageItemColor = (item: MedicationStorage, glp1MedicationOrder: string[] = []): string => {
+  if (item.category === 'glp1') {
+    // First try to match by exact medication name in the logged order
+    let medIndex = glp1MedicationOrder.indexOf(item.medicationName);
+    if (medIndex === -1) {
+      // Try partial match with medication name from logs
+      const baseName = item.medicationName.toLowerCase().replace(/\s*\(.*?\)/g, '').trim();
+      for (let i = 0; i < glp1MedicationOrder.length; i++) {
+        const logMedBase = glp1MedicationOrder[i].toLowerCase().replace(/\s*\(.*?\)/g, '').trim();
+        if (baseName.includes(logMedBase) || logMedBase.includes(baseName)) {
+          medIndex = i;
+          break;
+        }
+      }
+    }
+    return GLP1_COLORS[medIndex >= 0 ? medIndex : GLP1_COLORS.length - 1];
+  }
+  
+  if (item.category === 'peptide') {
+    const peptide = PEPTIDE_PRESETS.find(p => 
+      item.medicationName.toLowerCase().includes(p.name.toLowerCase()) ||
+      p.name.toLowerCase().includes(item.medicationName.toLowerCase())
+    );
+    return peptide ? PEPTIDE_CATEGORY_COLORS[peptide.category] : '#6B7280';
+  }
+  
+  return '#6B7280';
+};
+
 const PEPTIDE_CATEGORY_COLORS: Record<PeptideCategory, string> = {
   healing: '#EF4444',
   growth_hormone: '#F59E0B',
@@ -52,76 +91,6 @@ const PEPTIDE_CATEGORIES: PeptideCategory[] = [
   'healing', 'growth_hormone', 'fat_loss', 'muscle', 'skin', 'longevity', 'immune', 'cognitive', 'other'
 ];
 
-const GLP1_COLORS = [
-  '#9C7BD3', // Semaglutide
-  '#4ADEA8', // Tirzepatide
-  '#F59E0B', // Retatrutide
-  '#EF4444', // Cagrilintide
-  '#3B82F6', // Liraglutide
-  '#94A3B8', // Dulaglutide
-  '#6B7280', // Custom/Other
-];
-
-const getStorageItemColor = (item: MedicationStorage, glp1Order: string[]): string => {
-  if (item.category === 'glp1') {
-    const index = glp1Order.indexOf(item.medicationName);
-    if (index >= 0 && index < GLP1_COLORS.length) {
-      return GLP1_COLORS[index];
-    }
-    const med = MEDICATIONS.find(m => m.name === item.medicationName);
-    if (med) {
-      const medIndex = MEDICATIONS.indexOf(med);
-      if (medIndex >= 0 && medIndex < GLP1_COLORS.length) {
-        return GLP1_COLORS[medIndex];
-      }
-    }
-    return GLP1_COLORS[0];
-  } else if (item.category === 'peptide') {
-    const peptide = PEPTIDE_PRESETS.find(p => p.name === item.medicationName);
-    if (peptide) {
-      return PEPTIDE_CATEGORY_COLORS[peptide.category];
-    }
-    return PEPTIDE_CATEGORY_COLORS.other;
-  }
-  return '#6B7280';
-};
-
-interface StorageItemRowProps {
-  item: MedicationStorage;
-  glp1Order: string[];
-  onEdit: () => void;
-}
-
-const StorageItemRow: React.FC<StorageItemRowProps> = ({ item, glp1Order, onEdit }) => {
-  const itemColor = getStorageItemColor(item, glp1Order);
-  return (
-    <div 
-      onClick={onEdit}
-      className="flex items-center justify-between p-2 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30 transition-colors"
-      style={{ borderLeft: `3px solid ${itemColor}` }}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-medium text-white truncate">{item.medicationName}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`text-xs px-2 py-0.5 rounded ${
-            item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
-            item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
-            'bg-gray-500/20 text-gray-400'
-          }`}>
-            {STORAGE_TYPES.find(t => t.id === item.type)?.label}
-          </span>
-        </div>
-        <p className="text-xs text-gray-400 mt-1">
-          {item.remainingUnits}/{item.initialUnits} units
-          {item.dosagePerUnit > 0 && ` • ${item.dosagePerUnit} mg`}
-          {` • $${item.unitCost}/unit`}
-        </p>
-      </div>
-    </div>
-  );
-};
 
 interface StorageCardProps {
   medicationStorage: MedicationStorage[];
@@ -153,12 +122,12 @@ const StorageCard: React.FC<StorageCardProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<StorageCategory | 'all'>('all');
   const [isModalClosing, setIsModalClosing] = useState(false);
   const [editingItem, setEditingItem] = useState<MedicationStorage | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState<'purchase' | 'expiry'>('purchase');
   const [showMedicationPicker, setShowMedicationPicker] = useState(false);
   const [showPeptidePicker, setShowPeptidePicker] = useState(false);
   const [peptideSearchQuery, setPeptideSearchQuery] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Get unique medication order from logged entries (matches Medication Chart)
   const glp1MedicationOrder = useMemo(() => {
@@ -238,6 +207,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
 
   const openAddModal = () => {
     setEditingItem(null);
+    setConfirmAction(null);
     setFormData({
       medicationName: '',
       category: 'glp1',
@@ -256,6 +226,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
 
   const openEditModal = (item: MedicationStorage) => {
     setEditingItem(item);
+    setConfirmAction(null);
     setFormData({
       medicationName: item.medicationName,
       category: item.category,
@@ -317,12 +288,6 @@ const StorageCard: React.FC<StorageCardProps> = ({
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this storage item?')) {
-      onDeleteStorage(id);
-    }
-  };
-
   const formatCurrency = (value: number) => {
     return `$${value.toFixed(2)}`;
   };
@@ -338,7 +303,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       {/* Metrics */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4">
         <div className={smallCard}>
-          <p className={text.label}>Items</p>
+          <p className={text.label}>Total Items</p>
           <p className={text.value}>{metrics.totalItems}</p>
         </div>
         <div className={smallCard}>
@@ -362,6 +327,8 @@ const StorageCard: React.FC<StorageCardProps> = ({
           <p className={text.value}>{formatCurrency(metrics.avgCostPerUnit)}</p>
         </div>
       </div>
+
+      <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
       {/* Category Tabs */}
       <div className="flex gap-2 pb-2 mb-3">
@@ -395,6 +362,8 @@ const StorageCard: React.FC<StorageCardProps> = ({
       {/* Storage Overview Chart */}
       <StorageChart storage={medicationStorage} selectedCategory={selectedCategory} glp1MedicationOrder={glp1MedicationOrder} height={260} />
 
+      <div className="border-t border-[#B19CD9]/20 my-3"></div>
+
       {/* Add Button */}
       <button
         onClick={openAddModal}
@@ -403,71 +372,155 @@ const StorageCard: React.FC<StorageCardProps> = ({
         + Add Storage Item
       </button>
 
-      {/* Storage List grouped by category */}
+      {/* Storage List - Separate containers for GLP-1, Peptides, Other */}
       {filteredStorage.length > 0 ? (
         <div className="space-y-4 mt-4">
           {/* GLP-1 Card */}
           {(selectedCategory === 'all' || selectedCategory === 'glp1') && filteredStorage.filter(item => item.category === 'glp1').length > 0 && (
-            <div className={`rounded-lg p-3 border ${
+            <div className={`rounded-lg border p-3 ${
               isDarkMode 
                 ? 'bg-black/20 border-[#B19CD9]/20' 
                 : 'bg-gray-50 border-gray-200'
             }`}>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-text-primary' : 'text-gray-900'} mb-2`}>GLP-1</h3>
-              <div className="border-t border-[#B19CD9]/20 mb-2"></div>
-              <div className="space-y-2">
-                {filteredStorage.filter(item => item.category === 'glp1').map(item => (
-                  <StorageItemRow 
-                    key={item.id} 
-                    item={item} 
-                    glp1Order={glp1MedicationOrder}
-                    onEdit={() => openEditModal(item)}
-                  />
-                ))}
+              <h3 className={`text-base font-medium ${
+                isDarkMode ? 'text-text-primary' : 'text-gray-900'
+              }`}>GLP-1</h3>
+              <div className="border-t border-[#B19CD9]/20 my-2"></div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {filteredStorage.filter(item => item.category === 'glp1').map(item => {
+                  const itemColor = getStorageItemColor(item, glp1MedicationOrder);
+                  return (
+                    <div 
+                      key={item.id}
+                      onClick={() => openEditModal(item)}
+                      className={`rounded-lg p-3 border cursor-pointer transition-all ${
+                        isDarkMode 
+                          ? 'bg-black/20 border-[#B19CD9]/20 hover:border-[#B19CD9]/40' 
+                          : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={{ borderLeftWidth: '3px', borderLeftColor: itemColor }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {item.medicationName}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
+                          item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {STORAGE_TYPES.find(t => t.id === item.type)?.label}
+                        </span>
+                      </div>
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <div className="flex items-center justify-between">
+                          <span>{item.remainingUnits}/{item.initialUnits} units</span>
+                          <span className="text-[#4ADEA8]">${item.unitCost.toFixed(2)}/unit</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* Peptides Card */}
           {(selectedCategory === 'all' || selectedCategory === 'peptide') && filteredStorage.filter(item => item.category === 'peptide').length > 0 && (
-            <div className={`rounded-lg p-3 border ${
+            <div className={`rounded-lg border p-3 ${
               isDarkMode 
                 ? 'bg-black/20 border-[#B19CD9]/20' 
                 : 'bg-gray-50 border-gray-200'
             }`}>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-text-primary' : 'text-gray-900'} mb-2`}>Peptides</h3>
-              <div className="border-t border-[#B19CD9]/20 mb-2"></div>
-              <div className="space-y-2">
-                {filteredStorage.filter(item => item.category === 'peptide').map(item => (
-                  <StorageItemRow 
-                    key={item.id} 
-                    item={item} 
-                    glp1Order={glp1MedicationOrder}
-                    onEdit={() => openEditModal(item)}
-                  />
-                ))}
+              <h3 className={`text-base font-medium ${
+                isDarkMode ? 'text-text-primary' : 'text-gray-900'
+              }`}>Peptides</h3>
+              <div className="border-t border-[#B19CD9]/20 my-2"></div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {filteredStorage.filter(item => item.category === 'peptide').map(item => {
+                  const itemColor = getStorageItemColor(item, glp1MedicationOrder);
+                  return (
+                    <div 
+                      key={item.id}
+                      onClick={() => openEditModal(item)}
+                      className={`rounded-lg p-3 border cursor-pointer transition-all ${
+                        isDarkMode 
+                          ? 'bg-black/20 border-[#B19CD9]/20 hover:border-[#B19CD9]/40' 
+                          : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={{ borderLeftWidth: '3px', borderLeftColor: itemColor }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {item.medicationName}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
+                          item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {STORAGE_TYPES.find(t => t.id === item.type)?.label}
+                        </span>
+                      </div>
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <div className="flex items-center justify-between">
+                          <span>{item.remainingUnits}/{item.initialUnits} units</span>
+                          <span className="text-[#4ADEA8]">${item.unitCost.toFixed(2)}/unit</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* Others Card */}
           {(selectedCategory === 'all' || selectedCategory === 'other') && filteredStorage.filter(item => item.category === 'other').length > 0 && (
-            <div className={`rounded-lg p-3 border ${
+            <div className={`rounded-lg border p-3 ${
               isDarkMode 
                 ? 'bg-black/20 border-[#B19CD9]/20' 
                 : 'bg-gray-50 border-gray-200'
             }`}>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-text-primary' : 'text-gray-900'} mb-2`}>Other</h3>
-              <div className="border-t border-[#B19CD9]/20 mb-2"></div>
-              <div className="space-y-2">
-                {filteredStorage.filter(item => item.category === 'other').map(item => (
-                  <StorageItemRow 
-                    key={item.id} 
-                    item={item} 
-                    glp1Order={glp1MedicationOrder}
-                    onEdit={() => openEditModal(item)}
-                  />
-                ))}
+              <h3 className={`text-base font-medium ${
+                isDarkMode ? 'text-text-primary' : 'text-gray-900'
+              }`}>Other</h3>
+              <div className="border-t border-[#B19CD9]/20 my-2"></div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {filteredStorage.filter(item => item.category === 'other').map(item => {
+                  const itemColor = getStorageItemColor(item, glp1MedicationOrder);
+                  return (
+                    <div 
+                      key={item.id}
+                      onClick={() => openEditModal(item)}
+                      className={`rounded-lg p-3 border cursor-pointer transition-all ${
+                        isDarkMode 
+                          ? 'bg-black/20 border-[#B19CD9]/20 hover:border-[#B19CD9]/40' 
+                          : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={{ borderLeftWidth: '3px', borderLeftColor: itemColor }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {item.medicationName}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          item.type === 'vial' ? 'bg-purple-500/20 text-purple-400' :
+                          item.type === 'pen' ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {STORAGE_TYPES.find(t => t.id === item.type)?.label}
+                        </span>
+                      </div>
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <div className="flex items-center justify-between">
+                          <span>{item.remainingUnits}/{item.initialUnits} units</span>
+                          <span className="text-[#4ADEA8]">${item.unitCost.toFixed(2)}/unit</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -493,9 +546,9 @@ const StorageCard: React.FC<StorageCardProps> = ({
               <h2 className={`text-lg font-semibold ${modalText.title}`}>
                 {editingItem ? 'Edit Storage Item' : 'Add Storage Item'}
               </h2>
-              {editingItem && !confirmDelete && (
+              {editingItem && !confirmAction && (
                 <button
-                  onClick={() => setConfirmDelete(true)}
+                  onClick={() => setConfirmAction('delete')}
                   className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
                   title="Delete"
                 >
@@ -507,50 +560,25 @@ const StorageCard: React.FC<StorageCardProps> = ({
             </div>
             <div className="border-t border-[#B19CD9]/20 mb-4"></div>
 
-            {confirmDelete ? (
-              <div className="text-center py-4">
-                <p className={`text-base mb-4 ${modalText.value}`}>
-                  Are you sure you want to delete this storage item?
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      onDeleteStorage(editingItem!.id);
-                      closeStorageModal();
-                      setConfirmDelete(false);
-                    }}
-                    className="flex-1 py-2 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
-                    Yes, Delete
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(false)}
-                    className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
-                      Category
-                    </label>
-                    <div className="flex gap-1">
-                      {CATEGORIES.map(cat => (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, category: cat.id, medicationName: '' })}
-                          className={segmentButton(formData.category === cat.id)}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
+                    Category
+                  </label>
+                  <div className="flex gap-1">
+                    {CATEGORIES.map(cat => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, category: cat.id, medicationName: '' })}
+                        className={segmentButton(formData.category === cat.id)}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
                   </div>
+                </div>
                 <div>
                   <label className={`block text-xs font-medium ${modalText.label} mb-1`}>
                     Type
@@ -741,24 +769,47 @@ const StorageCard: React.FC<StorageCardProps> = ({
                   rows={2}
                 />
               </div>
-
-              <div className="flex gap-2 mt-4 pt-3 border-t border-[#B19CD9]/20">
-                <button
-                  onClick={closeStorageModal}
-                  className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleSave(true)}
-                  disabled={!formData.medicationName || !formData.initialUnits}
-                  className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
-                >
-                  {editingItem ? 'Update' : 'Add'}
-                </button>
-              </div>
             </div>
-            )}
+
+            <div className="flex gap-2 mt-4 pt-3 border-t border-[#B19CD9]/20">
+              {confirmAction && editingItem ? (
+                <>
+                  <button
+                    onClick={() => {
+                      if (confirmAction === 'delete') {
+                        onDeleteStorage(editingItem.id);
+                        closeStorageModal();
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                  >
+                    Yes, delete
+                  </button>
+                  <button
+                    onClick={() => setConfirmAction(null)}
+                    className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={closeStorageModal}
+                    className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleSave(true)}
+                    disabled={!formData.medicationName || !formData.initialUnits}
+                    className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
+                  >
+                    {editingItem ? 'Update' : 'Add'}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>,
         document.body

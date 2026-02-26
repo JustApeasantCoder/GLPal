@@ -124,9 +124,37 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
-        <h2 className={`text-xl font-semibold mb-6 ${modalText.title}`}>
-          {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className={`text-xl font-semibold ${modalText.title}`}>
+            {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
+          </h2>
+          {mode === 'edit' && !confirmAction && (
+            <div className="flex gap-1">
+              {onArchive && (
+                <button
+                  onClick={() => setConfirmAction('archive')}
+                  className="p-1.5 text-[#B19CD9] hover:bg-[#B19CD9]/10 rounded transition-colors"
+                  title="Archive"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l1-8 3 6 2-4 3 6z" />
+                  </svg>
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => setConfirmAction('delete')}
+                  className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                  title="Delete"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
 
         <div className="space-y-4">
@@ -240,26 +268,6 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
           <div className="flex gap-2">
-            {mode === 'edit' && onDelete && onArchive && !confirmAction && (
-              <>
-                <button
-                  onClick={() => setConfirmAction('archive')}
-                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Archive
-                </button>
-                <button
-                  onClick={() => setConfirmAction('delete')}
-                  className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
-                >
-                  Delete
-                </button>
-              </>
-            )}
             {mode === 'edit' && confirmAction && (
               <>
                 <button
