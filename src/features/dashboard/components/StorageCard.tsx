@@ -364,7 +364,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       </div>
 
       {/* Storage Overview Chart */}
-      <StorageChart storage={medicationStorage} selectedCategory={selectedCategory} glp1MedicationOrder={glp1MedicationOrder} height={180} />
+      <StorageChart storage={medicationStorage} selectedCategory={selectedCategory} glp1MedicationOrder={glp1MedicationOrder} height={260} />
 
       {/* Add Button */}
       <button

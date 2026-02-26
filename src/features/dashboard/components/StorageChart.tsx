@@ -86,20 +86,29 @@ const StorageChart: React.FC<StorageChartProps> = ({ storage, selectedCategory, 
     return {
       backgroundColor: 'transparent',
       animation: true,
+      animationDuration: 800,
+      animationEasing: 'cubicOut',
       grid: {
         top: 10,
         right: 60,
-        bottom: 20,
-        left: 100,
+        bottom: 10,
+        left: 10,
+        containLabel: true,
       },
       tooltip: {
         trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-        backgroundColor: '#1a1625',
+        axisPointer: { 
+          type: 'shadow',
+          shadowStyle: {
+            color: 'rgba(177, 156, 217, 0.1)',
+          },
+        },
+        backgroundColor: 'rgba(26, 22, 37, 0.95)',
         borderColor: '#B19CD9',
         borderWidth: 1,
-        borderRadius: 8,
-        textStyle: { color: '#fff', fontSize: 12 },
+        borderRadius: 12,
+        padding: [12, 16],
+        textStyle: { color: '#fff', fontSize: 13, fontFamily: 'system-ui' },
         formatter: (params: any) => {
           const item = params[0];
           const dataIndex = item.dataIndex;
@@ -108,52 +117,107 @@ const StorageChart: React.FC<StorageChartProps> = ({ storage, selectedCategory, 
           const valueRemaining = (data.remainingUnits * data.unitCost).toFixed(2);
           const percentRemaining = Math.round((data.remainingUnits / data.initialUnits) * 100);
           
-          let html = `<div class="font-semibold">${data.medicationName}</div>`;
-          html += `<div style="color: ${item.color}">${data.remainingUnits} units remaining (${percentRemaining}%)</div>`;
+          const categoryColors: Record<string, string> = {
+            glp1: '#3B82F6',
+            peptide: '#10B981',
+            other: '#6B7280',
+          };
+          
+          let html = `
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #fff;">${data.medicationName}</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${categoryColors[data.category] || '#6B7280'};"></span>
+              <span style="color: #999; font-size: 12px; text-transform: capitalize;">${data.category}</span>
+            </div>
+            <div style="background: #2a2a3a; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: #999;">Remaining</span>
+                <span style="color: ${item.color}; font-weight: 600;">${data.remainingUnits} units (${percentRemaining}%)</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: #1a1a24; border-radius: 3px; overflow: hidden;">
+                <div style="width: ${percentRemaining}%; height: 100%; background: linear-gradient(90deg, ${item.color}, ${item.color}aa); border-radius: 3px;"></div>
+              </div>
+            </div>
+          `;
           if (data.dosagePerUnit > 0) {
-            html += `<div>${totalDosage} mg total dosage</div>`;
+            html += `<div style="color: #999; margin-bottom: 4px;"><span style="color: #ccc;">Total dosage:</span> ${totalDosage} mg</div>`;
           }
-          html += `<div>$${valueRemaining} value remaining</div>`;
+          html += `<div style="color: #999; margin-bottom: 4px;"><span style="color: #ccc;">Value:</span> $${valueRemaining}</div>`;
           if (data.expiryDate) {
-            html += `<div>Expires: ${data.expiryDate}</div>`;
+            html += `<div style="color: #999;"><span style="color: #ccc;">Expires:</span> ${data.expiryDate}</div>`;
           }
           return html;
         },
       },
       xAxis: {
         type: 'value',
-        axisLine: { lineStyle: { color: '#333' } },
-        axisLabel: { color: '#666', fontSize: 10 },
-        splitLine: { lineStyle: { color: '#222' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { 
+          color: '#666', 
+          fontSize: 11,
+          formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value.toString(),
+        },
+        splitLine: { 
+          lineStyle: { 
+            color: '#222',
+            type: 'dashed',
+          } 
+        },
       },
       yAxis: {
         type: 'category',
         data: sortedData.map(d => d.medicationName),
-        axisLine: { lineStyle: { color: '#333' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
         axisLabel: { 
-          color: '#999', 
-          fontSize: 10,
-          width: 90,
+          color: '#aaa', 
+          fontSize: 11,
+          fontWeight: 500,
+          width: 80,
           overflow: 'truncate',
         },
-        axisTick: { show: false },
       },
       series: [{
         type: 'bar',
-        data: sortedData.map(d => ({
-          value: d.remainingUnits,
-          itemStyle: {
-            color: getItemColor(d, glp1MedicationOrder),
-            borderRadius: [0, 4, 4, 0],
-          },
-        })),
-        barWidth: '60%',
+        data: sortedData.map(d => {
+          const color = getItemColor(d, glp1MedicationOrder);
+          const percent = Math.round((d.remainingUnits / d.initialUnits) * 100);
+          return {
+            value: d.remainingUnits,
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 1, y2: 0,
+                colorStops: [
+                  { offset: 0, color: color },
+                  { offset: 1, color: `${color}cc` },
+                ],
+              },
+              borderRadius: [0, 8, 8, 0],
+            },
+          };
+        }),
+        barWidth: '55%',
+        showBackground: true,
+        backgroundStyle: {
+          color: 'rgba(255, 255, 255, 0.03)',
+          borderRadius: [0, 8, 8, 0],
+        },
         label: {
           show: true,
           position: 'right',
-          color: '#999',
-          fontSize: 10,
+          color: '#888',
+          fontSize: 11,
+          fontWeight: 500,
           formatter: (params: any) => `${params.value}u`,
+          offset: [8, 0],
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(177, 156, 217, 0.3)',
+          },
         },
       }],
     };
@@ -162,10 +226,13 @@ const StorageChart: React.FC<StorageChartProps> = ({ storage, selectedCategory, 
   if (!chartOption) {
     return (
       <div 
-        className="flex items-center justify-center text-gray-500 text-sm p-4"
+        className="flex flex-col items-center justify-center text-gray-500 text-sm p-4"
         style={{ height }}
       >
-        No active storage to display
+        <svg className="w-10 h-10 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <span>No active storage to display</span>
       </div>
     );
   }
