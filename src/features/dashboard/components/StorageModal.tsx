@@ -203,6 +203,8 @@ const StorageModal: React.FC<StorageModalProps> = ({
                 </div>
               </div>
 
+              <div className="border-t border-[#B19CD9]/20 my-3"></div>
+
               <div className="grid grid-cols-2 gap-3">
                 {formData.category === 'glp1' && (
                   <div>
@@ -331,6 +333,8 @@ const StorageModal: React.FC<StorageModalProps> = ({
                   />
                 </div>
               </div>
+
+              <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

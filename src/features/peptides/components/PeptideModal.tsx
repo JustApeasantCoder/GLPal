@@ -101,7 +101,7 @@ const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, onDelete, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal, modalText, modalContainer, modalBackdrop, modalSmall, cancelButton, saveButton, deleteButton } = useThemeStyles();
+  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal, modalText, modalContainer, modalBackdrop, modalSmall, modalLabel, cancelButton, saveButton, deleteButton } = useThemeStyles();
   const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
@@ -332,7 +332,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Peptide Name</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Peptide Name</label>
                   <input
                     type="text"
                     value={name}
@@ -345,7 +345,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
 
                 {/* Category */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Category</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Category</label>
                   <div className="flex flex-wrap gap-2">
                     {(Object.keys(CATEGORY_COLORS) as PeptideCategory[]).map((cat) => (
                       <button
@@ -376,7 +376,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                 {/* Dose & Frequency */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-xs mb-1 ${modalText.label}`}>Dose (mg)</label>
+                    <label className={`${modalLabel} ${modalText.label}`}>Dose (mg)</label>
                     <input
                       type="number"
                       value={dose}
@@ -388,7 +388,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                     />
                   </div>
                   <div>
-                    <label className={`block text-xs mb-1 ${modalText.label}`}>Dosing Schedule</label>
+                    <label className={`${modalLabel} ${modalText.label}`}>Dosing Schedule</label>
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setShowFrequencyPicker(true); }}
@@ -399,9 +399,11 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                   </div>
                 </div>
 
+                <div className="border-t border-[#B19CD9]/20 my-3"></div>
+
                 {/* Preferred Time */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Preferred Time</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Preferred Time</label>
                   <input
                     type="time"
                     value={preferredTime}
@@ -415,7 +417,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
 
                 {/* Route */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Injection Route</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Injection Route</label>
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setShowRoutePicker(true); }}
@@ -428,7 +430,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-xs mb-1 ${modalText.label}`}>Start Date</label>
+                    <label className={`${modalLabel} ${modalText.label}`}>Start Date</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('start')}
@@ -438,7 +440,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                     </button>
                   </div>
                   <div>
-                    <label className={`block text-xs mb-1 ${modalText.label}`}>End Date (optional)</label>
+                    <label className={`${modalLabel} ${modalText.label}`}>End Date (optional)</label>
                     <button
                       type="button"
                       onClick={() => openDatePicker('end')}
@@ -449,9 +451,11 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                   </div>
                 </div>
 
+                <div className="border-t border-[#B19CD9]/20 my-3"></div>
+
                 {/* Notes */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Notes</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Notes</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -463,7 +467,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
 
                 {/* Color */}
                 <div>
-                  <label className={`block text-xs mb-1 ${modalText.label}`}>Color</label>
+                  <label className={`${modalLabel} ${modalText.label}`}>Color</label>
                   <div className="flex gap-2">
                     {Object.values(CATEGORY_COLORS).map((c) => (
                       <button
