@@ -47,6 +47,45 @@ const landingPagePlugin = () => ({
           return;
         }
       }
+      if (req.url === '/blog' || req.url === '/blog/' || req.url === '/blog/index.html') {
+        const blogIndexPath = path.resolve(__dirname, 'landing/blog/index.html');
+        if (fs.existsSync(blogIndexPath)) {
+          let content = fs.readFileSync(blogIndexPath, 'utf-8');
+          content = content.replace(/href="\.\.\//g, 'href="../');
+          content = content.replace(/href="posts\//g, 'href="posts/');
+          res.setHeader('Content-Type', 'text/html');
+          res.end(content);
+          return;
+        }
+      }
+      if (req.url === '/blog/post.html' || req.url.startsWith('/blog/post.html?')) {
+        const blogPostPath = path.resolve(__dirname, 'landing/blog/post.html');
+        if (fs.existsSync(blogPostPath)) {
+          let content = fs.readFileSync(blogPostPath, 'utf-8');
+          content = content.replace(/href="\.\.\//g, 'href="../');
+          res.setHeader('Content-Type', 'text/html');
+          res.end(content);
+          return;
+        }
+      }
+      if (req.url.startsWith('/blog/posts/')) {
+        const postPath = path.resolve(__dirname, 'landing/' + req.url);
+        if (fs.existsSync(postPath)) {
+          res.setHeader('Content-Type', 'text/markdown');
+          res.end(fs.readFileSync(postPath, 'utf-8'));
+          return;
+        }
+      }
+      if (req.url.startsWith('/blog/css/') || req.url.startsWith('/blog/js/')) {
+        const assetPath = path.resolve(__dirname, 'landing/' + req.url);
+        if (fs.existsSync(assetPath)) {
+          const ext = path.extname(assetPath);
+          const contentType = ext === '.css' ? 'text/css' : 'application/javascript';
+          res.setHeader('Content-Type', contentType);
+          res.end(fs.readFileSync(assetPath, 'utf-8'));
+          return;
+        }
+      }
       next();
     });
   },
@@ -96,6 +135,61 @@ const fixBuildPaths = () => ({
       let content = fs.readFileSync(termsSrc, 'utf-8');
       content = content.replace(/href="\/terms"/g, `href="${base}terms"`);
       fs.writeFileSync(termsDest, content);
+    }
+
+    // Copy blog files to build
+    const blogDir = path.resolve(__dirname, 'landing/blog');
+    const blogBuildDir = path.resolve(buildDir, 'blog');
+    if (fs.existsSync(blogDir)) {
+      // Create blog directory
+      if (!fs.existsSync(blogBuildDir)) {
+        fs.mkdirSync(blogBuildDir, { recursive: true });
+      }
+      
+      // Copy blog index.html
+      const blogIndexSrc = path.resolve(blogDir, 'index.html');
+      const blogIndexDest = path.resolve(blogBuildDir, 'index.html');
+      if (fs.existsSync(blogIndexSrc)) {
+        let content = fs.readFileSync(blogIndexSrc, 'utf-8');
+        content = content.replace(/href="\.\.\//g, 'href="../');
+        content = content.replace(/href="css\//g, 'href="css/');
+        content = content.replace(/href="js\//g, 'href="js/');
+        fs.writeFileSync(blogIndexDest, content);
+      }
+      
+      // Copy blog post.html
+      const blogPostSrc = path.resolve(blogDir, 'post.html');
+      const blogPostDest = path.resolve(blogBuildDir, 'post.html');
+      if (fs.existsSync(blogPostSrc)) {
+        let content = fs.readFileSync(blogPostSrc, 'utf-8');
+        content = content.replace(/href="\.\.\//g, 'href="../');
+        content = content.replace(/href="css\//g, 'href="css/');
+        content = content.replace(/href="js\//g, 'href="js/');
+        fs.writeFileSync(blogPostDest, content);
+      }
+      
+      // Copy css directory
+      const cssDir = path.resolve(blogDir, 'css');
+      const cssBuildDir = path.resolve(blogBuildDir, 'css');
+      if (fs.existsSync(cssDir) && !fs.existsSync(cssBuildDir)) {
+        fs.cpSync(cssDir, cssBuildDir, { recursive: true });
+      }
+      
+      // Copy js directory
+      const jsDir = path.resolve(blogDir, 'js');
+      const jsBuildDir = path.resolve(blogBuildDir, 'js');
+      if (fs.existsSync(jsDir) && !fs.existsSync(jsBuildDir)) {
+        fs.cpSync(jsDir, jsBuildDir, { recursive: true });
+      }
+      
+      // Copy posts directory
+      const postsDir = path.resolve(blogDir, 'posts');
+      const postsBuildDir = path.resolve(blogBuildDir, 'posts');
+      if (fs.existsSync(postsDir) && !fs.existsSync(postsBuildDir)) {
+        fs.cpSync(postsDir, postsBuildDir, { recursive: true });
+      }
+      
+      console.log('Blog files copied to build');
     }
 
     // Add prefetch hints for app assets to speed up app load
@@ -157,6 +251,8 @@ export default defineConfig({
         'app/index': path.resolve(__dirname, 'app/index.html'),
         privacy: path.resolve(__dirname, 'landing/privacy.html'),
         terms: path.resolve(__dirname, 'landing/terms.html'),
+        'blog/index': path.resolve(__dirname, 'landing/blog/index.html'),
+        'blog/post': path.resolve(__dirname, 'landing/blog/post.html'),
       },
       output: {
         dir: 'build',

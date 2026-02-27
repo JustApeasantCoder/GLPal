@@ -142,6 +142,16 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     return saved === 'true';
   });
 
+  const [doseDisplayLimit, setDoseDisplayLimit] = useState(5);
+  const [prevDoseLimit, setPrevDoseLimit] = useState(5);
+  const [doseAnimClass, setDoseAnimClass] = useState('collapsed');
+  const [weightDisplayLimit, setWeightDisplayLimit] = useState(10);
+  const [prevWeightLimit, setPrevWeightLimit] = useState(10);
+  const [weightAnimClass, setWeightAnimClass] = useState('collapsed');
+  const [peptideDisplayLimit, setPeptideDisplayLimit] = useState(5);
+  const [prevPeptideLimit, setPrevPeptideLimit] = useState(5);
+  const [peptideAnimClass, setPeptideAnimClass] = useState('collapsed');
+
   const [showCaloriePicker, setShowCaloriePicker] = useState(false);
   const [showProteinPicker, setShowProteinPicker] = useState(false);
   const [showCarbsPicker, setShowCarbsPicker] = useState(false);
@@ -353,6 +363,31 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     localStorage.setItem('glpal_peptide_log_collapsed', String(isPeptideLogCollapsed));
   }, [isPeptideLogCollapsed]);
 
+  // Animation triggers
+  useEffect(() => {
+    if (isDoseLogCollapsed) {
+      setDoseAnimClass('collapsed');
+    } else {
+      setDoseAnimClass('expanded');
+    }
+  }, [isDoseLogCollapsed]);
+
+  useEffect(() => {
+    if (isWeightLogCollapsed) {
+      setWeightAnimClass('collapsed');
+    } else {
+      setWeightAnimClass('expanded');
+    }
+  }, [isWeightLogCollapsed]);
+
+  useEffect(() => {
+    if (isPeptideLogCollapsed) {
+      setPeptideAnimClass('collapsed');
+    } else {
+      setPeptideAnimClass('expanded');
+    }
+  }, [isPeptideLogCollapsed]);
+
   useEffect(() => {
     setManualEntries(dosesEntries.filter(e => e.isManual).sort((a, b) => b.date.localeCompare(a.date)));
   }, [dosesEntries]);
@@ -471,10 +506,10 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-20">
       <div className={bigCard}>
-        <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} >Dose Log</h1>
+        <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => setIsDoseLogCollapsed(!isDoseLogCollapsed)}>
+          <h1 className={bigCardText.title}>Dose Log</h1>
           <button
-            onClick={() => setIsDoseLogCollapsed(!isDoseLogCollapsed)}
+            onClick={(e) => { e.stopPropagation(); setIsDoseLogCollapsed(!isDoseLogCollapsed); }}
             className="text-text-muted hover:text-white transition-colors"
           >
             {isDoseLogCollapsed ? '▼' : '▲'}
@@ -482,11 +517,11 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {isDoseLogCollapsed ? (
-          <p className="text-text-muted text-center py-2">{manualEntries.length} entries</p>
-        ) : manualEntries.length === 0 ? (
-          <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
-        ) : (
+        {/* Animate content */}
+        <div className={`collapse-content ${doseAnimClass}`}>
+          {manualEntries.length === 0 ? (
+            <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
+          ) : (
           <>
             <div className="flex items-center justify-between mb-3">
               <div className="flex gap-1">
@@ -511,15 +546,18 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
               </div>
             </div>
             <div className="space-y-2">
-              {sortedEntries.map((entry) => (
+              {sortedEntries.slice(0, doseDisplayLimit).map((entry, idx) => (
               <div 
                 key={`${entry.date}-${entry.medication}-${entry.time || ''}`}
-                className={`rounded-lg p-3 border border-l-4 ${
+                className={`rounded-lg p-3 border border-l-4 ${idx >= prevDoseLimit ? 'animate-fadeIn' : ''} ${
                   isDarkMode 
                     ? 'bg-black/20 border-[#B19CD9]/20' 
                     : 'bg-gray-50 border-gray-200'
                 }`}
-                style={{ borderLeftColor: getMedColor(entry.medication) }}
+                style={{ 
+                  borderLeftColor: getMedColor(entry.medication),
+                  animationDelay: idx >= prevDoseLimit ? `${(idx - prevDoseLimit) * 80}ms` : undefined
+                }}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -594,15 +632,39 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                 </div>
               ))}
             </div>
+            
+            {/* Show More/Show All buttons - only show when there are more entries */}
+            {sortedEntries.length > doseDisplayLimit && (
+              <div className="flex gap-2 mt-4 animate-fadeIn">
+                <button
+                  onClick={() => { setPrevDoseLimit(doseDisplayLimit); setDoseDisplayLimit(doseDisplayLimit + 5); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-[#B19CD9]/20 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show More ({sortedEntries.length - doseDisplayLimit} more)
+                </button>
+                <button
+                  onClick={() => { setPrevDoseLimit(doseDisplayLimit); setDoseDisplayLimit(sortedEntries.length); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)] hover:shadow-[0_0_15px_rgba(177,156,217,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show All ({sortedEntries.length})
+                </button>
+              </div>
+            )}
           </>
+          )}
+        </div>
+        
+        {/* Entry count at bottom - only show when collapsed */}
+        {isDoseLogCollapsed && (
+          <p className="text-text-muted text-center py-2">{manualEntries.length} entries</p>
         )}
       </div>
 
       <div className={bigCard}>
-        <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} >Weight Log</h1>
+        <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => setIsWeightLogCollapsed(!isWeightLogCollapsed)}>
+          <h1 className={bigCardText.title}>Weight Log</h1>
           <button
-            onClick={() => setIsWeightLogCollapsed(!isWeightLogCollapsed)}
+            onClick={(e) => { e.stopPropagation(); setIsWeightLogCollapsed(!isWeightLogCollapsed); }}
             className="text-text-muted hover:text-white transition-colors"
           >
             {isWeightLogCollapsed ? '▼' : '▲'}
@@ -610,11 +672,11 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {isWeightLogCollapsed ? (
-          <p className="text-text-muted text-center py-2">{weightEntries.length} entries</p>
-        ) : weightEntries.length === 0 ? (
-          <p className="text-text-muted text-center py-8">No weight entries yet.</p>
-        ) : (
+        {/* Animate content */}
+        <div className={`collapse-content ${weightAnimClass}`}>
+          {weightEntries.length === 0 ? (
+            <p className="text-text-muted text-center py-8">No weight entries yet.</p>
+          ) : (
           <>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {(['daily', 'weekly', 'monthly'] as const).map((mode) => (
@@ -650,19 +712,22 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
             
             <div className="space-y-2">
-              {(aggregatedWeightData.data as any[]).slice().reverse().map((entry: any, idx: number) => {
+              {(aggregatedWeightData.data as any[]).slice().reverse().slice(0, weightDisplayLimit).map((entry: any, idx: number) => {
                 const changeColor = entry.change !== null && entry.change !== undefined
                   ? entry.change < 0 ? '#ef4444' : entry.change > 0 ? '#22c55e' : '#6b7280'
                   : '#6b7280';
                 return (
                 <div 
                   key={entry.date + '-' + idx}
-                  className={`rounded-lg p-3 border border-l-4 ${
+                  className={`rounded-lg p-3 border border-l-4 ${idx >= prevWeightLimit ? 'animate-fadeIn' : ''} ${
                     isDarkMode 
                       ? 'bg-black/20 border-[#B19CD9]/20' 
                       : 'bg-gray-50 border-gray-200'
                   }`}
-                  style={{ borderLeftColor: changeColor }}
+                  style={{ 
+                    borderLeftColor: changeColor,
+                    animationDelay: idx >= prevWeightLimit ? `${(idx - prevWeightLimit) * 80}ms` : undefined
+                  }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -737,7 +802,31 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                 </div>
               )})}
             </div>
+            
+            {/* Show More/Show All buttons - only show when there are more entries */}
+            {aggregatedWeightData.data.length > weightDisplayLimit && (
+              <div className="flex gap-2 mt-4 animate-fadeIn">
+                <button
+                  onClick={() => { setPrevWeightLimit(weightDisplayLimit); setWeightDisplayLimit(weightDisplayLimit + 10); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-[#B19CD9]/20 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show More ({aggregatedWeightData.data.length - weightDisplayLimit} more)
+                </button>
+                <button
+                  onClick={() => { setPrevWeightLimit(weightDisplayLimit); setWeightDisplayLimit(aggregatedWeightData.data.length); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)] hover:shadow-[0_0_15px_rgba(177,156,217,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show All ({aggregatedWeightData.data.length})
+                </button>
+              </div>
+            )}
           </>
+          )}
+        </div>
+        
+        {/* Entry count at bottom - only show when collapsed */}
+        {isWeightLogCollapsed && (
+          <p className="text-text-muted text-center py-2">{weightEntries.length} entries</p>
         )}
       </div>
 
@@ -1013,10 +1102,10 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
 
       {/* Peptide Log Section */}
       <div className={bigCard}>
-        <div className="flex justify-between items-center mb-2">
-          <h1 className={bigCardText.title} >Peptide Log</h1>
+        <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => setIsPeptideLogCollapsed(!isPeptideLogCollapsed)}>
+          <h1 className={bigCardText.title}>Peptide Log</h1>
           <button
-            onClick={() => setIsPeptideLogCollapsed(!isPeptideLogCollapsed)}
+            onClick={(e) => { e.stopPropagation(); setIsPeptideLogCollapsed(!isPeptideLogCollapsed); }}
             className="text-text-muted hover:text-white transition-colors"
           >
             {isPeptideLogCollapsed ? '▼' : '▲'}
@@ -1024,24 +1113,28 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {isPeptideLogCollapsed ? (
-          <p className="text-text-muted text-center py-2">{peptideLogs.length} entries</p>
-        ) : peptideLogs.length === 0 ? (
-          <p className="text-text-muted text-center py-8">No peptide logs yet.</p>
-        ) : (
-          <div className="space-y-2">
-            {peptideLogs.map((log) => {
+        {/* Animate content */}
+        <div className={`collapse-content ${peptideAnimClass}`}>
+          {peptideLogs.length === 0 ? (
+            <p className="text-text-muted text-center py-8">No peptide logs yet.</p>
+          ) : (
+            <>
+            <div className="space-y-2">
+              {peptideLogs.slice(0, peptideDisplayLimit).map((log, idx) => {
               const peptide = peptides.find(p => p.id === log.peptideId);
               const peptideColor = peptide?.color || '#B19CD9';
               return (
                 <div 
                   key={log.id}
-                  className={`rounded-lg p-3 border border-l-4 ${
+                  className={`rounded-lg p-3 border border-l-4 ${idx >= prevPeptideLimit ? 'animate-fadeIn' : ''} ${
                     isDarkMode 
                       ? 'bg-black/20 border-[#B19CD9]/20' 
                       : 'bg-gray-50 border-gray-200'
                   }`}
-                  style={{ borderLeftColor: peptideColor }}
+                  style={{ 
+                    borderLeftColor: peptideColor,
+                    animationDelay: idx >= prevPeptideLimit ? `${(idx - prevPeptideLimit) * 80}ms` : undefined
+                  }}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -1084,7 +1177,32 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                   )}
                 </div>
               );})}
-          </div>
+            </div>
+            
+            {/* Show More/Show All buttons - only show when there are more entries */}
+            {peptideLogs.length > peptideDisplayLimit && (
+              <div className="flex gap-2 mt-4 animate-fadeIn">
+                <button
+                  onClick={() => { setPrevPeptideLimit(peptideDisplayLimit); setPeptideDisplayLimit(peptideDisplayLimit + 5); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-[#B19CD9]/20 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show More ({peptideLogs.length - peptideDisplayLimit} more)
+                </button>
+                <button
+                  onClick={() => { setPrevPeptideLimit(peptideDisplayLimit); setPeptideDisplayLimit(peptideLogs.length); }}
+                  className="flex-1 py-2 text-sm rounded-lg bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)] hover:shadow-[0_0_15px_rgba(177,156,217,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Show All ({peptideLogs.length})
+                </button>
+              </div>
+            )}
+          </>
+          )}
+        </div>
+        
+        {/* Entry count at bottom - only show when collapsed */}
+        {isPeptideLogCollapsed && (
+          <p className="text-text-muted text-center py-2">{peptideLogs.length} entries</p>
         )}
       </div>
 
