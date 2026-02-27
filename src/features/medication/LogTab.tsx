@@ -310,11 +310,16 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
   }, [weights, weightViewMode]);
 
   const allMedications = useMemo(() => {
-    const medSet = new Set<string>();
-    manualEntries.forEach(e => medSet.add(e.medication));
-    protocols.forEach(p => medSet.add(p.medication));
-    return Array.from(medSet);
-  }, [manualEntries, protocols]);
+    const seen = new Set<string>();
+    const order: string[] = [];
+    dosesEntries.forEach(entry => {
+      if (!seen.has(entry.medication)) {
+        seen.add(entry.medication);
+        order.push(entry.medication);
+      }
+    });
+    return order;
+  }, [dosesEntries]);
 
   const sortedEntries = useMemo(() => {
     return [...manualEntries].sort((a, b) => {
@@ -509,11 +514,12 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
               {sortedEntries.map((entry) => (
               <div 
                 key={`${entry.date}-${entry.medication}-${entry.time || ''}`}
-                className={`rounded-lg p-3 border ${
+                className={`rounded-lg p-3 border border-l-4 ${
                   isDarkMode 
                     ? 'bg-black/20 border-[#B19CD9]/20' 
                     : 'bg-gray-50 border-gray-200'
                 }`}
+                style={{ borderLeftColor: getMedColor(entry.medication) }}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -585,9 +591,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                       + Side Effects / Notes
                     </button>
                   </div>
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
           </>
         )}
       </div>
@@ -644,14 +650,19 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
             
             <div className="space-y-2">
-              {(aggregatedWeightData.data as any[]).slice().reverse().map((entry: any, idx: number) => (
+              {(aggregatedWeightData.data as any[]).slice().reverse().map((entry: any, idx: number) => {
+                const changeColor = entry.change !== null && entry.change !== undefined
+                  ? entry.change < 0 ? '#ef4444' : entry.change > 0 ? '#22c55e' : '#6b7280'
+                  : '#6b7280';
+                return (
                 <div 
                   key={entry.date + '-' + idx}
-                  className={`rounded-lg p-3 border ${
+                  className={`rounded-lg p-3 border border-l-4 ${
                     isDarkMode 
                       ? 'bg-black/20 border-[#B19CD9]/20' 
                       : 'bg-gray-50 border-gray-200'
                   }`}
+                  style={{ borderLeftColor: changeColor }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -724,7 +735,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                     </div>
                   )}
                 </div>
-              ))}
+              )})}
             </div>
           </>
         )}
@@ -1021,14 +1032,16 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           <div className="space-y-2">
             {peptideLogs.map((log) => {
               const peptide = peptides.find(p => p.id === log.peptideId);
+              const peptideColor = peptide?.color || '#B19CD9';
               return (
                 <div 
                   key={log.id}
-                  className={`rounded-lg p-3 border ${
+                  className={`rounded-lg p-3 border border-l-4 ${
                     isDarkMode 
                       ? 'bg-black/20 border-[#B19CD9]/20' 
                       : 'bg-gray-50 border-gray-200'
                   }`}
+                  style={{ borderLeftColor: peptideColor }}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -1070,8 +1083,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                     </div>
                   )}
                 </div>
-              );
-            })}
+              );})}
           </div>
         )}
       </div>
