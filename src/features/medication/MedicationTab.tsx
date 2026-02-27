@@ -104,7 +104,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     return Array.from(medSet);
   }, [protocols]);
 
-  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, cancelButton, deleteButton } = useThemeStyles();
   const { isDarkMode } = useTheme();
 
   const generatedEntries = useMemo(
@@ -524,21 +524,13 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             <div className="flex gap-3">
               <button
                 onClick={closeLocalModal}
-                className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
-                  isDarkMode
-                    ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
+                className={cancelButton(isDarkMode)}
               >
                 Cancel
               </button>
               <button
                 onClick={() => deleteConfirmMed && handleDeleteMedication(deleteConfirmMed)}
-                className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                  isDarkMode
-                    ? 'bg-red-500/80 text-white hover:bg-red-500'
-                    : 'bg-red-500 text-white hover:bg-red-600'
-                }`}
+                className={deleteButton(isDarkMode)}
               >
                 Delete
               </button>

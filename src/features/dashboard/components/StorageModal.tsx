@@ -77,7 +77,7 @@ const StorageModal: React.FC<StorageModalProps> = ({
   useWheelForDate = true,
 }) => {
   const { isDarkMode } = useTheme();
-  const { modal, modalText, input: inputStyle, inputButton, primaryButton, textarea, segmentButton } = useThemeStyles();
+  const { modal, modalText, modalContainer, modalBackdrop, modalSmall, cancelButton, saveButton, deleteButton, input: inputStyle, inputButton, textarea, segmentButton } = useThemeStyles();
   
   const [formData, setFormData] = useState<FormData>(getInitialFormData(null));
   const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
@@ -142,11 +142,11 @@ const StorageModal: React.FC<StorageModalProps> = ({
       {ReactDOM.createPortal(
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div 
-            className={`absolute inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`}
+            className={modalBackdrop(isClosing)}
             style={{ backdropFilter: 'blur(8px)' }}
             onClick={onClose} 
           />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6 overflow-y-auto max-h-[90vh] ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+          <div className={`relative rounded-2xl ${modal} ${modalContainer} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
             <div className="flex items-center justify-between mb-2">
               <h2 className={`text-lg font-semibold ${modalText.title}`}>
                 {editingItem ? 'Edit Storage Item' : 'Add Storage Item'}
@@ -376,16 +376,16 @@ const StorageModal: React.FC<StorageModalProps> = ({
             <div className="flex gap-2 mt-4 pt-3 border-t border-[#B19CD9]/20">
               <button
                 onClick={onClose}
-                className="flex-1 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors"
+                className={cancelButton(isDarkMode)}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSave(true)}
                 disabled={!formData.medicationName || !formData.initialUnits}
-                className="flex-1 py-2 bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-medium rounded-lg hover:shadow-[0_0_15px_rgba(177,156,217,0.4)] transition-all disabled:opacity-50"
+                className={`${saveButton} disabled:opacity-50`}
               >
-                {editingItem ? 'Update' : 'Add'}
+                {editingItem ? 'Save' : 'Add'}
               </button>
             </div>
           </div>
@@ -427,8 +427,8 @@ const StorageModal: React.FC<StorageModalProps> = ({
 
       {showMedicationPicker && ReactDOM.createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowMedicationPicker(false)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-4 max-h-[80vh] overflow-y-auto ${modal} modal-content-fade-in`}>
+          <div className={modalBackdrop(false)} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowMedicationPicker(false)} />
+          <div className={`relative rounded-2xl ${modal} ${modalSmall} max-h-[80vh] overflow-y-auto modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-3 ${modalText.title}`}>Select Medication</h3>
             <div className="space-y-2 mb-3">
               {MAIN_MEDICATIONS.map((med) => (
@@ -473,7 +473,7 @@ const StorageModal: React.FC<StorageModalProps> = ({
             </div>
             <button
               onClick={() => setShowMedicationPicker(false)}
-              className="w-full mt-3 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm"
+              className={`w-full mt-3 py-2 rounded-lg border transition-colors text-sm ${isDarkMode ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
             >
               Cancel
             </button>
@@ -484,8 +484,8 @@ const StorageModal: React.FC<StorageModalProps> = ({
 
       {showPeptidePicker && ReactDOM.createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowPeptidePicker(false)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-4 max-h-[80vh] flex flex-col ${modal} modal-content-fade-in`}>
+          <div className={modalBackdrop(false)} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowPeptidePicker(false)} />
+          <div className={`relative rounded-2xl ${modal} max-w-md p-4 max-h-[80vh] flex flex-col ${modalContainer} modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-3 ${modalText.title}`}>Select Peptide</h3>
             
             <input
@@ -558,7 +558,7 @@ const StorageModal: React.FC<StorageModalProps> = ({
                 setShowPeptidePicker(false);
                 setPeptideSearchQuery('');
               }}
-              className="w-full mt-3 py-2 border border-[#B19CD9]/30 rounded-lg text-[#B19CD9] hover:bg-[#B19CD9]/10 transition-colors text-sm"
+              className={`w-full mt-3 py-2 rounded-lg border transition-colors text-sm ${isDarkMode ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
             >
               Cancel
             </button>
@@ -569,20 +569,14 @@ const StorageModal: React.FC<StorageModalProps> = ({
 
       {confirmAction && ReactDOM.createPortal(
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-          <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} backdrop-fade-in`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 border border-red-500/30 modal-content-fade-in ${
-            isDarkMode ? 'bg-[#1a1a24]' : 'bg-white'
-          }`}>
+          <div className={modalBackdrop(false)} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
+          <div className={`relative rounded-2xl ${modal} ${modalSmall} border border-red-500/30 modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Delete Storage Item?</h3>
             <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>This action cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmAction(null)}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                  isDarkMode 
-                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' 
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
+                className={cancelButton(isDarkMode)}
               >
                 Cancel
               </button>
@@ -593,7 +587,7 @@ const StorageModal: React.FC<StorageModalProps> = ({
                     onClose();
                   }
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm`}
+                className={deleteButton(isDarkMode)}
               >
                 Delete
               </button>

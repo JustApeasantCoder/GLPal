@@ -101,7 +101,7 @@ const getTodayString = () => timeService.todayString();
 
 const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, onDelete, editPeptide, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal, modalText } = useThemeStyles();
+  const { inputButton, input: inputStyle, textarea, secondaryButton, segmentButton, modal, modalText, modalContainer, modalBackdrop, modalSmall, cancelButton, saveButton, deleteButton } = useThemeStyles();
   const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PeptideCategory>('other');
@@ -233,17 +233,14 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
     <>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
         <div 
-          className={`fixed inset-0 bg-black/60 ${
-            isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'
-          }`}
+          className={modalBackdrop(isClosing)}
           style={{ backdropFilter: 'blur(8px)' }}
           onClick={handleClose} 
         />
         <div 
-          className={`relative w-full max-w-sm sm:max-w-md lg:max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${modal} ${
+          className={`relative rounded-2xl ${modal} ${modalContainer} overflow-hidden flex flex-col ${
             isClosing ? 'modal-fade-out' : 'modal-content-fade-in'
           }`}
-          style={isDarkMode ? { boxShadow: '0 0 30px rgba(177, 156, 217, 0.3)' } : {}}
         >
           {/* Header */}
           <div className={`flex items-center justify-between p-3 sm:p-4 border-b ${
@@ -491,19 +488,15 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
               <>
                 <button
                   onClick={handleClose}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-xl border font-medium transition-all ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={cancelButton(isDarkMode)}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="flex-1 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white font-semibold hover:shadow-[0_0_20px_rgba(177,156,217,0.5)] transition-all"
+                  className={saveButton}
                 >
-                  {editPeptide ? 'Update' : 'Add Peptide'}
+                  {editPeptide ? 'Save' : 'Add Peptide'}
                 </button>
               </>
             </div>
@@ -573,20 +566,14 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
 
       {confirmAction && editPeptide && (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-          <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} backdrop-fade-in`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 border border-red-500/30 modal-content-fade-in ${
-            isDarkMode ? 'bg-[#1a1a24]' : 'bg-white'
-          }`}>
+          <div className={modalBackdrop(false)} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setConfirmAction(null)} />
+          <div className={`relative rounded-2xl ${modal} ${modalSmall} border border-red-500/30 modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Delete Peptide?</h3>
             <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>This action cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmAction(null)}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                  isDarkMode 
-                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' 
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
+                className={cancelButton(isDarkMode)}
               >
                 Cancel
               </button>
@@ -597,7 +584,7 @@ const PeptideModal: React.FC<PeptideModalProps> = ({ isOpen, onClose, onSave, on
                   }
                   handleClose();
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm`}
+                className={deleteButton(isDarkMode)}
               >
                 Delete
               </button>

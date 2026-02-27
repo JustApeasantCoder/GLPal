@@ -22,7 +22,7 @@ interface ProtocolModalProps {
 
 const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, onDelete, protocol, mode, existingProtocols, useWheelForNumbers = true, useWheelForDate = true }) => {
   const { isDarkMode } = useTheme();
-  const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal, modalText } = useThemeStyles();
+  const { segmentButton, inputButton, input: inputStyle, textarea, primaryButton, secondaryButton, modal, modalText, modalContainer, modalBackdrop, modalSmall, cancelButton, saveButton, deleteButton } = useThemeStyles();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStopDatePicker, setShowStopDatePicker] = useState(false);
@@ -123,8 +123,8 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className={`fixed inset-0 bg-black/60 ${isClosing ? 'backdrop-fade-out' : 'backdrop-fade-in'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-2xl p-6 max-h-[90vh] overflow-y-auto ${modal} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
+      <div className={`${modalBackdrop(isClosing)}`} style={{ backdropFilter: 'blur(8px)' }} onClick={onClose} />
+      <div className={`relative rounded-2xl ${modal} ${modalContainer} ${isClosing ? 'modal-fade-out' : 'modal-content-fade-in'}`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={`text-xl font-semibold ${modalText.title}`}>
             {mode === 'add' ? 'Add Custom Plan' : 'Edit Protocol'}
@@ -262,17 +262,13 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               <>
                 <button
                   onClick={onClose}
-                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={cancelButton(isDarkMode)}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm"
+                  className={saveButton}
                 >
                   Save
                 </button>
@@ -282,17 +278,13 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
               <>
                 <button
                   onClick={onClose}
-                  className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                    isDarkMode
-                      ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={cancelButton(isDarkMode)}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm"
+                  className={saveButton}
                 >
                   Save
                 </button>
@@ -304,8 +296,8 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
       {showOtherModal && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className={`fixed inset-0 bg-black/60 ${showOtherModal ? 'backdrop-fade-in' : 'backdrop-fade-out'}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto ${modal} modal-content-fade-in`}>
+          <div className={`${modalBackdrop(false)}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowOtherModal(false)} />
+          <div className={`relative rounded-2xl ${modal} ${modalSmall} modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-4 ${modalText.title}`}>Select Medication</h3>
             <div className="space-y-2 mb-4">
               {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
@@ -415,20 +407,14 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-          <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} backdrop-fade-in`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDeleteConfirm(false)} />
-          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 border border-red-500/30 modal-content-fade-in ${
-            isDarkMode ? 'bg-[#1a1a24]' : 'bg-white'
-          }`}>
+          <div className={`${modalBackdrop(false)}`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDeleteConfirm(false)} />
+          <div className={`relative rounded-2xl ${modal} ${modalSmall} border border-red-500/30 modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Delete Protocol?</h3>
             <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>This action cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
-                  isDarkMode 
-                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' 
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                }`}
+                className={cancelButton(isDarkMode)}
               >
                 Cancel
               </button>
@@ -439,7 +425,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   }
                   onClose();
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm`}
+                className={deleteButton(isDarkMode)}
               >
                 Delete
               </button>
