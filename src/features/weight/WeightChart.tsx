@@ -382,7 +382,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
             value: [lastEntry.displayDate, lastEntry.weight],
             symbolSize: 12,
           }],
-          symbol: 'circle',
+          /* symbol: 'circle', */
           symbolSize: 14,
           /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
           itemStyle: {
@@ -413,6 +413,8 @@ const WeightChart: React.FC<WeightChartProps> = ({
         {
           name: 'WeightDots',
           type: 'scatter',
+          symbol: 'emptyCircle',
+          symbolSize: 0,
           z: 10,
           data: sortedData
             .map((d, i) => ({ ...d, index: i }))
@@ -420,14 +422,16 @@ const WeightChart: React.FC<WeightChartProps> = ({
             .map((d) => ({
               value: [d.displayDate, d.weight],
               /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
+              /* symbol: 'circle',
+              symbolSize: 10, */
               itemStyle: {
                 color: '#9C7BD3',
                 borderColor: '#2D1B4E',
                 borderWidth: 2,
               },
-            })),
-          symbol: 'circle',
-          symbolSize: 10,
+          })),
+          /* symbol: 'circle',
+          symbolSize: 10, */
           label: {
             show: true,
             position: 'top',
@@ -496,8 +500,8 @@ const WeightChart: React.FC<WeightChartProps> = ({
               type: 'scatter',
               data: [],
               itemStyle: { color: medicationColors[med]?.stroke || '#4ADEA8' },
-              symbol: 'circle',
-              symbolSize: 8,
+              /* symbol: 'circle',
+              symbolSize: 8, */
             };
           });
         })(),

@@ -142,8 +142,8 @@ export const generateMedicationSeries = ({
       combinedDoseData.push({
         name: dateStr,
         value: [dateStr, value],
-        symbol: 'circle',
-        symbolSize: 10,
+        /* symbol: 'circle',
+        symbolSize: 10, */
         /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
         itemStyle: {
           color: combinedColor.stroke,
@@ -203,6 +203,8 @@ export const generateMedicationSeries = ({
       {
         name: 'Combined',
         type: 'scatter',
+        symbol: 'emptyCircle',
+        symbolSize: 0,
         z: 10,
         showInLegend: false,
         emphasis: {
@@ -305,8 +307,8 @@ export const generateMedicationSeries = ({
         doseData.push({
           name: dateStr,
           value: [dateStr, value],
-          symbol: 'circle',
-          symbolSize: 10,
+          /* symbol: 'circle',
+          symbolSize: 10, */
           /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
           itemStyle: {
             color: color.stroke,
@@ -365,6 +367,8 @@ export const generateMedicationSeries = ({
       {
         name: med,
         type: 'scatter',
+        symbol: 'emptyCircle',
+        symbolSize: 0,
         z: 10,
         showInLegend: false,
         emphasis: {
