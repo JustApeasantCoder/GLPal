@@ -28,7 +28,7 @@ import { ModalType } from '../../shared/hooks/useAppHistory';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
-  onAddMedication: (dose: number, medication: string, date: string) => void;
+  onAddMedication: (dose: number, medication: string, date: string, halfLifeHours?: number) => void;
   onRefreshMedications: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;
@@ -511,6 +511,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onClose={onCloseModal}
         onAddMedication={onAddMedication}
         useWheelForDate={useWheelForDate}
+        useWheelForNumbers={useWheelForNumbers}
       />
 
       <LogDoseModal

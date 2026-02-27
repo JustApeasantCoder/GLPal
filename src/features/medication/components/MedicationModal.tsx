@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MEDICATIONS } from '../../../constants/medications';
 import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../../../shared/utils/database';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
@@ -14,9 +14,10 @@ interface MedicationModalProps {
   onClose: () => void;
   onAddMedication: (dose: number, medication: string, date: string) => void;
   useWheelForDate?: boolean;
+  useWheelForNumbers?: boolean;
 }
 
-const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication, useWheelForDate = true }) => {
+const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAddMedication, useWheelForDate = true, useWheelForNumbers = true }) => {
   const { isDarkMode } = useTheme();
   const { input: inputStyle, modal, modalText } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
@@ -64,15 +65,25 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
     }
   }, [isOpen]);
 
+  const dosePresets = useMemo(() => {
+    if (!selectedMedication) return ['0.25', '0.5', '1', '2.5', '5', '7.5', '10'];
+    const med = MEDICATIONS.find(m => m.id === selectedMedication);
+    if (!med || !med.titrationDoses) return ['0.25', '0.5', '1', '2.5', '5', '7.5', '10'];
+    return med.titrationDoses.map(d => d.toString());
+  }, [selectedMedication]);
+
   if (!isVisible) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const doseValue = parseFloat(dose);
     if (selectedMedication && doseValue && doseValue > 0 && doseValue < 100) {
+      const med = MEDICATIONS.find(m => m.id === selectedMedication);
+      const medicationName = med ? med.name : selectedMedication;
+      const halfLife = med ? med.halfLifeHours : 144;
       saveLastMedication(selectedMedication);
       saveLastDose(selectedMedication, doseValue);
-      onAddMedication(doseValue, selectedMedication, selectedDate);
+      onAddMedication(doseValue, medicationName, selectedDate, halfLife);
       setSelectedMedication('');
       setDose('');
       onClose();
@@ -164,6 +175,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             label="Select Dose (mg)"
             decimals={2}
             defaultValue={dose || '0.25'}
+            presets={dosePresets}
           />
 
           <div className="mb-4">
@@ -196,13 +208,24 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
             <label className={`block text-sm font-medium ${modalText.label} mb-2`}>
               Dose (mg)
             </label>
-            <button
-              type="button"
-              onClick={() => setShowDosePicker(true)}
-              className={inputStyle}
-            >
-              {dose ? `${dose} mg` : 'Select dose'}
-            </button>
+            {useWheelForNumbers ? (
+              <button
+                type="button"
+                onClick={() => setShowDosePicker(true)}
+                className={inputStyle}
+              >
+                {dose ? `${dose} mg` : 'Select dose'}
+              </button>
+            ) : (
+              <input
+                type="number"
+                step="0.01"
+                value={dose}
+                onChange={(e) => setDose(e.target.value)}
+                className={inputStyle}
+                placeholder="Enter dose (mg)"
+              />
+            )}
             <p className="text-xs text-[#4ADEA8] mt-1">Enter only the dose prescribed by your healthcare provider.</p>
           </div>
 

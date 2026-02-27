@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, Medication } from '../../../constants/medications';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
@@ -77,6 +77,13 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
       }, 200);
     }
   }, [isOpen]);
+
+  const dosePresets = useMemo(() => {
+    if (!selectedMedication) return ['0.25', '0.5', '1', '2.5', '5', '7.5', '10'];
+    const med = MEDICATIONS.find(m => m.id === selectedMedication);
+    if (!med || !med.titrationDoses) return ['0.25', '0.5', '1', '2.5', '5', '7.5', '10'];
+    return med.titrationDoses.map(d => d.toString());
+  }, [selectedMedication]);
 
   if (!isVisible) return null;
 
@@ -390,6 +397,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           label="Select Dose (mg)"
           decimals={2}
           defaultValue={dose || '0.25'}
+          presets={dosePresets}
         />
       )}
 

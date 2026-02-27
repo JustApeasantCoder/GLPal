@@ -76,12 +76,12 @@ function App() {
     addWeight(newEntry);
   }, [addWeight]);
 
-  const handleAddDose = useCallback((dose: number, medication: string, date: string) => {
+  const handleAddDose = useCallback((dose: number, medication: string, date: string, halfLifeHours: number = 144) => {
     const newEntry = { 
       date, 
       medication, 
       dose, 
-      halfLifeHours: 144,
+      halfLifeHours,
       isManual: true,
     };
     addDose(newEntry);

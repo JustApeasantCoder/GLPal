@@ -123,7 +123,7 @@ useEffect(() => {
     
     const isSelected = index === currentIndex;
     
-    const selectedColor = isDarkMode ? '#fff' : '#1a1625';
+    const selectedColor = isDarkMode ? '#ffffff' : '#000000';
     const unselectedColor = isDarkMode 
       ? `rgba(177, 156, 217, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`
       : `rgba(107, 114, 128, ${0.35 + (1 - clampedDistance / maxDistance) * 0.45})`;
@@ -139,7 +139,7 @@ useEffect(() => {
   return (
     <div className="flex flex-col items-center">
       {label && (
-        <span className={`text-xs mb-2 font-medium tracking-wider uppercase ${isDarkMode ? 'text-[#B19CD9]' : 'text-gray-500'}`}>{label}</span>
+        <span className={`text-xs mb-2 font-medium tracking-wider uppercase ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{label}</span>
       )}
 
       <div
@@ -148,8 +148,8 @@ useEffect(() => {
         onDragStart={(e) => e.preventDefault()}
         className={`relative h-[132px] w-20 rounded-2xl border select-none shadow-lg ${
           isDarkMode
-            ? 'border-[#B19CD9]/40 bg-gradient-to-b from-[#1a1625]/80 to-[#0d0a15]/90 shadow-purple-900/20'
-            : 'border-gray-300 bg-gradient-to-b from-gray-50 to-white shadow-gray-200/50'
+            ? 'border-[var(--card-border)] bg-[var(--card-bg)] shadow-purple-900/20'
+            : 'border-gray-300 bg-white'
         } ${
           !isTouchDevice
             ? 'cursor-grab active:cursor-grabbing overflow-hidden'
@@ -208,7 +208,7 @@ useEffect(() => {
             const opacity = 1 - Math.min(distance, 2) * 0.05;
             const isSelected = index === currentIndex;
             
-            const selectedColor = isDarkMode ? '#fff' : '#1a1625';
+            const selectedColor = isDarkMode ? '#ffffff' : '#000000';
             const unselectedColor = isDarkMode 
               ? `rgba(177, 156, 217, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`
               : `rgba(107, 114, 128, ${0.35 + (1 - Math.min(distance, 2) / 2) * 0.45})`;
