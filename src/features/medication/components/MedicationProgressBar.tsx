@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MedicationStats } from '../hooks/useMedicationStats';
 import { GLP1Protocol } from '../../../types';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface MedicationProgressBarProps {
   stats: MedicationStats;
@@ -23,6 +24,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   medicationColor,
   activeProtocol,
 }) => {
+  const { isDarkMode } = useTheme();
   const { 
     lastDoseDateStr, 
     isScheduleStartDay, 
@@ -81,20 +83,37 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
         : Math.min(80, Math.max(0, (daysSinceLastDose / intervalDays) * 100));
     const progressPercent = medicationEntryToday ? 100 : rawProgress;
 
+    const purpleGradient = isDarkMode
+      ? 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)'
+      : 'linear-gradient(90deg, #cdbcec, #B19CD9)';
+    const redGradient = isDarkMode
+      ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
+      : 'linear-gradient(90deg, #fca5a5, #f87171)';
+    const greenGradient = isDarkMode
+      ? 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)'
+      : 'linear-gradient(90deg, #a7f3d0, #6EE7B7)';
+    const purpleBoxShadow = isDarkMode
+      ? '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)'
+      : 'none';
+    const redBoxShadow = isDarkMode
+      ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
+      : 'none';
+    const greenBoxShadow = isDarkMode
+      ? '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
+      : 'none';
+
+    const gradientAnimateClass = !isDarkMode ? 'progress-gradient-animate' : '';
+
     return (
       <>
         {progressPercent > 0 && !isDueToday && !medicationEntryToday && (
           <div 
-            className="absolute top-0 h-full transition-all duration-300"
+            className={`absolute top-0 h-full transition-all duration-300 ${gradientAnimateClass}`}
             style={{ 
               left: 0,
               width: `${progressPercent}%`,
-              background: medicationIsOverdue
-                ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
-                : 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)',
-              boxShadow: medicationIsOverdue
-                ? '0 0 25px rgba(239,68,68,0.7), inset 0 0 20px rgba(255,255,255,0.2)'
-                : '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
+              background: medicationIsOverdue ? redGradient : purpleGradient,
+              boxShadow: medicationIsOverdue ? redBoxShadow : purpleBoxShadow,
             }}
           />
         )}
@@ -102,12 +121,12 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
           <>
             {progressPercent > 0 && (
               <div 
-                className="absolute top-0 h-full transition-all duration-300"
+                className={`absolute top-0 h-full transition-all duration-300 ${gradientAnimateClass}`}
                 style={{ 
                   left: 0,
                   width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, #9579be, #cdbcec, #9579be)',
-                  boxShadow: '0 0 25px rgba(177,156,217,0.6), inset 0 0 20px rgba(255,255,255,0.2)',
+                  background: purpleGradient,
+                  boxShadow: purpleBoxShadow,
                 }}
               />
             )}
@@ -116,12 +135,12 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
               const greenPercentSmooth = (hoursSinceMidnight / 24) * (100 - progressPercent);
               return (
                 <div 
-                  className="absolute top-0 h-full transition-all duration-300"
+                  className={`absolute top-0 h-full transition-all duration-300 ${gradientAnimateClass}`}
                   style={{ 
                     left: `${progressPercent}%`,
                     width: `${greenPercentSmooth}%`,
-                    background: 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)',
-                    boxShadow: '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)',
+                    background: greenGradient,
+                    boxShadow: greenBoxShadow,
                   }}
                 />
               );
@@ -130,12 +149,11 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
         )}
         {medicationEntryToday && (
           <div 
-            className="absolute top-0 h-full transition-all duration-300"
+            className={`absolute top-0 h-full transition-all duration-300 ${gradientAnimateClass}`}
             style={{ 
-              left: 0,
               width: '100%',
-              background: 'linear-gradient(90deg, #4ADEA8, #6EE7B7, #4ADEA8)',
-              boxShadow: '0 0 25px rgba(74,222,168,0.7), inset 0 0 20px rgba(255,255,255,0.2)',
+              background: greenGradient,
+              boxShadow: greenBoxShadow,
             }}
           />
         )}
@@ -190,28 +208,48 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
   const borderColor = medicationEntryToday 
     ? 'border-[#4ADEA8]/60' 
     : 'border-[#B19CD9]/40';
-  const shadowColor = medicationEntryToday
-    ? 'shadow-[0_0_15px_rgba(74,222,168,0.3)]'
-    : 'shadow-[0_0_15px_rgba(177,156,217,0.2)]';
+  const shadowColor = isDarkMode
+    ? (medicationEntryToday
+      ? 'shadow-[0_0_15px_rgba(74,222,168,0.3)]'
+      : 'shadow-[0_0_15px_rgba(177,156,217,0.2)]')
+    : (medicationEntryToday
+      ? 'shadow-sm border-[#4ADEA8]/40'
+      : 'shadow-sm border-[#B19CD9]/30');
+
+  const progressBarBg = isDarkMode
+    ? 'from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a]'
+    : 'from-gray-100 via-gray-50 to-gray-100';
+  const progressBarBorder = isDarkMode
+    ? borderColor
+    : medicationEntryToday
+      ? 'border-[#4ADEA8]/40'
+      : 'border-[#B19CD9]/30';
+  const textColor = isDarkMode ? 'text-white' : 'text-gray-900';
+  const textShadow = isDarkMode ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 2px rgba(177,156,217,0.8)';
+  const footerTextColor = isDarkMode ? 'text-[#B19CD9]/70' : 'text-[#9C7BD3]';
+  const stripeColor = isDarkMode ? 'rgba(177,156,217,0.1)' : 'rgba(156,123,211,0.08)';
+  const stripeOpacity = isDarkMode ? '30' : '80';
+  const stripeOverlay = isDarkMode ? 'from-transparent via-white/20 to-transparent' : 'from-transparent via-black/10 to-transparent';
 
   return (
     <div className="mb-4">
-      <div className={`relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border ${borderColor} ${shadowColor}`}>
-        <div className="absolute inset-0 opacity-30"
+      <div className={`relative overflow-hidden h-12 rounded-xl bg-gradient-to-r ${progressBarBg} border ${progressBarBorder} ${shadowColor}`}>
+        <div className={`absolute inset-0`}
           style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177,156,217,0.1) 10px, rgba(177,156,217,0.1) 20px)',
+            opacity: parseInt(stripeOpacity) / 100,
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${stripeColor} 10px, ${stripeColor} 20px)`,
             animation: 'stripeMove 2s linear infinite'
           }}
         />
         {getProgressBarContent()}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className={`absolute inset-0 bg-gradient-to-r ${stripeOverlay}`} />
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-bold text-white" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+          <span className={`text-sm font-bold ${textColor}`} style={{ textShadow }}>
             {getDisplayText()}
           </span>
         </div>
       </div>
-      <div className="flex justify-between mt-2 text-xs text-[#B19CD9]/70">
+      <div className={`flex justify-between mt-2 text-xs ${footerTextColor}`}>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[#4ADEA8]"></span>
           Last: {lastDoseDateStr}
@@ -229,7 +267,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
             disabled={isDisabled}
             className={`mt-2 w-full py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-300 ${
               isDisabled
-                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                ? isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : medicationIsOverdue
                   ? 'bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white hover:scale-[1.02] animate-pulse'
                   : 'bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white hover:scale-[1.02]'
@@ -254,7 +292,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
                 onChange={(e) => setDisclaimerChecked(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-[#4ADEA8]"
               />
-              <label htmlFor={`disclaimer-${medicationName}`} className="text-xs text-gray-300 leading-tight">
+              <label htmlFor={`disclaimer-${medicationName}`} className={`text-xs leading-tight ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 By checking this box, you confirm that you have consulted your healthcare provider regarding the missed dose.
               </label>
             </div>
