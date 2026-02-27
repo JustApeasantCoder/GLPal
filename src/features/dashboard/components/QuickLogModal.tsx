@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useThemeStyles } from '../../../contexts/ThemeContext';
 import { DailyLogEntry, SideEffect, WeightMacros, UserProfile } from '../../../types';
 import { db } from '../../../db/dexie';
@@ -10,6 +10,7 @@ interface QuickLogModalProps {
   onClose: () => void;
   onSave: (entry: DailyLogEntry, weightKg?: number) => void;
   profile: UserProfile;
+  initialDate?: string;
 }
 
 const COMMON_SIDE_EFFECTS = [
@@ -30,6 +31,7 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
   onClose,
   onSave,
   profile,
+  initialDate,
 }) => {
   const { isDarkMode } = useThemeStyles();
   const { modal, modalText, input: inputStyle, textarea } = useThemeStyles();
@@ -56,10 +58,46 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
+    if (initialDate) {
+      setSelectedDate(initialDate);
+    }
+  }, [initialDate]);
+
+  const loadExistingEntry = useCallback(async () => {
+    const existing = await db.dailyLogs.get(selectedDate);
+    if (existing) {
+      if (existing.weight !== undefined) {
+        setWeight(String(convertWeightFromKg(existing.weight, useImperialWeight ? 'imperial' : 'metric')));
+      }
+      if (existing.hydration !== undefined) {
+        setHydration(String(convertHydrationFromMl(existing.hydration, useOz ? 'oz' : 'ml')));
+      }
+      if (existing.mood !== undefined) {
+        setMood(existing.mood);
+      }
+      if (existing.sideEffects !== undefined) {
+        setSideEffects(existing.sideEffects);
+      }
+      if (existing.calories !== undefined) {
+        setCalories(String(existing.calories));
+      }
+      if (existing.macros) {
+        setProtein(String(existing.macros.protein || ''));
+        setCarbs(String(existing.macros.carbs || ''));
+        setFat(String(existing.macros.fat || ''));
+      }
+      if (existing.notes !== undefined) {
+        setNotes(existing.notes);
+      }
+    }
+  }, [selectedDate, useImperialWeight, useOz]);
+
+  useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
       document.body.classList.add('modal-open');
+      loadExistingEntry();
     } else if (isVisible && !isClosing) {
       setIsClosing(true);
       setTimeout(() => {
@@ -68,9 +106,24 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
         document.body.classList.remove('modal-open');
       }, 200);
     }
-  }, [isOpen]);
+  }, [isOpen, loadExistingEntry]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadExistingEntry();
+    }
+  }, [selectedDate, isOpen, loadExistingEntry]);
 
   const handleClose = () => {
+    setWeight('');
+    setHydration('');
+    setMood(5);
+    setSideEffects([]);
+    setCalories('');
+    setProtein('');
+    setCarbs('');
+    setFat('');
+    setNotes('');
     onClose();
   };
 
@@ -226,12 +279,17 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>
-              Mood: <span style={{ color: getMoodColor(mood) }}>{getMoodEmoji(mood)} {mood}/10</span>
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className={`text-sm font-medium ${modalText.label}`}>
+                Mood (optional)
+              </label>
+              <span className="text-sm font-medium" style={{ color: getMoodColor(mood) }}>
+                {getMoodEmoji(mood)} {mood}/10
+              </span>
+            </div>
             <input
               type="range"
-              min="1"
+              min="0"
               max="10"
               step="1"
               value={mood}
@@ -239,11 +297,13 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
               className="pain-slider w-full h-10 appearance-none cursor-pointer"
             />
             <div className="flex justify-between gap-1 mt-1">
-              <span className="text-xs text-red-400">Low</span>
-              <span className="text-xs text-yellow-400">Neutral</span>
-              <span className="text-xs text-green-400">Great</span>
+              <span className="text-xs text-green-400">None</span>
+              <span className="text-xs text-orange-400">Moderate</span>
+              <span className="text-xs text-red-400">Severe</span>
             </div>
           </div>
+
+          <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
           <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 

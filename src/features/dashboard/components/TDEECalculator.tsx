@@ -9,9 +9,11 @@ interface TDEECalculatorProps {
   profile: UserProfile;
   onProfileUpdate: (profile: UserProfile) => void;
   useWheelForNumbers?: boolean;
+  showGoalWeight?: boolean;
+  onGoalWeightClick?: () => void;
 }
 
-const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate, useWheelForNumbers = true }) => {
+const TDEECalculator: React.FC<TDEECalculatorProps> = ({ profile: initialProfile, onProfileUpdate, useWheelForNumbers = true, showGoalWeight = false, onGoalWeightClick }) => {
   const { isDarkMode } = useTheme();
   const { segmentButton, inputButton, input: inputStyle } = useThemeStyles();
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
@@ -97,93 +99,157 @@ return (
           </div>
         </div>
 
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-            Height ({unitSystem === 'imperial' ? 'ft / in' : 'cm'})
-          </label>
-          {useWheelForNumbers ? (
-            <button
-              type="button"
-              onClick={() => setShowHeightPicker(true)}
-              className={inputButton}
-            >
-              {unitSystem === 'imperial' 
-                ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
-                : `${Math.round(heightDisplayValue)} cm`
-              }
-            </button>
-          ) : (
-            unitSystem === 'imperial' ? (
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={feet}
-                  onChange={(e) => {
-                    const feetVal = parseInt(e.target.value) || 0;
-                    const heightCm = feetInchesToCm(feetVal, inches);
-                    if (heightCm && heightCm > 0) {
-                      handleChange({ ...profile, height: heightCm });
-                    }
-                  }}
-                  className={inputStyle}
-                  placeholder="ft"
-                  min={0}
-                  max={8}
-                />
-                <input
-                  type="number"
-                  value={inches}
-                  onChange={(e) => {
-                    const inchesVal = parseInt(e.target.value) || 0;
-                    const heightCm = feetInchesToCm(feet, inchesVal);
-                    if (heightCm && heightCm > 0) {
-                      handleChange({ ...profile, height: heightCm });
-                    }
-                  }}
-                  className={inputStyle}
-                  placeholder="in"
-                  min={0}
-                  max={11}
-                />
-              </div>
-            ) : (
-              <input
-                type="number"
-                value={Math.round(profile.height || 170)}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value) || 0;
-                  if (value && value > 0) {
-                    handleChange({ ...profile, height: value });
+        {showGoalWeight ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+                Height ({unitSystem === 'imperial' ? 'ft / in' : 'cm'})
+              </label>
+              {useWheelForNumbers ? (
+                <button
+                  type="button"
+                  onClick={() => setShowHeightPicker(true)}
+                  className={inputButton}
+                >
+                  {unitSystem === 'imperial' 
+                    ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
+                    : `${Math.round(heightDisplayValue)} cm`
                   }
-                }}
-                className={inputStyle}
-                placeholder="Enter height (cm)"
-              />
-            )
-          )}
-        </div>
+                </button>
+              ) : (
+                unitSystem === 'imperial' ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={feet}
+                      onChange={(e) => {
+                        const feetVal = parseInt(e.target.value) || 0;
+                        const heightCm = feetInchesToCm(feetVal, inches);
+                        if (heightCm && heightCm > 0) {
+                          handleChange({ ...profile, height: heightCm });
+                        }
+                      }}
+                      className={inputStyle}
+                      placeholder="ft"
+                      min={0}
+                      max={8}
+                    />
+                    <input
+                      type="number"
+                      value={inches}
+                      onChange={(e) => {
+                        const inchesVal = parseInt(e.target.value) || 0;
+                        const heightCm = feetInchesToCm(feet, inchesVal);
+                        if (heightCm && heightCm > 0) {
+                          handleChange({ ...profile, height: heightCm });
+                        }
+                      }}
+                      className={inputStyle}
+                      placeholder="in"
+                      min={0}
+                      max={11}
+                    />
+                  </div>
+                ) : (
+                  <input
+                    type="number"
+                    value={Math.round(profile.height || 170)}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      if (value && value > 0) {
+                        handleChange({ ...profile, height: value });
+                      }
+                    }}
+                    className={inputStyle}
+                    placeholder="Enter height (cm)"
+                  />
+                )
+              )}
+            </div>
 
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
-            Units
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleChange({ ...profile, unitSystem: 'metric' })}
-              className={segmentButton((profile.unitSystem || 'metric') === 'metric')}
-            >
-              Metric
-            </button>
-            <button
-              type="button"
-              onClick={() => handleChange({ ...profile, unitSystem: 'imperial' })}
-              className={segmentButton(profile.unitSystem === 'imperial')}
-            >
-              Imperial
-            </button>
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+                Goal Weight ({unitSystem === 'imperial' ? 'lbs' : 'kg'})
+              </label>
+              <button
+                type="button"
+                onClick={onGoalWeightClick}
+                className={inputButton}
+              >
+                {profile.goalWeight 
+                  ? `${Math.round(convertHeightFromCm(profile.goalWeight, unitSystem).value)} ${convertHeightFromCm(profile.goalWeight, unitSystem).unit}`
+                  : `Set goal weight`
+                }
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+              Height ({unitSystem === 'imperial' ? 'ft / in' : 'cm'})
+            </label>
+            {useWheelForNumbers ? (
+              <button
+                type="button"
+                onClick={() => setShowHeightPicker(true)}
+                className={inputButton}
+              >
+                {unitSystem === 'imperial' 
+                  ? `${Math.floor(heightDisplayValue / 12)}'${Math.round(heightDisplayValue % 12)}"`
+                  : `${Math.round(heightDisplayValue)} cm`
+                }
+              </button>
+            ) : (
+              unitSystem === 'imperial' ? (
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={feet}
+                    onChange={(e) => {
+                      const feetVal = parseInt(e.target.value) || 0;
+                      const heightCm = feetInchesToCm(feetVal, inches);
+                      if (heightCm && heightCm > 0) {
+                        handleChange({ ...profile, height: heightCm });
+                      }
+                    }}
+                    className={inputStyle}
+                    placeholder="ft"
+                    min={0}
+                    max={8}
+                  />
+                  <input
+                    type="number"
+                    value={inches}
+                    onChange={(e) => {
+                      const inchesVal = parseInt(e.target.value) || 0;
+                      const heightCm = feetInchesToCm(feet, inchesVal);
+                      if (heightCm && heightCm > 0) {
+                        handleChange({ ...profile, height: heightCm });
+                      }
+                    }}
+                    className={inputStyle}
+                    placeholder="in"
+                    min={0}
+                    max={11}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  value={Math.round(profile.height || 170)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    if (value && value > 0) {
+                      handleChange({ ...profile, height: value });
+                    }
+                  }}
+                  className={inputStyle}
+                  placeholder="Enter height (cm)"
+                />
+              )
+            )}
+          </div>
+        )}
       </div>
 
       <div>

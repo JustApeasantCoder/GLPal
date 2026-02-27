@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile, PeptideLogEntry, Peptide } from '../../types';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile, PeptideLogEntry, Peptide, DailyLogEntry } from '../../types';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
 import { useThemeStyles, Collapse } from '../../contexts/ThemeContext';
-import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
+import { convertWeightFromKg, getWeightUnit, convertWeightToKg, convertHydrationFromMl, getHydrationUnit } from '../../shared/utils/unitConversion';
 import { useAppStore } from '../../stores/appStore';
-import { saveMedicationManualEntries, saveWeightEntries } from '../../shared/utils/database';
+import { saveMedicationManualEntries, saveWeightEntries, addWeightEntry } from '../../shared/utils/database';
 import { ModalType } from '../../shared/hooks/useAppHistory';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
+import QuickLogModal from '../dashboard/components/QuickLogModal';
+import { db } from '../../db/dexie';
+import { timeService } from '../../core/timeService';
 
 interface LogTabProps {
   refreshKey?: number;
@@ -100,6 +103,28 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
   const [editWeightMacros, setEditWeightMacros] = useState<WeightMacros>({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isWeightModalClosing, setIsWeightModalClosing] = useState(false);
+  const [quickLogDate, setQuickLogDate] = useState<string | null>(null);
+  const [isQuickLogOpen, setIsQuickLogOpen] = useState(false);
+  const [dailyLogs, setDailyLogs] = useState<DailyLogEntry[]>([]);
+
+  // Fetch daily logs
+  useEffect(() => {
+    const fetchDailyLogs = async () => {
+      const logs = await db.dailyLogs.toArray();
+      setDailyLogs(logs);
+    };
+    fetchDailyLogs();
+  }, []);
+
+  const getDailyLog = (date: string): DailyLogEntry | undefined => {
+    return dailyLogs.find(log => log.date === date);
+  };
+
+  const getSeverityColor = (severity: number): string => {
+    if (severity <= 3) return 'text-green-400 bg-green-500/20';
+    if (severity <= 6) return 'text-yellow-400 bg-yellow-500/20';
+    return 'text-red-400 bg-red-500/20';
+  };
 
   // Derive modal visibility from activeModal if modal system is available
   const isSideEffectsModalOpen = activeModal === 'sideEffects';
@@ -207,7 +232,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         weekGroups.get(key)!.push(entry);
       });
       
-      const weekly: (WeightEntry & { change: number | null; weekLabel: string })[] = [];
+      const weekly: (WeightEntry & { change: number | null; weekLabel: string; hydration?: number; mood?: number; sideEffectsAvg?: number })[] = [];
       let prevAvg: number | null = null;
       
       const sortedWeeks = Array.from(weekGroups.keys()).sort();
@@ -237,6 +262,22 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           ? aggregatedMacros 
           : undefined;
         
+        // Get daily logs data for this week
+        const weekDates = entries.map(e => e.date);
+        const weekLogs = dailyLogs.filter(log => weekDates.includes(log.date));
+        const hydration = weekLogs.some(l => l.hydration !== undefined) 
+          ? Math.round(weekLogs.reduce((sum, l) => sum + (l.hydration || 0), 0) / weekLogs.length)
+          : undefined;
+        const moodValues = weekLogs.filter(l => l.mood !== undefined && l.mood > 0).map(l => l.mood!);
+        const mood = moodValues.length > 0 
+          ? Math.round(moodValues.reduce((a, b) => a + b, 0) / moodValues.length)
+          : undefined;
+        const sideEffectSevurities = weekLogs.filter(l => l.sideEffects && l.sideEffects.length > 0)
+          .flatMap(l => l.sideEffects!.map(se => se.severity));
+        const sideEffectsAvg = sideEffectSevurities.length > 0 
+          ? Math.round(sideEffectSevurities.reduce((a, b) => a + b, 0) / sideEffectSevurities.length)
+          : undefined;
+        
         weekly.push({
           date: weekKey,
           weight: avg,
@@ -244,6 +285,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           weekLabel,
           notes: notes || undefined,
           macros,
+          hydration,
+          mood,
+          sideEffectsAvg,
         });
       });
       
@@ -265,7 +309,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         monthGroups.get(key)!.push(entry);
       });
       
-      const monthly: (WeightEntry & { change: number | null; monthLabel: string })[] = [];
+      const monthly: (WeightEntry & { change: number | null; monthLabel: string; hydration?: number; mood?: number; sideEffectsAvg?: number })[] = [];
       let prevAvg: number | null = null;
       
       const sortedMonths = Array.from(monthGroups.keys()).sort();
@@ -295,6 +339,22 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           ? aggregatedMacros 
           : undefined;
         
+        // Get daily logs data for this month
+        const monthDates = entries.map(e => e.date);
+        const monthLogs = dailyLogs.filter(log => monthDates.includes(log.date));
+        const hydration = monthLogs.some(l => l.hydration !== undefined) 
+          ? Math.round(monthLogs.reduce((sum, l) => sum + (l.hydration || 0), 0) / monthLogs.length)
+          : undefined;
+        const moodValues = monthLogs.filter(l => l.mood !== undefined && l.mood > 0).map(l => l.mood!);
+        const mood = moodValues.length > 0 
+          ? Math.round(moodValues.reduce((a, b) => a + b, 0) / moodValues.length)
+          : undefined;
+        const sideEffectSevurities = monthLogs.filter(l => l.sideEffects && l.sideEffects.length > 0)
+          .flatMap(l => l.sideEffects!.map(se => se.severity));
+        const sideEffectsAvg = sideEffectSevurities.length > 0 
+          ? Math.round(sideEffectSevurities.reduce((a, b) => a + b, 0) / sideEffectSevurities.length)
+          : undefined;
+        
         monthly.push({
           date: monthKey + '-01',
           weight: avg,
@@ -302,6 +362,9 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
           monthLabel,
           notes: notes || undefined,
           macros,
+          hydration,
+          mood,
+          sideEffectsAvg,
         });
       });
       
@@ -314,7 +377,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     }
     
     return { data: sorted, prevChange: null };
-  }, [weights, weightViewMode]);
+  }, [weights, weightViewMode, dailyLogs]);
 
   const allMedications = useMemo(() => {
     const seen = new Set<string>();
@@ -470,9 +533,35 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     closeMacrosModal();
   };
 
+  const handleQuickLogSave = useCallback(async (entry: DailyLogEntry, weightKg?: number) => {
+    if (weightKg) {
+      const weightEntry: WeightEntry = {
+        date: entry.date,
+        weight: weightKg,
+        notes: entry.notes,
+        macros: entry.macros,
+      };
+      await addWeightEntry(weightEntry);
+      refreshWeights();
+    }
+    const logs = await db.dailyLogs.toArray();
+    setDailyLogs(logs);
+    setQuickLogDate(null);
+    setIsQuickLogOpen(false);
+  }, []);
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const getMoodEmoji = (value?: number): string => {
+    if (value === undefined || value === 0) return '';
+    if (value <= 2) return '😢';
+    if (value <= 4) return '😕';
+    if (value <= 6) return '😐';
+    if (value <= 8) return '🙂';
+    return '😊';
   };
 
   return (
@@ -633,7 +722,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
 
       <div className={bigCard}>
         <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => setIsWeightLogCollapsed(!isWeightLogCollapsed)}>
-          <h1 className={bigCardText.title}>Weight Log</h1>
+          <h1 className={bigCardText.title}>Daily Log</h1>
           <button
             onClick={(e) => { e.stopPropagation(); setIsWeightLogCollapsed(!isWeightLogCollapsed); }}
             className="text-text-muted hover:text-white transition-colors"
@@ -693,11 +782,12 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                     isDarkMode 
                       ? 'bg-black/20 border-[#B19CD9]/20' 
                       : 'bg-gray-50 border-gray-200'
-                  }`}
+                  } ${weightViewMode === 'daily' ? 'cursor-pointer hover:ring-2 hover:ring-[#4ADEA8]/50' : ''}`}
                   style={{ 
                     borderLeftColor: changeColor,
                     animationDelay: idx >= prevWeightLimit ? `${(idx - prevWeightLimit) * 80}ms` : undefined
                   }}
+                  onClick={() => weightViewMode === 'daily' && (setQuickLogDate(entry.date), setIsQuickLogOpen(true))}
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -726,49 +816,141 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                       </p>
                     </div>
                   </div>
-                  {(entry as any).macros || (entry as any).notes || (entry as any).hasNotes ? (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {(entry as any).macros && (
-                        <>
-                          {(entry as any).macros.calories > 0 && (
-                            <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
-                              {(entry as any).macros.calories} cal
+                  
+                  {/* All Daily Log Data */}
+                  {weightViewMode === 'daily' && (() => {
+                    const dailyLog = getDailyLog(entry.date);
+                    const hasAnyData = dailyLog && (
+                      dailyLog.hydration !== undefined ||
+                      dailyLog.mood !== undefined ||
+                      (dailyLog.sideEffects && dailyLog.sideEffects.length > 0) ||
+                      dailyLog.calories !== undefined ||
+                      (dailyLog.macros && (dailyLog.macros.calories > 0 || dailyLog.macros.protein > 0 || dailyLog.macros.carbs > 0 || dailyLog.macros.fat > 0)) ||
+                      dailyLog.notes
+                    );
+                    
+                    if (!hasAnyData) return null;
+                    
+                    return (
+                      <div className="mt-2 space-y-2">
+                        {/* Row 1: Calories and Macros */}
+                        {(dailyLog?.macros || dailyLog?.calories) && (
+                          <div className="flex flex-wrap gap-1">
+                            {dailyLog?.macros && (
+                              <>
+                                {dailyLog.macros.calories > 0 && (
+                                  <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                                    </svg>
+                                    {dailyLog.macros.calories} cal
+                                  </span>
+                                )}
+                                {dailyLog.macros.protein > 0 && (
+                                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                                    P: {dailyLog.macros.protein}g
+                                  </span>
+                                )}
+                                {dailyLog.macros.carbs > 0 && (
+                                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                                    C: {dailyLog.macros.carbs}g
+                                  </span>
+                                )}
+                                {dailyLog.macros.fat > 0 && (
+                                  <span className="text-xs bg-pink-500/20 text-pink-400 px-2 py-1 rounded">
+                                    F: {dailyLog.macros.fat}g
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Row 2: Hydration and Mood */}
+                        {(dailyLog?.hydration !== undefined || (dailyLog?.mood !== undefined && dailyLog.mood > 0)) && (
+                          <div className="flex flex-wrap gap-1">
+                            {dailyLog?.hydration !== undefined && (
+                              <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z" />
+                                </svg>
+                                {dailyLog.hydration}ml
+                              </span>
+                            )}
+                            {dailyLog?.mood !== undefined && dailyLog.mood > 0 && (
+                              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {dailyLog.mood}/10
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Row 3: Side Effects */}
+                        {dailyLog?.sideEffects && dailyLog.sideEffects.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {dailyLog.sideEffects.map((se, idx) => (
+                              <span key={idx} className={`text-xs px-2 py-1 rounded ${getSeverityColor(se.severity)}`}>
+                                {se.name} ({se.severity}/10)
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Row 4: Notes */}
+                        {dailyLog?.notes && (
+                          <div className="p-2 rounded bg-black/20 text-xs text-gray-300">
+                            {dailyLog.notes}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  
+                  {/* Weekly/Monthly aggregated data display */}
+                  {weightViewMode !== 'daily' && (() => {
+                    const hasAnyData = entry.hydration !== undefined || entry.mood !== undefined || entry.sideEffectsAvg !== undefined;
+                    if (!hasAnyData) return null;
+                    
+                    return (
+                      <div className="mt-2 space-y-2">
+                        {/* Row 1: Calories and Macros - not shown for weekly/monthly */}
+                        
+                        {/* Row 2: Hydration and Mood (averages) */}
+                        {(entry.hydration !== undefined || entry.mood !== undefined) && (
+                          <div className="flex flex-wrap gap-1">
+                            {entry.hydration !== undefined && (
+                              <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z" />
+                                </svg>
+                                ~{entry.hydration}ml avg
+                              </span>
+                            )}
+                            {entry.mood !== undefined && entry.mood > 0 && (
+                              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                ~{entry.mood}/10 avg
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Row 3: Side Effects Average */}
+                        {entry.sideEffectsAvg !== undefined && (
+                          <div className="flex flex-wrap gap-1">
+                            <span className={`text-xs px-2 py-1 rounded ${getSeverityColor(entry.sideEffectsAvg)}`}>
+                              ~{entry.sideEffectsAvg}/10 avg
                             </span>
-                          )}
-                          {(entry as any).macros.protein > 0 && (
-                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
-                              P: {(entry as any).macros.protein}g
-                            </span>
-                          )}
-                          {(entry as any).macros.carbs > 0 && (
-                            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
-                              C: {(entry as any).macros.carbs}g
-                            </span>
-                          )}
-                          {(entry as any).macros.fat > 0 && (
-                            <span className="text-xs bg-pink-500/20 text-pink-400 px-2 py-1 rounded">
-                              F: {(entry as any).macros.fat}g
-                            </span>
-                          )}
-                        </>
-                      )}
-                      {((entry as any).notes || (entry as any).hasNotes) && (
-                        <span className="text-xs bg-[#B19CD9]/20 text-[#B19CD9] px-2 py-1 rounded">
-                          📝
-                        </span>
-                      )}
-                    </div>
-                  ) : null}
-                  {weightViewMode === 'daily' && (
-                    <div className="flex justify-end mt-2">
-                      <button
-                        onClick={() => openWeightEditor(entry)}
-                        className="px-3 py-1 text-xs rounded-lg transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_10px_rgba(177,156,217,0.4)]"
-                      >
-                        + Macros / Notes
-                      </button>
-                    </div>
-                  )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )})}
             </div>
@@ -1233,6 +1415,17 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         defaultValue={String(editWeightMacros.fat)}
         presets={['20', '40', '80', '150']}
       />
+      
+      {/* Quick Log Modal */}
+      {profile && (
+        <QuickLogModal
+          isOpen={isQuickLogOpen}
+          onClose={() => { setIsQuickLogOpen(false); setQuickLogDate(null); }}
+          onSave={handleQuickLogSave}
+          profile={profile}
+          initialDate={quickLogDate || undefined}
+        />
+      )}
     </div>
   );
 };

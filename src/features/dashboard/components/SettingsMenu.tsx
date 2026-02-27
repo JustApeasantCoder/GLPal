@@ -149,45 +149,21 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
             {/* User Settings Section */}
             <div>
               <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>User Settings</h3>
-              <TDEECalculator profile={localProfile} onProfileUpdate={(updatedProfile) => {
-    setLocalProfile(updatedProfile);
-    onProfileUpdate(updatedProfile);
-  }} useWheelForNumbers={useWheelForNumbers} />
+              <TDEECalculator 
+                profile={localProfile} 
+                onProfileUpdate={(updatedProfile) => {
+                  setLocalProfile(updatedProfile);
+                  onProfileUpdate(updatedProfile);
+                }} 
+                useWheelForNumbers={useWheelForNumbers}
+                showGoalWeight={true}
+                onGoalWeightClick={() => handleOpenModal('goalWeightPicker')}
+              />
               
               {/* Separator */}
               <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
-              {/* Goal Weight Setting */}
-              <div className="space-y-4 mt-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${modalText.label}`} style={isDarkMode ? { textShadow: '0 0 10px rgba(177,156,217,0.5)' } : {}}>
-                    Goal Weight {unitSystem === 'imperial' ? '(lbs)' : '(kg)'}
-                  </label>
-                  {useWheelForNumbers ? (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenModal('goalWeightPicker')}
-                      className={inputButton}
-                    >
-                      {goalWeightDisplayValue ? `${goalWeightDisplayValue} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}` : `Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                    </button>
-                  ) : (
-                    <input
-                      type="number"
-                      value={goalWeightDisplayValue || ''}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        if (value && value > 0) {
-                          const weightInKg = convertWeightToKg(value, unitSystem);
-                          onProfileUpdate({ ...localProfile, goalWeight: weightInKg });
-                        }
-                      }}
-                      className={inputStyle}
-                      placeholder={`Enter goal weight (${unitSystem === 'imperial' ? 'lbs' : 'kg'})`}
-                    />
-                  )}
-                </div>
-              </div>
+              {/* Input Method Section */}
             </div>
 
             {/* Separator */}
@@ -266,10 +242,51 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
             {/* Units Section */}
             <div>
-              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Units</h3>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Measurement Units</h3>
+              
+              {/* Weight/Height Unit */}
+              <div className="mb-4">
+                <span className={`text-sm font-medium ${modalText.label}`}>Weight / Height</span>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedProfile = { ...localProfile, unitSystem: 'metric' as const };
+                      setLocalProfile(updatedProfile);
+                      onProfileUpdate(updatedProfile);
+                    }}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      (localProfile.unitSystem || 'metric') === 'metric'
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Metric
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedProfile = { ...localProfile, unitSystem: 'imperial' as const };
+                      setLocalProfile(updatedProfile);
+                      onProfileUpdate(updatedProfile);
+                    }}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      localProfile.unitSystem === 'imperial'
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    Imperial
+                  </button>
+                </div>
+              </div>
               
               {/* Hydration Unit */}
-              <div className="mb-4">
+              <div>
                 <span className={`text-sm font-medium ${modalText.label}`}>Hydration</span>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <button
