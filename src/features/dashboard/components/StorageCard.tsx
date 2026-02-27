@@ -61,14 +61,19 @@ const StorageCard: React.FC<StorageCardProps> = ({
     const totalInitial = filteredStorage.reduce((sum, item) => sum + item.initialUnits, 0);
     const totalRemaining = filteredStorage.reduce((sum, item) => sum + item.remainingUnits, 0);
     const totalCostRemaining = filteredStorage.reduce((sum, item) => sum + (item.remainingUnits * item.unitCost), 0);
+    const totalInitialCost = filteredStorage.reduce((sum, item) => sum + (item.initialUnits * item.unitCost), 0);
     const totalUsed = totalInitial - totalRemaining;
+    const costUsed = totalInitialCost - totalCostRemaining;
     const avgCostPerUnit = totalRemaining > 0 ? totalCostRemaining / totalRemaining : 0;
 
     return {
       totalItems,
       activeItems: active.length,
       totalRemaining,
+      totalUnits: totalInitial,
+      totalCost: totalInitialCost,
       costRemaining: totalCostRemaining,
+      costUsed,
       unitsUsed: totalUsed,
       avgCostPerUnit,
     };
@@ -158,24 +163,24 @@ const StorageCard: React.FC<StorageCardProps> = ({
           <p className={text.value}>{metrics.totalItems}</p>
         </div>
         <div className={smallCard}>
-          <p className={text.label}>In Stock</p>
-          <p className={text.value}>{metrics.activeItems}</p>
+          <p className={text.label}>Total Cost</p>
+          <p className={text.value}>{formatCurrency(metrics.totalCost)}</p>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Cost Used</p>
+          <p className={text.value}>{formatCurrency(metrics.costUsed)}</p>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Total Units</p>
+          <p className={text.value}>{Math.round(metrics.totalUnits)}</p>
+        </div>
+        <div className={smallCard}>
+          <p className={text.label}>Units Used</p>
+          <p className={text.value}>{Math.round(metrics.unitsUsed)}</p>
         </div>
         <div className={smallCard}>
           <p className={text.label}>Units Left</p>
-          <p className={text.value}>{metrics.totalRemaining.toFixed(1)}</p>
-        </div>
-        <div className={smallCard}>
-          <p className={text.label}>Cost Left</p>
-          <p className={text.value}>{formatCurrency(metrics.costRemaining)}</p>
-        </div>
-        <div className={smallCard}>
-          <p className={text.label}>Used</p>
-          <p className={text.value}>{metrics.unitsUsed.toFixed(1)}</p>
-        </div>
-        <div className={smallCard}>
-          <p className={text.label}>$/Unit</p>
-          <p className={text.value}>{formatCurrency(metrics.avgCostPerUnit)}</p>
+          <p className={text.value}>{Math.round(metrics.totalRemaining)}</p>
         </div>
       </div>
 
