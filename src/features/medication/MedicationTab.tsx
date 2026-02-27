@@ -11,7 +11,7 @@ import ProtocolList from './components/ProtocolList';
 import DisclaimerModal from './components/DisclaimerModal';
 import OverdueDisclaimerModal from './components/OverdueDisclaimerModal';
 import OfficialScheduleModal from './components/OfficialScheduleModal';
-import { GLP1Entry, GLP1Protocol } from '../../types';
+import { GLP1Entry, GLP1Protocol, MedicationStorage } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
 import { CHART_DATE_FORMATS } from '../../shared/utils/chartUtils';
 import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
@@ -47,6 +47,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
     setCollapsedMedications,
     latestDoseDone,
     setLatestDoseDone,
+    medicationStorage,
   } = useAppStore();
   
   const [isLogging, setIsLogging] = useState(false);
@@ -58,6 +59,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const collapsedSet = useMemo(() => new Set(collapsedMedications), [collapsedMedications]);
 
   const [showProgressDebug, setShowProgressDebug] = useState(false);
+  const [showCostDebug, setShowCostDebug] = useState(false);
   const [loggingMedicationName, setLoggingMedicationName] = useState<string>('');
 
   const showOfficialScheduleModal = activeModal === 'officialSchedule';
@@ -87,7 +89,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   const nowTimestamp = useTime();
   const now = new Date(nowTimestamp);
   const activeProtocol = useActiveProtocol(protocols);
-  const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone);
+  const stats = useMedicationStats(medicationEntries, protocols, now, latestDoseDone, undefined, medicationStorage);
 
   const currentLevelData = useMemo(() => 
     getCurrentLevel(medicationEntries, now), 
@@ -348,7 +350,19 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
             <div className={smallCard}>
               <p className={text.label}>Cost/Month</p>
-              <p className={text.value}>--</p>
+              <p className={text.value}>
+                {stats.costPerMonth !== null 
+                  ? `$${stats.costPerMonth.toFixed(2)}` 
+                  : '--'}
+              </p>
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  onClick={() => setShowCostDebug(!showCostDebug)}
+                  className="text-[10px] text-[#B19CD9]/50 hover:text-[#B19CD9] underline"
+                >
+                  {showCostDebug ? '▼' : '▶'} debug
+                </button>
+              )}
             </div>
             <div className={smallCard}>
               <p className={text.label}>Current Dose</p>
@@ -404,6 +418,15 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
               doseLoggedToday={medicationEntries.some(e => e.date === timeService.todayString() && e.isManual)}
               protocols={protocols}
               uniqueMedications={uniqueMedications}
+            />
+          )}
+          
+          {process.env.NODE_ENV === 'development' && showCostDebug && (
+            <CostDebugPanel 
+              stats={stats}
+              activeProtocol={activeProtocol}
+              medicationStorage={medicationStorage}
+              protocols={protocols}
             />
           )}
           
@@ -544,6 +567,203 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onClose={onCloseModal}
         onAcknowledged={handleDisclaimerAcknowledged}
       />
+    </div>
+  );
+};
+
+interface CostDebugPanelProps {
+  stats: ReturnType<typeof useMedicationStats>;
+  activeProtocol: GLP1Protocol | undefined;
+  medicationStorage: MedicationStorage[];
+  protocols: GLP1Protocol[];
+}
+
+const CostDebugPanel: React.FC<CostDebugPanelProps> = ({ stats, activeProtocol, medicationStorage, protocols }) => {
+  const { isDarkMode } = useTheme();
+  const todayStr = timeService.todayString();
+  
+  const bgClass = isDarkMode ? 'bg-black/40' : 'bg-white/80';
+  const borderClass = isDarkMode ? 'border-green-500/30' : 'border-green-600/30';
+  const titleClass = isDarkMode ? 'text-green-400' : 'text-green-700';
+  const sectionClass = isDarkMode ? 'text-green-300' : 'text-green-700';
+  const textClass = isDarkMode ? 'text-white' : 'text-gray-900';
+  const mutedClass = isDarkMode ? 'text-gray-400' : 'text-gray-600';
+  const successClass = isDarkMode ? 'text-green-400' : 'text-green-600';
+  const errorClass = isDarkMode ? 'text-red-400' : 'text-red-600';
+  const warningClass = isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+  const cyanClass = isDarkMode ? 'text-cyan-400' : 'text-cyan-600';
+  const subtleClass = isDarkMode ? 'text-gray-500' : 'text-gray-400';
+  const borderLineClass = isDarkMode ? 'border-green-500/20' : 'border-green-500/40';
+  
+  const activeProtocols = protocols?.filter(p => {
+    if (p.isArchived) return false;
+    const start = p.startDate;
+    const end = p.stopDate || '2099-12-31';
+    return todayStr >= start && todayStr <= end;
+  }) || [];
+
+  const findMatchingStorage = (medName: string) => {
+    if (!medicationStorage || medicationStorage.length === 0) return null;
+    const normalizedMed = normalizeMedName(medName);
+    if (!normalizedMed) return null;
+    
+    return medicationStorage.find(storage => {
+      const normalizedStorage = normalizeMedName(storage.medicationName);
+      return normalizedStorage === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+    });
+  };
+
+  const calculateCost = (protocol: GLP1Protocol, storage: MedicationStorage | null) => {
+    if (!protocol || !storage) return null;
+    const { dosagePerUnit, unitCost } = storage;
+    if (dosagePerUnit <= 0 || unitCost <= 0) return null;
+    
+    const dose = protocol.dose;
+    const dosesPerWeek = protocol.frequencyPerWeek;
+    const unitsPerDose = dose / dosagePerUnit;
+    const costPerDose = unitsPerDose * unitCost;
+    const dosesPerMonth = dosesPerWeek * 4;
+    const costPerMonth = costPerDose * dosesPerMonth;
+    
+    return {
+      medication: protocol.medication,
+      dose,
+      dosesPerWeek,
+      dosesPerMonth: dosesPerMonth.toFixed(2),
+      dosagePerUnit,
+      unitCost,
+      unitsPerDose: unitsPerDose.toFixed(4),
+      costPerDose: costPerDose.toFixed(4),
+      costPerMonth: costPerMonth.toFixed(2),
+    };
+  };
+
+  const costBreakdown = activeProtocols.map(protocol => {
+    const storage = findMatchingStorage(protocol.medication);
+    const cost = calculateCost(protocol, storage);
+    return { protocol, storage, cost };
+  });
+
+  const totalCost = costBreakdown
+    .filter(item => item.cost !== null)
+    .reduce((sum, item) => sum + parseFloat(item.cost!.costPerMonth), 0);
+
+  return (
+    <div className={`mb-4 p-3 rounded-lg ${bgClass} border ${borderClass} text-xs font-mono max-h-96 overflow-y-auto`}>
+      <div className={`${titleClass} font-bold mb-2`}>Cost/Month Debug Panel</div>
+      
+      <div className={`border-t ${borderLineClass} my-2`}></div>
+      <div className={`${sectionClass} mb-1`}>1. Find Active Protocols ({activeProtocols.length}):</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <span className={mutedClass}>active protocols count:</span>
+        <span className={activeProtocols.length > 0 ? successClass : errorClass}>
+          {activeProtocols.length}
+        </span>
+        
+        {activeProtocols.map((protocol, idx) => (
+          <span key={protocol.id} className="col-span-2 text-[10px] mt-1">
+            [{idx}] <span className={cyanClass}>{protocol.medication}</span> - 
+            {protocol.dose}mg @ {protocol.frequencyPerWeek}x/week
+          </span>
+        ))}
+        
+        {activeProtocols.length === 0 && (
+          <span className={`${errorClass} col-span-2`}>✗ No active protocols found for today ({todayStr})</span>
+        )}
+      </div>
+      
+      <div className={`border-t ${borderLineClass} my-2`}></div>
+      <div className={`${sectionClass} mb-1`}>2. Find Matching Storage:</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <span className={mutedClass}>total storage items:</span>
+        <span className={textClass}>{medicationStorage.length}</span>
+        
+        {medicationStorage.length > 0 && (
+          <>
+            <span className={`${mutedClass} col-span-2 mt-1`}>All storage items:</span>
+            {medicationStorage.map((item, idx) => {
+              const normalized = normalizeMedName(item.medicationName);
+              const matchesActive = activeProtocols.some(p => normalizeMedName(p.medication) === normalized);
+              return (
+                <span key={item.id} className="col-span-2 text-[10px]">
+                  [{idx}] <span className={matchesActive ? `${successClass} font-bold` : subtleClass}>
+                    {item.medicationName}
+                  </span> ({normalized}) - {item.dosagePerUnit}mg/unit @ ${item.unitCost}/unit - 
+                  isActive: <span className={item.isActive ? successClass : errorClass}>{item.isActive ? 'Y' : 'N'}</span> -
+                  remaining: <span className={item.remainingUnits > 0 ? textClass : errorClass}>{item.remainingUnits}</span>
+                </span>
+              );
+            })}
+          </>
+        )}
+      </div>
+      
+      <div className={`border-t ${borderLineClass} my-2`}></div>
+      <div className={`${sectionClass} mb-1`}>3. Calculate Cost Per Medication:</div>
+      {costBreakdown.length > 0 ? (
+        <div className="space-y-2">
+          {costBreakdown.map((item, idx) => (
+            <div key={item.protocol.id} className={`border ${borderLineClass} rounded p-2`}>
+              <div className={`${cyanClass} font-bold`}>[{idx}] {item.protocol.medication}</div>
+              {item.cost ? (
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] mt-1">
+                  <span className={mutedClass}>dose:</span>
+                  <span className={textClass}>{item.cost.dose}mg</span>
+                  
+                  <span className={mutedClass}>doses/week:</span>
+                  <span className={textClass}>{item.cost.dosesPerWeek}x</span>
+                  
+                  <span className={mutedClass}>doses/month:</span>
+                  <span className={textClass}>{item.cost.dosesPerMonth}</span>
+                  
+                  <span className={mutedClass}>units/dose:</span>
+                  <span className={warningClass}>{item.cost.unitsPerDose}</span>
+                  
+                  <span className={mutedClass}>unitCost:</span>
+                  <span className={textClass}>${item.cost.unitCost}</span>
+                  
+                  <span className={mutedClass}>cost/dose:</span>
+                  <span className={warningClass}>${item.cost.costPerDose}</span>
+                  
+                  <span className={`${mutedClass} font-bold`}>cost/month:</span>
+                  <span className={`${successClass} font-bold`}>${item.cost.costPerMonth}</span>
+                </div>
+              ) : (
+                <div className={`${errorClass} text-[10px] mt-1`}>
+                  ✗ No matching storage found
+                </div>
+              )}
+            </div>
+          ))}
+          
+          <div className={`border-t ${borderLineClass} pt-2 mt-2`}>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              <span className={`${mutedClass} font-bold`}>TOTAL costPerMonth:</span>
+              <span className={`${successClass} font-bold text-lg`}>
+                ${totalCost.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className={errorClass}>
+          ✗ No active protocols - cannot calculate
+        </div>
+      )}
+      
+      <div className={`border-t ${borderLineClass} my-2`}></div>
+      <div className={`${sectionClass} mb-1`}>4. Final Result (from stats):</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <span className={mutedClass}>stats.costPerMonth:</span>
+        <span className={stats.costPerMonth !== null ? `${successClass} font-bold` : errorClass}>
+          {stats.costPerMonth !== null ? `$${stats.costPerMonth.toFixed(2)}` : 'null (no data)'}
+        </span>
+      </div>
+      
+      <div className={`border-t ${borderLineClass} my-2`}></div>
+      <div className={`${subtleClass} text-[10px]`}>
+        Calculation: Sum of [(protocol.dose / storage.dosagePerUnit) × storage.unitCost × (protocol.frequencyPerWeek × 4)] for all active medications
+      </div>
     </div>
   );
 };

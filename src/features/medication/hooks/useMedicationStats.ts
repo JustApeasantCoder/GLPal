@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { GLP1Protocol, GLP1Entry } from '../../../types';
+import { GLP1Protocol, GLP1Entry, MedicationStorage } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { normalizeMedName, MedicationKey, MEDICATION_KEYS } from '../../../shared/utils/medicationUtils';
 import { calculateMedicationConcentration } from '../../../shared/utils/calculations';
@@ -38,6 +38,7 @@ export interface MedicationStats {
   tirzepatideDaysSinceLastDose: number;
   retatrutideDaysSinceLastDose: number;
   cagrilintideDaysSinceLastDose: number;
+  costPerMonth: number | null;
 }
 
 const toLocalDateStr = (d: Date): string => {
@@ -101,7 +102,8 @@ export const useMedicationStats = (
   protocols: GLP1Protocol[],
   currentTime: Date,
   latestDoseDone: number | null,
-  medicationName?: string
+  medicationName?: string,
+  medicationStorage?: MedicationStorage[]
 ): MedicationStats => {
   return useMemo(() => {
     const currentTimeDate = new Date(currentTime);
@@ -296,6 +298,45 @@ export const useMedicationStats = (
     
     const perMedStats = computePerMedStats(medicationEntries, currentTimeDate);
     
+    const activeProtocols = filteredProtocols?.filter(p => {
+      const start = p.startDate;
+      const end = p.stopDate || '2099-12-31';
+      return todayStr >= start && todayStr <= end;
+    }) || [];
+    
+    const costPerMonth: number | null = (() => {
+      if (!medicationStorage || medicationStorage.length === 0 || activeProtocols.length === 0) {
+        return null;
+      }
+      
+      let totalCost = 0;
+      
+      for (const protocol of activeProtocols) {
+        const normalizedMed = normalizeMedName(protocol.medication);
+        if (!normalizedMed) continue;
+        
+        const matchingStorage = medicationStorage.find(storage => {
+          const normalizedStorageMed = normalizeMedName(storage.medicationName);
+          return normalizedStorageMed === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+        });
+        
+        if (!matchingStorage) continue;
+        
+        const { dosagePerUnit, unitCost } = matchingStorage;
+        if (dosagePerUnit <= 0 || unitCost <= 0) continue;
+        
+        const dose = protocol.dose;
+        const dosesPerWeek = protocol.frequencyPerWeek;
+        const unitsPerDose = dose / dosagePerUnit;
+        const costPerDose = unitsPerDose * unitCost;
+        const dosesPerMonth = dosesPerWeek * 4;
+        
+        totalCost += costPerDose * dosesPerMonth;
+      }
+      
+      return totalCost > 0 ? totalCost : null;
+    })();
+    
     return { 
       totalDoses, 
       totalPlannedDoses,
@@ -353,8 +394,9 @@ export const useMedicationStats = (
       tirzepatideDaysSinceLastDose: perMedStats.tirzepatide.daysSinceLastDose,
       retatrutideDaysSinceLastDose: perMedStats.retatrutide.daysSinceLastDose,
       cagrilintideDaysSinceLastDose: perMedStats.cagrilintide.daysSinceLastDose,
+      costPerMonth,
     };
-  }, [medicationEntries, protocols, currentTime, latestDoseDone, medicationName]);
+  }, [medicationEntries, protocols, currentTime, latestDoseDone, medicationName, medicationStorage]);
 };
 
 export const isMedicationOverdue = (

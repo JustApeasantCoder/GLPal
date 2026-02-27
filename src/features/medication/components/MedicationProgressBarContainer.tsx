@@ -281,6 +281,7 @@ const calculateMedicationStats = (
     tirzepatideDaysSinceLastDose: perMedStats.tirzepatide.daysSinceLastDose,
     retatrutideDaysSinceLastDose: perMedStats.retatrutide.daysSinceLastDose,
     cagrilintideDaysSinceLastDose: perMedStats.cagrilintide.daysSinceLastDose,
+    costPerMonth: null,
   };
 
   const todayStr2 = timeService.todayString();
