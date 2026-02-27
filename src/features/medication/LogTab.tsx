@@ -7,6 +7,7 @@ import { useAppStore } from '../../stores/appStore';
 import { saveMedicationManualEntries, saveWeightEntries } from '../../shared/utils/database';
 import { ModalType } from '../../shared/hooks/useAppHistory';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
+import Collapse from '../../shared/components/Collapse';
 
 interface LogTabProps {
   refreshKey?: number;
@@ -144,13 +145,10 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
 
   const [doseDisplayLimit, setDoseDisplayLimit] = useState(5);
   const [prevDoseLimit, setPrevDoseLimit] = useState(5);
-  const [doseAnimClass, setDoseAnimClass] = useState('collapsed');
   const [weightDisplayLimit, setWeightDisplayLimit] = useState(10);
   const [prevWeightLimit, setPrevWeightLimit] = useState(10);
-  const [weightAnimClass, setWeightAnimClass] = useState('collapsed');
   const [peptideDisplayLimit, setPeptideDisplayLimit] = useState(5);
   const [prevPeptideLimit, setPrevPeptideLimit] = useState(5);
-  const [peptideAnimClass, setPeptideAnimClass] = useState('collapsed');
 
   const [showCaloriePicker, setShowCaloriePicker] = useState(false);
   const [showProteinPicker, setShowProteinPicker] = useState(false);
@@ -363,31 +361,6 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     localStorage.setItem('glpal_peptide_log_collapsed', String(isPeptideLogCollapsed));
   }, [isPeptideLogCollapsed]);
 
-  // Animation triggers
-  useEffect(() => {
-    if (isDoseLogCollapsed) {
-      setDoseAnimClass('collapsed');
-    } else {
-      setDoseAnimClass('expanded');
-    }
-  }, [isDoseLogCollapsed]);
-
-  useEffect(() => {
-    if (isWeightLogCollapsed) {
-      setWeightAnimClass('collapsed');
-    } else {
-      setWeightAnimClass('expanded');
-    }
-  }, [isWeightLogCollapsed]);
-
-  useEffect(() => {
-    if (isPeptideLogCollapsed) {
-      setPeptideAnimClass('collapsed');
-    } else {
-      setPeptideAnimClass('expanded');
-    }
-  }, [isPeptideLogCollapsed]);
-
   useEffect(() => {
     setManualEntries(dosesEntries.filter(e => e.isManual).sort((a, b) => b.date.localeCompare(a.date)));
   }, [dosesEntries]);
@@ -517,9 +490,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {/* Animate content */}
-        <div className={`collapse-content ${doseAnimClass}`}>
-          <div className="collapse-inner">
+        <Collapse isOpen={!isDoseLogCollapsed}>
           {manualEntries.length === 0 ? (
             <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
           ) : (
@@ -653,8 +624,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
-          </div>
-        </div>
+        </Collapse>
         
         {/* Entry count at bottom - only show when collapsed */}
         {isDoseLogCollapsed && (
@@ -674,9 +644,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {/* Animate content */}
-        <div className={`collapse-content ${weightAnimClass}`}>
-          <div className="collapse-inner">
+        <Collapse isOpen={!isWeightLogCollapsed}>
           {weightEntries.length === 0 ? (
             <p className="text-text-muted text-center py-8">No weight entries yet.</p>
           ) : (
@@ -825,8 +793,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
-          </div>
-        </div>
+        </Collapse>
         
         {/* Entry count at bottom - only show when collapsed */}
         {isWeightLogCollapsed && (
@@ -1117,9 +1084,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         </div>
         <div className="border-t border-[#B19CD9]/20 mb-3"></div>
         
-        {/* Animate content */}
-        <div className={`collapse-content ${peptideAnimClass}`}>
-          <div className="collapse-inner">
+        <Collapse isOpen={!isPeptideLogCollapsed}>
           {peptideLogs.length === 0 ? (
             <p className="text-text-muted text-center py-8">No peptide logs yet.</p>
           ) : (
@@ -1203,8 +1168,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
-          </div>
-        </div>
+        </Collapse>
         
         {/* Entry count at bottom - only show when collapsed */}
         {isPeptideLogCollapsed && (
