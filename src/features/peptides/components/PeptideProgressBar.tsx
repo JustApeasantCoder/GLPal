@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Peptide, PeptideLogEntry, PeptideFrequency } from '../../../types';
 import { timeService } from '../../../core/timeService';
+import { isDevMode } from '../../../debug/debug';
 
 interface PeptideProgressBarProps {
   peptide: Peptide;
@@ -416,7 +417,7 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
       </div>
 
       {/* Debug Panel */}
-      {process.env.NODE_ENV === 'development' && (
+      {isDevMode && (
       <div className="mt-2">
         <button
           type="button"

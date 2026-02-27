@@ -25,6 +25,7 @@ import { useMedicationStats, useActiveProtocol, isMedicationOverdue } from './ho
 import { normalizeMedName } from '../../shared/utils/medicationUtils';
 import { getCurrentLevel } from '../../shared/utils/medicationChartUtils';
 import { ModalType } from '../../shared/hooks/useAppHistory';
+import { isDevMode } from '../../debug/debug';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
@@ -355,7 +356,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
                   ? `$${stats.costPerMonth.toFixed(2)}` 
                   : '--'}
               </p>
-              {process.env.NODE_ENV === 'development' && (
+              {isDevMode && (
                 <button
                   onClick={() => setShowCostDebug(!showCostDebug)}
                   className="text-[10px] text-[#B19CD9]/50 hover:text-[#B19CD9] underline"
@@ -400,7 +401,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
             </div>
           ))}
           
-          {process.env.NODE_ENV === 'development' && (
+          {isDevMode && (
             <button
               onClick={() => setShowProgressDebug(!showProgressDebug)}
               className="text-xs text-[#B19CD9]/50 hover:text-[#B19CD9] underline mb-2"
@@ -797,7 +798,7 @@ const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({ stats, now, act
         <span className="text-white">{now.toString()}</span>
         
         <span className="text-gray-400">Current Time:</span>
-        <span className="text-white">{new Date(now).toLocaleTimeString()}</span>
+        <span className="text-white">{new Date(now).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
         
         <span className="text-gray-400">todayStr:</span>
         <span className="text-yellow-400">{(() => {

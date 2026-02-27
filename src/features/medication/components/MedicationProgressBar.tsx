@@ -184,7 +184,7 @@ const MedicationProgressBar: React.FC<MedicationProgressBarProps> = ({
     if (nextDueDays === 0) {
       return `${nextDueHours} Hour${nextDueHours !== 1 ? 's' : ''} Until Next Dose`;
     }
-    return `DEBUG: ${nextDueDays}d ${nextDueHours}h isDueToday=${isDueToday}`;
+    return `${nextDueDays} Day${nextDueDays !== 1 ? 's' : ''} ${nextDueHours} Hour${nextDueHours !== 1 ? 's' : ''} Until Next Dose`;
   };
 
   const getButtonConfig = () => {

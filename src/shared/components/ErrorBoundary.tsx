@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { isDevMode, debug } from '../../debug/debug';
 
 interface Props {
   children: ReactNode;
@@ -19,7 +20,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    debug.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {
@@ -39,7 +40,7 @@ class ErrorBoundary extends Component<Props, State> {
             >
               Refresh Page
             </button>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {isDevMode && this.state.error && (
               <details className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded text-sm">
                 <summary className="cursor-pointer font-medium">Error Details</summary>
                 <pre className="mt-2 whitespace-pre-wrap text-red-600 dark:text-red-400">

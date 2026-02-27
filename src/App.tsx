@@ -9,6 +9,7 @@ import { useAppStore, TabType } from './stores/appStore';
 import { useTimeStore } from './stores/timeStore';
 import { timeService } from './core/timeService';
 import { useAppHistory } from './shared/hooks/useAppHistory';
+import { isDevMode } from './debug/debug';
 
 import Dashboard from './features/dashboard/Dashboard';
 import MedicationTab from './features/medication/MedicationTab';
@@ -120,9 +121,9 @@ function App() {
               GLPal
             </a>
           </h1>
-          {process.env.NODE_ENV === 'development' && (
+          {isDevMode && (
             <div className="text-xs text-text-secondary font-mono bg-black/20 px-2 py-1 rounded">
-              {timeService.toLocalDateString(nowDate())} {nowDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              {timeService.toLocalDateString(nowDate())} {nowDate().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -137,7 +138,7 @@ function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </button>
-            {process.env.NODE_ENV === 'development' && (
+            {isDevMode && (
             <>
             <button
               onClick={() => {
@@ -211,7 +212,7 @@ function App() {
             </button>
             </>
             )}
-            {process.env.NODE_ENV === 'development' && (
+            {isDevMode && (
             <button
               onClick={handleClearData}
               className="p-2 rounded-xl hover:bg-red-500/20 transition-all duration-300 group"
