@@ -295,5 +295,24 @@ export const useTheme = () => {
   };
 };
 
+// =============================================================================
+// REUSABLE COMPONENTS
+// =============================================================================
+
+interface CollapseProps {
+  isOpen: boolean;
+  children: React.ReactNode;
+}
+
+export const Collapse: React.FC<CollapseProps> = ({ isOpen, children }) => {
+  return (
+    <div className={`collapse-content ${isOpen ? 'expanded' : 'collapsed'}`}>
+      <div className="collapse-inner">
+        {children}
+      </div>
+    </div>
+  );
+};
+
 // Keep useThemeStyles as alias for backward compatibility
 export const useThemeStyles = useTheme;

@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GLP1Entry, GLP1Protocol, SideEffect, WeightEntry, WeightMacros, UserProfile, PeptideLogEntry, Peptide } from '../../types';
 import { getMedicationColorByName } from '../../shared/utils/chartUtils';
-import { useThemeStyles } from '../../contexts/ThemeContext';
+import { useThemeStyles, Collapse } from '../../contexts/ThemeContext';
 import { convertWeightFromKg, getWeightUnit } from '../../shared/utils/unitConversion';
 import { useAppStore } from '../../stores/appStore';
 import { saveMedicationManualEntries, saveWeightEntries } from '../../shared/utils/database';
 import { ModalType } from '../../shared/hooks/useAppHistory';
 import DoseWheelPickerModal from '../../shared/components/DoseWheelPickerModal';
-import Collapse from '../../shared/components/Collapse';
 
 interface LogTabProps {
   refreshKey?: number;

@@ -1,8 +1,7 @@
 import React from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, formatDateShort, formatFrequency } from '../../../constants/medications';
-import { useTheme } from '../../../contexts/ThemeContext';
-import Collapse from '../../../shared/components/Collapse';
+import { useTheme, Collapse } from '../../../contexts/ThemeContext';
 
 const GLP1_COLORS = [
   '#9C7BD3', // Semaglutide
