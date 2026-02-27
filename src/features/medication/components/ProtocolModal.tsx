@@ -415,14 +415,20 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-fade-in" style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative rounded-2xl shadow-2xl w-full max-w-xs p-6 bg-[#1a1a24] border border-red-500/30 modal-content-fade-in">
-            <h3 className="text-lg font-semibold mb-2 text-white">Delete Protocol?</h3>
-            <p className="text-gray-400 text-sm mb-4">This action cannot be undone.</p>
+          <div className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'} backdrop-fade-in`} style={{ backdropFilter: 'blur(8px)' }} onClick={() => setShowDeleteConfirm(false)} />
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-xs p-6 border border-red-500/30 modal-content-fade-in ${
+            isDarkMode ? 'bg-[#1a1a24]' : 'bg-white'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Delete Protocol?</h3>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>This action cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-2 rounded-lg border border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10 transition-all text-sm"
+                className={`flex-1 px-4 py-2 rounded-lg border transition-all text-sm ${
+                  isDarkMode 
+                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 Cancel
               </button>
@@ -433,7 +439,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   }
                   onClose();
                 }}
-                className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                className={`flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm`}
               >
                 Delete
               </button>

@@ -9,13 +9,12 @@ import MedicationProgressBar from './components/MedicationProgressBar';
 import MedicationProgressBarContainer from './components/MedicationProgressBarContainer';
 import ProtocolList from './components/ProtocolList';
 import DisclaimerModal from './components/DisclaimerModal';
-import DeleteConfirmModal from './components/DeleteConfirmModal';
 import OverdueDisclaimerModal from './components/OverdueDisclaimerModal';
 import OfficialScheduleModal from './components/OfficialScheduleModal';
 import { GLP1Entry, GLP1Protocol } from '../../types';
 import { ChartPeriod, useTime } from '../../shared/hooks';
 import { CHART_DATE_FORMATS } from '../../shared/utils/chartUtils';
-import { useThemeStyles } from '../../contexts/ThemeContext';
+import { useTheme, useThemeStyles } from '../../contexts/ThemeContext';
 import { useAppStore } from '../../stores/appStore';
 import { MEDICATIONS, generateId } from '../../constants/medications';
 import { saveProtocol, deleteProtocol, archiveProtocol, generateDosesFromProtocols, regenerateAllDoses } from '../../services/MedicationService';
@@ -106,6 +105,7 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
   }, [protocols]);
 
   const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const { isDarkMode } = useTheme();
 
   const generatedEntries = useMemo(
     () => medicationEntries,
@@ -505,12 +505,47 @@ const MedicationTab: React.FC<MedicationTabProps> = ({ medicationEntries, onAddM
         onConfirm={handleConfirmOverdueDose}
       />
 
-      <DeleteConfirmModal
-        isOpen={showDeleteConfirm}
-        medicationName={deleteConfirmMed || ''}
-        onClose={closeLocalModal}
-        onConfirm={() => deleteConfirmMed && handleDeleteMedication(deleteConfirmMed)}
-      />
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div 
+            className={`fixed inset-0 ${isDarkMode ? 'bg-black/60' : 'bg-black/40'}`}
+            style={{ backdropFilter: 'blur(8px)' }}
+            onClick={closeLocalModal}
+          />
+          <div className={`relative rounded-2xl shadow-2xl w-full max-w-sm p-6 border border-red-500/30 ${
+            isDarkMode ? 'bg-[#1a1a24]' : 'bg-white'
+          }`}>
+            <h2 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Delete {deleteConfirmMed}?
+            </h2>
+            <p className={`text-sm mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              This will remove all protocols for this medication. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={closeLocalModal}
+                className={`flex-1 py-3 rounded-xl border transition-all font-medium ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/40 text-white/80 hover:text-white hover:bg-white/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteConfirmMed && handleDeleteMedication(deleteConfirmMed)}
+                className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                  isDarkMode
+                    ? 'bg-red-500/80 text-white hover:bg-red-500'
+                    : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <DisclaimerModal
         isOpen={showDisclaimer}
