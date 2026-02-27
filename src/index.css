@@ -299,3 +299,29 @@ body.modal-open {
 .pain-level-indicator {
   transition: color 150ms ease;
 }
+
+/* LogTab collapse animations */
+.collapse-content {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 400ms ease-in-out, opacity 300ms ease-in-out;
+  opacity: 1;
+}
+
+.collapse-content.collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.collapse-content > .collapse-inner {
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 400ms ease-out both;
+}

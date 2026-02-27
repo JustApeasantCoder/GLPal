@@ -519,6 +519,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         
         {/* Animate content */}
         <div className={`collapse-content ${doseAnimClass}`}>
+          <div className="collapse-inner">
           {manualEntries.length === 0 ? (
             <p className="text-text-muted text-center py-8">No manually logged doses yet.</p>
           ) : (
@@ -652,6 +653,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
+          </div>
         </div>
         
         {/* Entry count at bottom - only show when collapsed */}
@@ -674,6 +676,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         
         {/* Animate content */}
         <div className={`collapse-content ${weightAnimClass}`}>
+          <div className="collapse-inner">
           {weightEntries.length === 0 ? (
             <p className="text-text-muted text-center py-8">No weight entries yet.</p>
           ) : (
@@ -822,6 +825,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
+          </div>
         </div>
         
         {/* Entry count at bottom - only show when collapsed */}
@@ -1115,6 +1119,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
         
         {/* Animate content */}
         <div className={`collapse-content ${peptideAnimClass}`}>
+          <div className="collapse-inner">
           {peptideLogs.length === 0 ? (
             <p className="text-text-muted text-center py-8">No peptide logs yet.</p>
           ) : (
@@ -1198,6 +1203,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
             )}
           </>
           )}
+          </div>
         </div>
         
         {/* Entry count at bottom - only show when collapsed */}
