@@ -85,33 +85,35 @@ const ProtocolList: React.FC<ProtocolListProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {isExpanded && (
-              <div className="space-y-1">
-                {medProtocols.map((protocol, index) => (
-                  <div 
-                    key={protocol.id}
-                    onClick={() => onEditProtocol(protocol)}
-                    className="flex items-start justify-between gap-2 py-2 cursor-pointer hover:bg-black/10 dark:hover:bg-white/5 rounded px-1 -mx-1"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium whitespace-nowrap ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`}>
-                        {protocol.dose}mg
-                      </span>
-                      {protocol.phase === 'titrate' && (
-                        <span className="text-[#4ADEA8]">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
+            <div className={`collapse-content ${isExpanded ? 'expanded' : 'collapsed'}`}>
+              <div className="collapse-inner">
+                <div className="space-y-1">
+                  {medProtocols.map((protocol, index) => (
+                    <div 
+                      key={protocol.id}
+                      onClick={() => onEditProtocol(protocol)}
+                      className="flex items-start justify-between gap-2 py-2 cursor-pointer hover:bg-black/10 dark:hover:bg-white/5 rounded px-1 -mx-1"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium whitespace-nowrap ${isDarkMode ? 'text-text-primary' : 'text-gray-900'}`}>
+                          {protocol.dose}mg
                         </span>
-                      )}
+                        {protocol.phase === 'titrate' && (
+                          <span className="text-[#4ADEA8]">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-sm whitespace-nowrap ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>
+                        {formatDateShort(protocol.startDate)} → {protocol.stopDate ? formatDateShort(protocol.stopDate) : 'Ongoing'}
+                      </span>
                     </div>
-                    <span className={`text-sm whitespace-nowrap ${isDarkMode ? 'text-text-muted' : 'text-gray-600'}`}>
-                      {formatDateShort(protocol.startDate)} → {protocol.stopDate ? formatDateShort(protocol.stopDate) : 'Ongoing'}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         );
       })}
