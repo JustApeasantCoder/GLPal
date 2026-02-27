@@ -12,7 +12,7 @@ const getTodayString = () => timeService.todayString();
 interface MedicationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddMedication: (dose: number, medication: string, date: string) => void;
+  onAddMedication: (dose: number, medication: string, date: string, halfLifeHours?: number, time?: string) => void;
   useWheelForDate?: boolean;
   useWheelForNumbers?: boolean;
 }
@@ -23,6 +23,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const [selectedMedication, setSelectedMedication] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
+  const [currentTime, setCurrentTime] = useState<string>('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDosePicker, setShowDosePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -31,6 +32,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   useEffect(() => {
     if (isOpen) {
       setSelectedDate(getTodayString());
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
       const lastMed = getLastMedication();
       if (lastMed) {
         setSelectedMedication(lastMed);
@@ -83,7 +86,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
       const halfLife = med ? med.halfLifeHours : 144;
       saveLastMedication(selectedMedication);
       saveLastDose(selectedMedication, doseValue);
-      onAddMedication(doseValue, medicationName, selectedDate, halfLife);
+      onAddMedication(doseValue, medicationName, selectedDate, halfLife, currentTime);
       setSelectedMedication('');
       setDose('');
       onClose();

@@ -10,6 +10,7 @@ import { useTimeStore } from './stores/timeStore';
 import { timeService } from './core/timeService';
 import { useAppHistory } from './shared/hooks/useAppHistory';
 import { isDevMode } from './debug/debug';
+import { GLP1Entry } from './types';
 
 import Dashboard from './features/dashboard/Dashboard';
 import MedicationTab from './features/medication/MedicationTab';
@@ -77,14 +78,17 @@ function App() {
     addWeight(newEntry);
   }, [addWeight]);
 
-  const handleAddDose = useCallback((dose: number, medication: string, date: string, halfLifeHours: number = 144) => {
-    const newEntry = { 
+  const handleAddDose = useCallback((dose: number, medication: string, date: string, halfLifeHours: number = 144, time?: string) => {
+    const newEntry: GLP1Entry = { 
       date, 
       medication, 
       dose, 
       halfLifeHours,
       isManual: true,
     };
+    if (time) {
+      newEntry.time = time;
+    }
     addDose(newEntry);
     refreshDoses();
   }, [addDose, refreshDoses]);

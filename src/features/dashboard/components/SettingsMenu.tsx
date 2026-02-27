@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { UserProfile, UnitSystem } from '../../../types';
+import { UserProfile, UnitSystem, HydrationUnit } from '../../../types';
 import { ModalType } from '../../../shared/hooks/useAppHistory';
 import TDEECalculator from './TDEECalculator';
 import { convertWeightFromKg, convertWeightToKg } from '../../../shared/utils/unitConversion';
@@ -37,6 +37,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   const [pendingGoalWeight, setPendingGoalWeight] = useState<string>('');
   const [useWheelForNumbers, setUseWheelForNumbers] = useState(false);
   const [useWheelForDate, setUseCalendarPicker] = useState(false);
+  const [hydrationUnit, setHydrationUnit] = useState<HydrationUnit>('ml');
 
   const showGoalWeightPicker = activeModal === 'goalWeightPicker';
 
@@ -64,20 +65,22 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   useEffect(() => {
     setUseWheelForNumbers(profile.useWheelForNumbers ?? false);
     setUseCalendarPicker(profile.useWheelForDate ?? true);
+    setHydrationUnit(profile.hydrationUnit ?? 'ml');
   }, [profile]);
 
   // Save settings to profile when they change
   useEffect(() => {
-    if (profile.useWheelForNumbers === useWheelForNumbers && profile.useWheelForDate === useWheelForDate) {
+    if (profile.useWheelForNumbers === useWheelForNumbers && profile.useWheelForDate === useWheelForDate && profile.hydrationUnit === hydrationUnit) {
       return; // Don't save if values haven't changed
     }
     const updatedProfile = {
       ...profile,
       useWheelForNumbers,
       useWheelForDate,
+      hydrationUnit,
     };
     onProfileUpdate(updatedProfile);
-  }, [useWheelForNumbers, useWheelForDate]);
+  }, [useWheelForNumbers, useWheelForDate, hydrationUnit]);
 
   // Update local profile when parent profile changes
   useEffect(() => {
@@ -256,6 +259,44 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
                     }`}
                   >
                     Calendar Picker
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Units Section */}
+            <div>
+              <h3 className={`text-lg font-medium mb-4 ${modalText.title}`} style={{ textShadow: isDarkMode ? '0 0 15px rgba(177,156,217,0.5)' : 'none' }}>Units</h3>
+              
+              {/* Hydration Unit */}
+              <div className="mb-4">
+                <span className={`text-sm font-medium ${modalText.label}`}>Hydration</span>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setHydrationUnit('ml')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      hydrationUnit === 'ml'
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    ml
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHydrationUnit('oz')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
+                      hydrationUnit === 'oz'
+                        ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white shadow-[0_0_15px_rgba(177,156,217,0.4)]'
+                        : isDarkMode
+                          ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30 hover:bg-[#B19CD9]/20'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    oz
                   </button>
                 </div>
               </div>

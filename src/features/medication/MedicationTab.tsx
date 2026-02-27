@@ -29,7 +29,7 @@ import { isDevMode } from '../../debug/debug';
 
 interface MedicationTabProps {
   medicationEntries: GLP1Entry[];
-  onAddMedication: (dose: number, medication: string, date: string, halfLifeHours?: number) => void;
+  onAddMedication: (dose: number, medication: string, date: string, halfLifeHours?: number, time?: string) => void;
   onRefreshMedications: () => void;
   chartPeriod: ChartPeriod;
   onChartPeriodChange: (period: ChartPeriod) => void;

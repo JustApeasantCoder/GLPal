@@ -1,5 +1,6 @@
 // Define UnitSystem type locally to avoid circular imports
 export type UnitSystem = 'metric' | 'imperial';
+export type HydrationUnit = 'ml' | 'oz';
 
 // Weight conversion constants
 const KG_TO_LBS = 2.20462;
@@ -8,6 +9,10 @@ const LBS_TO_KG = 0.453592;
 // Height conversion constants  
 const CM_TO_INCHES = 0.393701;
 const INCHES_TO_CM = 2.54;
+
+// Hydration conversion constants
+const ML_TO_OZ = 0.033814;
+const OZ_TO_ML = 29.5735;
 
 // Weight conversions
 export const kgToLbs = (kg: number): number => kg * KG_TO_LBS;
@@ -87,4 +92,29 @@ export const getWeightUnit = (unitSystem: UnitSystem): string => {
 // Get height unit symbol
 export const getHeightUnit = (unitSystem: UnitSystem): string => {
   return unitSystem === 'imperial' ? 'ft/in' : 'cm';
+};
+
+// Hydration conversions
+export const mlToOz = (ml: number): number => ml * ML_TO_OZ;
+export const ozToMl = (oz: number): number => oz * OZ_TO_ML;
+
+// Hydration input conversion (converts user input to ml for storage)
+export const convertHydrationToMl = (value: number, fromUnit: HydrationUnit): number => {
+  if (fromUnit === 'oz') {
+    return Math.round(ozToMl(value));
+  }
+  return value;
+};
+
+// Hydration output conversion (converts stored ml to display unit)
+export const convertHydrationFromMl = (ml: number, toUnit: HydrationUnit): number => {
+  if (toUnit === 'oz') {
+    return Math.round(mlToOz(ml) * 10) / 10;
+  }
+  return ml;
+};
+
+// Get hydration unit symbol
+export const getHydrationUnit = (unit: HydrationUnit): string => {
+  return unit === 'oz' ? 'oz' : 'ml';
 };

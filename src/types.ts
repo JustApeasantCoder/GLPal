@@ -19,6 +19,17 @@ export interface SideEffect {
   severity: number; // 1-10
 }
 
+export interface DailyLogEntry {
+  date: string; // YYYY-MM-DD format
+  weight?: number; // kg (stored as kg internally)
+  hydration?: number; // ml (stored as ml internally)
+  mood?: number; // 1-10
+  sideEffects?: SideEffect[];
+  calories?: number;
+  macros?: WeightMacros;
+  notes?: string;
+}
+
 export interface MedicationEntry {
   date: string;
   medication: string;
@@ -49,6 +60,7 @@ export type GLP1Entry = MedicationEntry;
 export type GLP1Protocol = MedicationProtocol;
 
 export type UnitSystem = 'metric' | 'imperial';
+export type HydrationUnit = 'ml' | 'oz';
 
 export interface UserProfile {
   age: number;
@@ -57,6 +69,7 @@ export interface UserProfile {
   activityLevel: number; // multiplier
   goalWeight?: number; // kg (stored as metric internally)
   unitSystem?: UnitSystem; // preferred display units
+  hydrationUnit?: HydrationUnit; // preferred hydration display units
   useWheelForNumbers?: boolean;
   useWheelForDate?: boolean;
 }
