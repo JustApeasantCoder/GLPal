@@ -3,6 +3,8 @@ import ReactECharts from 'echarts-for-react';
 import { MedicationStorage, StorageCategory, PeptideCategory } from '../../../types';
 import { MEDICATIONS } from '../../../constants/medications';
 import { PEPTIDE_PRESETS } from '../../../types';
+import { getChartTooltipConfig } from '../../../shared/utils/chartUtils';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface StorageChartProps {
   storage: MedicationStorage[];
@@ -64,6 +66,7 @@ const getItemColor = (item: MedicationStorage, glp1MedicationOrder: string[] = [
 
 const StorageChart: React.FC<StorageChartProps> = ({ storage, selectedCategory, glp1MedicationOrder = [], height = 180 }) => {
   const [chartKey, setChartKey] = useState(0);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     setChartKey(prev => prev + 1);
@@ -103,12 +106,7 @@ const StorageChart: React.FC<StorageChartProps> = ({ storage, selectedCategory, 
             color: 'rgba(177, 156, 217, 0.1)',
           },
         },
-        backgroundColor: 'rgba(26, 22, 37, 0.95)',
-        borderColor: '#B19CD9',
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: [12, 16],
-        textStyle: { color: '#fff', fontSize: 13, fontFamily: 'system-ui' },
+        ...getChartTooltipConfig(isDarkMode),
         formatter: (params: any) => {
           const item = params[0];
           const dataIndex = item.dataIndex;

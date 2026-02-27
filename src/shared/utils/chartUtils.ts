@@ -2,6 +2,33 @@ import { useMemo } from 'react';
 import { WeightEntry, GLP1Entry } from '../../types';
 import { timeService } from '../../core/timeService';
 
+// Chart tooltip colors matching big card
+export const CHART_TOOLTIP_COLORS = {
+  dark: {
+    backgroundColor: 'rgba(26, 26, 36, 0.95)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    textColor: '#E2E8F0',
+  },
+  light: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderColor: 'rgba(177, 156, 217, 0.4)',
+    textColor: '#1F2937',
+  },
+};
+
+export const getChartTooltipConfig = (isDarkMode: boolean = true) => {
+  const colors = isDarkMode ? CHART_TOOLTIP_COLORS.dark : CHART_TOOLTIP_COLORS.light;
+  return {
+    backgroundColor: colors.backgroundColor,
+    borderColor: colors.borderColor,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: [12, 16],
+    extraCssText: 'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);',
+    textStyle: { color: colors.textColor, fontSize: 13 },
+  };
+};
+
 // Chart color palettes
 export const CHART_COLORS = {
   medications: [

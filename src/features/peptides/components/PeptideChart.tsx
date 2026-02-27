@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { PeptideLogEntry } from '../../../types';
 import { isMobile } from '../../../shared/utils/common';
+import { getChartTooltipConfig } from '../../../shared/utils/chartUtils';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface PeptideChartProps {
   logs: PeptideLogEntry[];
@@ -10,6 +12,7 @@ interface PeptideChartProps {
 }
 
 const PeptideChart: React.FC<PeptideChartProps> = ({ logs, color, height = 200 }) => {
+  const { isDarkMode } = useTheme();
   const chartOption = useMemo(() => {
     if (logs.length === 0) return null;
 
@@ -53,11 +56,7 @@ const PeptideChart: React.FC<PeptideChartProps> = ({ logs, color, height = 200 }
         splitLine: { lineStyle: { color: '#222' } },
       },
       tooltip: {
-        backgroundColor: '#1a1625',
-        borderColor: '#B19CD9',
-        borderWidth: 1,
-        borderRadius: 8,
-        textStyle: { color: '#fff', fontSize: 12 },
+        ...getChartTooltipConfig(isDarkMode),
         formatter: (params: any) => {
           const data = params[0];
           return `${data.name}<br/>${data.value} injections`;

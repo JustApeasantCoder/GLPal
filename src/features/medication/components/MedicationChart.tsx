@@ -4,11 +4,12 @@ import { GLP1Entry } from '../../../types';
 import { useMedicationChartData } from '../../../shared/hooks/useChartDataProcessor';
 import { useChartDateRange } from '../../../shared/hooks/useChartDateRange';
 import { generateMedicationSeries } from '../../../shared/utils/medicationChartUtils';
-import { CHART_COLORS } from '../../../shared/utils/chartUtils';
+import { CHART_COLORS, getChartTooltipConfig } from '../../../shared/utils/chartUtils';
 import ChartEmptyState from '../../../shared/components/ChartEmptyState';
 import { useTime } from '../../../shared/hooks';
 import { isMobile } from '../../../shared/utils/common';
 import { timeService } from '../../../core/timeService';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 import { ChartPeriod } from '../../../shared/hooks';
 
@@ -24,6 +25,7 @@ interface MedicationChartProps {
 
 const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegendChange }) => {
   const chartRef = useRef<any>(null);
+  const { isDarkMode } = useTheme();
   const { medications, medicationColors, dosesByMed, halfLifeByMed } =
     useMedicationChartData(data);
 
@@ -84,15 +86,7 @@ const MedicationChart: React.FC<MedicationChartProps> = ({ data, period, onLegen
       animation: !isMobile(),
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(20, 15, 35, 0.95)',
-        borderColor: 'rgba(177, 156, 217, 0.4)',
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: [12, 16],
-        /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
-        extraCssText:
-          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);',
-        textStyle: { color: '#E2E8F0', fontSize: 13 },
+        ...getChartTooltipConfig(isDarkMode),
         formatter: (params: any) => {
           if (!params || !params.length) return '';
           const filteredParams = params.filter(

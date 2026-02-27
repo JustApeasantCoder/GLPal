@@ -6,9 +6,10 @@ import { useWeightChartData } from '../../shared/hooks/useChartDataProcessor';
 import { useWeightChartDateRange } from '../../shared/hooks/useChartDateRange';
 import ChartEmptyState from '../../shared/components/ChartEmptyState';
 import { ChartPeriod } from '../../shared/hooks';
-import { getMedicationColor } from '../../shared/utils/chartUtils';
+import { getMedicationColor, getChartTooltipConfig } from '../../shared/utils/chartUtils';
 import { timeService } from '../../core/timeService';
 import { isMobile } from '../../shared/utils/common';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const getToday = () => new Date(timeService.now());
 
@@ -38,6 +39,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
 }) => {
   const [localVisibleMedications, setLocalVisibleMedications] = useState<string[] | undefined>(undefined);
   const visibleMedications = externalVisibleMedications !== undefined ? externalVisibleMedications : localVisibleMedications;
+  const { isDarkMode } = useTheme();
   
   const { sortedData, minWeight, maxWeight, weightPadding } =
     useWeightChartData(data);
@@ -251,15 +253,7 @@ const WeightChart: React.FC<WeightChartProps> = ({
       animation: !isMobile(),
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(20, 15, 35, 0.95)',
-        borderColor: 'rgba(177, 156, 217, 0.4)',
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: [12, 16],
-        /* TEMPORARILY REMOVED BLUR - TODO: Restore later */
-        extraCssText:
-          'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);',
-        textStyle: { color: '#E2E8F0', fontSize: 13 },
+        ...getChartTooltipConfig(isDarkMode),
         formatter: (params: any) => {
           if (!params || !params.length) return '';
           const item = params[0];
