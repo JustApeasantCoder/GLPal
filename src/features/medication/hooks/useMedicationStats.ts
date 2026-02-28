@@ -313,11 +313,13 @@ export const useMedicationStats = (
       
       for (const protocol of activeProtocols) {
         const normalizedMed = normalizeMedName(protocol.medication);
-        if (!normalizedMed) continue;
         
         const matchingStorage = medicationStorage.find(storage => {
-          const normalizedStorageMed = normalizeMedName(storage.medicationName);
-          return normalizedStorageMed === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+          if (normalizedMed) {
+            const normalizedStorageMed = normalizeMedName(storage.medicationName);
+            return normalizedStorageMed === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+          }
+          return storage.medicationName.toLowerCase() === protocol.medication.toLowerCase() && storage.isActive && storage.remainingUnits > 0;
         });
         
         if (!matchingStorage) continue;

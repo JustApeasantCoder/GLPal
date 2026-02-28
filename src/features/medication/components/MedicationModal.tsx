@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MEDICATIONS } from '../../../constants/medications';
-import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication } from '../../../shared/utils/database';
+import { getLastDoses, saveLastDose, getLastMedication, saveLastMedication, getCustomMedications, saveCustomMedication } from '../../../shared/utils/database';
 import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
 import CalendarPickerModal from '../../../shared/components/CalendarPickerModal';
 import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
@@ -30,10 +30,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const [showDosePicker, setShowDosePicker] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [savedCustomMedications, setSavedCustomMedications] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedDate(getTodayString());
+      setSavedCustomMedications(getCustomMedications());
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
       const lastMed = getLastMedication();
@@ -49,11 +51,16 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
       if (lastDoses[selectedMedication]) {
         setDose(lastDoses[selectedMedication].toString());
       } else {
-        const med = MEDICATIONS.find(m => m.id === selectedMedication);
-        if (med) setDose(med.defaultDose.toString());
+        const isCustomMed = savedCustomMedications.includes(selectedMedication);
+        if (isCustomMed) {
+          setDose('1');
+        } else {
+          const med = MEDICATIONS.find(m => m.id === selectedMedication);
+          if (med) setDose(med.defaultDose.toString());
+        }
       }
     }
-  }, [selectedMedication]);
+  }, [selectedMedication, savedCustomMedications]);
 
   useEffect(() => {
     if (isOpen) {
@@ -89,7 +96,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
       : (MEDICATIONS.find(m => m.id === selectedMedication)?.halfLifeHours || 144);
     
     if (medicationName && doseValue && doseValue > 0 && doseValue < 100) {
-      if (!customMedication.trim()) {
+      if (customMedication.trim()) {
+        saveCustomMedication(customMedication.trim());
+        saveLastMedication(customMedication.trim());
+        saveLastDose(customMedication.trim(), doseValue);
+        setSavedCustomMedications(getCustomMedications());
+      } else {
         saveLastMedication(selectedMedication);
         saveLastDose(selectedMedication, doseValue);
       }
@@ -214,6 +226,27 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                   <span className={`text-sm ${modalText.value}`}>{med.name}</span>
                 </button>
               ))}
+              {savedCustomMedications.length > 0 && (
+                <>
+                  <div className={`border-t border-[#B19CD9]/20 my-2`}></div>
+                  {savedCustomMedications.map((customMed) => (
+                    <button
+                      key={customMed}
+                      type="button"
+                      onClick={() => handleMedicationSelect(customMed)}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                        selectedMedication === customMed
+                          ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                          : isDarkMode
+                            ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                            : 'bg-gray-100 border border-transparent hover:bg-gray-200'
+                      }`}
+                    >
+                      <span className={`text-sm ${modalText.value}`}>{customMed}</span>
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
             <div className="border-t border-[#B19CD9]/20 pt-4 mt-4">
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-[#B19CD9]' : 'text-[#9C7BD3]'}`}>Or enter custom medication</label>

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { GLP1Protocol } from '../../../types';
 import { MEDICATIONS, generateId, Medication } from '../../../constants/medications';
 import { timeService } from '../../../core/timeService';
+import { getCustomMedications, saveCustomMedication } from '../../../shared/utils/database';
 
 const getTodayString = () => timeService.todayString();
 
@@ -38,7 +39,11 @@ export interface UseProtocolFormReturn {
   setSelectedDurationDays: (days: number) => void;
   customMedication: string;
   setCustomMedication: (value: string) => void;
+  customHalfLife: string;
+  setCustomHalfLife: (value: string) => void;
   savedMedications: string[];
+  savedCustomMedications: string[];
+  setSavedCustomMedications: (value: string[]) => void;
   showOtherModal: boolean;
   setShowOtherModal: (show: boolean) => void;
   MAIN_MEDICATIONS: Medication[];
@@ -71,7 +76,9 @@ export const useProtocolForm = ({
   });
   const [showOtherModal, setShowOtherModal] = useState(false);
   const [customMedication, setCustomMedication] = useState('');
+  const [customHalfLife, setCustomHalfLife] = useState('');
   const [savedMedications, setSavedMedications] = useState<string[]>([]);
+  const [savedCustomMedications, setSavedCustomMedications] = useState<string[]>([]);
 
   useEffect(() => {
     const loadMedications = () => {
@@ -98,6 +105,7 @@ export const useProtocolForm = ({
 
     if (isOpen) {
       const loadedMeds = loadMedications();
+      setSavedCustomMedications(getCustomMedications());
       
       if (mode === 'edit' && protocol) {
         const med = MEDICATIONS.find(m => m.name === protocol.medication);
@@ -295,7 +303,16 @@ export const useProtocolForm = ({
     let medicationName = selectedMedication;
     let halfLife = 120;
     
-    if (selectedMedication.startsWith('custom:')) {
+    if (customMedication.trim()) {
+      medicationName = customMedication.trim();
+      halfLife = customHalfLife ? parseFloat(customHalfLife) || 144 : 144;
+      const currentSaved = JSON.parse(localStorage.getItem('usedMedications') || '[]');
+      if (!currentSaved.includes(medicationName)) {
+        const updated = [...currentSaved, medicationName];
+        localStorage.setItem('usedMedications', JSON.stringify(updated));
+        setSavedMedications(updated);
+      }
+    } else if (selectedMedication.startsWith('custom:')) {
       medicationName = selectedMedication.replace('custom:', '');
       const currentSaved = JSON.parse(localStorage.getItem('usedMedications') || '[]');
       if (!currentSaved.includes(medicationName)) {
@@ -348,6 +365,8 @@ export const useProtocolForm = ({
     setPhase(undefined);
     setShowOtherModal(false);
     setCustomMedication('');
+    setCustomHalfLife('');
+    setSavedCustomMedications(getCustomMedications());
   };
 
   return {
@@ -369,7 +388,11 @@ export const useProtocolForm = ({
     setSelectedDurationDays,
     customMedication,
     setCustomMedication,
+    customHalfLife,
+    setCustomHalfLife,
     savedMedications,
+    savedCustomMedications,
+    setSavedCustomMedications,
     showOtherModal,
     setShowOtherModal,
     MAIN_MEDICATIONS,

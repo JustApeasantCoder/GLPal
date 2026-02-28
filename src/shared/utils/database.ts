@@ -1,4 +1,4 @@
-import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry, MedicationStorage } from '../../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, UserProfile, Peptide, PeptideLogEntry, MedicationStorage, DailyLogEntry } from '../../types';
 import { db, clearDatabase } from '../../db/dexie';
 
 const isLocalStorageAvailable = (): boolean => {
@@ -26,6 +26,17 @@ export const clearAllData = async (): Promise<void> => {
   localStorage.removeItem('glpal_last_doses');
   localStorage.removeItem('glpal_last_medication');
   localStorage.removeItem('glpal_dosage_calculator');
+  localStorage.removeItem('glpal_custom_medications');
+  localStorage.removeItem('usedMedications');
+  localStorage.removeItem('protocolDurationDays');
+  localStorage.removeItem('lastLoggedDate');
+  localStorage.removeItem('lastLoggedProtocolId');
+  localStorage.removeItem('glpal_dose_log_collapsed');
+  localStorage.removeItem('glpal_weight_log_collapsed');
+  localStorage.removeItem('glpal_peptide_log_collapsed');
+  localStorage.removeItem('glpal_expanded_peptide_card');
+  localStorage.removeItem('glpal_disclaimer_acknowledged');
+  localStorage.removeItem('glpal_sim_offset');
 };
 
 // Weight entries
@@ -253,6 +264,21 @@ export const saveLastMedication = (medicationId: string): void => {
   localStorage.setItem('glpal_last_medication', medicationId);
 };
 
+export const getCustomMedications = (): string[] => {
+  if (!isLocalStorageAvailable()) return [];
+  const stored = localStorage.getItem('glpal_custom_medications');
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const saveCustomMedication = (name: string): void => {
+  if (!isLocalStorageAvailable()) return;
+  const existing = getCustomMedications();
+  if (!existing.includes(name)) {
+    const updated = [name, ...existing].slice(0, 10);
+    localStorage.setItem('glpal_custom_medications', JSON.stringify(updated));
+  }
+};
+
 // Peptides
 export const getPeptides = async (): Promise<Peptide[]> => {
   try {
@@ -352,6 +378,29 @@ export const deleteMedicationStorage = async (id: string): Promise<void> => {
 export const getActiveMedicationStorage = async (): Promise<MedicationStorage[]> => {
   const items = await getMedicationStorage();
   return items.filter(item => item.isActive);
+};
+
+// Daily Logs
+export const getDailyLogs = async (): Promise<DailyLogEntry[]> => {
+  try {
+    const entries = await db.dailyLogs.toArray();
+    return entries.sort((a, b) => a.date.localeCompare(b.date));
+  } catch {
+    return [];
+  }
+};
+
+export const saveDailyLogs = async (entries: DailyLogEntry[]): Promise<void> => {
+  entries.sort((a, b) => a.date.localeCompare(b.date));
+  await db.dailyLogs.bulkPut(entries);
+};
+
+export const addDailyLog = async (entry: DailyLogEntry): Promise<void> => {
+  await db.dailyLogs.put(entry);
+};
+
+export const deleteDailyLog = async (date: string): Promise<void> => {
+  await db.dailyLogs.delete(date);
 };
 
 // Dosage Calculator (localStorage)

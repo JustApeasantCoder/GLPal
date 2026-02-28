@@ -7,6 +7,7 @@ import CalendarPickerModal from '../../../shared/components/CalendarPickerModal'
 import BottomSheetModal from '../../../shared/components/BottomSheetModal';
 import { useProtocolForm, frequencyOptions, durationPresets, toLocalDateString } from '../hooks/useProtocolForm';
 import { useTheme, useThemeStyles } from '../../../contexts/ThemeContext';
+import { saveCustomMedication, getCustomMedications } from '../../../shared/utils/database';
 
 interface ProtocolModalProps {
   isOpen: boolean;
@@ -48,6 +49,11 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     setSelectedDurationDays,
     customMedication,
     setCustomMedication,
+    customHalfLife,
+    setCustomHalfLife,
+    savedMedications,
+    savedCustomMedications,
+    setSavedCustomMedications,
     showOtherModal,
     setShowOtherModal,
     MAIN_MEDICATIONS,
@@ -90,12 +96,22 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
   const handleMedicationSelect = (medicationId: string) => {
     if (medicationId === 'other') {
       setShowOtherModal(true);
+    } else if (savedCustomMedications.includes(medicationId)) {
+      setSelectedMedication(medicationId);
+      setCustomMedication('');
+      setCustomHalfLife('');
+      setDose('1');
     } else {
+      setCustomMedication('');
+      setCustomHalfLife('');
       applyMedicationDefaults(medicationId);
     }
   };
 
   const handleSave = () => {
+    if (customMedication.trim()) {
+      saveCustomMedication(customMedication.trim());
+    }
     const newProtocol = formHandleSave();
     if (newProtocol) {
       onSave(newProtocol);
@@ -117,14 +133,6 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
     if (selectedDurationDays && date) {
       const endDate = new Date(new Date(date).getTime() + selectedDurationDays * 24 * 60 * 60 * 1000);
       setStopDate(toLocalDateString(endDate));
-    }
-  };
-
-  const handleCustomMedicationAdd = () => {
-    if (customMedication.trim()) {
-      setSelectedMedication('custom:' + customMedication.trim());
-      setDose('1');
-      setShowOtherModal(false);
     }
   };
 
@@ -172,6 +180,22 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   }`}
                 >
                   <span className={modalText.value}>{med.name}</span>
+                </button>
+              ))}
+              {savedCustomMedications.length > 0 && savedCustomMedications.map((customMed) => (
+                <button
+                  key={customMed}
+                  type="button"
+                  onClick={() => handleMedicationSelect(customMed)}
+                  className={`text-left px-3 py-2 rounded-lg transition-all text-sm ${
+                    selectedMedication === customMed
+                      ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                      : isDarkMode
+                        ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                        : 'bg-gray-100 border border-transparent hover:bg-gray-200'
+                  }`}
+                >
+                  <span className={modalText.value}>{customMed}</span>
                 </button>
               ))}
             </div>
@@ -326,22 +350,91 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
                   <span className={modalText.value}>{med.name}</span>
                 </button>
               ))}
+              {savedCustomMedications.length > 0 && (
+                <>
+                  <div className={`border-t border-[#B19CD9]/20 my-2`}></div>
+                  {savedCustomMedications.map((customMed) => (
+                    <button
+                      key={customMed}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMedication(customMed);
+                        setDose('1');
+                        setShowOtherModal(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
+                        selectedMedication === customMed
+                          ? 'bg-[#B19CD9]/30 border border-[#B19CD9]'
+                          : isDarkMode
+                            ? 'bg-black/20 border border-transparent hover:bg-[#B19CD9]/10'
+                            : 'bg-gray-100 border border-transparent hover:bg-gray-200'
+                      }`}
+                    >
+                      <span className={modalText.value}>{customMed}</span>
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
             <div className="border-t border-[#B19CD9]/20 pt-4">
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-[#B19CD9]' : 'text-[#9C7BD3]'}`}>Or enter custom medication</label>
               <input
                 type="text"
                 value={customMedication}
-                onChange={(e) => setCustomMedication(e.target.value)}
+                onChange={(e) => {
+                  setCustomMedication(e.target.value);
+                  if (e.target.value.trim()) {
+                    setSelectedMedication('');
+                  }
+                }}
                 placeholder="Custom medication name"
                 className={`${inputStyle} mb-2`}
               />
+              {customMedication.trim() && (
+                <div className="mb-2">
+                  <input
+                    type="number"
+                    value={customHalfLife}
+                    onChange={(e) => setCustomHalfLife(e.target.value)}
+                    placeholder="Half-life (hours) - optional"
+                    className={inputStyle}
+                    step="1"
+                    min="0"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-4 pt-3 border-t border-[#B19CD9]/20">
               <button
-                onClick={handleCustomMedicationAdd}
-                disabled={!customMedication.trim()}
-                className="w-full bg-gradient-to-r from-accent-purple-light to-accent-purple-medium text-white py-2 px-4 rounded-lg hover:shadow-theme transition-all text-sm disabled:opacity-50"
+                type="button"
+                onClick={() => setShowOtherModal(false)}
+                className={`flex-1 py-2 rounded-lg border transition-colors text-sm ${
+                  isDarkMode
+                    ? 'border-[#B19CD9]/30 text-white hover:bg-[#B19CD9]/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
               >
-                Add Custom
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (customMedication.trim()) {
+                    saveCustomMedication(customMedication.trim());
+                    setSelectedMedication(customMedication.trim());
+                    setDose('1');
+                    setSavedCustomMedications(getCustomMedications());
+                  }
+                  setTimeout(() => setShowOtherModal(false), 0);
+                }}
+                disabled={!customMedication.trim()}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  customMedication.trim()
+                    ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white hover:shadow-[0_0_15px_rgba(177,156,217,0.5)]'
+                    : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                Save
               </button>
             </div>
           </div>
