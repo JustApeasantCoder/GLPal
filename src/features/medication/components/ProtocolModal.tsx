@@ -158,7 +158,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div>
             <label className={`${modalLabel} ${modalText.label}`}>Medication</label>
             <div className="grid grid-cols-2 gap-2">
-              {MAIN_MEDICATIONS.filter(med => med.id !== 'other').map((med) => (
+              {MAIN_MEDICATIONS.map((med) => (
                 <button
                   key={med.id}
                   type="button"
