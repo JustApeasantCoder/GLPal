@@ -32,7 +32,14 @@ const StorageItemCard: React.FC<StorageItemCardProps> = ({ item, itemColor, onCl
       </div>
       <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
         <div className="flex items-center justify-between">
-          <span>{item.remainingUnits}/{item.initialUnits} units</span>
+          <div className="flex items-center gap-2">
+            <span>{item.remainingUnits}/{item.initialUnits} units</span>
+            {item.dosagePerUnit > 0 && (
+              <span className={isDarkMode ? 'text-gray-500' : 'text-gray-500'}>
+                ({item.dosagePerUnit}mg)
+              </span>
+            )}
+          </div>
           <span className="text-[#4ADEA8]">${item.unitCost.toFixed(2)}/unit</span>
         </div>
       </div>
