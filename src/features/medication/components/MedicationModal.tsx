@@ -21,6 +21,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const { isDarkMode } = useTheme();
   const { input: inputStyle, modal, modalText } = useThemeStyles();
   const [selectedMedication, setSelectedMedication] = useState<string>('');
+  const [customMedication, setCustomMedication] = useState<string>('');
+  const [customHalfLife, setCustomHalfLife] = useState<string>('');
   const [dose, setDose] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -80,14 +82,21 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const doseValue = parseFloat(dose);
-    if (selectedMedication && doseValue && doseValue > 0 && doseValue < 100) {
-      const med = MEDICATIONS.find(m => m.id === selectedMedication);
-      const medicationName = med ? med.name : selectedMedication;
-      const halfLife = med ? med.halfLifeHours : 144;
-      saveLastMedication(selectedMedication);
-      saveLastDose(selectedMedication, doseValue);
+    
+    const medicationName = customMedication.trim() || (selectedMedication ? (MEDICATIONS.find(m => m.id === selectedMedication)?.name || selectedMedication) : '');
+    const halfLife = customMedication.trim() 
+      ? (parseFloat(customHalfLife) || 144) 
+      : (MEDICATIONS.find(m => m.id === selectedMedication)?.halfLifeHours || 144);
+    
+    if (medicationName && doseValue && doseValue > 0 && doseValue < 100) {
+      if (!customMedication.trim()) {
+        saveLastMedication(selectedMedication);
+        saveLastDose(selectedMedication, doseValue);
+      }
       onAddMedication(doseValue, medicationName, selectedDate, halfLife, currentTime);
       setSelectedMedication('');
+      setCustomMedication('');
+      setCustomHalfLife('');
       setDose('');
       onClose();
     }
@@ -95,6 +104,8 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
 
   const handleMedicationSelect = (medId: string) => {
     setSelectedMedication(medId);
+    setCustomMedication('');
+    setCustomHalfLife('');
     const lastDoses = getLastDoses();
     if (lastDoses[medId]) {
       setDose(lastDoses[medId].toString());
@@ -187,7 +198,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
               Medication
             </label>
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {MEDICATIONS.map((med) => (
+              {MEDICATIONS.filter(m => m.id !== 'other').map((med) => (
                 <button
                   key={med.id}
                   type="button"
@@ -203,6 +214,34 @@ const MedicationModal: React.FC<MedicationModalProps> = ({ isOpen, onClose, onAd
                   <span className={`text-sm ${modalText.value}`}>{med.name}</span>
                 </button>
               ))}
+            </div>
+            <div className="border-t border-[#B19CD9]/20 pt-4 mt-4">
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-[#B19CD9]' : 'text-[#9C7BD3]'}`}>Or enter custom medication</label>
+              <input
+                type="text"
+                value={customMedication}
+                onChange={(e) => {
+                  setCustomMedication(e.target.value);
+                  if (e.target.value.trim()) {
+                    setSelectedMedication('');
+                  }
+                }}
+                placeholder="Custom medication name"
+                className={`${inputStyle} mb-2`}
+              />
+              {customMedication.trim() && (
+                <div className="mb-2">
+                  <input
+                    type="number"
+                    value={customHalfLife}
+                    onChange={(e) => setCustomHalfLife(e.target.value)}
+                    placeholder="Half-life (hours) - optional"
+                    className={inputStyle}
+                    step="1"
+                    min="0"
+                  />
+                </div>
+              )}
             </div>
           </div>
 

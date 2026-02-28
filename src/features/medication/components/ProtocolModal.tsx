@@ -307,7 +307,7 @@ const ProtocolModal: React.FC<ProtocolModalProps> = ({ isOpen, onClose, onSave, 
           <div className={`relative rounded-2xl ${modal} ${modalSmall} modal-content-fade-in`}>
             <h3 className={`text-lg font-semibold mb-4 ${modalText.title}`}>Select Medication</h3>
             <div className="space-y-2 mb-4">
-              {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) || m.id === 'other').map((med: Medication) => (
+              {MEDICATIONS.filter(m => !getAllMedicationIds().includes(m.id) && m.id !== 'other').map((med: Medication) => (
                 <button
                   key={med.id}
                   type="button"

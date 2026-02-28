@@ -607,11 +607,13 @@ const CostDebugPanel: React.FC<CostDebugPanelProps> = ({ stats, activeProtocol, 
   const findMatchingStorage = (medName: string) => {
     if (!medicationStorage || medicationStorage.length === 0) return null;
     const normalizedMed = normalizeMedName(medName);
-    if (!normalizedMed) return null;
     
     return medicationStorage.find(storage => {
       const normalizedStorage = normalizeMedName(storage.medicationName);
-      return normalizedStorage === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+      if (normalizedMed && normalizedStorage) {
+        return normalizedStorage === normalizedMed && storage.isActive && storage.remainingUnits > 0;
+      }
+      return storage.medicationName.toLowerCase() === medName.toLowerCase() && storage.isActive && storage.remainingUnits > 0;
     });
   };
 
