@@ -4,6 +4,9 @@ import { DailyLogEntry, SideEffect, WeightMacros, UserProfile } from '../../../t
 import { db } from '../../../db/dexie';
 import { timeService } from '../../../core/timeService';
 import { convertWeightToKg, convertWeightFromKg, getWeightUnit, convertHydrationToMl, convertHydrationFromMl, getHydrationUnit } from '../../../shared/utils/unitConversion';
+import DateWheelPickerModal from '../../../shared/components/DateWheelPickerModal';
+import WeightWheelPickerModal from '../../weight/components/WeightWheelPickerModal';
+import DoseWheelPickerModal from '../../../shared/components/DoseWheelPickerModal';
 
 interface QuickLogModalProps {
   isOpen: boolean;
@@ -11,6 +14,8 @@ interface QuickLogModalProps {
   onSave: (entry: DailyLogEntry, weightKg?: number) => void;
   profile: UserProfile;
   initialDate?: string;
+  useWheelForNumbers?: boolean;
+  useWheelForDate?: boolean;
 }
 
 const COMMON_SIDE_EFFECTS = [
@@ -32,8 +37,10 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
   onSave,
   profile,
   initialDate,
+  useWheelForNumbers = true,
+  useWheelForDate = false,
 }) => {
-  const { isDarkMode } = useThemeStyles();
+  const { isDarkMode, inputButton } = useThemeStyles();
   const { modal, modalText, input: inputStyle, textarea } = useThemeStyles();
   
   const unitSystem = profile.unitSystem || 'metric';
@@ -45,9 +52,7 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
 
   const [selectedDate, setSelectedDate] = useState(timeService.todayString());
   const [weight, setWeight] = useState('');
-  const [useImperialWeight, setUseImperialWeight] = useState(unitSystem === 'imperial');
   const [hydration, setHydration] = useState('');
-  const [useOz, setUseOz] = useState(hydrationUnit === 'oz');
   const [mood, setMood] = useState(5);
   const [sideEffects, setSideEffects] = useState<SideEffect[]>([]);
   const [newSideEffect, setNewSideEffect] = useState('');
@@ -56,6 +61,13 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [notes, setNotes] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
+  const [showHydrationPicker, setShowHydrationPicker] = useState(false);
+  const [showCaloriePicker, setShowCaloriePicker] = useState(false);
+  const [showProteinPicker, setShowProteinPicker] = useState(false);
+  const [showCarbsPicker, setShowCarbsPicker] = useState(false);
+  const [showFatPicker, setShowFatPicker] = useState(false);
 
   useEffect(() => {
     if (initialDate) {
@@ -67,10 +79,10 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
     const existing = await db.dailyLogs.get(selectedDate);
     if (existing) {
       if (existing.weight !== undefined) {
-        setWeight(String(convertWeightFromKg(existing.weight, useImperialWeight ? 'imperial' : 'metric')));
+        setWeight(String(convertWeightFromKg(existing.weight, unitSystem)));
       }
       if (existing.hydration !== undefined) {
-        setHydration(String(convertHydrationFromMl(existing.hydration, useOz ? 'oz' : 'ml')));
+        setHydration(String(convertHydrationFromMl(existing.hydration, hydrationUnit)));
       }
       if (existing.mood !== undefined) {
         setMood(existing.mood);
@@ -90,7 +102,7 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
         setNotes(existing.notes);
       }
     }
-  }, [selectedDate, useImperialWeight, useOz]);
+  }, [selectedDate, unitSystem, hydrationUnit]);
 
   useEffect(() => {
     if (isOpen) {
@@ -153,8 +165,8 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
         }
       : undefined;
 
-    const weightKg = weight ? convertWeightToKg(parseFloat(weight), useImperialWeight ? 'imperial' : 'metric') : undefined;
-    const hydrationMl = hydration ? convertHydrationToMl(parseFloat(hydration), useOz ? 'oz' : 'ml') : undefined;
+    const weightKg = weight ? convertWeightToKg(parseFloat(weight), unitSystem) : undefined;
+    const hydrationMl = hydration ? convertHydrationToMl(parseFloat(hydration), hydrationUnit) : undefined;
 
     const entry: DailyLogEntry = {
       date: selectedDate,
@@ -212,19 +224,49 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
         <div className="space-y-4 flex-1">
           <div>
             <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Date</label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className={inputStyle}
-            />
+            {useWheelForDate ? (
+              <button
+                type="button"
+                onClick={() => setShowDatePicker(true)}
+                className={inputButton}
+              >
+                {selectedDate || 'Tap to select'}
+              </button>
+            ) : (
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className={inputStyle}
+              />
+            )}
           </div>
+
+          {showDatePicker && useWheelForDate && (
+            <DateWheelPickerModal
+              isOpen={showDatePicker}
+              value={selectedDate}
+              onChange={(date) => {
+                setSelectedDate(date);
+                setShowDatePicker(false);
+              }}
+              onClose={() => setShowDatePicker(false)}
+            />
+          )}
 
           <div className={`border-t my-3 ${isDarkMode ? 'border-[#B19CD9]/20' : 'border-gray-200'}`}></div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Weight</label>
-            <div className="flex gap-2">
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Weight ({weightUnit})</label>
+            {useWheelForNumbers ? (
+              <button
+                type="button"
+                onClick={() => setShowWeightPicker(true)}
+                className={inputButton}
+              >
+                {weight || 'Tap to select'}
+              </button>
+            ) : (
               <input
                 type="number"
                 value={weight}
@@ -234,54 +276,67 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
                 step="0.1"
                 min="0"
               />
-              <button
-                type="button"
-                onClick={() => setUseImperialWeight(!useImperialWeight)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  useImperialWeight
-                    ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white'
-                    : isDarkMode
-                      ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30'
-                      : 'bg-white text-gray-700 border border-gray-300'
-                }`}
-              >
-                {weightUnit}
-              </button>
-            </div>
+            )}
           </div>
 
+          {showWeightPicker && (
+            <WeightWheelPickerModal
+              isOpen={showWeightPicker}
+              onSave={(value) => {
+                setWeight(value);
+                setShowWeightPicker(false);
+              }}
+              onClose={() => setShowWeightPicker(false)}
+              decimals={1}
+              defaultValue={weight || ''}
+              label="Select Weight"
+            />
+          )}
+
           <div>
-            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Hydration</label>
-            <div className="flex gap-2">
+            <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Hydration ({getHydrationUnit(hydrationUnit)})</label>
+            {useWheelForNumbers ? (
+              <button
+                type="button"
+                onClick={() => setShowHydrationPicker(true)}
+                className={inputButton}
+              >
+                {hydration || 'Tap to select'}
+              </button>
+            ) : (
               <input
                 type="number"
                 value={hydration}
                 onChange={(e) => setHydration(e.target.value)}
-                placeholder={`Enter hydration (${getHydrationUnit(useOz ? 'oz' : 'ml')})`}
+                placeholder={`Enter hydration (${getHydrationUnit(hydrationUnit)})`}
                 className={inputStyle}
                 step="1"
                 min="0"
               />
-              <button
-                type="button"
-                onClick={() => setUseOz(!useOz)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  useOz
-                    ? 'bg-gradient-to-r from-[#B19CD9] to-[#9C7BD3] text-white'
-                    : isDarkMode
-                      ? 'bg-[#B19CD9]/10 text-[#B19CD9] border border-[#B19CD9]/30'
-                      : 'bg-white text-gray-700 border border-gray-300'
-                }`}
-              >
-                {getHydrationUnit(useOz ? 'oz' : 'ml')}
-              </button>
-            </div>
+            )}
           </div>
+
+          {showHydrationPicker && (
+            <DoseWheelPickerModal
+              isOpen={showHydrationPicker}
+              onSave={(value) => {
+                setHydration(value);
+                setShowHydrationPicker(false);
+              }}
+              onClose={() => setShowHydrationPicker(false)}
+              decimals={0}
+              defaultValue={hydration || '0'}
+              label="Select Hydration"
+              min={0}
+              max={5000}
+              step={1}
+            />
+          )}
 
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className={`text-sm font-medium ${modalText.label}`}>
-                Mood (optional)
+                Mood
               </label>
               <span className="text-sm font-medium" style={{ color: getMoodColor(mood) }}>
                 {getMoodEmoji(mood)} {mood}/10
@@ -297,9 +352,9 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
               className="pain-slider w-full h-10 appearance-none cursor-pointer"
             />
             <div className="flex justify-between gap-1 mt-1">
-              <span className="text-xs text-green-400">None</span>
-              <span className="text-xs text-orange-400">Moderate</span>
-              <span className="text-xs text-red-400">Severe</span>
+              <span className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>Low</span>
+              <span className={`text-xs ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>Okay</span>
+              <span className={`text-xs ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>Great</span>
             </div>
           </div>
 
@@ -334,17 +389,17 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
                       : 'bg-gray-50 border-gray-200'
                   }`}>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">{se.name}</span>
+                      <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>{se.name}</span>
                       <button
                         type="button"
                         onClick={() => removeSideEffect(se.name)}
-                        className="text-xs text-red-400 hover:text-red-300"
+                        className={`text-xs ${isDarkMode ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-500'}`}
                       >
                         Remove
                       </button>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400">Mild</span>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Mild</span>
                       <input
                         type="range"
                         min="1"
@@ -353,13 +408,13 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
                         onChange={(e) => updateSideEffectSeverity(se.name, parseInt(e.target.value))}
                         className="pain-slider flex-1 h-10 appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-gray-400">Severe</span>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Severe</span>
                     </div>
                     <div className="text-center mt-1">
                       <span className={`text-xs font-medium ${
-                        se.severity <= 3 ? 'text-green-400' :
-                        se.severity <= 6 ? 'text-yellow-400' :
-                        'text-red-400'
+                        se.severity <= 3 ? (isDarkMode ? 'text-green-400' : 'text-green-600') :
+                        se.severity <= 6 ? (isDarkMode ? 'text-yellow-400' : 'text-yellow-600') :
+                        isDarkMode ? 'text-red-400' : 'text-red-600'
                       }`}>
                         {se.severity}/10
                       </span>
@@ -374,51 +429,159 @@ const QuickLogModal: React.FC<QuickLogModalProps> = ({
 
           <div>
             <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Calories</label>
-            <input
-              type="number"
-              value={calories}
-              onChange={(e) => setCalories(e.target.value)}
-              placeholder="Enter calories"
-              className={inputStyle}
-              min="0"
-            />
+            {useWheelForNumbers ? (
+              <button
+                type="button"
+                onClick={() => setShowCaloriePicker(true)}
+                className={inputButton}
+              >
+                {calories || 'Tap to select'}
+              </button>
+            ) : (
+              <input
+                type="number"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+                placeholder="Enter calories"
+                className={inputStyle}
+                min="0"
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className={`block text-xs font-medium mb-1 ${modalText.label}`}>Protein (g)</label>
-              <input
-                type="number"
-                value={protein}
-                onChange={(e) => setProtein(e.target.value)}
-                placeholder="0"
-                className={inputStyle}
-                min="0"
-              />
+              {useWheelForNumbers ? (
+                <button
+                  type="button"
+                  onClick={() => setShowProteinPicker(true)}
+                  className={inputButton}
+                >
+                  {protein || '0'}
+                </button>
+              ) : (
+                <input
+                  type="number"
+                  value={protein}
+                  onChange={(e) => setProtein(e.target.value)}
+                  placeholder="0"
+                  className={inputStyle}
+                  min="0"
+                />
+              )}
             </div>
             <div>
               <label className={`block text-xs font-medium mb-1 ${modalText.label}`}>Carbs (g)</label>
-              <input
-                type="number"
-                value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
-                placeholder="0"
-                className={inputStyle}
-                min="0"
-              />
+              {useWheelForNumbers ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCarbsPicker(true)}
+                  className={inputButton}
+                >
+                  {carbs || '0'}
+                </button>
+              ) : (
+                <input
+                  type="number"
+                  value={carbs}
+                  onChange={(e) => setCarbs(e.target.value)}
+                  placeholder="0"
+                  className={inputStyle}
+                  min="0"
+                />
+              )}
             </div>
             <div>
               <label className={`block text-xs font-medium mb-1 ${modalText.label}`}>Fat (g)</label>
-              <input
-                type="number"
-                value={fat}
-                onChange={(e) => setFat(e.target.value)}
-                placeholder="0"
-                className={inputStyle}
-                min="0"
-              />
+              {useWheelForNumbers ? (
+                <button
+                  type="button"
+                  onClick={() => setShowFatPicker(true)}
+                  className={inputButton}
+                >
+                  {fat || '0'}
+                </button>
+              ) : (
+                <input
+                  type="number"
+                  value={fat}
+                  onChange={(e) => setFat(e.target.value)}
+                  placeholder="0"
+                  className={inputStyle}
+                  min="0"
+                />
+              )}
             </div>
           </div>
+
+          {showCaloriePicker && (
+            <DoseWheelPickerModal
+              isOpen={showCaloriePicker}
+              onSave={(value) => {
+                setCalories(value);
+                setShowCaloriePicker(false);
+              }}
+              onClose={() => setShowCaloriePicker(false)}
+              decimals={0}
+              defaultValue={calories || '0'}
+              label="Select Calories"
+              min={0}
+              max={10000}
+              step={1}
+            />
+          )}
+
+          {showProteinPicker && (
+            <DoseWheelPickerModal
+              isOpen={showProteinPicker}
+              onSave={(value) => {
+                setProtein(value);
+                setShowProteinPicker(false);
+              }}
+              onClose={() => setShowProteinPicker(false)}
+              decimals={0}
+              defaultValue={protein || '0'}
+              label="Select Protein"
+              min={0}
+              max={500}
+              step={1}
+            />
+          )}
+
+          {showCarbsPicker && (
+            <DoseWheelPickerModal
+              isOpen={showCarbsPicker}
+              onSave={(value) => {
+                setCarbs(value);
+                setShowCarbsPicker(false);
+              }}
+              onClose={() => setShowCarbsPicker(false)}
+              decimals={0}
+              defaultValue={carbs || '0'}
+              label="Select Carbs"
+              min={0}
+              max={1000}
+              step={1}
+            />
+          )}
+
+          {showFatPicker && (
+            <DoseWheelPickerModal
+              isOpen={showFatPicker}
+              onSave={(value) => {
+                setFat(value);
+                setShowFatPicker(false);
+              }}
+              onClose={() => setShowFatPicker(false)}
+              decimals={0}
+              defaultValue={fat || '0'}
+              label="Select Fat"
+              min={0}
+              max={500}
+              step={1}
+            />
+          )}
 
           <div>
             <label className={`block text-sm font-medium mb-2 ${modalText.label}`}>Notes</label>

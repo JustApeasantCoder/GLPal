@@ -50,7 +50,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onOpenModal,
   onCloseModal,
 }) => {
-  const { bigCard, bigCardText, smallCard, text } = useThemeStyles();
+  const { bigCard, bigCardText, smallCard, text, primaryButton } = useThemeStyles();
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false);
 
   // Use custom hooks for data processing
@@ -140,7 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="border-t border-[#B19CD9]/20 my-3"></div>
 
         {/* Charts Section */}
-        <div className="space-y-6">
+        <div className="space-y-3">
 {/* Weight Trends */}
           <div>
             <PeriodSelector value={chartPeriod} onChange={onChartPeriodChange} />
@@ -156,18 +156,15 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-[#B19CD9]/20 my-3"></div>
+          <div className="border-t border-[#B19CD9]/20"></div>
 
 {/* Quick Log Button */}
-          <div className="mb-6">
+          <div>
             <button
               onClick={() => setIsQuickLogOpen(true)}
-              className="w-full bg-gradient-to-r from-[#4ADEA8] to-[#4FD99C] text-white py-3 px-4 rounded-xl font-medium hover:shadow-[0_0_20px_rgba(74,222,168,0.5)] transition-all flex items-center justify-center gap-2"
+              className={`w-full py-2 ${primaryButton}`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Quick Log
++ Quick Log
             </button>
           </div>
         </div>
@@ -207,6 +204,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         onClose={() => setIsQuickLogOpen(false)}
         onSave={handleQuickLogSave}
         profile={profile}
+        useWheelForNumbers={useWheelForNumbers}
+        useWheelForDate={useWheelForDate}
       />
     </>
   );
