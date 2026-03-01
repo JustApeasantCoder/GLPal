@@ -1,11 +1,12 @@
 import { CsvRow, ImportPreview, ImportResult, ImportMode, SIDE_EFFECT_KEYS } from '../utils/csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, GLP1Protocol, SideEffect, Peptide, PeptideLogEntry, MedicationStorage, DailyLogEntry } from '../types';
 import {
   parseCsv,
   generateImportPreview,
   convertToWeightEntry,
   convertToDoseEntry,
   convertToUserProfile,
+  convertToDailyLog,
   hasData,
 } from '../utils/csvImport';
 import {
@@ -30,6 +31,8 @@ import {
   savePeptideLogs,
   getMedicationStorage,
   saveMedicationStorage,
+  getDailyLogs,
+  saveDailyLogs,
 } from '../shared/utils/database';
 
 class DataImportExportService {
@@ -38,7 +41,7 @@ class DataImportExportService {
   
   async exportData(): Promise<void> {
     console.log('Starting CSV export with embedded protocols...');
-    const [weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage] = await Promise.all([
+    const [weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage, dailyLogs] = await Promise.all([
       getWeightEntries(),
       getMedicationEntries(),
       getMedicationProtocols(),
@@ -46,9 +49,10 @@ class DataImportExportService {
       getPeptides(),
       getPeptideLogs(),
       getMedicationStorage(),
+      getDailyLogs(),
     ]);
     
-    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage);
+    const csvContent = exportAllToCsv(weightEntries, doseEntries, protocols, profile, peptides, peptideLogs, medicationStorage, dailyLogs);
     const filename = generateExportFilename();
     downloadCsv(csvContent, filename);
   }
@@ -95,11 +99,14 @@ class DataImportExportService {
     
     if (mode === 'replace') {
       if (includeData) {        
+        const dailyLogs: DailyLogEntry[] = [];
+        
         validRows.forEach(row => {
           if (!row.date) return;
           
           const weightEntry = convertToWeightEntry(row, dateOffset);
           const doseEntry = convertToDoseEntry(row, dateOffset);
+          const dailyLog = convertToDailyLog(row, dateOffset);
           
           if (weightEntry && weightEntry.weight > 0) {
             weightEntries.push(weightEntry);
@@ -107,6 +114,10 @@ class DataImportExportService {
           
           if (doseEntry && doseEntry.medication) {
             doseEntries.push(doseEntry);
+          }
+          
+          if (dailyLog && (dailyLog.weight !== undefined || dailyLog.hydration !== undefined || dailyLog.mood !== undefined || dailyLog.calories !== undefined)) {
+            dailyLogs.push(dailyLog);
           }
         });
         
@@ -118,6 +129,11 @@ class DataImportExportService {
         if (doseEntries.length > 0) {
           await setMedicationEntries(doseEntries);
           imported += doseEntries.length;
+        }
+        
+        if (dailyLogs.length > 0) {
+          await saveDailyLogs(dailyLogs);
+          imported += dailyLogs.length;
         }
       }
       
@@ -261,6 +277,8 @@ class DataImportExportService {
         }
       }
     } else {
+      const dailyLogs: DailyLogEntry[] = [];
+      
       validRows.forEach(row => {
         if (!row.date) {
           skipped++;
@@ -269,6 +287,7 @@ class DataImportExportService {
         
         const weightEntry = convertToWeightEntry(row, dateOffset);
         const doseEntry = convertToDoseEntry(row, dateOffset);
+        const dailyLog = convertToDailyLog(row, dateOffset);
         
         if (weightEntry && weightEntry.weight > 0) {
           weightEntries.push(weightEntry);
@@ -276,6 +295,10 @@ class DataImportExportService {
         
         if (doseEntry && doseEntry.medication) {
           doseEntries.push(doseEntry);
+        }
+        
+        if (dailyLog && (dailyLog.weight !== undefined || dailyLog.hydration !== undefined || dailyLog.mood !== undefined || dailyLog.calories !== undefined)) {
+          dailyLogs.push(dailyLog);
         }
       });
       
@@ -287,6 +310,11 @@ class DataImportExportService {
       if (doseEntries.length > 0) {
         await setMedicationEntries(doseEntries);
         imported += doseEntries.length;
+      }
+      
+      if (dailyLogs.length > 0) {
+        await saveDailyLogs(dailyLogs);
+        imported += dailyLogs.length;
       }
       
       const manualRows = validRows.filter(row => row.Mdate || row.Mmedication);

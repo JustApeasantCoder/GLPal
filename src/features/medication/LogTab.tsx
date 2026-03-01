@@ -120,10 +120,10 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
     return dailyLogs.find(log => log.date === date);
   };
 
-  const getSeverityColor = (severity: number): string => {
-    if (severity <= 3) return 'text-green-400 bg-green-500/20';
-    if (severity <= 6) return 'text-yellow-400 bg-yellow-500/20';
-    return 'text-red-400 bg-red-500/20';
+  const getSeverityColor = (severity: number, isDark: boolean = true): string => {
+    if (severity <= 3) return isDark ? 'text-green-400 bg-green-500/20' : 'text-green-700 bg-green-100';
+    if (severity <= 6) return isDark ? 'text-yellow-400 bg-yellow-500/20' : 'text-yellow-700 bg-yellow-100';
+    return isDark ? 'text-red-400 bg-red-500/20' : 'text-red-700 bg-red-100';
   };
 
   // Derive modal visibility from activeModal if modal system is available
@@ -870,7 +870,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                         {(dailyLog?.hydration !== undefined || (dailyLog?.mood !== undefined && dailyLog.mood > 0)) && (
                           <div className="flex flex-wrap gap-1">
                             {dailyLog?.hydration !== undefined && (
-                              <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded flex items-center gap-1">
+                              <span className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z" />
                                 </svg>
@@ -878,7 +878,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                               </span>
                             )}
                             {dailyLog?.mood !== undefined && dailyLog.mood > 0 && (
-                              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded flex items-center gap-1">
+                              <span className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -892,7 +892,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                         {dailyLog?.sideEffects && dailyLog.sideEffects.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {dailyLog.sideEffects.map((se, idx) => (
-                              <span key={idx} className={`text-xs px-2 py-1 rounded ${getSeverityColor(se.severity)}`}>
+                              <span key={idx} className={`text-xs px-2 py-1 rounded ${getSeverityColor(se.severity, isDarkMode)}`}>
                                 {se.name} ({se.severity}/10)
                               </span>
                             ))}
@@ -901,7 +901,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                         
                         {/* Row 4: Notes */}
                         {dailyLog?.notes && (
-                          <div className="p-2 rounded bg-black/20 text-xs text-gray-300">
+                          <div className={`p-2 rounded text-xs ${isDarkMode ? 'bg-black/20 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                             {dailyLog.notes}
                           </div>
                         )}
@@ -922,7 +922,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                         {(entry.hydration !== undefined || entry.mood !== undefined) && (
                           <div className="flex flex-wrap gap-1">
                             {entry.hydration !== undefined && (
-                              <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded flex items-center gap-1">
+                              <span className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z" />
                                 </svg>
@@ -930,7 +930,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                               </span>
                             )}
                             {entry.mood !== undefined && entry.mood > 0 && (
-                              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded flex items-center gap-1">
+                              <span className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -943,7 +943,7 @@ const LogTab: React.FC<LogTabProps> = ({ profile, useWheelForNumbers = true, act
                         {/* Row 3: Side Effects Average */}
                         {entry.sideEffectsAvg !== undefined && (
                           <div className="flex flex-wrap gap-1">
-                            <span className={`text-xs px-2 py-1 rounded ${getSeverityColor(entry.sideEffectsAvg)}`}>
+                            <span className={`text-xs px-2 py-1 rounded ${getSeverityColor(entry.sideEffectsAvg, isDarkMode)}`}>
                               ~{entry.sideEffectsAvg}/10 avg
                             </span>
                           </div>

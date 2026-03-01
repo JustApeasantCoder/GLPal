@@ -115,7 +115,7 @@ function App() {
           : 'bg-white/90 border-gray-200'
       }`}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold text-text-primary flex items-center gap-2" style={{ 
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3 leading-none" style={{ 
             background: 'linear-gradient(135deg, #B19CD9, #4ADEA8)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',

@@ -1,5 +1,5 @@
 import { CsvRow, CSV_HEADER, ALL_COLUMNS, SIDE_EFFECT_COLUMNS } from './csvTypes';
-import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol, Peptide, PeptideLogEntry, MedicationStorage } from '../types';
+import { WeightEntry, GLP1Entry, UserProfile, SideEffect, GLP1Protocol, Peptide, PeptideLogEntry, MedicationStorage, DailyLogEntry } from '../types';
 import { timeService } from '../core/timeService';
 
 const escapeCsvValue = (value: string | number | boolean | undefined): string => {
@@ -44,7 +44,8 @@ export const exportAllToCsv = (
   profile?: UserProfile | null,
   peptides: Peptide[] = [],
   peptideLogs: PeptideLogEntry[] = [],
-  medicationStorage: MedicationStorage[] = []
+  medicationStorage: MedicationStorage[] = [],
+  dailyLogs: DailyLogEntry[] = []
 ): string => {
   const unitSystem = profile?.unitSystem || 'metric';
   
@@ -62,6 +63,36 @@ export const exportAllToCsv = (
       protein: entry.macros?.protein,
       carbs: entry.macros?.carbs,
       fat: entry.macros?.fat,
+    };
+    
+    dateToRowMap.set(key, row);
+  });
+  
+  dailyLogs.forEach((entry: DailyLogEntry) => {
+    const key = entry.date;
+    const existing = dateToRowMap.get(key) || {};
+    const sideEffectMap = createSideEffectMap(entry.sideEffects);
+    
+    const sideEffects: Partial<CsvRow> = {};
+    SIDE_EFFECT_COLUMNS.forEach(se => {
+      const value = getSideEffectValue(sideEffectMap, se);
+      if (value !== undefined) {
+        (sideEffects as any)[se] = value;
+      }
+    });
+    
+    const row: CsvRow = {
+      ...existing,
+      ...sideEffects,
+      date: formatDate(entry.date),
+      weight: entry.weight ? weightToExportUnit(entry.weight, unitSystem) : existing.weight,
+      hydration: entry.hydration,
+      mood: entry.mood,
+      calories: entry.calories ?? existing.calories,
+      protein: entry.macros?.protein ?? existing.protein,
+      carbs: entry.macros?.carbs ?? existing.carbs,
+      fat: entry.macros?.fat ?? existing.fat,
+      notes: entry.notes || existing.notes,
     };
     
     dateToRowMap.set(key, row);

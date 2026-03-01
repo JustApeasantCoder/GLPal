@@ -1,4 +1,4 @@
-import { WeightEntry, GLP1Entry, GLP1Protocol, Peptide, PeptideLogEntry, UserProfile, MedicationStorage } from '../types';
+import { WeightEntry, GLP1Entry, GLP1Protocol, Peptide, PeptideLogEntry, UserProfile, MedicationStorage, DailyLogEntry } from '../types';
 import { db } from '../db/dexie';
 import { timeService } from '../core/timeService';
 
@@ -20,6 +20,7 @@ export interface BackupData {
   peptideLogs: PeptideLogEntry[];
   userProfile: UserProfile | null;
   medicationStorage: MedicationStorage[];
+  dailyLogs: DailyLogEntry[];
 }
 
 export interface BackupFile {
@@ -264,13 +265,14 @@ class GoogleDriveService {
   }
 
   async exportAllData(): Promise<BackupData> {
-    const [weights, medications, protocols, peptides, peptideLogs, medicationStorage] = await Promise.all([
+    const [weights, medications, protocols, peptides, peptideLogs, medicationStorage, dailyLogs] = await Promise.all([
       db.weights.toArray(),
       db.medications.toArray(),
       db.protocols.toArray(),
       db.peptides.toArray(),
       db.peptideLogs.toArray(),
       db.medicationStorage.toArray(),
+      db.dailyLogs.toArray(),
     ]);
 
     const userProfileArray = await db.userProfile.toArray();
@@ -286,6 +288,7 @@ class GoogleDriveService {
       peptideLogs,
       userProfile,
       medicationStorage,
+      dailyLogs,
     };
   }
 
@@ -382,6 +385,7 @@ class GoogleDriveService {
       await db.peptideLogs.clear();
       await db.userProfile.clear();
       await db.medicationStorage.clear();
+      await db.dailyLogs.clear();
     }
 
     if (data.weights && data.weights.length > 0) {
@@ -452,6 +456,16 @@ class GoogleDriveService {
         await db.userProfile.put(profileData);
       } else {
         await db.userProfile.add(profileData);
+      }
+    }
+
+    if (data.dailyLogs && data.dailyLogs.length > 0) {
+      if (mode === 'merge') {
+        for (const entry of data.dailyLogs) {
+          await db.dailyLogs.put(entry);
+        }
+      } else {
+        await db.dailyLogs.bulkPut(data.dailyLogs);
       }
     }
   }

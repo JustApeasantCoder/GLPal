@@ -1,0 +1,28 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient -->
+    <linearGradient id="glpalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B19CD9"></stop>
+      <stop offset="100%" stop-color="#4ADEA8"></stop>
+    </linearGradient>
+
+    <!-- Mask to cut out the G -->
+    <mask id="gCutout">
+      <!-- Full rectangle visible -->
+      <rect width="32" height="32" rx="8" fill="white"></rect>
+
+      <!-- Embed Google Font -->
+      <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&amp;display=swap');
+      </style>
+
+      <!-- G cutout, perfectly centered -->
+      <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="'Poppins', sans-serif" font-weight="700" font-size="30" fill="black">
+        G
+      </text>
+    </mask>
+  </defs>
+
+  <!-- Gradient rectangle with mask applied -->
+  <rect width="32" height="32" rx="8" fill="url(#glpalGradient)" mask="url(#gCutout)"></rect>
+</svg>

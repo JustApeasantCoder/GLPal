@@ -19,6 +19,8 @@ export const ALL_COLUMNS = [
   'protein',
   'carbs',
   'fat',
+  'hydration',
+  'mood',
   'medication',
   'dose',
   'painLevel',
@@ -104,6 +106,8 @@ export interface CsvRow {
   protein?: number;
   carbs?: number;
   fat?: number;
+  hydration?: number;
+  mood?: number;
   medication?: string;
   dose?: number;
   painLevel?: number;

@@ -1,5 +1,5 @@
 import { CsvRow, ImportPreview, LBS_TO_KG, ALL_COLUMNS, SIDE_EFFECT_KEYS } from './csvTypes';
-import { WeightEntry, WeightMacros, GLP1Entry, UserProfile, SideEffect } from '../types';
+import { WeightEntry, WeightMacros, GLP1Entry, UserProfile, SideEffect, DailyLogEntry } from '../types';
 // import { normalizeMedName } from '../shared/utils/medicationUtils';
 
 const unescapeCsvValue = (value: string): string => {
@@ -206,6 +206,8 @@ export const parseCsv = (content: string, importWeightUnit: 'auto' | 'kg' | 'lbs
         case 'dizziness':
         case 'lossOfAppetite':
         case 'heartburn':
+        case 'hydration':
+        case 'mood':
           row[standardName] = parseNumberWithUnit(value);
           break;
         case 'useWheelForNumbers':
@@ -371,6 +373,48 @@ export const convertToWeightEntry = (row: CsvRow, dateOffset: number = 0): Weigh
     weight: row.weight || 0,
     notes: row.notes,
     macros: macros?.calories || macros?.protein || macros?.carbs || macros?.fat ? macros : undefined,
+  };
+};
+
+export const convertToDailyLog = (row: CsvRow, dateOffset: number = 0): DailyLogEntry | null => {
+  if (!row.date || (row.weight === undefined && row.hydration === undefined && row.mood === undefined && row.calories === undefined)) {
+    return null;
+  }
+  
+  let adjustedDate = row.date;
+  if (dateOffset !== 0 && row.date) {
+    const dateObj = new Date(row.date);
+    dateObj.setTime(dateObj.getTime() + dateOffset);
+    adjustedDate = dateObj.toISOString().split('T')[0];
+  }
+  
+  const macros: WeightMacros | undefined = row.calories !== undefined || row.protein !== undefined 
+    ? {
+        calories: row.calories || 0,
+        protein: row.protein || 0,
+        carbs: row.carbs || 0,
+        fat: row.fat || 0,
+      }
+    : undefined;
+  
+  const sideEffects: SideEffect[] = [];
+  SIDE_EFFECT_KEYS.forEach(se => {
+    const severity = (row as any)[se];
+    if (severity !== undefined && severity > 0) {
+      const name = se.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      sideEffects.push({ name, severity });
+    }
+  });
+  
+  return {
+    date: adjustedDate,
+    weight: row.weight,
+    hydration: row.hydration,
+    mood: row.mood,
+    calories: row.calories,
+    macros,
+    notes: row.notes,
+    sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
   };
 };
 

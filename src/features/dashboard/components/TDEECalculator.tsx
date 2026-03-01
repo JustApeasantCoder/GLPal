@@ -100,7 +100,7 @@ return (
         </div>
 
         {showGoalWeight ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="contents">
             <div>
               <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
                 Height ({unitSystem === 'imperial' ? 'ft / in' : 'cm'})
