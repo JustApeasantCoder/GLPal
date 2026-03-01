@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Peptide, PeptideLogEntry, PeptideFrequency } from '../../../types';
 import { timeService } from '../../../core/timeService';
 import { isDevMode } from '../../../debug/debug';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface PeptideProgressBarProps {
   peptide: Peptide;
@@ -76,6 +77,7 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
   currentTime,
   color,
 }) => {
+  const { isDarkMode } = useTheme();
   const result = useMemo(() => {
     const intervalDays = getFrequencyDays(peptide.frequency);
     const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
@@ -341,12 +343,42 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
   const peptidePurple = '#B19CD9';
   // For daily overdue, keep purple color
   const progressColor = isOverdue && !isDaily
-    ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)' 
-    : `linear-gradient(90deg, ${peptidePurple}, ${peptidePurple}dd, ${peptidePurple})`;
+    ? isDarkMode
+      ? 'linear-gradient(90deg, #EF4444, #F87171, #EF4444)'
+      : 'linear-gradient(90deg, #fca5a5, #f87171)'
+    : isDarkMode
+      ? `linear-gradient(90deg, ${peptidePurple}, ${peptidePurple}dd, ${peptidePurple})`
+      : `linear-gradient(90deg, #cdbcec, #B19CD9)`;
 
   const glowColor = isOverdue && !isDaily
-    ? 'rgba(239,68,68,0.7)' 
-    : 'rgba(177,156,217,0.6)';
+    ? isDarkMode
+      ? 'rgba(239,68,68,0.7)'
+      : 'rgba(239,68,68,0.3)'
+    : isDarkMode
+      ? 'rgba(177,156,217,0.6)'
+      : 'rgba(177,156,217,0.3)';
+
+  const gradientAnimateClass = !isDarkMode ? 'progress-gradient-animate' : '';
+
+  const stripeColor = isDarkMode ? 'rgba(177,156,217,0.1)' : 'rgba(156,123,211,0.08)';
+  const stripeOpacity = isDarkMode ? '30' : '80';
+  const stripeOverlay = isDarkMode ? 'from-transparent via-white/20 to-transparent' : 'from-transparent via-black/10 to-transparent';
+
+  const boxShadow = isDarkMode
+    ? '0 0 25px ' + glowColor + ', inset 0 0 20px rgba(255,255,255,0.2)'
+    : 'none';
+
+  const progressBarBg = isDarkMode
+    ? 'bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a]'
+    : 'bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100';
+
+  const progressBarBorder = isDarkMode
+    ? 'border-[#B19CD9]/40'
+    : 'border-[#B19CD9]/30';
+
+  const progressBarShadow = isDarkMode
+    ? 'shadow-[0_0_15px_rgba(177,156,217,0.2)]'
+    : 'shadow-sm';
 
   // For daily, override overdue to show "Dose Due Today" and keep bar full
   const isOverdueDaily = isOverdue && isDaily;
@@ -370,47 +402,52 @@ const PeptideProgressBar: React.FC<PeptideProgressBarProps> = ({
   return (
     <div className="mb-4">
       {/* Progress Bar */}
-      <div className="relative overflow-hidden h-12 rounded-xl bg-gradient-to-r from-[#0d0d1a] via-[#1a1a2e] to-[#0d0d1a] border border-[#B19CD9]/40 shadow-[0_0_15px_rgba(177,156,217,0.2)]">
+      <div className={`relative overflow-hidden h-12 rounded-xl ${progressBarBg} border ${progressBarShadow} ${progressBarBorder}`}>
         {/* Animated background */}
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(177,156,217,0.1) 10px, rgba(177,156,217,0.1) 20px)',
+            opacity: parseInt(stripeOpacity) / 100,
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${stripeColor} 10px, ${stripeColor} 20px)`,
             animation: 'stripeMove 2s linear infinite'
           }}
         />
         
         {/* Progress Fill */}
         <div 
-          className="absolute top-0 h-full transition-all duration-300"
+          className={`absolute top-0 h-full transition-all duration-300 ${gradientAnimateClass}`}
           style={{ 
             width: `${Math.min(100, displayProgress)}%`,
             background: progressColor,
-            boxShadow: `0 0 25px ${glowColor}, inset 0 0 20px rgba(255,255,255,0.2)`,
+            boxShadow: boxShadow,
           }}
         />
         
         {/* Shine Effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className={`absolute inset-0 bg-gradient-to-r ${stripeOverlay}`} />
         
         {/* Center Text */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-bold text-white" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+          <span className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`} style={isDarkMode ? { textShadow: '0 1px 2px rgba(0,0,0,0.5)' } : {}}>
             {displayLabel}
           </span>
         </div>
       </div>
 
       {/* Info Row */}
-      <div className="flex justify-between mt-2 text-xs text-[#B19CD9]/70">
-        <span className="flex items-center gap-1">
+      <div className={`flex justify-between mt-2 text-xs ${isDarkMode ? 'text-[#B19CD9]/70' : 'text-gray-600'}`}>
+        <span className={`flex items-center gap-1 ${isDarkMode ? '' : 'text-gray-700'}`}>
           <span className="w-2 h-2 rounded-full bg-[#4ADEA8]"></span>
           Last: {latestLog 
-            ? `${latestLog.date} ${latestLog.time}` 
+            ? (() => {
+                const [year, month, day] = latestLog.date.split('-').map(Number);
+                const date = new Date(year, month - 1, day);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              })()
             : 'Never'}
         </span>
-        <span className="font-medium text-[#B19CD9]">{peptide.name}</span>
-        <span className="flex items-center gap-1">
+        <span className={`font-medium ${isDarkMode ? 'text-[#B19CD9]' : 'text-[#9C7BD3]'}`}>{peptide.name}</span>
+        <span className={`flex items-center gap-1 ${isDarkMode ? '' : 'text-gray-600'}`}>
           {getFrequencyLabel(peptide.frequency)}
           <span className="w-2 h-2 rounded-full bg-[#B19CD9]"></span>
         </span>
