@@ -37,7 +37,7 @@
     "electron-pack": "cross-env ELECTRON=true npm run build && electron .",
     "electron-serve": "cross-env ELECTRON_DEV=true npm run build && concurrently \"serve -s build -p 3000\" \"wait-on http://localhost:3000/ && electron .\"",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "cd build && git init && git add . && git commit -m \"Deploy\" && git push origin HEAD:gh-pages --force"
   },
   "eslintConfig": {
     "extends": [
