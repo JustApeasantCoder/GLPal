@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Use - GLPal</title>
+  <meta name="description" content="GLPal Terms of Use - Read our terms and conditions.">
+  
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #B19CD9;
+      --primary-light: #D4C4E8;
+      --accent: #4ADEA8;
+      --accent-light: #7EEFC4;
+      --dark: #0a0a0f;
+      --dark-secondary: #12121a;
+      --dark-card: #1a1a24;
+      --text: #ffffff;
+      --text-secondary: #a0a0b0;
+      --text-muted: #6a6a7a;
+      --border: rgba(177, 156, 217, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(26, 26, 36, 0.6);
+    }
+
+    body.light-mode {
+      --dark: #f5f5f7;
+      --dark-secondary: #ffffff;
+      --dark-card: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-muted: #86868b;
+      --border: rgba(0, 0, 0, 0.1);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --card-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    body.light-mode .bg-effects::before {
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 222, 168, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(177, 156, 217, 0.08) 0%, transparent 70%);
+    }
+
+    body.light-mode header {
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .glass {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      max-width: 100vw;
+    }
+
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-effects::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 222, 168, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(177, 156, 217, 0.05) 0%, transparent 70%);
+      animation: bgPulse 20s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    body.light-mode header {
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #4FD99C);
+      color: #0a0a0f;
+      box-shadow: 0 4px 20px rgba(74, 222, 168, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(74, 222, 168, 0.4);
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(177, 156, 217, 0.1);
+      color: var(--text);
+      border-color: var(--primary);
+    }
+
+    .theme-toggle .icon-sun {
+      display: none;
+    }
+
+    .theme-toggle .icon-moon {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-sun {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-moon {
+      display: none;
+    }
+
+    .main-content {
+      padding: 140px 0 80px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .page-header h1 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .glass {
+      background: rgba(26, 26, 36, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    body.light-mode .glass {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .glass h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .glass h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0 8px;
+      color: var(--text);
+    }
+
+    .glass p, .glass li {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .glass ul {
+      margin-left: 20px;
+      margin-top: 12px;
+    }
+
+    .glass li {
+      margin-bottom: 8px;
+    }
+
+    .glass a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .glass a:hover {
+      color: var(--primary);
+    }
+
+    .last-updated {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 32px;
+    }
+
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border-light);
+      margin-top: 80px;
+    }
+
+    body.light-mode footer {
+      border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 {
+        font-size: 32px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-effects"></div>
+
+  <header>
+    <div class="container">
+      <a href="/app/" class="logo">GLPal</a>
+      <div class="nav-links">
+        <a href="/app/">Home</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <a href="/app/" class="btn btn-primary">Open App</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>Terms of Use</h1>
+        <p>Please read these terms carefully before using GLPal.</p>
+      </div>
+
+      <div class="glass">
+        <p>By accessing or using GLPal, you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the application.</p>
+      </div>
+
+      <div class="glass">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By downloading, installing, or using GLPal, you accept and agree to be bound by the terms and provisions of this agreement. Additionally, when using GLPal, you shall be subject to any posted guidelines or rules applicable to such services.</p>
+      </div>
+
+      <div class="glass">
+        <h2>2. Description of Service</h2>
+        <p>GLPal is a personal health tracking application that allows users to track their weight, GLP-1 medications, peptides, and related health data. The application stores all data locally on the user's device and offers optional cloud backup via Google Drive.</p>
+      </div>
+
+      <div class="glass">
+        <h2>3. Not Medical Advice</h2>
+        <p>GLPal is for informational and tracking purposes only. The information provided by GLPal does not constitute medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+        <p>Never disregard professional medical advice or delay in seeking it because of something you have read or recorded in GLPal.</p>
+      </div>
+
+      <div class="glass">
+        <h2>4. User Responsibilities</h2>
+        <p>You agree to use GLPal in accordance with all applicable laws and regulations. You are responsible for:</p>
+        <ul>
+          <li>Maintaining the security of your device</li>
+          <li>Ensuring the accuracy of data you enter</li>
+          <li>Backing up your data regularly</li>
+          <li>Using the app only for lawful purposes</li>
+        </ul>
+      </div>
+
+      <div class="glass">
+        <h2>5. Intellectual Property</h2>
+        <p>GLPal and its original content, features, and functionality are owned by the developer and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+        <p>You may not copy, modify, distribute, sell, or lease any part of GLPal without prior written consent.</p>
+      </div>
+
+      <div class="glass">
+        <h2>6. Limitation of Liability</h2>
+        <p>GLPal is provided "as is" without warranty of any kind. In no event shall the developer be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.</p>
+        <p>The developer shall not be liable for any decisions made based on the information provided by GLPal.</p>
+      </div>
+
+      <div class="glass">
+        <h2>7. User Data and Privacy</h2>
+        <p>Your use of GLPal is also governed by our Privacy Policy. By using GLPal, you consent to the collection and use of information as outlined in the Privacy Policy.</p>
+        <p>All data you enter into GLPal is stored locally on your device. You are solely responsible for maintaining backups of your data.</p>
+      </div>
+
+      <div class="glass">
+        <h2>8. Third-Party Services</h2>
+        <p>GLPal may contain links to third-party websites or services that are not owned or controlled by the developer. The developer has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third-party websites or services.</p>
+        <p>You acknowledge and agree that the developer shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content.</p>
+      </div>
+
+      <div class="glass">
+        <h2>9. Termination</h2>
+        <p>The developer may terminate or suspend your access to GLPal immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms of Use.</p>
+      </div>
+
+      <div class="glass">
+        <h2>10. Changes to Terms</h2>
+        <p>The developer reserves the right, at their sole discretion, to modify or replace these Terms of Use at any time. What constitutes a material change will be determined at the developer's sole discretion.</p>
+        <p>Your continued use of GLPal after any such changes shall constitute your consent to such changes.</p>
+      </div>
+
+      <div class="glass">
+        <h2>11. Contact Information</h2>
+        <p>If you have any questions about these Terms of Use, please contact:</p>
+        <p>Email: <a href="mailto:glpal.app@gmail.com">glpal.app@gmail.com</a></p>
+      </div>
+
+      <p class="last-updated">Last updated: February 2026</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <a href="/app/" class="logo">GLPal</a>
+        <div class="footer-links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Use</a>
+          <a href="https://github.com/JustApeasantCoder/GLPal" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <div class="copyright">© 2024 GLPal. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('glpal-landing-theme');
+    
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('glpal-landing-theme', isLight ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>

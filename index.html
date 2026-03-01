@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLPal - Privacy-First GLP-1 & Weight Tracking App</title>
+  <meta name="description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy. No accounts, no cloud logging—just your data, on your terms.">
+  <meta name="keywords" content="GLP-1, weight tracking, medication tracker, peptide calculator, health app, privacy first, local storage">
+  <meta name="author" content="GLPal">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
+  <meta property="og:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy. No accounts, no cloud logging.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://glpal.app/">
+  <meta property="og:image" content="https://glpal.app/og-image.png">
+  <meta property="og:site_name" content="GLPal">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GLPal - Privacy-First GLP-1 & Weight Tracking App">
+  <meta name="twitter:description" content="Track your weight, GLP-1 medications, and peptides with absolute privacy.">
+  <meta name="twitter:image" content="https://glpal.app/og-image.png">
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="https://glpal.app/">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #B19CD9;
+      --primary-light: #D4C4E8;
+      --accent: #4ADEA8;
+      --accent-light: #7EEFC4;
+      --dark: #0a0a0f;
+      --dark-secondary: #12121a;
+      --dark-card: #1a1a24;
+      --text: #ffffff;
+      --text-secondary: #a0a0b0;
+      --text-muted: #6a6a7a;
+      --border: rgba(177, 156, 217, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(26, 26, 36, 0.6);
+    }
+
+    /* Light Mode */
+    body.light-mode {
+      --dark: #f5f5f7;
+      --dark-secondary: #ffffff;
+      --dark-card: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-muted: #86868b;
+      --border: rgba(0, 0, 0, 0.1);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --card-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    body.light-mode .btn-primary,
+    body.light-mode .nav-links .btn-primary {
+      color: #000000 !important;
+    }
+
+    body.light-mode .bg-effects::before {
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 222, 168, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(177, 156, 217, 0.08) 0%, transparent 70%);
+    }
+
+    body.light-mode header {
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .glass {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .feature-card,
+    body.light-mode .testimonial-card,
+    body.light-mode .screenshot-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .phone-mockup {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15);
+    }
+
+    body.light-mode .phone-screen {
+      background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+    }
+
+    body.light-mode .hero::before,
+    body.light-mode .hero::after {
+      opacity: 0.5;
+    }
+
+    body.light-mode .privacy-badge {
+      background: rgba(177, 156, 217, 0.15);
+      border-color: rgba(177, 156, 217, 0.3);
+      color: #7c5fb8;
+    }
+
+    body.light-mode .footer-content {
+      border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode footer {
+      border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .copyright,
+    body.light-mode .footer-links a {
+      color: #86868b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
+    /* Background Effects */
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-effects::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(177, 156, 217, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 222, 168, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(177, 156, 217, 0.05) 0%, transparent 70%);
+      animation: bgPulse 20s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    /* Glass Card */
+    .glass {
+      background: rgba(26, 26, 36, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-links .btn {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #4FD99C);
+      color: #0a0a0f;
+      box-shadow: 0 4px 20px rgba(74, 222, 168, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(74, 222, 168, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(177, 156, 217, 0.2) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 10%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(74, 222, 168, 0.15) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: float 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(5deg); }
+    }
+
+    .hero .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-content h1 {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero-content h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-content p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .stat {
+      text-align: left;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Phone Mockup */
+    .hero-visual {
+      position: relative;
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .phone-mockup {
+      background: var(--dark-card);
+      border-radius: 40px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 
+        0 50px 100px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+      transition: transform 0.5s ease;
+    }
+
+    .phone-mockup:hover {
+      transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+
+    .phone-screen {
+      background: linear-gradient(180deg, #1a1a24 0%, #0a0a0f 100%);
+      border-radius: 32px;
+      aspect-ratio: 9/19.5;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: var(--dark-card);
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+
+    .phone-content {
+      padding: 60px 20px 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .app-logo {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .app-nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    .app-nav-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+    }
+
+    .app-card {
+      background: rgba(177, 156, 217, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .app-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .app-card-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .app-card-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .app-card-change {
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .app-chart {
+      height: 60px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .app-chart-bar {
+      flex: 1;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 4px 4px 0 0;
+      opacity: 0.7;
+    }
+
+    .app-doses {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .app-dose {
+      background: rgba(74, 222, 168, 0.15);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Section Styles */
+    section {
+      padding: 100px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .section-header h2 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-header p {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+
+    /* Features Section */
+    .features {
+      position: relative;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: rgba(26, 26, 36, 0.6);
+      -webkit-backdrop-filter: blur(20px);
+              backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 32px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, rgba(177, 156, 217, 0.2), rgba(74, 222, 168, 0.2));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* How It Works */
+    .how-it-works {
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.05), transparent);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 15%;
+      right: 15%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      opacity: 0.3;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 80px;
+      height: 80px;
+      background: var(--dark-card);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary);
+      position: relative;
+      z-index: 1;
+    }
+
+    .step h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .step p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    /* Screenshots */
+    .screenshots {
+      padding: 80px 0;
+    }
+
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .screenshot-card {
+      background: var(--dark-card);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: all 0.3s ease;
+    }
+
+    .screenshot-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .screenshot-placeholder {
+      aspect-ratio: 9/19;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--dark-secondary), var(--dark-card));
+      padding: 20px;
+      text-align: center;
+    }
+
+    .screenshot-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .screenshot-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* Testimonials */
+    .testimonials {
+      background: linear-gradient(180deg, transparent, rgba(74, 222, 168, 0.03));
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background: rgba(26, 26, 36, 0.6);
+      -webkit-backdrop-filter: blur(20px);
+              backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 32px;
+    }
+
+    .testimonial-quote {
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+      color: var(--text-secondary);
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testimonial-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .testimonial-name {
+      font-weight: 600;
+    }
+
+    .testimonial-role {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 120px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(74, 222, 168, 0.15) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+
+    .cta .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta h2 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+
+    .cta p {
+      font-size: 20px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Privacy Badge */
+    .privacy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(74, 222, 168, 0.1);
+      border: 1px solid rgba(74, 222, 168, 0.3);
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(177, 156, 217, 0.1);
+      color: var(--text);
+      border-color: var(--primary);
+    }
+
+    .theme-toggle .icon-sun {
+      display: none;
+    }
+
+    .theme-toggle .icon-moon {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-sun {
+      display: block;
+    }
+
+    body.light-mode .theme-toggle .icon-moon {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero .container {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-content h1 {
+        font-size: 42px;
+      }
+
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .hero-visual {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .features-grid,
+      .steps,
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .screenshots-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 32px;
+      }
+
+      .section-header h2 {
+        font-size: 28px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .screenshots-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta h2 {
+        font-size: 32px;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .hero::before,
+      .hero::after,
+      .cta::before {
+        width: 300px;
+        height: 300px;
+        right: -50%;
+        left: -50%;
+      }
+    }
+
+    /* Scroll Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Stagger delays */
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+    .delay-4 { transition-delay: 0.4s; }
+    .delay-5 { transition-delay: 0.5s; }
+    .delay-6 { transition-delay: 0.6s; }
+    .delay-7 { transition-delay: 0.7s; }
+    .delay-8 { transition-delay: 0.8s; }
+
+    /* FAQ Section */
+    .faq {
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.03));
+    }
+
+    .faq-grid {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: rgba(26, 26, 36, 0.6);
+      -webkit-backdrop-filter: blur(20px);
+              backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--primary);
+    }
+
+    body.light-mode .faq-item {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 20px 24px;
+      background: none;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .faq-question:hover {
+      color: var(--primary);
+    }
+
+    .faq-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+      color: var(--primary);
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-answer-content {
+      padding: 0 24px 20px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* Why I Built Section */
+    .why-i-built {
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.05), transparent);
+    }
+
+    .why-i-built-content {
+      max-width: 700px;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    .why-i-built-content p {
+      margin-bottom: 20px;
+    }
+
+    .philosophy-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 28px 0;
+      padding: 28px;
+      background: rgba(26, 26, 36, 0.6);
+      -webkit-backdrop-filter: blur(20px);
+              backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+    }
+
+    body.light-mode .philosophy-list {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .philosophy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .philosophy-icon {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--accent), #4FD99C);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .trust-points {
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 500;
+      line-height: 1.6;
+      margin: 24px 0;
+    }
+
+    .trust-heading {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-top: 28px;
+      margin-bottom: 24px;
+    }
+
+    /* Support Section */
+    .support {
+      padding: 60px 0;
+      background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.05));
+      text-align: center;
+    }
+
+    .support-content {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .support-content h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .support-content p {
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .support-action {
+      margin-top: 20px;
+    }
+  </style>
+  <link rel="prefetch" href="/assets/app/index-DZDfyzGf.js">
+  <link rel="prefetch" href="/assets/index-CDUEMmyD.css">
+  <link rel="prefetch" href="/assets/MedicationProgressBar-dsaythmV.js">
+</head>
+<body>
+  <div class="bg-effects"></div>
+
+  <header>
+    <div class="container">
+      <a href="/app/" class="logo">GLPal</a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#why-i-built">Why I Built This</a>
+        <a href="#faq">FAQ</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <a href="/app/" class="btn btn-primary" style="color: #000000;">Open App</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content fade-in-up">
+        <div class="privacy-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          100% Private • No Accounts Required
+        </div>
+        <h1>Track Your <span class="gradient-text">GLP-1</span> Journey<br>with Complete Privacy</h1>
+        <p>Monitor weight, log medications, and visualize progress—all stored locally on your device. No cloud accounts, no data selling, no tracking. Your health data stays yours.</p>
+        <div class="hero-buttons" style="justify-content: center;">
+          <a href="/app/" class="btn btn-primary">Get Started Free</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Local Storage</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Accounts Needed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">Free</div>
+            <div class="stat-label">Forever</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual fade-in-up delay-2">
+        <div class="phone-mockup">
+            <div class="phone-screen">
+              <img src="/assets/SS1-kL6Sz0kY.png" alt="GLPal App" style="width: 100%; height: 100%; object-fit: cover; border-radius: 32px;">
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Everything You Need</h2>
+        <p>Powerful tracking tools designed for <span class="gradient-text">GLP-1</span> users, with privacy at the core.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in-up delay-1">
+          <div class="feature-icon">⚖️</div>
+          <h3>Weight Tracking</h3>
+          <p>Log daily weight with easy input, set goals, and visualize progress with beautiful charts and long-term trends.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-2">
+          <div class="feature-icon">💊</div>
+          <h3><span class="gradient-text">GLP-1</span> Medication</h3>
+          <p>Track doses, injection sites, timing, and side effects. Never miss a dose with smart reminders.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-3">
+          <div class="feature-icon">🧬</div>
+          <h3>Peptide Logging</h3>
+          <p>Support for BPC-157, TB-500, CJC-1295, and more. Manage complex protocols with ease.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-4">
+          <div class="feature-icon">📊</div>
+          <h3>Progress Analytics</h3>
+          <p>Beautiful charts, trends, and insights. Understand your journey with powerful visual analytics.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-5">
+          <div class="feature-icon">🧮</div>
+          <h3>Peptide Calculator</h3>
+          <p>Calculate doses, reconstitute solutions, and adjust concentrations. Precision dosing made simple.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-6">
+          <div class="feature-icon">☁️</div>
+          <h3>Cloud Backup (Optional)</h3>
+          <p>Backup to Google Drive when you choose. Your data stays encrypted, you stay in control.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-7">
+          <div class="feature-icon">📱</div>
+          <h3>Installable PWA</h3>
+          <p>Add to home screen for full-screen app experience. Works offline after first load.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-8">
+          <div class="feature-icon">🔒</div>
+          <h3>Complete Privacy</h3>
+          <p>No accounts, no cloud by default, no tracking. All data stored locally on your device.</p>
+        </div>
+        <div class="feature-card fade-in-up delay-8">
+          <div class="feature-icon">📦</div>
+          <h3>Import & Export</h3>
+          <p>Export to CSV/JSON anytime. Full ownership of your data, portable anywhere.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="why-i-built" id="why-i-built">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Why I Built <span class="gradient-text">GLPal</span></h2>
+      </div>
+      <div class="why-i-built-content fade-in-up">
+        <p>I started using <span class="gradient-text">GLP-1</span> medications not too long ago. Like many people, I wanted a simple way to track my weight, log doses, and see my progress over time.</p>
+        
+        <p>When I looked at existing apps, I noticed a pattern.</p>
+        
+        <p class="trust-points">They wanted my Email.<br>They wanted my Data.<br>And eventually, they wanted my Money.</p>
+        
+        <p>Some required accounts just to open the app. Others locked basic features behind subscriptions. Almost all of them collected more personal information than necessary.</p>
+        
+        <p>I didn't want to trade my private health data just to use a simple tracker.</p>
+        
+        <p>So I built one that doesn't ask for any of that.</p>
+        
+        <p class="trust-heading" style="text-align: center;"><span class="gradient-text">GLPal</span> Is Built Differently:</p>
+        
+        <div class="philosophy-list">
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No account required — open the app and start tracking immediately</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>Your data stays on your device — stored locally in your browser</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No tracking or analytics — no third-party data collection</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>No subscriptions — all features are free</span>
+          </div>
+          <div class="philosophy-item">
+            <span class="philosophy-icon">✓</span>
+            <span>Your data remains yours — export anytime or back up to your own Google Drive</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <a href="/app/" class="btn btn-primary">Get Started Free</a>
+      </div>
+      <div class="section-header fade-in">
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know about <span class="gradient-text">GLPal</span>.</p>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item fade-in-up delay-1">
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is my data really private?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes, 100%. All your data is stored locally on your device using IndexedDB. We don't have any servers or cloud databases. Your health information never leaves your device unless you explicitly choose to export it or backup to your own Google Drive.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Do I need to create an account?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              No accounts, no sign-ups, no email required. <span class="gradient-text">GLPal</span> is completely free to use. Just open the app and start tracking immediately.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I use <span class="gradient-text">GLPal</span> on multiple devices?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes! You can export your data to a file and import it on any device. For seamless syncing, you can optionally enable Google Drive backup to keep your data in sync across devices.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>What <span class="gradient-text">GLP-1</span> medications can I track?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              <span class="gradient-text">GLPal</span> supports all major <span class="gradient-text">GLP-1</span> medications including Ozempic, Wegovy, Mounjaro, Zepbound, Saxenda, Rybelsus, and semaglutide. You can also create custom medications and track any peptide or supplement.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Does <span class="gradient-text">GLPal</span> work offline?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes! Once loaded, <span class="gradient-text">GLPal</span> works completely offline. You can track your weight and medications without an internet connection. The app is a Progressive Web App (PWA) that you can install on your device.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I export my data?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Absolutely. You can export all your data to JSON or CSV format at any time. This gives you full ownership and portability of your health data.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is <span class="gradient-text">GLPal</span> free?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes, <span class="gradient-text">GLPal</span> is completely free with no premium tiers, no subscriptions, and no hidden costs. It's an open-source project built to help the <span class="gradient-text">GLP-1</span> community.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Is <span class="gradient-text">GLPal</span> a medical device?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              No, <span class="gradient-text">GLPal</span> is a personal health tracking tool and is not a medical device. It provides information to help you track your progress but does not provide medical advice. Always consult your healthcare provider for medical decisions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta fade-in">
+    <div class="container">
+      <h2>Start Your Journey Today</h2>
+      <p>Join thousands of users tracking their <span class="gradient-text">GLP-1</span> progress with complete privacy.</p>
+      <div class="cta-buttons">
+        <a href="/app/" class="btn btn-primary">Let's Get Started</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="support">
+    <div class="container">
+      <div class="support-content">
+        <h3>Support</h3>
+        <p><span class="gradient-text">GLPal</span> is completely free and built independently.</p>
+        <p>If you find it useful, your support helps fund development and future platform distribution.</p>
+        <p class="support-action">
+          <a href="https://ko-fi.com/justapeasantcoder" target="_blank" rel="noopener" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+            <span>☕</span> Buy me a coffee
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+      <a href="/app/" class="logo">GLPal</a>
+        <div class="footer-links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Use</a>
+          <a href="https://github.com/JustApeasantCoder/GLPal" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <div class="copyright">© 2026 <span class="gradient-text">GLPal</span>. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('glpal-landing-theme');
+    
+    // Apply saved theme on load
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('glpal-landing-theme', isLight ? 'light' : 'dark');
+    });
+
+    // Scroll Animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all fade-in elements
+    document.querySelectorAll('.fade-in, .fade-in-up, .fade-in-left, .fade-in-right').forEach(el => {
+      observer.observe(el);
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const faqItem = button.parentElement;
+        const isOpen = faqItem.classList.contains('open');
+        
+        // Close all other FAQ items
+        document.querySelectorAll('.faq-item.open').forEach(item => {
+          item.classList.remove('open');
+        });
+        
+        // Toggle current item
+        if (!isOpen) {
+          faqItem.classList.add('open');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
